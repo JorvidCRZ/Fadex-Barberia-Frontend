@@ -1,0 +1,58 @@
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+
+@keyframes canje-pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgb(212 165 116 / 0.55);
+        background-color: rgb(212 165 116 / 0.08);
+    }
+
+    70% {
+        box-shadow: 0 0 0 14px rgb(212 165 116 / 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgb(212 165 116 / 0);
+        background-color: transparent;
+    }
+}
+
+.fila-canjeada {
+    animation: canje-pulse 1.4s ease-out;
+}
+
+
+@keyframes check-pop {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    50% {
+        transform: scale(1.3);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 0;
+    }
+}
+
+.check-canje {
+    animation: check-pop 1.1s ease-out forwards;
+}

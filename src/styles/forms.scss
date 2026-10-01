@@ -1,0 +1,223 @@
+@mixin input-base {
+    @apply w-full rounded-xl border border-ui-border bg-ui-card px-4 py-3 text-text-primary outline-none transition;
+
+    &:focus {
+        @apply border-brand-gold;
+    }
+
+    &::placeholder {
+        @apply text-text-muted;
+    }
+}
+
+
+/* ========================================
+   TÍTULOS
+   ======================================== */
+
+.title-form {
+    @apply mb-4 text-xl font-bold;
+}
+
+.subtitle-form {
+    @apply mb-6 text-center text-lg font-medium text-brand-gold;
+}
+
+
+/* ========================================
+   FORMULARIOS
+   ======================================== */
+
+.part-form {
+    @apply mb-4 flex flex-col gap-2;
+}
+
+.form-base {
+    @apply rounded-2xl border border-ui-border bg-ui-card p-6 shadow-sm;
+}
+
+.inputs-text {
+    @include input-base;
+}
+
+.label-form,
+form label,
+span.form-label {
+    @apply py-2 text-sm font-semibold text-text-secondary;
+}
+
+
+/* ========================================
+   INPUTS
+   ======================================== */
+
+input,
+textarea,
+p-select,
+p-treeSelect,
+p-multiselect,
+p-fileUpload,
+app-search-bar input {
+    @include input-base;
+}
+
+.p-input-icon-left>input {
+    padding-left: 2.5rem !important;
+}
+
+.p-paginator p-select {
+    @apply w-auto;
+
+    padding: initial !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+
+/* ========================================
+   PRIME INPUTS
+   ======================================== */
+
+.p-inputtext,
+.p-password-input,
+.p-inputnumber-input,
+.p-datepicker-input,
+.p-select,
+.p-multiselect,
+.p-treeselect {
+    border-radius: 0.75rem !important;
+}
+
+
+/* ========================================
+   VALIDACIONES
+   ======================================== */
+
+.p-inputtext.ng-invalid.ng-touched,
+.p-inputtext.ng-invalid.ng-dirty,
+p-password.ng-invalid.ng-touched .p-password-input,
+p-password.ng-invalid.ng-dirty .p-password-input,
+p-select.ng-invalid.ng-touched,
+p-select.ng-invalid.ng-dirty,
+p-treeSelect.ng-invalid.ng-touched,
+p-treeSelect.ng-invalid.ng-dirty,
+textarea.ng-invalid.ng-touched,
+textarea.ng-invalid.ng-dirty,
+p-datepicker.ng-invalid.ng-touched .p-datepicker-input,
+p-datepicker.ng-invalid.ng-dirty .p-datepicker-input,
+p-inputnumber.ng-invalid.ng-touched .p-inputnumber-input,
+p-inputnumber.ng-invalid.ng-dirty .p-inputnumber-input {
+    @apply border-red-500 ring-1 ring-red-500;
+}
+
+.p-inputtext.ng-valid.ng-touched,
+p-password.ng-valid.ng-touched .p-password-input,
+p-select.ng-valid.ng-touched,
+p-treeSelect.ng-valid.ng-touched,
+p-multiselect.ng-valid.ng-touched,
+textarea.ng-valid.ng-touched,
+p-datepicker.ng-valid.ng-touched .p-datepicker-input,
+p-inputnumber.ng-valid.ng-touched .p-inputnumber-input {
+    @apply border-brand-gold ring-1 ring-brand-gold/70;
+}
+
+
+/* ========================================
+   BÚSQUEDA
+   ======================================== */
+
+app-search-bar input {
+    padding-left: 2.5rem !important;
+    border-color: rgb(var(--color-brand-gold)) !important;
+}
+
+
+/* ========================================
+   FILTROS
+   ======================================== */
+
+.filtros-panel {
+    color: rgb(var(--color-brand-gold)) !important;
+}
+
+.filtros-panel .p-inputtext,
+.filtros-panel p-select,
+.filtros-panel p-treeSelect,
+.filtros-panel p-datepicker .p-datepicker-input,
+.filtros-panel p-multiselect,
+.filtros-panel p-inputnumber .p-inputnumber-input {
+    min-height: 2.75rem !important;
+    padding: 0.55rem 0.65rem !important;
+    font-size: 0.85rem;
+
+    &::placeholder {
+        color: rgb(var(--color-text-muted)) !important;
+    }
+}
+
+
+/* ========================================
+   COLOR PICKER
+   ======================================== */
+
+p-colorpicker .p-colorpicker-preview {
+    @apply size-10 rounded-xl border border-ui-border p-6;
+}
+
+
+/* ========================================
+   UPLOAD
+   ======================================== */
+
+.upload-field {
+    @apply w-full rounded-xl border border-ui-border px-4 py-3;
+}
+
+.upload-field .p-fileupload-basic {
+    @apply flex w-full items-center gap-2;
+}
+
+.upload-field .p-button {
+    @apply size-auto rounded-lg;
+}
+
+
+/* ========================================
+   TREE SELECT
+   ======================================== */
+
+p-treeSelect button {
+    @apply rounded-lg transition-transform duration-200 hover:scale-110 hover:bg-green-200;
+
+    color: var(--p-button-text-primary-color);
+}
+
+.p-treeselect-label,
+.p-multiselect-label {
+    padding: 0 !important;
+}
+
+
+/* ========================================
+   PASSWORD
+   ======================================== */
+
+p-password svg {
+    cursor: pointer;
+}
+
+
+/* ========================================
+   ACORDEÓN FILTROS
+   ======================================== */
+
+.filtros-acordeon .p-accordionpanel>div:first-child {
+    @apply rounded-lg bg-ui-surface;
+}
+
+.filtros-acordeon .p-accordionpanel:first-child>.p-accordionheader,
+.filtros-acordeon .p-accordionpanel:first-child>.p-accordioncontent {
+    background: rgb(var(--color-ui-surface)) !important;
+    border: 1px solid rgb(var(--color-brand-gold)) !important;
+}

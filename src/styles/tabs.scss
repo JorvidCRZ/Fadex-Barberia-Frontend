@@ -1,0 +1,30 @@
+.p-tabs,
+.p-tabpanels,
+.p-tabpanel {
+    background: transparent !important;
+}
+
+.p-tablist {
+    background: transparent !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+}
+
+.p-tab {
+    background: transparent !important;
+    color: rgb(var(--color-text-secondary)) !important;
+}
+
+.p-tab:hover {
+    color: rgb(var(--color-brand-gold)) !important;
+}
+
+.p-tab[aria-selected='true'] {
+    color: rgb(var(--color-brand-gold)) !important;
+    border-bottom-color: rgb(var(--color-brand-gold)) !important;
+}
+
+:root {
+    --p-tabs-active-bar-background: rgb(var(--color-brand-gold));
+    --p-tab-active-color: rgb(var(--color-brand-gold));
+}

@@ -1,0 +1,385 @@
+/* ========================================
+   PRODUCT PAGE
+   ======================================== */
+
+.producto-page-hero {
+    @apply relative overflow-hidden bg-brand-black text-brand-white;
+}
+
+.producto-page-overlay {
+    @apply absolute inset-0 bg-gradient-to-b from-black/75 via-black/70 to-brand-black;
+}
+
+.producto-page-hero-inner {
+    @apply relative mx-auto flex min-h-72 max-w-7xl items-center px-4 py-14 sm:px-6 lg:px-8;
+}
+
+.producto-page-section {
+    @apply bg-brand-dark px-4 py-10 text-brand-white sm:px-6 lg:px-8;
+}
+
+.producto-page-panel {
+    @apply rounded-3xl border border-brand-gold bg-ui-black p-5 shadow-2xl shadow-black/30 backdrop-blur-sm sm:p-6;
+}
+
+.producto-page-summary {
+    @apply mt-6 flex items-center justify-between text-sm text-text-secondary;
+}
+
+.producto-page-paginator {
+    @apply mt-8 rounded-3xl bg-brand-dark px-5 py-4 text-brand-white;
+}
+
+
+/* ========================================
+   PRODUCT DETAIL
+   ======================================== */
+
+.producto-detail-page {
+    @apply bg-brand-dark px-4 pb-10 pt-6 text-brand-white sm:px-6 lg:px-8;
+}
+
+.producto-detail-hero {
+    @apply mb-6 flex flex-col gap-4 rounded-3xl border border-ui-border-soft bg-white/5 p-5 shadow-2xl shadow-black/30 backdrop-blur-sm lg:flex-row lg:items-end lg:justify-between;
+}
+
+.producto-detail-back {
+    @apply w-fit;
+
+    margin: 1rem 0 1.5rem 0.5rem;
+}
+
+.producto-detail-loading {
+    @apply rounded-3xl border border-ui-border-soft bg-white/5 p-8 text-center text-text-secondary;
+}
+
+.producto-detail-layout {
+    @apply grid gap-10 rounded-3xl shadow-black/30 backdrop-blur-sm lg:p-8;
+
+    grid-template-columns: 1fr;
+}
+
+
+/* ========================================
+   GALERÍA
+   ======================================== */
+
+.producto-detail-gallery {
+    @apply flex flex-col gap-4;
+}
+
+.producto-detail-main-image {
+    @apply overflow-hidden rounded-3xl border border-brand-gold bg-ui-card;
+}
+
+.producto-detail-main-image img {
+    @apply w-full object-contain;
+
+    height: 28rem;
+    border-radius: 12px;
+    box-shadow: 0 16px 36px rgb(0 0 0 / 0.5);
+}
+
+.producto-detail-thumbs {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    height: 64px;
+    margin-top: 1rem;
+}
+
+.producto-detail-thumb img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.15s;
+}
+
+.producto-detail-thumb img.selected {
+    transform: scale(1.03);
+    box-shadow: 0 8px 20px rgb(0 0 0 / 0.55);
+    border-color: rgb(var(--color-brand-gold));
+}
+
+
+/* ========================================
+   INFORMACIÓN
+   ======================================== */
+
+.producto-detail-name {
+    color: rgb(var(--color-text-primary));
+    font-weight: 800;
+    font-size: 1.6rem;
+    letter-spacing: 0.4px;
+    margin-bottom: 0.5rem;
+}
+
+.producto-detail-price {
+    color: rgb(var(--color-brand-gold));
+    font-weight: 900;
+    letter-spacing: 0.6px;
+    font-size: 1.7rem;
+}
+
+.producto-detail-desc {
+    color: rgb(var(--color-text-secondary));
+    line-height: 1.65;
+    margin-top: 0.9rem;
+    letter-spacing: 0.2px;
+}
+
+.producto-detail-price-row {
+    @apply flex items-end justify-between gap-4 border-t border-ui-border-soft pt-4;
+}
+
+.producto-detail-stock {
+    @apply text-sm text-text-secondary;
+}
+
+.producto-detail-quantity {
+    @apply flex flex-col gap-2;
+}
+
+
+/* ========================================
+   COMPRA
+   ======================================== */
+
+.producto-detail-buy {
+    background: linear-gradient(180deg,
+            rgb(18 18 18),
+            rgb(22 22 22 / 0.95));
+    padding: 1.15rem;
+    border-radius: 12px;
+}
+
+.producto-detail-buy .p-button {
+    width: 100%;
+    margin-top: 0.7rem;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+}
+
+
+/* ========================================
+   NOTA
+   ======================================== */
+
+.producto-detail-note {
+    @apply flex items-center justify-between rounded-2xl border border-ui-border-soft bg-white/5 px-4 py-3 text-sm text-brand-white;
+}
+
+
+/* ========================================
+   PRODUCT CARDS
+   ======================================== */
+
+.producto-list-grid {
+    @apply mt-8 grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+}
+
+.producto-list-empty {
+    @apply col-span-full py-10 text-center text-text-secondary;
+}
+
+.producto-card-shell {
+    @apply overflow-hidden rounded-3xl border border-ui-border bg-ui-card shadow-lg shadow-black/20 transition-transform duration-300 hover:-translate-y-1 hover:shadow-2xl;
+}
+
+.producto-card-media {
+    @apply relative;
+}
+
+.producto-card-image {
+    @apply h-56 w-full object-cover transition-all duration-300;
+}
+
+.producto-card-image:hover {
+    transform: scale(1.05);
+}
+
+.producto-card-body {
+    display: flex;
+    flex-direction: column;
+    height: 12rem;
+    padding: 1rem 1.5rem 1.5rem;
+}
+
+.producto-card-title {
+    @apply line-clamp-1 text-lg font-semibold text-brand-white;
+}
+
+.producto-card-description {
+    @apply line-clamp-2 text-sm text-text-muted;
+}
+
+.producto-card-meta {
+    @apply mt-auto flex items-center justify-between pt-3 text-yellow-300;
+}
+
+.producto-card-price {
+    @apply text-xl font-bold;
+}
+
+.producto-card-stock {
+    @apply text-sm text-text-secondary;
+}
+
+.producto-card-actions {
+    @apply mt-4 flex gap-2;
+}
+
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (min-width: 1024px) {
+    .producto-detail-layout {
+        grid-template-columns: 380px minmax(0, 1fr) 320px;
+        align-items: start;
+    }
+
+    .producto-detail-gallery {
+        display: grid;
+        grid-template-columns: 72px 1fr;
+        gap: 32px;
+        align-items: start;
+    }
+
+    .producto-detail-buy {
+        padding: 18px;
+        border-radius: 12px;
+    }
+
+    .p-galleria-thumbnails-content {
+        max-height: 520px;
+        overflow-y: auto;
+        padding-right: 6px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .producto-detail-layout {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .producto-detail-gallery {
+        order: 1;
+        padding-inline: 1rem;
+    }
+
+    .producto-detail-main-image img {
+        height: auto;
+        max-height: 46vh;
+        object-fit: contain;
+    }
+
+    .producto-detail-thumbs {
+        gap: 0.5rem;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .producto-detail-thumb {
+        flex: 0 0 auto;
+    }
+
+    .producto-detail-thumb img {
+        width: 52px;
+        height: 52px;
+        border: 1px solid rgb(var(--color-brand-gold));
+    }
+
+    .producto-detail-info {
+        order: 2;
+        padding-inline: 1rem;
+    }
+
+    .producto-detail-actions {
+        padding: 0;
+    }
+
+    .producto-detail-buy {
+        width: 100% !important;
+        max-width: 420px;
+        margin: 0.8rem auto 0;
+        position: static !important;
+        padding: 1rem;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgb(0 0 0 / 0.45);
+        border: 1px solid rgb(255 255 255 / 0.03);
+    }
+
+    .producto-detail-buy .p-button {
+        padding: 0.65rem 0.9rem;
+        height: 48px;
+    }
+
+    .producto-detail-name {
+        font-size: 1.25rem;
+        margin-bottom: 0.6rem;
+    }
+
+    .producto-detail-price {
+        font-size: 1.4rem;
+    }
+
+    .producto-detail-main-image img {
+        max-height: 55vh;
+        width: 100%;
+    }
+
+    .producto-detail-back {
+        margin: 1rem 0 0.8rem 0.5rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .producto-detail-buy {
+        bottom: 12px;
+        left: 50%;
+        width: 100%;
+        max-width: 520px;
+        z-index: 80;
+        border-radius: 14px;
+        padding: 0.85rem 1rem;
+    }
+
+    .producto-detail-buy .p-button {
+        height: 52px;
+        font-size: 1rem;
+    }
+
+    .producto-detail-main-image img {
+        box-shadow: 0 6px 16px rgb(0 0 0 / 0.35);
+    }
+
+    .producto-detail-thumbs {
+        margin: 1.5rem 0;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        justify-content: center;
+        height: auto;
+        max-width: 360px;
+    }
+
+    .producto-detail-thumb img {
+        width: 72px;
+        height: 72px;
+    }
+
+    .producto-detail-name {
+        margin-bottom: 1rem;
+    }
+
+    .producto-detail-price {
+        margin-top: 0.25rem;
+    }
+}

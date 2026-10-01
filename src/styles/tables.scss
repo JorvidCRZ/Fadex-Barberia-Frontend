@@ -1,0 +1,95 @@
+/* ========================================
+   DATATABLE
+   ======================================== */
+
+.p-datatable {
+    overflow: auto;
+    border: 1px solid rgb(var(--color-brand-gold-soft)) !important;
+    border-radius: 12px !important;
+}
+
+.p-datatable-thead {
+    background: rgb(var(--color-ui-card));
+    color: rgb(var(--color-text-table-sub));
+    font-weight: 600;
+    text-align: center !important;
+}
+
+.p-datatable-thead>tr>th {
+    background: rgb(var(--color-brand-dark)) !important;
+    border-bottom: 2px solid rgb(var(--color-brand-gold-soft)) !important;
+    color: rgb(var(--color-text-table-sub)) !important;
+    text-align: center !important;
+    white-space: nowrap;
+}
+
+.p-datatable-tbody>tr {
+    text-align: center !important;
+    background: rgb(var(--color-ui-card)) !important;
+    color: rgb(var(--color-text-table-sub));
+}
+
+.p-datatable-tbody>tr:hover {
+    background: rgb(var(--color-brand-black)) !important;
+}
+
+.p-datatable-tbody>tr>td {
+    border-bottom: 1px solid rgb(var(--color-ui-border));
+    color: rgb(var(--color-text-table-sub));
+}
+
+.p-datatable-tbody>tr>td:first-child {
+    text-align: left !important;
+    padding-left: 1.5rem !important;
+}
+
+.p-datatable-tbody>tr>td:not(:first-child) {
+    text-align: center !important;
+}
+
+
+/* ========================================
+   PAGINATOR
+   ======================================== */
+
+.p-datatable .p-paginator {
+    padding: 1rem;
+    border-top: 1px solid rgb(var(--color-brand-gold));
+    background: rgb(var(--color-brand-dark));
+}
+
+.p-paginator-page.p-paginator-page-selected {
+    background: rgb(var(--color-brand-gold)) !important;
+    color: black !important;
+}
+
+
+/* ========================================
+   BOTÓN EXPANDIR
+   ======================================== */
+
+.boton-expandir-tabla .p-button {
+    @apply mr-2 inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-brand-gold/30 bg-brand-gold-soft text-brand-gold transition-all duration-200;
+}
+
+.boton-expandir-tabla .p-button:hover {
+    @apply scale-110 border-brand-gold bg-brand-gold text-black;
+}
+
+.boton-expandir-tabla .p-button:focus,
+.boton-expandir-tabla .p-button:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+
+/* ========================================
+   TABLE ACTIONS
+   ======================================== */
+
+.boton-editar-tabla .p-button,
+.boton-eliminar-tabla .p-button,
+.boton-ver-tabla .p-button,
+.boton-agregar .p-button {
+    box-shadow: none !important;
+}

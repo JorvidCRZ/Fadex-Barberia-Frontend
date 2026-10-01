@@ -1,0 +1,396 @@
+@mixin badge-base {
+    @apply inline-flex whitespace-nowrap rounded-full border px-3 py-1 text-sm font-medium;
+}
+
+.badge-base {
+    @include badge-base;
+}
+
+.badge-text {
+    @include badge-base;
+
+    @apply border-indigo-500/30 bg-indigo-500/10 text-indigo-400;
+}
+
+.badge-activo {
+    @include badge-base;
+
+    @apply border-green-500/30 bg-green-500/10 text-green-400;
+}
+
+.badge-inactivo {
+    @include badge-base;
+
+    @apply border-red-500/30 bg-red-500/10 text-red-400;
+}
+
+.badge-warning {
+    @include badge-base;
+
+    @apply border-yellow-500/30 bg-yellow-500/10 text-yellow-400;
+}
+
+.badge-rol {
+    @include badge-base;
+
+    @apply border-blue-500/30 bg-blue-500/10 text-blue-400;
+}
+
+.badge-stock-ok,
+.tipo-compra,
+.movimiento-ingreso {
+    @include badge-base;
+
+    @apply border-green-500/30 bg-green-500/10 text-green-400;
+}
+
+.badge-stock-bajo {
+    @include badge-base;
+
+    @apply border-amber-500/30 bg-amber-500/10 text-amber-400;
+}
+
+.badge-stock-cero {
+    @include badge-base;
+
+    @apply border-red-500/30 bg-red-500/10 text-red-400;
+}
+
+
+/* ========================================
+   ESTADOS GENERALES
+   ======================================== */
+
+.estado-producto,
+.estado-reserva {
+    @include badge-base;
+
+    @apply border-blue-500/30 bg-blue-500/10 text-blue-400;
+}
+
+.estado-servicio {
+    @include badge-base;
+
+    @apply border-purple-500/30 bg-purple-500/10 text-purple-400;
+}
+
+.estado-descuento {
+    @include badge-base;
+
+    @apply border-green-500/30 bg-green-500/10 text-green-400;
+}
+
+.estado-cupon {
+    @include badge-base;
+
+    @apply border-indigo-500/30 bg-indigo-500/10 text-indigo-400;
+}
+
+.estado-sin-premio {
+    @include badge-base;
+
+    @apply border-gray-500/30 bg-gray-500/10 text-gray-400;
+}
+
+.estado-venta {
+    @include badge-base;
+
+    @apply border-emerald-500/30 bg-emerald-500/10 text-emerald-400;
+}
+
+.estado-ajuste {
+    @include badge-base;
+
+    @apply border-amber-500/30 bg-amber-500/10 text-amber-400;
+}
+
+
+/* ========================================
+   CITAS
+   ======================================== */
+
+.estado-confirmada {
+    @include badge-base;
+
+    @apply border-green-500/30 bg-green-500/10 text-green-400;
+}
+
+.estado-finalizada {
+    @include badge-base;
+
+    @apply border-blue-500/30 bg-blue-500/10 text-blue-400;
+}
+
+.estado-cancelada {
+    @include badge-base;
+
+    @apply border-red-500/30 bg-red-500/10 text-red-400;
+}
+
+.estado-no_asistio {
+    @include badge-base;
+
+    @apply border-gray-500/30 bg-gray-500/10 text-gray-400;
+}
+
+.estado-default {
+    @include badge-base;
+
+    @apply border-zinc-500/30 bg-zinc-500/10 text-zinc-400;
+}
+
+
+/* ========================================
+   RECLAMOS
+   ======================================== */
+
+.estado-reclamo-abierto {
+    @include badge-base;
+
+    @apply border-yellow-500/30 bg-yellow-500/10 text-yellow-400;
+}
+
+.estado-reclamo-en-proceso {
+    @include badge-base;
+
+    @apply border-blue-500/30 bg-blue-500/10 text-blue-400;
+}
+
+.estado-reclamo-resuelto {
+    @include badge-base;
+
+    @apply border-green-500/30 bg-green-500/10 text-green-400;
+}
+
+.estado-reclamo-cerrado {
+    @include badge-base;
+
+    @apply border-gray-500/30 bg-gray-500/10 text-gray-400;
+}
+
+.estado-reclamo-anulado {
+    @include badge-base;
+
+    @apply border-red-500/30 bg-red-500/10 text-red-400;
+}
+
+.tipo-reclamacion-reclamo {
+    @include badge-base;
+
+    @apply border-orange-500/30 bg-orange-500/10 text-orange-400;
+}
+
+.tipo-reclamacion-queja {
+    @include badge-base;
+
+    @apply border-purple-500/30 bg-purple-500/10 text-purple-400;
+}
+
+.estado-solucion-reclamo {
+    @include badge-base;
+
+    @apply border-teal-500/30 bg-teal-500/10 text-teal-400;
+}
+
+
+/* ========================================
+   ÓRDENES
+   ======================================== */
+
+.badge-text.estado-pendiente {
+    @include badge-base;
+
+    @apply border-amber-500 bg-amber-500/10 text-amber-400;
+}
+
+.badge-text.estado-pagado {
+    @include badge-base;
+
+    @apply border-orange-500 bg-orange-500/10 text-orange-400;
+}
+
+.badge-text.estado-web {
+    @include badge-base;
+
+    @apply border-cyan-500/30 bg-cyan-500/10 text-cyan-400;
+}
+
+.badge-text.estado-presencial {
+    @include badge-base;
+
+    @apply border-gray-500/30 bg-gray-500/10 text-gray-400;
+}
+
+.badge-text.estado-delivery {
+    @include badge-base;
+
+    @apply border-sky-500/30 bg-sky-500/10 text-sky-400;
+}
+
+.badge-text.estado-recojo-tienda {
+    @include badge-base;
+
+    @apply border-emerald-500/30 bg-emerald-500/10 text-emerald-400;
+}
+
+.badge-text.estado-efectivo {
+    @include badge-base;
+
+    @apply border-emerald-500/30 bg-emerald-500/10 text-emerald-400;
+}
+
+.badge-text.estado-transferencia {
+    @include badge-base;
+
+    @apply border-blue-500/30 bg-blue-500/10 text-blue-400;
+}
+
+.badge-text.estado-tarjeta {
+    @include badge-base;
+
+    @apply border-indigo-500/30 bg-indigo-500/10 text-indigo-400;
+}
+
+.badge-text.estado-yape {
+    @include badge-base;
+
+    @apply border-violet-500/30 bg-violet-500/10 text-violet-400;
+}
+
+.badge-text.estado-pasarela {
+    @include badge-base;
+
+    @apply border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-400;
+}
+
+.badge-text.estado-preparando {
+    @include badge-base;
+
+    @apply border-blue-500/30 bg-blue-500/10 text-blue-400;
+}
+
+.badge-text.estado-enviado {
+    @include badge-base;
+
+    @apply border-sky-500/30 bg-sky-500/10 text-sky-400;
+}
+
+.badge-text.estado-devuelto {
+    @include badge-base;
+
+    @apply border-violet-500/30 bg-violet-500/10 text-violet-400;
+}
+
+.badge-text.estado-activa {
+    @include badge-base;
+
+    @apply border-green-500/30 bg-green-500/10 text-green-400;
+}
+
+.badge-text.estado-anulado {
+    @include badge-base;
+
+    @apply border-red-500/30 bg-red-500/10 text-red-400;
+}
+
+.badge-text.estado-emitido {
+    @include badge-base;
+
+    @apply border-amber-500/30 bg-amber-500/10 text-amber-400;
+}
+
+.badge-text.estado-recibida-parcial {
+    @include badge-base;
+
+    @apply border-sky-500/30 bg-sky-500/10 text-sky-400;
+}
+
+.badge-text.estado-entregado {
+    @include badge-base;
+
+    @apply border-green-500/30 bg-green-500/10 text-green-400;
+}
+
+.badge-text.estado-cancelado {
+    @include badge-base;
+
+    @apply border-red-500/30 bg-red-500/10 text-red-400;
+}
+
+
+/* ========================================
+   MOVIMIENTOS / RECLAMOS
+   ======================================== */
+
+.badge-text.movimiento-egreso,
+.badge-text.tipo-servicio {
+    @include badge-base;
+
+    @apply border-red-500/30 bg-red-500/10 text-red-400;
+}
+
+.badge-text.referencia-orden-compra {
+    @include badge-base;
+
+    @apply border-amber-500/30 bg-amber-500/10 text-amber-400;
+}
+
+.badge-text.referencia-orden-venta {
+    @include badge-base;
+
+    @apply border-blue-500/30 bg-blue-500/10 text-blue-400;
+}
+
+.badge-text.referencia-manual {
+    @include badge-base;
+
+    @apply border-indigo-500/30 bg-indigo-500/10 text-indigo-400;
+}
+
+.badge-text.estado-abierto {
+    @include badge-base;
+
+    @apply border-red-500 bg-red-500/10 text-red-400;
+}
+
+.badge-text.estado-en-proceso {
+    @include badge-base;
+
+    @apply border-amber-500 bg-amber-500/10 text-amber-400;
+}
+
+.badge-text.estado-resuelto {
+    @include badge-base;
+
+    @apply border-emerald-500 bg-emerald-500/10 text-emerald-400;
+}
+
+.badge-text.estado-cerrado {
+    @include badge-base;
+
+    @apply border-gray-500 bg-gray-500/10 text-gray-400;
+}
+
+.badge-text.problema-defectuoso {
+    @include badge-base;
+
+    @apply border-rose-500 bg-rose-500/10 text-rose-400;
+}
+
+.badge-text.problema-incorrecto {
+    @include badge-base;
+
+    @apply border-orange-500 bg-orange-500/10 text-orange-400;
+}
+
+.badge-text.causa-empaque {
+    @include badge-base;
+
+    @apply border-cyan-500 bg-cyan-500/10 text-cyan-400;
+}
+
+.badge-text.solucion-reembolso-total {
+    @include badge-base;
+
+    @apply border-green-500 bg-green-500/10 text-green-400;
+}

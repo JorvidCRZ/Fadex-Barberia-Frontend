@@ -1,0 +1,75 @@
+/* ========================================
+   SIDEBAR HOVER / FOCUS
+   ======================================== */
+
+.custom-panelmenu .p-panelmenu-header-content:hover,
+.custom-panelmenu .p-panelmenu-header-content:focus,
+.custom-panelmenu .p-panelmenu-header-content:focus-visible,
+.custom-panelmenu .p-panelmenu-header-content:focus-within,
+.custom-panelmenu .p-panelmenu-item-content:hover,
+.custom-panelmenu .p-panelmenu-item-content:focus,
+.custom-panelmenu .p-panelmenu-item-content:focus-visible,
+.custom-panelmenu .p-menuitem-link:hover,
+.custom-panelmenu .p-menuitem-link:focus,
+.custom-panelmenu .p-menuitem-link:focus-visible,
+.custom-panelmenu .p-panelmenu-header-link:hover,
+.custom-panelmenu .p-panelmenu-header-link:focus,
+.custom-panelmenu .p-panelmenu-header-link:focus-visible {
+    background: rgb(var(--color-brand-gold) / 0.15) !important;
+    border-color: rgb(var(--color-brand-gold)) !important;
+    color: rgb(var(--color-brand-gold)) !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+
+/* ========================================
+   ICONOS
+   ======================================== */
+
+.custom-panelmenu .p-panelmenu-header-icon,
+.custom-panelmenu .p-menuitem-icon,
+.custom-panelmenu .p-panelmenu-submenu-icon,
+.custom-panelmenu .p-submenu-icon,
+.custom-panelmenu .p-icon {
+    color: rgb(var(--color-brand-gold)) !important;
+    transition: color 0.2s ease;
+    font-size: 0.95rem;
+}
+
+
+/* ========================================
+   CERRAR SESIÓN
+   ======================================== */
+
+.custom-panelmenu .logout-link,
+.custom-panelmenu .logout-link * {
+    color: rgb(var(--color-brand-red)) !important;
+}
+
+
+/* ========================================
+   ITEM ACTIVO
+   ======================================== */
+
+.custom-panelmenu .p-menuitem-link-active {
+    background: rgb(var(--color-brand-gold-soft)) !important;
+    color: rgb(var(--color-brand-gold)) !important;
+    font-weight: bold;
+    border-radius: 6px;
+}
+
+
+/* ========================================
+   ESTRUCTURA
+   ======================================== */
+
+ul.p-panelmenu-root-list,
+.p-panelmenu-submenu {
+    padding: revert !important;
+}
+
+ul.p-panelmenu-root-list li,
+.p-panelmenu-submenu li {
+    margin: 0.8rem 0 !important;
+}
