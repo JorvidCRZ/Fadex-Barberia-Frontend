@@ -1,1 +1,360 @@
-<p>reclamos works!</p>
+<section class="relative h-64 sm:h-80 w-full flex items-center justify-center text-white overflow-hidden">
+  <div class="absolute inset-0">
+    <img src="/assets/serio.jpg" alt="Libro de Reclamaciones" class="w-full h-full object-cover object-center" />
+    <div class="absolute inset-0 bg-black/80"></div>
+  </div>
+  <div class="relative z-10 text-center px-6 max-w-3xl">
+    <p class="text-brand-gold text-sm font-semibold tracking-widest uppercase mb-3">Atención al cliente</p>
+    <h1 class="text-4xl md:text-5xl font-bold tracking-wide uppercase">Libro de Reclamaciones</h1>
+    <p class="mt-4 text-text-secondary text-lg">Tu opinión nos importa. Registra tu queja o reclamo y te respondemos en menos de 48 horas.</p>
+  </div>
+</section>
+
+<section class="bg-brand-gold py-4 px-4">
+  <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center gap-3 text-center sm:text-left">
+    <svg class="w-6 h-6 text-black shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20A10 10 0 0012 2z" />
+    </svg>
+    <p class="text-black text-sm font-semibold">
+      Conforme al Código de Protección y Defensa del Consumidor — Ley N° 29571, este establecimiento cuenta con un Libro
+      de Reclamaciones a disposición del consumidor.
+    </p>
+  </div>
+</section>
+
+<section class="bg-ui-surface py-16 px-4">
+  <div class="text-center mb-10">
+    <p class="text-brand-gold text-sm font-semibold tracking-widest uppercase mb-3">Antes de continuar</p>
+    <h2 class="text-text-primary text-3xl font-bold uppercase tracking-wide">¿Qué deseas registrar?</h2>
+    <div class="mt-3 w-16 h-1 bg-brand-gold mx-auto rounded-full"></div>
+  </div>
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
+
+    <div (click)="seleccionarTipo('QUEJA')"
+      class="bg-ui-black border rounded-xl p-6 transition-all duration-300 group flex flex-col gap-3 cursor-pointer hover:shadow-lg"
+      [class.border-brand-gold]="form.get('tipoReclamacion')?.value === 'QUEJA'"
+      [class.border-ui-border]="form.get('tipoReclamacion')?.value !== 'QUEJA'">
+      <div class="w-12 h-12 rounded-lg bg-brand-gold-soft group-hover:bg-brand-gold/20 flex items-center justify-center transition">
+        <svg class="w-6 h-6 text-brand-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+        </svg>
+      </div>
+      <div>
+        <h3 class="text-text-primary font-bold text-sm uppercase tracking-wide mb-1">Queja</h3>
+        <p class="text-text-muted text-xs leading-relaxed">Disconformidad relacionada a la atención al cliente, trato del personal o condiciones del local. No implica un perjuicio económico directo.</p>
+      </div>
+      <span class="mt-auto text-brand-gold text-xs font-semibold uppercase tracking-wide">Seleccionar →</span>
+    </div>
+
+    <div (click)="seleccionarTipo('RECLAMO')"
+      class="bg-ui-black border rounded-xl p-6 transition-all duration-300 group flex flex-col gap-3 cursor-pointer hover:shadow-lg hover:shadow-brand-gold/20"
+      [class.border-brand-gold]="form.get('tipoReclamacion')?.value === 'RECLAMO'"
+      [class.border-ui-border]="form.get('tipoReclamacion')?.value !== 'RECLAMO'">
+      <div class="w-12 h-12 rounded-lg bg-brand-gold-soft group-hover:bg-brand-gold/20 flex items-center justify-center transition">
+        <svg class="w-6 h-6 text-brand-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+        </svg>
+      </div>
+      <div>
+        <h3 class="text-text-primary font-bold text-sm uppercase tracking-wide mb-1">Reclamo</h3>
+        <p class="text-text-muted text-xs leading-relaxed">Disconformidad relacionada al servicio recibido o producto adquirido que implica un perjuicio económico o en la calidad pactada.</p>
+      </div>
+      <span class="mt-auto text-brand-gold text-xs font-semibold uppercase tracking-wide">Seleccionar →</span>
+    </div>
+
+  </div>
+</section>
+
+<section class="bg-ui-black py-16 px-4">
+  <div class="text-center mb-10">
+    <p class="text-brand-gold text-sm font-semibold tracking-widest uppercase mb-3">Completa el formulario</p>
+    <h2 class="text-text-primary text-3xl font-bold uppercase tracking-wide">Registra tu solicitud</h2>
+    <div class="mt-3 w-16 h-1 bg-brand-gold mx-auto rounded-full"></div>
+  </div>
+
+  @if (enviado) {
+    <div class="max-w-3xl mx-auto bg-ui-card border border-brand-gold rounded-xl p-8 text-center flex flex-col gap-4">
+      <div class="w-16 h-16 rounded-full bg-brand-gold-soft flex items-center justify-center mx-auto">
+        <svg class="w-8 h-8 text-brand-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+      </div>
+      <h3 class="text-text-primary text-xl font-bold uppercase tracking-wide">¡Solicitud registrada!</h3>
+      <p class="text-text-secondary text-sm">Tu código de seguimiento es:</p>
+      <span class="text-brand-gold text-2xl font-bold tracking-widest">{{ numeroReclamo }}</span>
+      <p class="text-text-muted text-xs">  También hemos enviado este código a tu correo electrónico.Guárdalo para consultar el estado de tu solicitud.</p>
+      <button type="button" (click)="enviado = false" class="boton-primary mt-2 mx-auto">Registrar otro reclamo</button>
+    </div>
+  }
+
+  @if (!enviado) {
+    <form [formGroup]="form" (ngSubmit)="onEnviar()" class="max-w-3xl mx-auto flex flex-col gap-6">
+      <div class="bg-ui-card border border-ui-border rounded-xl p-5">
+        <h3 class="text-text-primary font-bold text-sm uppercase tracking-wide mb-4">1. Tipo de solicitud</h3>
+        <div class="flex gap-4 flex-wrap">
+          @for (tipo of tiposReclamacion; track tipo.value) {
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="radio" [value]="tipo.value" formControlName="tipoReclamacion" class="accent-brand-gold w-4 h-4" />
+              <span class="text-text-secondary text-sm">{{ tipo.label }}</span>
+            </label>
+          }
+        </div>
+      </div>
+
+      <div class="bg-ui-card border border-ui-border rounded-xl p-5">
+        <h3 class="text-text-primary font-bold text-sm uppercase tracking-wide mb-4">2. Datos del cliente</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+          <div class="part-form">
+            <label class="label-form">Nombres *</label>
+            <input pInputText formControlName="nombres" placeholder="Ej: Juan Carlos" />
+            @if (campoInvalido('nombres')) {
+              <p-message severity="error" variant="simple" size="small">Los nombres son requeridos</p-message>
+            }
+          </div>
+
+          <div class="part-form">
+            <label class="label-form">Apellidos *</label>
+            <input pInputText formControlName="apellidos" placeholder="Ej: Rodríguez López" />
+            @if (campoInvalido('apellidos')) {
+              <p-message severity="error" variant="simple" size="small">Los apellidos son requeridos</p-message>
+            }
+          </div>
+
+          <div class="part-form">
+            <label class="label-form">Tipo de documento *</label>
+            <p-select formControlName="tipoDocumento" [options]="tiposDocumento"optionLabel="label" optionValue="value" placeholder="Seleccionar..." styleClass="w-full" />
+            @if (campoInvalido('numeroDocumento')) {
+                <p-message severity="error" variant="simple" size="small">
+                  @switch (form.get('tipoDocumento')?.value) {
+                    @case ('DNI') { DNI: 8 dígitos }
+                    @case ('CE') { Carné de Extranjería: 9 dígitos }
+                    @case ('PASAPORTE') { Pasaporte: entre 6 y 12 caracteres }
+                  }
+                </p-message>
+              }
+          </div>
+          
+          <div class="part-form">
+            <label class="label-form">Número de documento *</label>
+            <input pInputText formControlName="numeroDocumento" [maxlength]=" form.get('tipoDocumento')?.value === 'DNI' ? 8 : form.get('tipoDocumento')?.value === 'CE' ? 9 : 12 ">
+            <div class="flex justify-between mt-1">
+              @if (campoInvalido('numeroDocumento')) {
+                <p-message severity="error" variant="simple" size="small">
+                  @switch (form.get('tipoDocumento')?.value) {
+                    @case ('DNI') {
+                      DNI: debe tener exactamente 8 dígitos
+                    }
+                    @case ('CE') {
+                      Carné de Extranjería: debe tener exactamente 9 dígitos
+                    }
+                    @case ('PASAPORTE') {
+                      Pasaporte: entre 6 y 12 caracteres alfanuméricos
+                    }
+                  }
+                </p-message>
+              }              
+              <span class="text-text-subtle text-xs">{{ form.get('numeroDocumento')?.value?.length || 0 }}/{{form.get('tipoDocumento')?.value === 'DNI' ? 8 :form.get('tipoDocumento')?.value === 'CE' ? 9 : 12}}</span>
+            </div>
+          </div>
+
+          <div class="part-form">
+            <label class="label-form">Correo electrónico *</label>
+            <input pInputText formControlName="email" type="email" placeholder="correo@ejemplo.com" />
+            @if (campoInvalido('email')) {
+                <p-message severity="error" variant="simple" size="small">Ingresa un correo válido</p-message>
+            }
+          </div>
+
+          <div class="part-form">
+            <label class="label-form">Teléfono *</label>
+            <input pInputText formControlName="telefono" placeholder="Ej: 987 654 321" />
+            @if (campoInvalido('telefono')) {
+                <p-message severity="error" variant="simple" size="small">El teléfono es requerido con formato válido con 9 dígitos</p-message>
+            }
+          </div>
+
+        </div>
+      </div>
+
+      <div class="bg-ui-card border border-ui-border rounded-xl p-5">
+        <h3 class="text-text-primary font-bold text-sm uppercase tracking-wide mb-4">3. Detalle de la solicitud</h3>
+        <div class="flex flex-col gap-4">
+
+          <div class="part-form">
+            <label class="label-form">Tipo de problema *</label>
+            <p-select formControlName="tipoProblema" [options]="tiposProblema" optionLabel="label" optionValue="value" placeholder="Seleccionar motivo..." styleClass="w-full" />
+            @if (campoInvalido('tipoProblema')) {
+                <p-message severity="error" variant="simple" size="small">Seleccione un tipo de problema</p-message>
+            }
+          </div>
+
+          <div class="part-form">
+            <label class="label-form">Fecha de ocurrencia *</label>
+            <p-datepicker formControlName="fechaOcurrencia" [maxDate]="today" dateFormat="dd/mm/yy" placeholder="Seleccionar fecha..." styleClass="w-full"inputStyleClass="w-full" />
+            @if (campoInvalido('fechaOcurrencia')) {
+                <p-message severity="error" variant="simple" size="small">Seleccione una fecha válida</p-message>
+            }
+          </div>
+
+          <div class="part-form">
+            <label class="label-form">Monto reclamado (S/)</label>
+            <p-inputnumber formControlName="montoReclamado" [minFractionDigits]="2" [maxFractionDigits]="2" placeholder="Ej: 35.00" [min]="0" [max]="1000" styleClass="w-full" mode="currency" currency="PEN" locale="es-PE" />
+          </div>
+
+          <div class="part-form">
+            <label class="label-form">Descripción detallada *</label>
+            <textarea pTextarea formControlName="descripcion" [rows]="5"
+              placeholder="Describe con el mayor detalle posible lo ocurrido..."></textarea>
+            <div class="flex justify-between mt-1">
+              @if (campoInvalido('descripcion')) {
+                <p-message severity="error" variant="simple" size="small">Mínimo 5 caracteres</p-message>
+              } @else {
+                <span></span>
+              }
+              <span class="text-text-subtle text-xs">{{ form.get('descripcion')?.value?.length || 0 }} caracteres</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="bg-ui-card border border-ui-border rounded-xl p-5">
+        <h3 class="text-text-primary font-bold text-sm uppercase tracking-wide mb-1">4. Evidencia (opcional)</h3>
+        <p class="text-text-muted text-xs mb-4">Puedes adjuntar fotos, capturas de pantalla o comprobantes. Máx. 5 archivos, 10 MB cada uno.</p>
+
+        <label class="flex flex-col items-center justify-center w-full border border-dashed border-ui-border hover:border-brand-gold rounded-xl p-8 cursor-pointer transition group">
+          <svg class="w-8 h-8 text-text-subtle group-hover:text-brand-gold mb-3 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+          </svg>
+          <span class="text-text-muted text-sm group-hover:text-brand-gold transition">Arrastra archivos aquí o haz clic para seleccionar</span>
+          <span class="text-text-subtle text-xs mt-1">PNG, JPG, PDF — Máx. 10 MB</span>
+          <input type="file" multiple accept=".png,.jpg,.jpeg,.pdf" class="hidden" (change)="onSeleccionarArchivos($event)" />
+        </label>
+
+        @if (archivos.length) {
+          <div class="mt-4 flex flex-col gap-2">
+            @for (archivo of archivos; track archivo.name; let i = $index) {
+              <div class="flex items-center justify-between bg-ui-black border border-ui-border rounded-lg px-4 py-2.5">
+                <div class="flex items-center gap-3">
+                  <svg class="w-4 h-4 text-brand-gold shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                  </svg>
+                  <span class="text-text-secondary text-xs truncate max-w-xs">{{ archivo.name }}</span>
+                  <span class="text-text-subtle text-xs shrink-0">{{ formatearTamano(archivo.size) }}</span>
+                </div>
+                <button type="button" (click)="eliminarArchivo(i)" class="text-text-subtle hover:text-brand-red transition ml-4 shrink-0">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="bg-ui-card border rounded-xl p-5 flex flex-col gap-3"
+        [class.border-brand-red]="formSubmitted && (form.get('aceptaVeracidad')?.invalid || form.get('aceptaDatos')?.invalid || form.get('aceptaTerminos')?.invalid)"
+        [class.border-ui-border]="!(formSubmitted && (form.get('aceptaVeracidad')?.invalid || form.get('aceptaDatos')?.invalid || form.get('aceptaTerminos')?.invalid))">
+        <h3 class="text-text-primary font-bold text-sm uppercase tracking-wide mb-1">5. Declaración y consentimiento</h3>
+
+        <label class="flex items-start gap-3 cursor-pointer">
+          <p-checkbox formControlName="aceptaVeracidad" [binary]="true" />
+          <span class="text-text-secondary text-xs leading-relaxed">Declaro que la información proporcionada es verídica y que soy el titular o representante autorizado para presentar esta solicitud.</span>
+        </label>
+
+        <label class="flex items-start gap-3 cursor-pointer">
+          <p-checkbox formControlName="aceptaDatos" [binary]="true" />
+          <span class="text-text-secondary text-xs leading-relaxed">Autorizo el tratamiento de mis datos personales conforme a la Ley N° 29733 — Ley de Protección de Datos Personales, únicamente para la gestión de esta solicitud.</span>
+        </label>
+
+        <label class="flex items-start gap-3 cursor-pointer">
+          <p-checkbox formControlName="aceptaTerminos" [binary]="true" />
+          <span class="text-text-secondary text-xs leading-relaxed">He leído y acepto los <span class="text-brand-gold underline cursor-pointer">Términos y Condiciones</span> del servicio de reclamaciones.</span>
+        </label>
+
+        @if (formSubmitted && (form.get('aceptaVeracidad')?.invalid || form.get('aceptaDatos')?.invalid || form.get('aceptaTerminos')?.invalid)) {
+          <span class="text-brand-red text-xs">Debes aceptar todas las declaraciones para continuar</span>
+        }
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-3 justify-end">
+        <button type="button" (click)="onLimpiar()" class="boton-secondary p-button"> Limpiar formulario</button>
+        <button type="submit" [disabled]="enviando" class="boton-primary p-button flex items-center gap-2 justify-center">
+          @if (enviando) {
+            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+            </svg>
+            Enviando...
+          } @else {
+            Enviar solicitud
+          }
+        </button>
+      </div>
+    </form>
+  }
+</section>
+
+<section class="bg-ui-surface py-16 px-4">
+  <div class="text-center mb-10">
+    <p class="text-brand-gold text-sm font-semibold tracking-widest uppercase mb-3">¿Qué pasa después?</p>
+    <h2 class="text-text-primary text-3xl font-bold uppercase tracking-wide">Proceso de atención</h2>
+    <div class="mt-3 w-16 h-1 bg-brand-gold mx-auto rounded-full"></div>
+  </div>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
+
+    @for (paso of pasos; track paso.numero) {
+      <div class="bg-ui-black border rounded-xl p-5 transition-all duration-300 group flex flex-col gap-3 relative"
+        [class.border-brand-gold]="paso.activo"
+        [class.border-ui-border]="!paso.activo"
+        [class.hover:shadow-brand-gold\/20]="paso.activo">
+        <span class="text-brand-gold text-4xl font-bold opacity-20 absolute top-4 right-4">{{ paso.numero }}</span>
+        <div class="w-12 h-12 rounded-lg bg-brand-gold-soft group-hover:bg-brand-gold/20 flex items-center justify-center transition">
+          <svg class="w-6 h-6 text-brand-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" [attr.d]="paso.icono"/>
+          </svg>
+        </div>
+        <h3 class="text-text-primary font-bold text-sm uppercase tracking-wide">{{ paso.titulo }}</h3>
+        <p class="text-text-muted text-xs leading-relaxed">{{ paso.descripcion }}</p>
+      </div>
+    }
+
+  </div>
+</section>
+
+<section class="bg-ui-black py-16 px-4">
+  <div class="max-w-3xl mx-auto text-center">
+    <p class="text-brand-gold text-sm font-semibold tracking-widest uppercase mb-3">Seguimiento de solicitudes</p>
+    <h2 class="text-text-primary text-3xl font-bold uppercase tracking-wide">Conserva tu código de seguimiento</h2>
+    <div class="mt-3 w-16 h-1 bg-brand-gold mx-auto rounded-full"></div>
+    <p class="mt-6 text-text-secondary leading-relaxed">Al registrar una queja o reclamo recibirás un código único de seguimientoen tu correo electrónico. Conserva este código para futuras consultas ocomunicaciones con nuestro equipo de atención.</p>
+    <p class="mt-4 text-text-muted text-sm">Todas las actualizaciones sobre tu solicitud serán enviadas al correoelectrónico registrado durante el proceso.</p>
+  </div>
+</section>
+
+<section class="bg-ui-surface py-16 px-4">
+  <div class="text-center mb-10">
+    <p class="text-brand-gold text-sm font-semibold tracking-widest uppercase mb-3">Otras formas de contacto</p>
+    <h2 class="text-text-primary text-3xl font-bold uppercase tracking-wide">Canales de atención</h2>
+    <div class="mt-3 w-16 h-1 bg-brand-gold mx-auto rounded-full"></div>
+  </div>
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
+
+    @for (canal of canales; track canal.titulo) {
+      <div class="bg-ui-black border border-ui-border hover:border-brand-gold rounded-xl p-5 transition-all duration-300 group flex flex-col gap-3 text-center items-center">
+        <div class="w-12 h-12 rounded-lg bg-brand-gold-soft group-hover:bg-brand-gold/20 flex items-center justify-center transition">
+          <svg class="w-6 h-6 text-brand-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" [attr.d]="canal.icono"/>
+          </svg>
+        </div>
+        <h3 class="text-text-primary font-bold text-sm uppercase tracking-wide">{{ canal.titulo }}</h3>
+        <p class="text-text-muted text-xs leading-relaxed">{{ canal.descripcion }}</p>
+        <span class="text-brand-gold font-bold text-sm">{{ canal.contacto }}</span>
+        <span class="text-text-subtle text-xs">{{ canal.horario }}</span>
+      </div>
+    }
+  </div>
+</section>

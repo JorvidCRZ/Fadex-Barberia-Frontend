@@ -1,0 +1,16 @@
+@if(banners.length > 0){
+  <p-carousel [value]="banners" [numVisible]="1" [numScroll]="1" [circular]="true" [autoplayInterval]="5000" [responsiveOptions]="responsiveOptions" [showIndicators]="true" [showNavigators]="true" class="banner-carousel">
+    <ng-template pTemplate let-banner #item>
+      <article class="banner-slide">
+        <img [src]="obtenerUrlImagen(banner.urlImagen)" [alt]="banner.titulo" class="banner-image" />
+        <div class="banner-overlay"></div>
+        <div class="banner-content">
+          <span class="banner-eyebrow">FADEX BARBER</span>
+          <h1>{{ banner.titulo }}</h1>
+          <p>{{ banner.subtitulo }}</p>
+          <a [href]="banner.urlDestino || '#'" class="boton-primary">Reservar cita</a>
+        </div>
+      </article>
+    </ng-template>
+  </p-carousel>
+}

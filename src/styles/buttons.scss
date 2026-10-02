@@ -53,10 +53,10 @@
 .boton-primary {
     @include boton-base;
 
-    @apply border border-brand-gold bg-brand-gold text-black;
+    @apply border border-brand-gold/30 bg-brand-gold/10 text-brand-gold;
 
     &:hover {
-        @apply border-brand-gold bg-brand-gold-hover;
+        @apply border-brand-gold bg-brand-gold text-black;
     }
 }
 

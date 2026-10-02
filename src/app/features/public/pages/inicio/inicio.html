@@ -1,27 +1,3 @@
 <section class="inicio-hero">
-  <div class="inicio-background">
-    <img
-      ngSrc="/assets/cortebarba.jpg"
-      alt="Barbero realizando un corte"
-      fill
-      priority
-      class="inicio-background-image"
-    />
-    <div class="inicio-overlay"></div>
-  </div>
-
-  <div class="inicio-content">
-    <h1>Estilo que habla por ti</h1>
-
-    <p class="inicio-description">
-      Cortes modernos, precisión y elegancia. Vive la experiencia de una barbería premium.
-    </p>
-
-    <div class="inicio-actions">
-      <button type="button" class="boton-primary">Reservar cita</button>
-      <!-- (click)="reservarCita()" -->
-      <button type="button" class="boton-secondary">Ver servicios</button>
-      <!-- (click)="verServicios()" -->
-    </div>
-  </div>
+  <app-banner [banners]="banners"></app-banner>
 </section>

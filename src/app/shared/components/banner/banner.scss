@@ -1,0 +1,189 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.banner-carousel {
+  display: block;
+  position: relative;
+  width: 100%;
+}
+
+.banner-slide {
+  position: relative;
+  display: flex;
+  min-height: min(100vh, 48rem);
+  width: 100%;
+  align-items: center;
+  overflow: hidden;
+  background: rgb(var(--color-brand-black));
+}
+
+.banner-image,
+.banner-overlay {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.banner-image {
+  object-fit: cover;
+  object-position: center;
+}
+
+.banner-overlay {
+  background:
+    linear-gradient(90deg, rgb(0 0 0 / 88%) 0%, rgb(0 0 0 / 62%) 42%, rgb(0 0 0 / 16%) 100%),
+    linear-gradient(0deg, rgb(0 0 0 / 35%), transparent 45%);
+}
+
+.banner-content {
+  position: relative;
+  z-index: 1;
+  width: min(100% - 3rem, 76rem);
+  margin: 0 auto;
+  padding: 8rem 0 6rem;
+  color: rgb(var(--color-text-primary));
+}
+
+.banner-eyebrow {
+  display: block;
+  margin-bottom: 1.25rem;
+  color: rgb(var(--color-brand-gold));
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+}
+
+.banner-content h1 {
+  max-width: 38rem;
+  margin: 0;
+  color: rgb(var(--color-brand-white));
+  font-size: clamp(2.75rem, 7vw, 6.5rem);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 0.98;
+  text-transform: uppercase;
+}
+
+.banner-content p {
+  max-width: 30rem;
+  margin: 2rem 0;
+  color: rgb(var(--color-text-secondary));
+  font-size: clamp(1rem, 1.8vw, 1.25rem);
+  line-height: 1.6;
+}
+
+.banner-content .boton-primary {
+  min-width: 10rem;
+}
+
+:host ::ng-deep .p-carousel-content,
+:host ::ng-deep .p-carousel-container,
+:host ::ng-deep .p-carousel-items-content,
+:host ::ng-deep .p-carousel-items-container,
+:host ::ng-deep .p-carousel-item,
+:host ::ng-deep .p-carousel-viewport {
+  height: 100%;
+}
+
+:host ::ng-deep .p-carousel-item {
+  overflow: hidden;
+}
+
+:host ::ng-deep .p-carousel-indicator-list {
+  position: absolute;
+  z-index: 2;
+  bottom: 1.25rem;
+  left: 50%;
+  margin: 0;
+  transform: translateX(-50%);
+}
+
+:host ::ng-deep .p-carousel-indicator-button {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 5rem;
+  background: rgb(var(--color-brand-white) / 45%) !important;
+}
+
+:host ::ng-deep .p-carousel-indicator.p-carousel-indicator-active .p-carousel-indicator-button {
+  background: rgb(var(--color-brand-gold)) !important;
+}
+
+:host ::ng-deep .p-carousel-prev-button,
+:host ::ng-deep .p-carousel-next-button {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+
+:host ::ng-deep .p-carousel-prev-button {
+  left: 3rem;
+}
+
+:host ::ng-deep .p-carousel-next-button {
+  right: 3rem;
+}
+
+:host ::ng-deep .p-carousel-prev-button button,
+:host ::ng-deep .p-carousel-next-button button {
+  width: 4rem !important;
+  height: 4rem !important;
+  border: 1px solid rgb(var(--color-brand-gold) / 30%) !important;
+  color: rgb(var(--color-brand-gold)) !important;
+  background: rgb(var(--color-brand-gold) / 10%) !important;
+  border-radius: 999px !important;
+  transition: all 300ms ease;
+}
+
+:host ::ng-deep .p-carousel-prev-button button:hover,
+:host ::ng-deep .p-carousel-next-button button:hover {
+  border-color: rgb(var(--color-brand-gold)) !important;
+  color: rgb(var(--color-brand-black)) !important;
+  background: rgb(var(--color-brand-gold)) !important;
+}
+
+:host ::ng-deep .p-carousel-prev-button .p-icon,
+:host ::ng-deep .p-carousel-next-button .p-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+@media (width <= 640px) {
+  .banner-slide {
+    min-height: 38rem;
+  }
+
+  .banner-content {
+    width: min(100% - 2rem, 76rem);
+    padding: 6rem 0 5rem;
+  }
+
+  .banner-content h1 {
+    font-size: clamp(2.5rem, 14vw, 4.5rem);
+  }
+
+  :host ::ng-deep .p-carousel-prev-button {
+    left: 0.25rem;
+  }
+
+  :host ::ng-deep .p-carousel-next-button {
+    right: 0.25rem;
+  }
+
+  :host ::ng-deep .p-carousel-prev-button button,
+  :host ::ng-deep .p-carousel-next-button button {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  :host ::ng-deep .p-carousel-prev-button .p-icon,
+  :host ::ng-deep .p-carousel-next-button .p-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+}

@@ -11,11 +11,11 @@
 
     <!-- Nav desktop -->
     <nav class="hidden w-full items-center gap-6 md:flex md:justify-center lg:w-auto xl:gap-11">
-      <!-- <ng-container *ngFor="let p of publicNav  "> -->
-        <!-- <a [routerLink]="p.path" routerLinkActive="!text-white" class="group relative pb-1 text-sm font-medium text-brand-white transition-colors hover:text-brand-gold sm:text-base">{{ p.label }} -->
-          <!-- <span class="absolute bottom-0 left-1/2 h-0.5 w-0 rounded bg-brand-gold transition-all duration-300 group-hover:left-0 group-hover:w-full"></span> -->
-        <!-- </a> -->
-      <!-- </ng-container> -->
+      <ng-container *ngFor="let p of publicNav  ">
+        <a [routerLink]="p.path" routerLinkActive="!text-white" class="group relative pb-1 text-sm font-medium text-brand-white transition-colors hover:text-brand-gold sm:text-base">{{ p.label }}
+          <span class="absolute bottom-0 left-1/2 h-0.5 w-0 rounded bg-brand-gold transition-all duration-300 group-hover:left-0 group-hover:w-full"></span>
+        </a>
+      </ng-container>
     </nav>
 
     <!-- Derecha desktop -->
@@ -30,13 +30,6 @@
       @if (isAuthenticated) {
         <!-- Iconos de utilidad (solo auth) -->
         <div class="flex items-center gap-4 border-r border-ui-border pr-5">
-          <!-- Notificaciones -->
-          <button
-            class="relative flex h-9 w-9 items-center justify-center rounded-lg transition-all hover:bg-ui-surface hover:text-brand-gold text-brand-white">
-            <i class="pi pi-bell text-lg"></i>
-            <span class="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-brand-gold text-xs font-bold text-black">2</span>
-          </button>
-
           <!-- Soporte/Chat -->
           <button routerLink="/reclamos"
             class=" cursor-pointer flex h-9 w-9 items-center justify-center rounded-lg transition-all hover:bg-ui-surface hover:text-brand-gold text-brand-white">
@@ -65,11 +58,10 @@
       </summary>
 
       <nav class="mt-3 grid gap-2 rounded-2xl border border-ui-border bg-ui-surface p-3">
-        <!-- <ng-container *ngFor="let p of publicNav"> -->
-          <!-- <a [routerLink]="p.path" -->
-            <!-- /* class="rounded-xl px-3 py-2 text-sm font-medium text-brand-white transition hover:bg-brand-gold/10 hover:text-brand-gold">{{ p.label }}</a> */ -->
-        <!-- </ng-container> -->
-        <!-- Iconos utilidad mobile: carrito siempre visible -->
+        <ng-container *ngFor="let p of publicNav">
+          <a [routerLink]="p.path" class="rounded-xl px-3 py-2 text-sm font-medium text-brand-white transition hover:bg-brand-gold/10 hover:text-brand-gold">{{ p.label }}</a>
+        </ng-container>
+        Iconos utilidad mobile: carrito siempre visible
         <div class="mt-2 grid grid-cols-4 gap-2 border-t border-ui-border pt-3">
           <a routerLink="/carrito"
             class="relative flex flex-col items-center justify-center gap-1 rounded-lg p-2 transition hover:bg-ui-elevated hover:text-brand-gold text-brand-white text-xs">
