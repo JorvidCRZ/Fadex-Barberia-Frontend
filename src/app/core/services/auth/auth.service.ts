@@ -1,0 +1,84 @@
+import { inject, Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { map, Observable, tap } from 'rxjs';
+import { TokenService } from './token.service';
+import { environment } from '../../../../environments/environment';
+import { RefreshRequest } from '../../models/auth/refreshRequest.model';
+import { LoginRequest, LoginResponse } from '../../models/auth/loginResponse.model';
+import { ApiResponse } from '../../models/common/index.model';
+
+@Injectable({
+  providedIn: 'root',
+})
+export class AuthService {
+  private API = environment.apiUrl + '/auth';
+  private http = inject(HttpClient);
+  private tokenService = inject(TokenService);
+
+  login(data: LoginRequest): Observable<LoginResponse> {
+    return this.http.post<ApiResponse<LoginResponse>>(this.API + "/login", data).pipe(map(res => res.data), tap(data => {
+      this.tokenService.saveAccessToken(data.accessToken);
+      this.tokenService.saveRefreshToken(data.refreshToken);
+    }));
+  }
+
+  loginWithGoogle(idToken: string): Observable<LoginResponse> {
+    return this.http.post<ApiResponse<LoginResponse>>(this.API + "/google", { idToken }).pipe(
+      map(res => res.data), 
+      tap(data => {
+        this.tokenService.saveAccessToken(data.accessToken);
+        this.tokenService.saveRefreshToken(data.refreshToken);
+      })
+    );
+  }
+
+  refreshToken(): Observable<ApiResponse<LoginResponse>> {
+    const token = this.tokenService.getRefreshToken();
+    const body: RefreshRequest = { refreshToken: token! };
+    return this.http.post<ApiResponse<LoginResponse>>(this.API + "/refresh", body);
+  }
+
+  logout() {
+    this.tokenService.clearTokens();
+  }
+
+  // auth.service.ts
+  register(data: {
+    username: string;
+    password: string;
+    idRol: number;
+    nombre: string;
+    apellido: string;
+    telefono: string;
+    email: string;
+  }): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(environment.apiUrl + "/usuarios/cliente", data);
+  }
+
+  forgotPassword(email: string): Observable<void> {
+    return this.http.post<void>(`${this.API}/forgot-password`, { email: email });
+  }
+
+  resetPassword(token: string, nuevaPassword: string): Observable<void> {
+    return this.http.post<void>(`${this.API}/reset-password`, { token, nuevaPassword });
+  }
+
+  loginWithQr(qrToken: string, pin: string): Observable<LoginResponse> {
+  return this.http.post<ApiResponse<LoginResponse>>(this.API + "/qr-login", { qrToken, pin }).pipe(
+    map(res => res.data),
+    tap(data => {
+      this.tokenService.saveAccessToken(data.accessToken);
+      this.tokenService.saveRefreshToken(data.refreshToken);
+    })
+  );
+}
+cambiarPassword(passwordActual: string, passwordNueva: string): Observable<ApiResponse<void>> {
+  return this.http.patch<ApiResponse<void>>(`${this.API}/change-password`, {
+    passwordActual,
+    passwordNueva,
+  });
+}
+verificarTokenReset(token: string): Observable<void> {
+  return this.http.get<void>(`${this.API}/verificar-token?token=${token}`);
+}
+}
