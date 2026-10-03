@@ -1,9 +1,9 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { environment } from '@/environments/environment';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { ApiResponse, Page } from '../../models/common/index.model';
 import { Barbero } from '../../models/gestion/barbero/barbero.model';
+import { environment } from '../../../../environments/environment.development';
 import { ResumenGeneralBarbero } from '../../models/gestion/barbero/barbero-resumen.model';
 import { ResumenIndividualBarbero } from '../../models/gestion/barbero/barbero-resumen-individual.model';
 import { PerfilBarbero, StatsHoy, Cita, ResumenSemanal, EstadoResponse } from '../../models/gestion/barbero/barbero-resumen-individual.model';

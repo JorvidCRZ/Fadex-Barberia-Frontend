@@ -15,6 +15,7 @@ import { filter } from 'rxjs';
       <router-outlet></router-outlet>
     </main>
   <app-footer/>`,})
+  
 export class PublicLayoutComponent {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);

@@ -1,4 +1,5 @@
-import { VentaDetalle } from '@/app/core/models/ventas/detalle.model';
+import { VentaDetalle } from "./detalle.model";
+
 
 export interface Venta {
 

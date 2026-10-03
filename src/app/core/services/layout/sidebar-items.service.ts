@@ -10,7 +10,6 @@ import { CLIENTE_MENU } from '../../config/menu.cliente.confing';
 export class SidebarItemsService {
     getSidebarItems(permisos: string[], role: string): MenuItem[] {
         const menu = this.getMenuByRole(role);
-        // For client role show full menu (no permission filtering) so users see all sections
         const skipPermission = role === 'cliente';
         return this.filterItems(menu, permisos, skipPermission);
     }
@@ -28,13 +27,9 @@ export class SidebarItemsService {
         return items.map((item) => {
             const childItems = item.items ? this.filterItems(item.items, permisos, skipPermission) : undefined;
             const canShow = skipPermission || permisos.length === 0 || !item.permission || permisos.includes(item.permission) || !!childItems?.length;
-            if (!canShow) {
-                return null;
-            }
+            if (!canShow) { return null; }
             const menuItem: MenuItem = { label: item.label, icon: item.icon, routerLink: item.routerLink, };
-            if (childItems?.length) {
-                menuItem.items = childItems;
-            }
+            if (childItems?.length) { menuItem.items = childItems; }
             return menuItem;
         }).filter((item): item is MenuItem => item !== null);
     }

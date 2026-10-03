@@ -1,16 +1,15 @@
-import { environment } from '@/environments/environment';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { ApiResponse, Page } from '../../models/common/index.model';
+import { environment } from '../../../../environments/environment.development';
+import { AdminRegister } from '../../models/auth/usuario/admin-register.model';
 import { ClienteRegister } from '../../models/auth/usuario/cliente-register.model';
+import { BarberoRegister } from '../../models/auth/usuario/barbero-register.model';
 import { ResetPasswordRequest } from '../../models/auth/usuario/reset-password-request.model';
 import { UpdateUsernameRequest } from '../../models/auth/usuario/update-username-request.model';
-import { BarberoRegister } from '../../models/auth/usuario/barbero-register.model';
-import { ApiResponse, Page } from '../../models/common/index.model';
-import { AssignRolesRequest, Permiso, Rol, UsuarioTablaResponse } from '../../models/gestion/usuario.model';
-import { AdminRegister } from '../../models/auth/usuario/admin-register.model';
 import { ChangePasswordRequest } from '../../models/auth/usuario/change-password-request.model';
+import { AssignRolesRequest, Permiso, Rol, UsuarioTablaResponse } from '../../models/gestion/usuario.model';
 
 @Injectable({
     providedIn: 'root'

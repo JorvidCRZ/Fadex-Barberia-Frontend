@@ -1,9 +1,9 @@
 import { Injectable, inject } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
-import { environment } from "@/environments/environment.development";
 import { ApiResponse } from "../../models/common/index.model";
-import { FidelizacionDashboardAdminResponse, FidelizacionDashboardClienteResponse } from "../../models/fidelizacion/dashboard.model";
+import { environment } from '../../../../environments/environment.development';
 import { GiroPorSemana, MovimientoPorSemana } from "../../models/ruleta/giro.model";
+import { FidelizacionDashboardAdminResponse, FidelizacionDashboardClienteResponse } from "../../models/fidelizacion/dashboard.model";
 
 @Injectable({
     providedIn: "root"

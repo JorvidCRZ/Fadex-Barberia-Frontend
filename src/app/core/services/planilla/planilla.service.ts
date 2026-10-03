@@ -1,14 +1,9 @@
+import { Observable } from 'rxjs';
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
-
-import { environment } from '@/environments/environment';
 import { ApiResponse, PageResponse } from '../../models/common/index.model';
-
-import {
-  PlanillaResumen,
-  PlanillaBarbero
-} from '../../models/planilla/planilla.model';
+import { environment } from '../../../../environments/environment.development';
+import {PlanillaResumen,PlanillaBarbero} from '../../models/planilla/planilla.model';
 import { ResumenBarbero, VentaBarbero } from '../../models/planilla/venta-barbero.model';
 
 @Injectable({

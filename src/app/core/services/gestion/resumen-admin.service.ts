@@ -1,17 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { forkJoin, Observable, map } from 'rxjs';
-import { environment } from '@/environments/environment';
-import {
-  ApiResponse,
-  ClienteResumenResponseDTO,
-  ResumenBarberoDTO,
-  VentaResponseDTO,
-  CitaBarberoResponseDTO,
-  ReservaDTO,
-  DashboardData,
-  KpiCard,
-} from '../../models/gestion/admin/resumen-admin';
+import { environment } from '../../../../environments/environment.development';
+import {ApiResponse,ClienteResumenResponseDTO,ResumenBarberoDTO,VentaResponseDTO,CitaBarberoResponseDTO,ReservaDTO,DashboardData,KpiCard,} from '../../models/gestion/admin/resumen-admin';
 
 @Injectable({
   providedIn: 'root',

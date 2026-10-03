@@ -1,9 +1,9 @@
 import { Injectable, inject } from "@angular/core";
-import { environment } from "@/environments/environment.development";
 import { HttpClient } from "@angular/common/http";
+import { environment } from "../../../../environments/environment.development";
 import { RuletaCategoriaFiltro, RuletaCategoriaRequest, RuletaCategoriaResponse } from "../../models/ruleta/ruleta-categoria.model";
-import { buildHttpParamsComponent } from "@/app/shared/utils/build-http-params.component";
 import { ApiResponse, PageResponse } from "../../models/common/index.model";
+import { buildHttpParamsComponent } from "../../../shared/utils/build-http-params.component";
 
 @Injectable({
     providedIn: 'root'

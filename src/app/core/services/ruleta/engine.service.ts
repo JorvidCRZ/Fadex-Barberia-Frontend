@@ -1,10 +1,9 @@
-import { Injectable, inject } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { environment } from "@/environments/environment.development";
-
+import { Injectable, inject } from "@angular/core";
 import { ApiResponse } from "../../models/common/index.model";
 import { RuletaResponse } from "../../models/ruleta/ruleta.model";
 import { RecompensaObtenida } from "../../models/ruleta/recompensa.model";
+import { environment } from "../../../../environments/environment.development";
 @Injectable({
     providedIn: 'root'
 })

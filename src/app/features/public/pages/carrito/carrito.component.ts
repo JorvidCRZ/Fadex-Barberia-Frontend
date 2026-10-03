@@ -20,8 +20,8 @@ import { CarritoService } from '../../../../core/services/catalogos/carrito.serv
   templateUrl: './carrito.html',
   styleUrl: './carrito.scss'
 })
-export class CarritoComponent {
 
+export class CarritoComponent {
   private router = inject(Router);
   private notify = inject(NotificationService);
   // private tokenService = inject(TokenService);

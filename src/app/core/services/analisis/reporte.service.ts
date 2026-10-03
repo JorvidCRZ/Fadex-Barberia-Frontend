@@ -1,11 +1,11 @@
-import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { environment } from '@/environments/environment';
+import { HttpClient } from '@angular/common/http';
+import { inject, Injectable } from '@angular/core';
+import { ApiResponse } from '../../models/common/index.model';
 import { FilaSemanal } from '../../models/analisis/reporte.model';
 import { ReporteFiltro } from '../../models/analisis/reporte.model';
-import { ApiResponse, Page, PageResponse } from '../../models/common/index.model';
+import { environment } from '../../../../environments/environment.development';
 
 @Injectable({ providedIn: 'root' })
 export class ReporteService {

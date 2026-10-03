@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { CitaBarberoResponseDTO, EstadoCita } from '../../models/reserva/reserva.model';
-import { environment } from '@/environments/environment';
+import { environment } from '../../../../environments/environment.development';
 
 export interface ServicioHistorialDTO {
   idReserva: number;

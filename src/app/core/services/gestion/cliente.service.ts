@@ -1,12 +1,12 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Cliente } from '../../models/gestion/cliente/cliente.model';
-import { environment } from '@/environments/environment';
-import { ClienteResumen } from '../../models/gestion/cliente/ClienteResumen.model';
-import { ClienteDetalleResumen } from '../../models/gestion/cliente/cliente-detalle-resumen.model';
-import { ActividadReciente } from '../../models/gestion/cliente/ActividadReciente.model';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { ApiResponse, Page } from '../../models/common/index.model';
+import { Cliente } from '../../models/gestion/cliente/cliente.model';
+import { environment } from '../../../../environments/environment.development';
+import { ClienteResumen } from '../../models/gestion/cliente/ClienteResumen.model';
+import { ActividadReciente } from '../../models/gestion/cliente/ActividadReciente.model';
+import { ClienteDetalleResumen } from '../../models/gestion/cliente/cliente-detalle-resumen.model';
 
 @Injectable({
     providedIn: 'root'

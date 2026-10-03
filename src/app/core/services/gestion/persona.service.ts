@@ -1,12 +1,9 @@
+import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
-
-import { environment } from '@/environments/environment';
-
-
-import { PersonaUpdateRequest } from '../../models/gestion/persona/persona-update.model';
 import { ApiResponse } from '../../models/common/index.model';
+import { environment } from '../../../../environments/environment.development';
+import { PersonaUpdateRequest } from '../../models/gestion/persona/persona-update.model';
 
 @Injectable({
     providedIn: 'root'

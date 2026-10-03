@@ -9,8 +9,12 @@ import { InputTextModule } from 'primeng/inputtext';
 import { MessageModule } from 'primeng/message';
 import { SelectModule } from 'primeng/select';
 import { TextareaModule } from 'primeng/textarea';
+import { NotificationService } from '../../../../core/services/common/notification.service';
+import { ReclamoService } from '../../../../core/services/operaciones/reclamo.service';
+import { TIPO_DOCUMENTO_OPTIONS, TIPO_PROBLEMA_OPTIONS, TIPO_RECLAMACION_OPTIONS } from '../../../../core/models/common/select.option.model';
 import { campoInvalido, marcarFormulario } from '../../../../shared/utils/form-utils.component';
-// import { NotificationService } from '@/app/core/services/common/notification.service';
+import { TipoReclamacion } from '../../../../core/models/operaciones/reclamos-model/reclamo.enum.model';
+import { ReclamoPublicoRequest } from '../../../../core/models/operaciones/reclamos-model/reclamo.model';
 
 @Component({
   selector: 'app-reclamos',
@@ -22,8 +26,8 @@ import { campoInvalido, marcarFormulario } from '../../../../shared/utils/form-u
 })
 export class ReclamosComponent implements OnInit {
   private fb = inject(FormBuilder);
-  // private reclamoService = inject(ReclamoService);
-  // private notify = inject(NotificationService);
+  private reclamoService = inject(ReclamoService);
+  private notify = inject(NotificationService);
 
   form!: FormGroup;
   formSubmitted = false;
@@ -33,9 +37,9 @@ export class ReclamosComponent implements OnInit {
   archivos: File[] = [];
   today = new Date();
 
-  // tiposReclamacion = TIPO_RECLAMACION_OPTIONS;
-  // tiposDocumento = TIPO_DOCUMENTO_OPTIONS;
-  // tiposProblema = TIPO_PROBLEMA_OPTIONS;
+  tiposReclamacion = TIPO_RECLAMACION_OPTIONS;
+  tiposDocumento = TIPO_DOCUMENTO_OPTIONS;
+  tiposProblema = TIPO_PROBLEMA_OPTIONS;
 
   campoInvalido = (campo: string) => campoInvalido(this.form, campo, this.formSubmitted);
 
@@ -46,7 +50,7 @@ export class ReclamosComponent implements OnInit {
 
   private initForm(): void {
     this.form = this.fb.group({
-      // tipoReclamacion: [TipoReclamacion.RECLAMO, Validators.required],
+      tipoReclamacion: [TipoReclamacion.RECLAMO, Validators.required],
       nombres: ['', Validators.required],
       apellidos: ['', Validators.required],
       tipoDocumento: ['DNI', Validators.required],
@@ -107,7 +111,7 @@ export class ReclamosComponent implements OnInit {
     this.formSubmitted = false;
     this.archivos = [];
     this.form.reset({
-      // tipoReclamacion: TipoReclamacion.RECLAMO,
+      tipoReclamacion: TipoReclamacion.RECLAMO,
       tipoDocumento: 'DNI',
       aceptaVeracidad: false,
       aceptaDatos: false,
@@ -120,35 +124,35 @@ export class ReclamosComponent implements OnInit {
     if (this.form.invalid) { marcarFormulario(this.form); return; }
 
     const v = this.form.value;
-    // const request: ReclamoPublicoRequest = {
-      // nombres: v.nombres.trim(),
-      // apellidos: v.apellidos.trim(),
-      // email: v.email,
-      // telefono: v.telefono || undefined,
-      // tipoDocumento: v.tipoDocumento,
-      // numeroDocumento: v.numeroDocumento,
-      // tipoReclamacion: v.tipoReclamacion,
-      // tipoProblema: v.tipoProblema,
-      // descripcion: v.descripcion,
-      // montoReclamado: v.montoReclamado || undefined,
-      // fechaOcurrencia: v.fechaOcurrencia ? new Date(v.fechaOcurrencia).toISOString() : undefined,
-    // };
+    const request: ReclamoPublicoRequest = {
+      nombres: v.nombres.trim(),
+      apellidos: v.apellidos.trim(),
+      email: v.email,
+      telefono: v.telefono || undefined,
+      tipoDocumento: v.tipoDocumento,
+      numeroDocumento: v.numeroDocumento,
+      tipoReclamacion: v.tipoReclamacion,
+      tipoProblema: v.tipoProblema,
+      descripcion: v.descripcion,
+      montoReclamado: v.montoReclamado || undefined,
+      fechaOcurrencia: v.fechaOcurrencia ? new Date(v.fechaOcurrencia).toISOString() : undefined,
+    };
 
-    // this.enviando = true;
-    // this.reclamoService.crearReclamoPublico(request, this.archivos.length ? this.archivos : undefined)
-      // .subscribe({
-        // next: (res) => {
-          // this.enviando = false;
-          // this.enviado = true;
-          // this.numeroReclamo = res.data.numeroReclamo;
-          // this.notify.showSuccess(res.message);
-          // this.onLimpiar();
-        // },
-        // error: (error) => {
-          // this.enviando = false;
-          // this.notify.showHttpError(error.message);
-        // }
-      // });
+    this.enviando = true;
+    this.reclamoService.crearReclamoPublico(request, this.archivos.length ? this.archivos : undefined)
+      .subscribe({
+        next: (res) => {
+          this.enviando = false;
+          this.enviado = true;
+          this.numeroReclamo = res.data.numeroReclamo;
+          this.notify.showSuccess(res.message);
+          this.onLimpiar();
+        },
+        error: (error) => {
+          this.enviando = false;
+          this.notify.showHttpError(error.message);
+        }
+      });
   }
 
   formatearTamano(bytes: number): string {
@@ -156,7 +160,7 @@ export class ReclamosComponent implements OnInit {
   }
 
   seleccionarTipo(tipo: string): void {
-    // this.form.get('tipoReclamacion')?.setValue(tipo as TipoReclamacion);
+    this.form.get('tipoReclamacion')?.setValue(tipo as TipoReclamacion);
   }
 
   pasos = [

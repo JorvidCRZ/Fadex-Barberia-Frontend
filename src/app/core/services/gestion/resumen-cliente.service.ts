@@ -1,9 +1,10 @@
-import { Injectable, inject } from '@angular/core';  // ← inject faltaba
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { forkJoin, map, Observable, catchError, of } from 'rxjs';
 import { TokenService } from '../auth/token.service';
+import { forkJoin, map, Observable, catchError, of } from 'rxjs';
+import { environment } from '../../../../environments/environment.development';
 import { ApiResponse, ReservaDTO, ClienteDetalleResumenDTO, ServicioResponseDTO, } from '../../models/gestion/cliente/ClienteResumen.model'; 
-import { environment } from '@/environments/environment';
+
 
 const BASE = environment.apiUrl;  
 

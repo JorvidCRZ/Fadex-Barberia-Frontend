@@ -1,8 +1,8 @@
-import { Injectable, inject } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { environment } from "@/environments/environment.development";
-import { buildHttpParamsComponent } from "@/app/shared/utils/build-http-params.component";
+import { Injectable, inject } from "@angular/core";
 import { ApiResponse, PageResponse } from "../../models/common/index.model";
+import { environment } from '../../../../environments/environment.development';
+import { buildHttpParamsComponent } from "../../../shared/utils/build-http-params.component";
 import { FidelizacionTarjetaFiltro, FidelizacionTarjetaPatchRequest, FidelizacionTarjetaRequest, FidelizacionTarjetaResponse } from "../../models/fidelizacion/tarjeta.model";
 
 @Injectable({

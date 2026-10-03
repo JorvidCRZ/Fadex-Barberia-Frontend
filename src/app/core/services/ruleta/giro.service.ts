@@ -1,9 +1,9 @@
-import { Injectable, inject } from "@angular/core";
-import { environment } from "@/environments/environment.development";
 import { HttpClient } from "@angular/common/http";
-import { buildHttpParamsComponent } from "@/app/shared/utils/build-http-params.component";
+import { Injectable, inject } from "@angular/core";
 import { ApiResponse, PageResponse } from "../../models/common/index.model";
+import { environment } from "../../../../environments/environment.development";
 import { GiroFiltro, GiroRequest, GiroResponse } from "../../models/ruleta/giro.model";
+import { buildHttpParamsComponent } from "../../../shared/utils/build-http-params.component";
 
 @Injectable({
     providedIn: 'root'
