@@ -1,7 +1,6 @@
 <section class="w-full mx-auto my-8 relative">
     @if(sliders().length > 0){
-        <p-carousel [value]="sliders()" [numVisible]="getNumVisible(4)" [numScroll]="1" [circular]="true" 
-        [showIndicators]="true" [showNavigators]="true" [responsiveOptions]="getResponsiveOptions()" [autoplayInterval]="4000" class="rounded-xl overflow-hidden">
+        <p-carousel [value]="sliders()" [numVisible]="getNumVisible(4)" [numScroll]="1" [circular]="true" [showIndicators]="true" [showNavigators]="true" [responsiveOptions]="getResponsiveOptions()" [autoplayInterval]="4000" class="rounded-xl overflow-hidden">
             <ng-template let-slider #item>
                 <div class="flex flex-col justify-center items-center p-5 group">
                     <a [href]="slider.urlDestino || '#'" class="block w-[220px] h-[220px] md:w-[260px] md:h-[260px] lg:w-[300px] lg:h-[300px] border border-gray-200 rounded-xl overflow-hidden shadow group-hover:shadow-lg transition-transform duration-300 group-hover:scale-105 bg-white">

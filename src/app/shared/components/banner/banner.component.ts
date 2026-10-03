@@ -22,15 +22,13 @@ export class BannerComponent implements OnInit {
     responsiveOptions = [{ breakpoint: '1024px', numVisible: 1, numScroll: 1 }];
 
     ngOnInit() {
-        if (this.banners.length === 0 && this.bannerKey) {
-            this.cargarBanner();
-        }
+        if (this.banners.length === 0 && this.bannerKey) {this.cargarBanner();}
     }
 
     cargarBanner() {
         this.bannerService.obtenerBannersPublicos(this.bannerKey).subscribe(resp => {
             setTimeout(() => {
-this.banners = resp.data || [];
+                this.banners = resp.data || [];
                 this.cd.detectChanges();
             }, 0);
         });

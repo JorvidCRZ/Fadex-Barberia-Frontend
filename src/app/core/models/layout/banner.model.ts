@@ -6,6 +6,7 @@ export interface BannerBase {
     activo: boolean;
     subtitulo: string;
     urlDestino: string;
+    tituloBoton?: string;
     seccion: BannerSeccion;
     fechaInicio: string | null;
     fechaFin: string | null;

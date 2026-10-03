@@ -12,9 +12,7 @@
       <h3 class="mb-4 font-semibold text-brand-white">Explorar</h3>
       <ul class="flex flex-col gap-3">
         @for (p of publicNav; track p.path) {
-          <li>
-            <a [routerLink]="p.path" class="text-text-secondary transition-colors hover:text-brand-gold"> {{ p.label }} </a>
-          </li>
+          <li><a [routerLink]="p.path" class="text-text-secondary transition-colors hover:text-brand-gold"> {{ p.label }} </a></li>
         }
       </ul>
     </div>
@@ -23,26 +21,22 @@
       <h3 class="mb-4 font-semibold text-brand-white">Servicios</h3>
       <ul class="flex flex-col gap-3">
         @for (servicio of servicios; track servicio) {
-          <li>
-            <a routerLink="/servicios" class="text-text-secondary transition-colors hover:text-brand-gold" > {{ servicio }} </a>
-          </li>
+          <li><a routerLink="/servicios" class="text-text-secondary transition-colors hover:text-brand-gold" > {{ servicio }} </a></li>
         }
       </ul>
     </div>
 
     <div>
-      <h3 class="mb-4 font-semibold text-brand-white">Reserva tu cita</h3>
+      <h3 class="mb-4 font-semibold text-brand-white"> Reserva tu cita </h3>
       <ul class="flex flex-col gap-3 text-sm text-text-secondary">
         @for (item of contacto; track item.texto) {
-          <li>
-            <a [routerLink]="item.ruta" class="transition-colors hover:text-brand-gold"> {{ item.texto }} </a>
-          </li>
+          <li><a [routerLink]="item.ruta" class="transition-colors hover:text-brand-gold"> {{ item.texto }} </a></li>
         }
       </ul>
 
       <a routerLink="/reservas" class="boton-primary mt-4 w-full rounded-full">
         <i class="pi pi-calendar" aria-hidden="true"></i>
-        <span>Reservar cita</span>
+        <span> Reservar cita </span>
       </a>
     </div>
   </div>
@@ -51,8 +45,8 @@
     <p class="text-sm text-gray-500">© 2026 Fadex Barber. Todos los derechos reservados.</p>
     <div class="flex gap-3">
       @for (red of redesSociales; track red.label) {
-        <a [href]="red.url" target="_blank" rel="noopener noreferrer" [attr.aria-label]="red.label">
-          <p-button [icon]="red.icono" [text]="true" [rounded]="true" styleClass="social-button"/>
+        <a [href]="red.url" target="_blank" rel="noopener noreferrer" [attr.aria-label]="red.label" styleClass="social-button">
+          <i [class]="'pi ' + red.icono" aria-hidden="true"></i>
         </a>
       }
     </div>
