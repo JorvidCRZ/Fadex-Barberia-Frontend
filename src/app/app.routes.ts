@@ -13,6 +13,7 @@ import { PublicLayoutComponent } from './features/public/layout/public-layout.co
 // import { Error404Component } from './shared/components/error404/error404.component';
 import { InicioComponent } from './features/public/pages/inicio/inicio.component';
 import { CarritoComponent } from './features/public/pages/carrito/carrito.component';
+import { Error404Component } from './shared/components/error404/error404.component';
 // import { BarberoLayoutComponent } from './features/private/layout/barbero-layout.component';
 // import { DashboardAdministrativoComponent } from './features/private/dashboard/dashboard-administrativo/dashboard-administrativo.component';
 // import { RegistrarClient } from './features/private/components/gestion/clientes/registrar-client/registrar-client';
@@ -130,7 +131,7 @@ export const routes: Routes = [
       { path: '', redirectTo: 'inicio', pathMatch: 'full' },
       { path: 'inicio', component: InicioComponent },
       { path: 'nosotros', component: NosotrosComponent },
-      // { path: 'productos', loadComponent: () => import('./features/public/pages/productos/productos.component').then(m => m.ProductComponent) },
+      { path: 'productos', loadComponent: () => import('./features/public/pages/productos/productos.component').then(m => m.ProductComponent) },
       // { path: 'forgot-password', component: ForgotPasswordComponent },
       // { path: 'reset-password', component: ResetPassword },
       // { path: 'productos/detalle/:id', loadComponent: () => import('./features/public/pages/productos/producto-detalle/producto-detalle.component').then(m => m.ProductoDetalleComponent) },
@@ -163,9 +164,9 @@ export const routes: Routes = [
           // { path: '**', loadComponent: () => import('./shared/components/error404/error404.component').then(m => m.Error404Component) }
         // ]
       // },
-      // { path: '**', component: Error404Component }
+      { path: '**', component: Error404Component }
     ]
   },
 
-  // { path: '**', component: Error404Component },
+  { path: '**', component: Error404Component },
 ];

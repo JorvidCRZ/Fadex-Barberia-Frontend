@@ -9,5 +9,5 @@ import { HOME_BANNERS } from '../../../../core/config/banner.config';
   styleUrl: './inicio.scss',
 })
 export class InicioComponent {
-  readonly banners = HOME_BANNERS;
+  readonly banners = HOME_BANNERS.filter((banner) => banner.seccion === 'HOME_TOP');
 }

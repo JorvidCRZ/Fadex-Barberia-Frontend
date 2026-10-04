@@ -60,10 +60,28 @@
     }
 }
 
+p-button.boton-primary .p-button,
+button.boton-primary.p-button {
+    @apply border-brand-gold/30 bg-brand-gold/10 text-brand-gold;
+
+    &:hover {
+        @apply border-brand-gold bg-brand-gold text-black;
+    }
+}
+
 .boton-secondary {
     @include boton-base;
 
     @apply border border-ui-border bg-ui-card text-white;
+
+    &:hover {
+        @apply border-ui-border bg-ui-elevated;
+    }
+}
+
+p-button.boton-secondary .p-button,
+button.boton-secondary.p-button {
+    @apply border-ui-border bg-ui-card text-white;
 
     &:hover {
         @apply border-ui-border bg-ui-elevated;

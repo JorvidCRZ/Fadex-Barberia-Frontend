@@ -5,7 +5,7 @@ export interface BannerBase {
     titulo: string;
     activo: boolean;
     subtitulo: string;
-    urlDestino: string;
+    urlDestino?: string;
     tituloBoton?: string;
     seccion: BannerSeccion;
     fechaInicio: string | null;
@@ -28,10 +28,9 @@ export interface SidebarItem {
     routerLinkActiveOptions?: any;
     linkClass?: string;
     roles?: string[];   
-    // permission?: PermissionCode | PermissionCode[];
     items?: SidebarItem[];
 }
 
 export interface BannerRequest extends BannerBase { }
 export interface Banner extends BannerBase { id: number; urlImagen: string; }
-export type BannerSeccion = 'HOME_TOP' | 'HOME_MIDDLE' | 'HOME_BOTTOM';
+export type BannerSeccion = 'HOME_TOP' | 'NOSOTROS_TOP' | 'HOME_BOTTOM';

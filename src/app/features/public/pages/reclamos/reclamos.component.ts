@@ -21,8 +21,7 @@ import { ReclamoPublicoRequest } from '../../../../core/models/operaciones/recla
   imports: [ReactiveFormsModule, SelectModule, InputTextModule, InputNumberModule, CheckboxModule,
     TextareaModule, ButtonModule, DatePickerModule, MessageModule, CommonModule
   ],
-  templateUrl: './reclamos.html',
-  styleUrl: './reclamos.scss',
+  templateUrl: './reclamos.html'
 })
 export class ReclamosComponent implements OnInit {
   private fb = inject(FormBuilder);
@@ -36,10 +35,20 @@ export class ReclamosComponent implements OnInit {
   numeroReclamo = '';
   archivos: File[] = [];
   today = new Date();
+  pasoActual = 0;
+  readonly totalPasos = 4;
+  readonly nombresPasos = ['Solicitud', 'Datos personales', 'Detalle', 'Confirmación'];
+  readonly controlesPorPaso: string[][] = [
+    ['tipoReclamacion'],
+    ['nombres', 'apellidos', 'tipoDocumento', 'numeroDocumento', 'email', 'telefono'],
+    ['tipoProblema', 'fechaOcurrencia', 'descripcion'],
+    ['aceptaVeracidad', 'aceptaDatos', 'aceptaTerminos']
+  ];
 
   tiposReclamacion = TIPO_RECLAMACION_OPTIONS;
   tiposDocumento = TIPO_DOCUMENTO_OPTIONS;
   tiposProblema = TIPO_PROBLEMA_OPTIONS;
+  readonly tipoReclamacion = TipoReclamacion;
 
   campoInvalido = (campo: string) => campoInvalido(this.form, campo, this.formSubmitted);
 
@@ -54,7 +63,7 @@ export class ReclamosComponent implements OnInit {
       nombres: ['', Validators.required],
       apellidos: ['', Validators.required],
       tipoDocumento: ['DNI', Validators.required],
-      numeroDocumento: ['', [Validators.required, Validators.minLength(8), Validators.pattern(/^\d{8}$/)]],
+      numeroDocumento: ['', [Validators.required, Validators.pattern(/^\d{8}$/)]],
       email: ['', [Validators.required, Validators.email]],
       telefono: ['', [Validators.required, Validators.pattern(/^9\d{8}$/)]],
       tipoProblema: [null, Validators.required],
@@ -98,7 +107,19 @@ export class ReclamosComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     if (!input.files) return;
     const nuevos = Array.from(input.files);
-    const validos = nuevos.filter(f => ['image/jpeg', 'image/png', 'application/pdf'].includes(f.type) && f.size <= 10 * 1024 * 1024);
+    const permitidos = ['image/jpeg', 'image/png', 'application/pdf'];
+    const validos = nuevos.filter(f => permitidos.includes(f.type) && f.size <= 10 * 1024 * 1024);
+    const rechazados = nuevos.length - validos.length;
+
+    if (rechazados > 0) {
+      this.notify.showWarn(`${rechazados} archivo(s) no cumplen con el formato o tamaño permitido.`);
+    }
+
+    const excedentes = Math.max(0, this.archivos.length + validos.length - 5);
+    if (excedentes > 0) {
+      this.notify.showWarn('Solo puedes adjuntar hasta 5 archivos.');
+    }
+
     this.archivos = [...this.archivos, ...validos].slice(0, 5);
     input.value = '';
   }
@@ -109,6 +130,7 @@ export class ReclamosComponent implements OnInit {
 
   onLimpiar(): void {
     this.formSubmitted = false;
+    this.pasoActual = 0;
     this.archivos = [];
     this.form.reset({
       tipoReclamacion: TipoReclamacion.RECLAMO,
@@ -159,8 +181,62 @@ export class ReclamosComponent implements OnInit {
     return bytes < 1024 * 1024 ? ` ${(bytes / 1024).toFixed(0)} KB` : `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
-  seleccionarTipo(tipo: string): void {
-    this.form.get('tipoReclamacion')?.setValue(tipo as TipoReclamacion);
+  seleccionarTipo(tipo: TipoReclamacion | undefined): void {
+    if (!tipo) {
+      return;
+    }
+
+    this.form.get('tipoReclamacion')?.setValue(tipo);
+    this.form.get('tipoReclamacion')?.markAsTouched();
+  }
+
+  validarPasoActual(): boolean {
+    const controles = this.controlesPorPaso[this.pasoActual];
+    controles.forEach(nombre => this.form.get(nombre)?.markAsTouched());
+    return controles.every(nombre => this.form.get(nombre)?.valid);
+  }
+
+  siguientePaso(): void {
+    this.formSubmitted = true;
+    if (!this.validarPasoActual()) {
+      return;
+    }
+
+    this.formSubmitted = false;
+    this.pasoActual = Math.min(this.pasoActual + 1, this.totalPasos - 1);
+  }
+
+  pasoAnterior(): void {
+    this.formSubmitted = false;
+    this.pasoActual = Math.max(this.pasoActual - 1, 0);
+  }
+
+  irAlPaso(paso: number): void {
+    if (paso < this.pasoActual) {
+      this.pasoAnterior();
+    }
+  }
+
+  get mensajeDocumento(): string {
+    switch (this.form.get('tipoDocumento')?.value) {
+      case 'DNI':
+        return 'DNI: debe tener exactamente 8 dígitos';
+      case 'CE':
+        return 'Carné de Extranjería: debe tener exactamente 9 dígitos';
+      case 'PASAPORTE':
+        return 'Pasaporte: entre 6 y 12 caracteres alfanuméricos';
+      default:
+        return 'Número de documento inválido';
+    }
+  }
+
+  get tipoReclamacionLabel(): string {
+    return this.tiposReclamacion.find(tipo => tipo.value === this.form.get('tipoReclamacion')?.value)?.label ?? '';
+  }
+
+  registrarOtro(): void {
+    this.enviado = false;
+    this.onLimpiar();
   }
 
   pasos = [

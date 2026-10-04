@@ -142,18 +142,69 @@ app-search-bar input {
 }
 
 .filtros-panel .p-inputtext,
-.filtros-panel p-select,
-.filtros-panel p-treeSelect,
+.filtros-panel .p-select,
+.filtros-panel .p-treeselect,
 .filtros-panel p-datepicker .p-datepicker-input,
-.filtros-panel p-multiselect,
+.filtros-panel .p-multiselect,
 .filtros-panel p-inputnumber .p-inputnumber-input {
     min-height: 2.75rem !important;
     padding: 0.55rem 0.65rem !important;
     font-size: 0.85rem;
+    border: 1px solid rgb(var(--color-ui-border)) !important;
+    border-radius: 0.75rem !important;
+    background: rgb(var(--color-ui-card)) !important;
+    color: rgb(var(--color-text-primary)) !important;
 
     &::placeholder {
         color: rgb(var(--color-text-muted)) !important;
     }
+}
+
+.filtros-panel .p-inputnumber {
+    min-height: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+}
+
+.filtros-panel p-inputnumber .p-inputnumber-input {
+    width: 100%;
+}
+
+.filtros-panel .p-select-label,
+.filtros-panel .p-multiselect-label,
+.filtros-panel .p-treeselect-label,
+.filtros-panel .p-inputnumber-input,
+.filtros-panel .p-datepicker-input {
+    color: rgb(var(--color-text-primary)) !important;
+}
+
+.filtros-panel .p-select-label.p-placeholder,
+.filtros-panel .p-multiselect-label.p-placeholder,
+.filtros-panel .p-treeselect-label.p-placeholder {
+    color: rgb(var(--color-text-muted)) !important;
+}
+
+.filtros-panel .p-select:not(.p-disabled):hover,
+.filtros-panel .p-multiselect:not(.p-disabled):hover,
+.filtros-panel .p-treeselect:not(.p-disabled):hover,
+.filtros-panel p-datepicker:hover .p-datepicker-input,
+.filtros-panel .p-inputtext:hover {
+    border-color: rgb(var(--color-brand-gold)) !important;
+}
+
+.filtros-panel .p-select:focus-within,
+.filtros-panel .p-multiselect:focus-within,
+.filtros-panel .p-treeselect:focus-within,
+.filtros-panel p-datepicker:focus-within,
+.filtros-panel .p-inputtext:focus {
+    border-color: rgb(var(--color-brand-gold)) !important;
+    box-shadow: 0 0 0 1px rgb(var(--color-brand-gold) / 0.35) !important;
+}
+
+.filtros-panel p-inputnumber .p-inputnumber-input:hover,
+.filtros-panel p-inputnumber:focus-within .p-inputnumber-input {
+    border-color: rgb(var(--color-brand-gold)) !important;
 }
 
 

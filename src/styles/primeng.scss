@@ -229,14 +229,112 @@ p-datepicker {
    PAGINATOR SELECT
    ======================================== */
 
+p-paginator {
+    @apply block;
+    --p-paginator-background: transparent;
+}
+
 p-paginator .p-paginator {
-    @apply mt-4 flex items-center gap-2 rounded-lg border border-brand-gold bg-ui-card p-3;
+    @apply border-0 bg-transparent text-text-secondary;
+    background: transparent !important;
 }
 
-p-paginator .p-paginator p-select {
-    @apply w-auto rounded-lg border border-ui-border bg-ui-card text-text-primary;
+p-paginator .p-paginator .p-paginator-content {
+    @apply border-0 bg-transparent;
+    background: transparent !important;
 }
 
+p-paginator .p-paginator > :not(.p-paginator-rpp-dropdown),
+p-paginator .p-paginator .p-paginator-content > * {
+    background-color: transparent !important;
+}
+
+p-paginator .p-paginator .p-paginator-current {
+    color: rgb(var(--color-text-secondary)) !important;
+}
+
+p-paginator .p-paginator .p-paginator-page,
+p-paginator .p-paginator .p-paginator-first,
+p-paginator .p-paginator .p-paginator-prev,
+p-paginator .p-paginator .p-paginator-next,
+p-paginator .p-paginator .p-paginator-last {
+    background: transparent !important;
+    color: rgb(var(--color-text-secondary)) !important;
+}
+
+p-paginator .p-paginator .p-paginator-page:hover,
+p-paginator .p-paginator .p-paginator-first:hover,
+p-paginator .p-paginator .p-paginator-prev:hover,
+p-paginator .p-paginator .p-paginator-next:hover,
+p-paginator .p-paginator .p-paginator-last:hover {
+    border-color: rgb(var(--color-brand-gold)) !important;
+    background: rgb(var(--color-brand-gold-soft)) !important;
+    color: rgb(var(--color-brand-gold)) !important;
+}
+
+p-paginator .p-paginator .p-paginator-page.p-highlight {
+    border-color: rgb(var(--color-brand-gold)) !important;
+    background: rgb(var(--color-brand-gold)) !important;
+    color: rgb(var(--color-brand-black)) !important;
+}
+
+p-paginator .p-paginator .p-paginator-rpp-dropdown,
+p-paginator .p-paginator .p-select {
+    @apply min-w-16 rounded-lg border border-brand-gold/30 bg-ui-card text-text-primary;
+    background-color: rgb(var(--color-ui-card)) !important;
+    border-color: rgb(var(--color-brand-gold) / 0.3) !important;
+}
+
+p-paginator p-select.p-paginator-rpp-dropdown,
+p-paginator p-select.p-paginator-rpp-dropdown.p-disabled {
+    --p-select-background: rgb(var(--color-ui-card));
+    --p-select-disabled-background: rgb(var(--color-ui-card));
+    --p-select-color: rgb(var(--color-text-primary));
+    --p-select-disabled-color: rgb(var(--color-text-primary));
+    background: rgb(var(--color-ui-card)) !important;
+    background-color: rgb(var(--color-ui-card)) !important;
+    border: 1px solid rgb(var(--color-brand-gold) / 0.3) !important;
+    color: rgb(var(--color-text-primary)) !important;
+    opacity: 1 !important;
+}
+
+p-paginator p-select.p-paginator-rpp-dropdown .p-select-label,
+p-paginator p-select.p-paginator-rpp-dropdown .p-select-dropdown {
+    background: transparent !important;
+    color: rgb(var(--color-text-primary)) !important;
+}
+
+p-paginator p-select.p-paginator-rpp-dropdown .p-select-dropdown {
+    color: rgb(var(--color-brand-gold)) !important;
+}
+
+p-paginator .p-paginator .p-paginator-rpp-dropdown:hover,
+p-paginator .p-paginator .p-select:hover {
+    @apply border-brand-gold bg-ui-card text-text-primary;
+}
+
+p-paginator .p-paginator .p-paginator-rpp-dropdown .p-select-label,
+p-paginator .p-paginator .p-paginator-rpp-dropdown .p-select-dropdown,
+p-paginator .p-paginator .p-select .p-select-label,
+p-paginator .p-paginator .p-select .p-select-dropdown {
+    @apply bg-transparent text-text-primary;
+}
+
+p-paginator .p-paginator .p-paginator-rpp-dropdown .p-select-label,
+p-paginator .p-paginator .p-select .p-select-label {
+    @apply text-text-primary;
+}
+
+p-paginator .p-paginator .p-paginator-rpp-dropdown .p-select-dropdown,
+p-paginator .p-paginator .p-select .p-select-dropdown {
+    color: rgb(var(--color-brand-gold)) !important;
+}
+
+p-paginator .p-paginator .p-paginator-rpp-dropdown.p-disabled,
+p-paginator .p-paginator .p-select.p-disabled {
+    @apply border-brand-gold/30 text-text-primary opacity-100;
+    background-color: rgb(var(--color-ui-card)) !important;
+}
 
 /* ========================================
    TOAST

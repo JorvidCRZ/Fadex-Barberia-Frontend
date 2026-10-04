@@ -13,7 +13,7 @@ import { BotonComunicacionComponent } from '../../../shared/components/boton-com
   imports: [RouterOutlet, FooterComponent, HeaderComponent, BotonCarritoComponent, BotonComunicacionComponent],
   template: `
   <app-header/>
-    <main [class.min-h-screen]="!isCompactPage()" class="sm:pt-22 bg-black pb-0">
+    <main [class.min-h-screen]="!isCompactPage()" class="pt-20 bg-black pb-0">
       <router-outlet></router-outlet>
       <app-boton-carrito></app-boton-carrito>
       <app-boton-comunicacion></app-boton-comunicacion>

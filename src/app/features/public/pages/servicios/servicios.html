@@ -1,1 +1,38 @@
-<p>servicios works!</p>
+<!-- Hero -->
+<section class="relative h-64 sm:h-80 w-full flex items-center justify-center overflow-hidden">
+  <div class="absolute inset-0">
+    <img src="/assets/cortebarba.jpg" alt="Servicios Barbería" class="w-full h-full object-cover object-center" />
+    <div class="absolute inset-0 bg-brand-black/70"></div>
+  </div>
+  <div class="relative z-10 text-center px-6 max-w-3xl">
+    <p class="text-brand-gold text-sm font-semibold tracking-widest uppercase mb-3">Lo que ofrecemos</p>
+    <h1 class="text-4xl md:text-5xl font-bold tracking-wide uppercase text-brand-white">Nuestros Servicios</h1>
+    <p class="mt-4 text-text-secondary text-lg">Precisión, estilo y cuidado en cada corte.</p>
+  </div>
+</section>
+
+<section class="bg-brand-black py-10 px-4">
+  <div class="mx-auto max-w-7xl flex flex-col gap-6">
+
+    <app-filtros [fields]="filtrosFields" titulo="Servicios" (buscar)="onBuscar($event)" (limpiar)="onLimpiar()" />
+
+    <div class="flex items-center justify-between text-sm text-text-secondary">
+      <span>{{ totalRecords }} servicio(s) disponible(s)</span>
+      @if (cargando) { <span>Cargando...</span> }
+    </div>
+
+    <div class="mt-8">
+      <app-servicio-lista [servicios]="servicios" [cargando]="cargando" (seleccionado)="abrirDetalle($event)" />
+		</div>
+
+    @if (totalRecords > size) { 
+      <p-paginator [first]="page * size" [rows]="size" [totalRecords]="totalRecords" [rowsPerPageOptions]="[10, 20, 50]" [showCurrentPageReport]="true" currentPageReportTemplate="Página {currentPage} de {totalPages} · {totalRecords} servicio(s)" (onPageChange)="onPaginatorChange($event)" />
+    }
+
+  </div>
+</section>
+
+
+@if (mostrarModal) {
+<app-servicio-detalle [servicio]="servicioSeleccionado" [cargando]="cargandoDetalle" (cerrar)="cerrarModal()" (reservar)="irAReservar()" />
+}

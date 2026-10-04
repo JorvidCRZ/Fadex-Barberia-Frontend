@@ -8,7 +8,9 @@
           <span class="banner-eyebrow">FADEX BARBER</span>
           <h1>{{ banner.titulo }}</h1>
           <p>{{ banner.subtitulo }}</p>
-          <a [href]="banner.urlDestino || '#'" class="boton-primary">{{banner.tituloBoton}}</a>
+          @if(banner.urlDestino){
+            <a [href]="banner.urlDestino || '#'" class="boton-primary">{{banner.tituloBoton}}</a>
+          }
         </div>
       </article>
     </ng-template>

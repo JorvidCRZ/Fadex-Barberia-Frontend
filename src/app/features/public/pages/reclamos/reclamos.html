@@ -1,6 +1,6 @@
 <section class="relative h-64 sm:h-80 w-full flex items-center justify-center text-white overflow-hidden">
   <div class="absolute inset-0">
-    <img src="/assets/serio.jpg" alt="Libro de Reclamaciones" class="w-full h-full object-cover object-center" />
+    <img src="/assets/images/libro-reclamaciones.jpg" alt="Libro de Reclamaciones" class="w-full h-full object-cover object-center" />
     <div class="absolute inset-0 bg-black/80"></div>
   </div>
   <div class="relative z-10 text-center px-6 max-w-3xl">
@@ -23,7 +23,7 @@
   </div>
 </section>
 
-<section class="bg-ui-surface py-16 px-4">
+<section class="hidden bg-ui-surface py-16 px-4" aria-hidden="true">
   <div class="text-center mb-10">
     <p class="text-brand-gold text-sm font-semibold tracking-widest uppercase mb-3">Antes de continuar</p>
     <h2 class="text-text-primary text-3xl font-bold uppercase tracking-wide">¿Qué deseas registrar?</h2>
@@ -31,7 +31,7 @@
   </div>
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
 
-    <div (click)="seleccionarTipo('QUEJA')"
+    <div (click)="seleccionarTipo(tipoReclamacion.QUEJA)"
       class="bg-ui-black border rounded-xl p-6 transition-all duration-300 group flex flex-col gap-3 cursor-pointer hover:shadow-lg"
       [class.border-brand-gold]="form.get('tipoReclamacion')?.value === 'QUEJA'"
       [class.border-ui-border]="form.get('tipoReclamacion')?.value !== 'QUEJA'">
@@ -47,7 +47,7 @@
       <span class="mt-auto text-brand-gold text-xs font-semibold uppercase tracking-wide">Seleccionar →</span>
     </div>
 
-    <div (click)="seleccionarTipo('RECLAMO')"
+    <div (click)="seleccionarTipo(tipoReclamacion.RECLAMO)"
       class="bg-ui-black border rounded-xl p-6 transition-all duration-300 group flex flex-col gap-3 cursor-pointer hover:shadow-lg hover:shadow-brand-gold/20"
       [class.border-brand-gold]="form.get('tipoReclamacion')?.value === 'RECLAMO'"
       [class.border-ui-border]="form.get('tipoReclamacion')?.value !== 'RECLAMO'">
@@ -66,8 +66,8 @@
   </div>
 </section>
 
-<section class="bg-ui-black py-16 px-4">
-  <div class="text-center mb-10">
+<section class="bg-ui-black py-12 px-4 sm:py-16">
+  <div class="text-center mb-8 sm:mb-10">
     <p class="text-brand-gold text-sm font-semibold tracking-widest uppercase mb-3">Completa el formulario</p>
     <h2 class="text-text-primary text-3xl font-bold uppercase tracking-wide">Registra tu solicitud</h2>
     <div class="mt-3 w-16 h-1 bg-brand-gold mx-auto rounded-full"></div>
@@ -83,25 +83,61 @@
       <h3 class="text-text-primary text-xl font-bold uppercase tracking-wide">¡Solicitud registrada!</h3>
       <p class="text-text-secondary text-sm">Tu código de seguimiento es:</p>
       <span class="text-brand-gold text-2xl font-bold tracking-widest">{{ numeroReclamo }}</span>
-      <p class="text-text-muted text-xs">  También hemos enviado este código a tu correo electrónico.Guárdalo para consultar el estado de tu solicitud.</p>
-      <button type="button" (click)="enviado = false" class="boton-primary mt-2 mx-auto">Registrar otro reclamo</button>
+      <p class="text-text-muted text-xs">También hemos enviado este código a tu correo electrónico. Guárdalo para consultar el estado de tu solicitud.</p>
+      <button type="button" (click)="registrarOtro()" class="boton-primary mt-2 mx-auto">Registrar otro reclamo</button>
     </div>
   }
 
   @if (!enviado) {
-    <form [formGroup]="form" (ngSubmit)="onEnviar()" class="max-w-3xl mx-auto flex flex-col gap-6">
-      <div class="bg-ui-card border border-ui-border rounded-xl p-5">
-        <h3 class="text-text-primary font-bold text-sm uppercase tracking-wide mb-4">1. Tipo de solicitud</h3>
-        <div class="flex gap-4 flex-wrap">
-          @for (tipo of tiposReclamacion; track tipo.value) {
-            <label class="flex items-center gap-2 cursor-pointer">
-              <input type="radio" [value]="tipo.value" formControlName="tipoReclamacion" class="accent-brand-gold w-4 h-4" />
-              <span class="text-text-secondary text-sm">{{ tipo.label }}</span>
-            </label>
+    <form [formGroup]="form" (ngSubmit)="pasoActual === totalPasos - 1 ? onEnviar() : siguientePaso()" class="max-w-4xl mx-auto flex flex-col gap-6">
+      <div class="rounded-2xl border border-ui-border bg-ui-card p-4 sm:p-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">Paso {{ pasoActual + 1 }} de {{ totalPasos }}</p>
+            <h3 class="mt-1 text-lg font-bold text-text-primary">{{ nombresPasos[pasoActual] }}</h3>
+          </div>
+          <span class="text-sm text-text-secondary">{{ ((pasoActual + 1) / totalPasos * 100) | number:'1.0-0' }}%</span>
+        </div>
+        <div class="mt-4 h-2 overflow-hidden rounded-full bg-ui-elevated">
+          <div class="h-full rounded-full bg-brand-gold transition-all duration-300" [style.width.%]="(pasoActual + 1) / totalPasos * 100"></div>
+        </div>
+        <div class="mt-4 grid grid-cols-4 gap-2">
+          @for (nombre of nombresPasos; track nombre; let i = $index) {
+            <button type="button" [disabled]="i >= pasoActual" (click)="irAlPaso(i)" class="flex flex-col items-center gap-1 text-center">
+              <span class="flex h-8 w-8 items-center justify-center rounded-full border text-xs font-bold"
+                [class.border-brand-gold]="i <= pasoActual" [class.bg-brand-gold]="i <= pasoActual"
+                [class.text-brand-black]="i <= pasoActual" [class.border-ui-border]="i > pasoActual"
+                [class.text-text-muted]="i > pasoActual">{{ i < pasoActual ? '✓' : i + 1 }}</span>
+              <span class="hidden text-[11px] sm:block" [class.text-brand-gold]="i <= pasoActual" [class.text-text-muted]="i > pasoActual">{{ nombre }}</span>
+            </button>
           }
         </div>
       </div>
+      @if (pasoActual === 0) {
+      <div class="bg-ui-card border border-ui-border rounded-xl p-5">
+        <h3 class="text-text-primary font-bold text-lg">¿Qué deseas registrar?</h3>
+        <p class="mt-1 text-sm text-text-secondary">Selecciona una opción para comenzar.</p>
+        <div class="mt-5 grid gap-4 sm:grid-cols-2">
+          @for (tipo of tiposReclamacion; track tipo.value) {
+            <button type="button" (click)="seleccionarTipo(tipo.value)"
+              class="rounded-xl border p-5 text-left transition hover:-translate-y-1 hover:border-brand-gold"
+              [class.border-brand-gold]="form.get('tipoReclamacion')?.value === tipo.value"
+              [class.bg-brand-gold-soft]="form.get('tipoReclamacion')?.value === tipo.value"
+              [class.border-ui-border]="form.get('tipoReclamacion')?.value !== tipo.value">
+              <span class="font-bold uppercase tracking-wide text-text-primary">{{ tipo.label }}</span>
+              <span class="mt-2 block text-sm leading-relaxed text-text-secondary">
+                {{ tipo.value === 'QUEJA' ? 'Disconformidad sobre la atención o las condiciones del servicio.' : 'Disconformidad sobre un producto o servicio adquirido.' }}
+              </span>
+              <span class="mt-4 block text-xs font-semibold uppercase tracking-wide text-brand-gold">
+                {{ form.get('tipoReclamacion')?.value === tipo.value ? 'Seleccionado' : 'Seleccionar' }}
+              </span>
+            </button>
+          }
+        </div>
+      </div>
+      }
 
+      @if (pasoActual === 1) {
       <div class="bg-ui-card border border-ui-border rounded-xl p-5">
         <h3 class="text-text-primary font-bold text-sm uppercase tracking-wide mb-4">2. Datos del cliente</h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -138,7 +174,7 @@
           
           <div class="part-form">
             <label class="label-form">Número de documento *</label>
-            <input pInputText formControlName="numeroDocumento" [maxlength]=" form.get('tipoDocumento')?.value === 'DNI' ? 8 : form.get('tipoDocumento')?.value === 'CE' ? 9 : 12 ">
+            <input pInputText formControlName="numeroDocumento" [maxlength]="maxLengthDocumento">
             <div class="flex justify-between mt-1">
               @if (campoInvalido('numeroDocumento')) {
                 <p-message severity="error" variant="simple" size="small">
@@ -155,7 +191,7 @@
                   }
                 </p-message>
               }              
-              <span class="text-text-subtle text-xs">{{ form.get('numeroDocumento')?.value?.length || 0 }}/{{form.get('tipoDocumento')?.value === 'DNI' ? 8 :form.get('tipoDocumento')?.value === 'CE' ? 9 : 12}}</span>
+              <span class="text-text-subtle text-xs">{{ form.get('numeroDocumento')?.value?.length || 0 }}/{{ maxLengthDocumento }}</span>
             </div>
           </div>
 
@@ -178,6 +214,8 @@
         </div>
       </div>
 
+      }
+      @if (pasoActual === 2) {
       <div class="bg-ui-card border border-ui-border rounded-xl p-5">
         <h3 class="text-text-primary font-bold text-sm uppercase tracking-wide mb-4">3. Detalle de la solicitud</h3>
         <div class="flex flex-col gap-4">
@@ -235,7 +273,7 @@
 
         @if (archivos.length) {
           <div class="mt-4 flex flex-col gap-2">
-            @for (archivo of archivos; track archivo.name; let i = $index) {
+            @for (archivo of archivos; track i; let i = $index) {
               <div class="flex items-center justify-between bg-ui-black border border-ui-border rounded-lg px-4 py-2.5">
                 <div class="flex items-center gap-3">
                   <svg class="w-4 h-4 text-brand-gold shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -255,6 +293,8 @@
         }
       </div>
 
+      }
+      @if (pasoActual === 3) {
       <div class="bg-ui-card border rounded-xl p-5 flex flex-col gap-3"
         [class.border-brand-red]="formSubmitted && (form.get('aceptaVeracidad')?.invalid || form.get('aceptaDatos')?.invalid || form.get('aceptaTerminos')?.invalid)"
         [class.border-ui-border]="!(formSubmitted && (form.get('aceptaVeracidad')?.invalid || form.get('aceptaDatos')?.invalid || form.get('aceptaTerminos')?.invalid))">
@@ -280,9 +320,20 @@
         }
       </div>
 
-      <div class="flex flex-col sm:flex-row gap-3 justify-end">
-        <button type="button" (click)="onLimpiar()" class="boton-secondary p-button"> Limpiar formulario</button>
-        <button type="submit" [disabled]="enviando" class="boton-primary p-button flex items-center gap-2 justify-center">
+      <div class="rounded-xl border border-ui-border-soft bg-ui-black p-4 text-sm">
+        <p class="mb-2 font-semibold text-text-primary">Resumen de tu solicitud</p>
+        <p class="text-text-secondary"><span class="text-text-muted">Tipo:</span> {{ tipoReclamacionLabel }}</p>
+        <p class="text-text-secondary"><span class="text-text-muted">Solicitante:</span> {{ form.get('nombres')?.value }} {{ form.get('apellidos')?.value }}</p>
+        <p class="text-text-secondary"><span class="text-text-muted">Documento:</span> {{ form.get('tipoDocumento')?.value }} {{ form.get('numeroDocumento')?.value }}</p>
+        <p class="mt-2 text-xs text-text-muted">Al enviar, recibirás un código de seguimiento en tu correo.</p>
+      </div>
+      }
+
+      <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
+        <button type="button" (click)="pasoAnterior()" [disabled]="pasoActual === 0 || enviando" class="boton-secondary p-button" [class.invisible]="pasoActual === 0">← Atrás</button>
+        <div class="flex flex-col gap-3 sm:flex-row">
+        <button pButton type="button" (click)="onLimpiar()" [disabled]="enviando" class="boton-secondary p-button">Limpiar</button>
+        <button pButton type="submit" [disabled]="enviando" class="boton-primary p-button flex items-center gap-2 justify-center">
           @if (enviando) {
             <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
@@ -290,9 +341,10 @@
             </svg>
             Enviando...
           } @else {
-            Enviar solicitud
+            {{ pasoActual === totalPasos - 1 ? 'Enviar solicitud' : 'Continuar →' }}
           }
         </button>
+        </div>
       </div>
     </form>
   }
@@ -310,7 +362,7 @@
       <div class="bg-ui-black border rounded-xl p-5 transition-all duration-300 group flex flex-col gap-3 relative"
         [class.border-brand-gold]="paso.activo"
         [class.border-ui-border]="!paso.activo"
-        [class.hover:shadow-brand-gold\/20]="paso.activo">
+        [class.hover:shadow-brand-gold]="paso.activo">
         <span class="text-brand-gold text-4xl font-bold opacity-20 absolute top-4 right-4">{{ paso.numero }}</span>
         <div class="w-12 h-12 rounded-lg bg-brand-gold-soft group-hover:bg-brand-gold/20 flex items-center justify-center transition">
           <svg class="w-6 h-6 text-brand-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -330,8 +382,8 @@
     <p class="text-brand-gold text-sm font-semibold tracking-widest uppercase mb-3">Seguimiento de solicitudes</p>
     <h2 class="text-text-primary text-3xl font-bold uppercase tracking-wide">Conserva tu código de seguimiento</h2>
     <div class="mt-3 w-16 h-1 bg-brand-gold mx-auto rounded-full"></div>
-    <p class="mt-6 text-text-secondary leading-relaxed">Al registrar una queja o reclamo recibirás un código único de seguimientoen tu correo electrónico. Conserva este código para futuras consultas ocomunicaciones con nuestro equipo de atención.</p>
-    <p class="mt-4 text-text-muted text-sm">Todas las actualizaciones sobre tu solicitud serán enviadas al correoelectrónico registrado durante el proceso.</p>
+    <p class="mt-6 text-text-secondary leading-relaxed">Al registrar una queja o reclamo recibirás un código único de seguimiento en tu correo electrónico. Conserva este código para futuras consultas o comunicaciones con nuestro equipo de atención.</p>
+    <p class="mt-4 text-text-muted text-sm">Todas las actualizaciones sobre tu solicitud serán enviadas al correo electrónico registrado durante el proceso.</p>
   </div>
 </section>
 

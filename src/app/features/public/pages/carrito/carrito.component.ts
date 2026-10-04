@@ -5,26 +5,23 @@ import { Router } from '@angular/router';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputNumberModule } from 'primeng/inputnumber';
-
-// import { TokenService } from '@/app/core/services/auth/token.service';
 import { SafeImageUrlPipe } from '../../../../shared/pipes/safe-image-url.pipe';
 import { SolesPipe } from '../../../../shared/pipes/moneda.pipe';
 import { NotificationService } from '../../../../core/services/common/notification.service';
+import { TokenService } from '../../../../core/services/auth/token.service';
 import { CarritoService } from '../../../../core/services/catalogos/carrito.service';
 
 @Component({
   selector: 'app-carrito',
   standalone: true,
-  imports: [ CommonModule, FormsModule, TableModule, ButtonModule, InputNumberModule, SafeImageUrlPipe, SolesPipe
-  ],
-  templateUrl: './carrito.html',
-  styleUrl: './carrito.scss'
+  imports: [ CommonModule, FormsModule, TableModule, ButtonModule, InputNumberModule, SafeImageUrlPipe, SolesPipe],
+  templateUrl: './carrito.html'
 })
-
 export class CarritoComponent {
+
   private router = inject(Router);
   private notify = inject(NotificationService);
-  // private tokenService = inject(TokenService);
+  private tokenService = inject(TokenService);
   private carritoService = inject(CarritoService);
 
   readonly items = this.carritoService.items;
@@ -33,11 +30,11 @@ export class CarritoComponent {
   readonly cantidad = this.carritoService.cantidad;
 
   procesarCompra(): void {
-    // if (!this.tokenService.isLogged()) {
-    //   this.notify.showError('Debes iniciar sesión para continuar con la compra');
-    //   this.router.navigate(['/productos']);
-    //   return;
-    // }
+    if (!this.tokenService.isLogged()) {
+      this.notify.showError('Debes iniciar sesión para continuar con la compra');
+      this.router.navigate(['/productos']);
+      return;
+    }
     this.router.navigate(['/checkout']);
   }
 
