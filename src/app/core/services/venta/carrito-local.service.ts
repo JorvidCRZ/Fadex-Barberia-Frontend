@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Producto } from '../../models/catalogos/productos.model';
 import { Servicio } from '../../models/catalogos/servicios.model';
+import { obtenerPrecio } from '../catalogos/carrito.service';
 
 export interface ItemCarrito {
   idItem: number; 
@@ -31,9 +32,9 @@ export class CarritoLocalService {
       idItem: producto.id,
       nombre: producto.nombre,
       tipo: 'PRODUCTO',
-      precioUnitario: producto.precio,
+      precioUnitario: obtenerPrecio(producto),
       cantidad: 1,
-      subtotal: producto.precio,
+      subtotal: obtenerPrecio(producto),
       stockDisponible: producto.stock
     };
     this.procesarIngreso(item);

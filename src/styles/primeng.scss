@@ -23,6 +23,23 @@ p-button .p-button {
    DIALOG
    ======================================== */
 
+.p-drawer {
+    background: rgb(var(--color-ui-surface)) !important;
+    color: rgb(var(--color-text-primary)) !important;
+    border-left: 1px solid rgb(var(--color-ui-border)) !important;
+}
+
+.p-drawer-header {
+    background: rgb(var(--color-ui-black)) !important;
+    color: rgb(var(--color-text-primary)) !important;
+    border-bottom: 1px solid rgb(var(--color-ui-border-soft));
+}
+
+.p-drawer-content {
+    background: rgb(var(--color-ui-surface)) !important;
+    color: rgb(var(--color-text-primary)) !important;
+}
+
 .p-dialog {
     overflow: overlay;
     border: 1px solid rgb(var(--color-brand-gold-hover)) !important;

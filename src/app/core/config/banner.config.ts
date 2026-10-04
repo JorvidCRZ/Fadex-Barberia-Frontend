@@ -8,5 +8,5 @@ export const HOME_BANNERS: Banner[] = [
   { id: 3, orden: 3, titulo: 'Cuidado de barba', subtitulo: 'Detalles que definen tu estilo', activo: true, tituloBoton: 'Reservar cita',
     urlImagen: '/assets/cortebarba.jpg',urlDestino: '/reservas',seccion: 'HOME_TOP',fechaInicio: null,fechaFin: null,},
   {id: 4, orden: 4, titulo: 'Tiendda online', subtitulo: 'Productos de calidad para tu cuidado personal', activo: true, tituloBoton: 'Ir a la tienda',
-    urlImagen: '/assets/banner-tienda.webp', urlDestino: '/productos', seccion: 'HOME_TOP', fechaInicio: null, fechaFin: null,},
+    urlImagen: '/assets/banner-mostrador.webp', urlDestino: '/productos', seccion: 'HOME_TOP', fechaInicio: null, fechaFin: null,},
 ];

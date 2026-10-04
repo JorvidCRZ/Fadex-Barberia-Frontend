@@ -2,13 +2,17 @@ import { Injectable, signal, computed } from '@angular/core';
 import { Producto } from '../../models/catalogos/productos.model';
 import { CarritoItem } from '../../models/catalogos/carrito.model';
 
+export function obtenerPrecio(producto: Producto): number {
+    return producto.precioPromo ?? producto.precioVenta ?? producto.precio;
+}
+
 @Injectable({ providedIn: 'root' })
 export class CarritoService {
 
     private _items = signal<CarritoItem[]>([]);
     readonly items = this._items.asReadonly();
     readonly cantidad = computed(() => this._items().reduce((sum, item) => sum + item.cantidad, 0));
-    readonly subtotal = computed(() => this._items().reduce((sum, item) => sum + item.cantidad * item.producto.precio, 0));
+    readonly subtotal = computed(() => this._items().reduce((sum, item) => sum + item.cantidad * obtenerPrecio(item.producto), 0));
     readonly total = computed(() => this.subtotal());
 
     constructor() {
@@ -51,8 +55,6 @@ export class CarritoService {
             items.push({
                 producto,
                 cantidad,
-                subtotal: producto.precio * cantidad,
-                total: producto.precio * cantidad,
             });
         }
 
