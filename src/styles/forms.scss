@@ -91,6 +91,92 @@ app-search-bar input {
 
 
 /* ========================================
+   FORMULARIO DE RECLAMOS / PRIME INPUTS
+   ======================================== */
+
+app-reclamos {
+    .p-inputtext,
+    .p-inputnumber-input,
+    .p-datepicker-input,
+    .p-select,
+    textarea {
+        width: 100%;
+        border: 1px solid rgb(var(--color-ui-border)) !important;
+        border-radius: 0.75rem !important;
+        background: rgb(var(--color-ui-card)) !important;
+        color: rgb(var(--color-text-primary)) !important;
+        transition:
+            border-color var(--transition-fast),
+            box-shadow var(--transition-fast);
+    }
+
+    .p-inputtext,
+    .p-inputnumber-input,
+    .p-datepicker-input,
+    textarea {
+        padding: 0.85rem 1rem !important;
+    }
+
+    .p-select {
+        min-height: 3rem;
+    }
+
+    .p-select-label,
+    .p-datepicker-input,
+    .p-inputnumber-input {
+        color: rgb(var(--color-text-primary)) !important;
+    }
+
+    .p-select-label.p-placeholder,
+    .p-inputtext::placeholder,
+    .p-inputnumber-input::placeholder,
+    .p-datepicker-input::placeholder,
+    textarea::placeholder {
+        color: rgb(var(--color-text-muted)) !important;
+    }
+
+    .p-inputtext:hover,
+    .p-inputnumber-input:hover,
+    .p-datepicker-input:hover,
+    .p-select:hover,
+    textarea:hover {
+        border-color: rgb(var(--color-brand-gold-hover)) !important;
+    }
+
+    .p-inputtext:enabled:focus,
+    .p-inputnumber-input:enabled:focus,
+    .p-datepicker-input:enabled:focus,
+    .p-select.p-focus,
+    textarea:focus {
+        border-color: rgb(var(--color-brand-gold)) !important;
+        box-shadow: 0 0 0 3px rgb(var(--color-brand-gold) / 0.18) !important;
+        outline: none;
+    }
+
+    .p-select-dropdown {
+        color: rgb(var(--color-brand-gold)) !important;
+    }
+
+    .p-checkbox-box {
+        border-color: rgb(var(--color-ui-border)) !important;
+        background: rgb(var(--color-ui-card)) !important;
+    }
+
+    .p-checkbox-box.p-highlight {
+        border-color: rgb(var(--color-brand-gold)) !important;
+        background: rgb(var(--color-brand-gold)) !important;
+        color: rgb(var(--color-brand-black)) !important;
+    }
+
+    .p-message {
+        background: transparent !important;
+        border: 0 !important;
+        padding: 0 !important;
+    }
+}
+
+
+/* ========================================
    VALIDACIONES
    ======================================== */
 
