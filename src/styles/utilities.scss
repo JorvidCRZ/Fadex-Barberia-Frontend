@@ -1,0 +1,47 @@
+/* ========================================
+   LAYOUT
+   ======================================== */
+
+.container-main {
+    max-width: 1200px;
+    margin-inline: auto;
+    width: 100%;
+    padding-inline: 1rem;
+}
+
+.tamano-menu {
+    max-width: 1350px;
+    margin-inline: auto;
+}
+
+@media (width > 1800px) {
+    .container-main {
+        max-width: 1600px;
+    }
+
+    .tamano-menu {
+        max-width: 1600px;
+    }
+}
+
+
+/* ========================================
+   TEXTOS
+   ======================================== */
+
+.texto {
+    color: rgb(var(--color-text-table)) !important;
+}
+
+
+/* ========================================
+   ETIQUETAS
+   ======================================== */
+
+.etiqueta {
+    @apply m-1 rounded-xl p-2 text-base font-bold transition-all duration-300 hover:scale-105;
+}
+
+.etiqueta-fit {
+    @apply rounded px-2 py-1 text-[11px] font-bold;
+}

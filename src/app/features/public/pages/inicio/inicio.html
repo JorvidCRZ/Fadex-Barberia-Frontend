@@ -1,0 +1,27 @@
+<section class="inicio-hero">
+  <app-banner [banners]="banners"></app-banner>
+</section>
+
+<section class="bg-ui-surface px-4 py-16" aria-labelledby="ubicacion-titulo">
+  <div class="mx-auto grid max-w-6xl grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-12">
+    <div class="flex flex-col items-start">
+      <p class="mb-3 text-sm font-semibold uppercase tracking-widest text-brand-gold">Visítanos</p>
+      <h2 id="ubicacion-titulo" class="max-w-md text-3xl font-bold uppercase tracking-wide text-white md:text-4xl">Encuentra tu estilo en Fadex</h2>
+      <div class="my-5 h-1 w-16 rounded-full bg-brand-gold" aria-hidden="true"></div>
+      <p class="max-w-lg leading-relaxed text-gray-400">Estamos listos para recibirte. Consulta nuestra ubicación en Google Maps y llega fácilmente a tu próxima cita.</p>
+
+      <div class="my-6 flex items-center gap-3 font-semibold text-white">
+        <i class="pi pi-map-marker text-brand-gold" aria-hidden="true"></i>
+        <span>Fadex Barber</span>
+      </div>
+
+      <a class="inline-flex items-center gap-2 rounded-xl border border-brand-gold/40 bg-brand-gold/10 px-5 py-3 font-bold text-brand-gold transition-all duration-300 hover:border-brand-gold hover:bg-brand-gold hover:text-black" href="https://www.google.com/maps/search/?api=1&query=Fadex+Barber" target="_blank" rel="noopener noreferrer">
+        <i class="pi pi-directions" aria-hidden="true"></i> Abrir en Google Maps
+      </a>
+    </div>
+
+    <div class="min-h-80 overflow-hidden rounded-2xl border border-ui-border-soft bg-ui-black shadow-2xl">
+      <iframe class="block min-h-80 w-full border-0 grayscale-[.15] contrast-105" title="Ubicación de Fadex Barber en Google Maps" src="https://www.google.com/maps?q=Fadex+Barber&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </div>
+  </div>
+</section>

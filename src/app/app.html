@@ -1,0 +1,13 @@
+@if (isLoading()) {
+<div class="fixed inset-0 flex flex-col items-center justify-center bg-slate-900/60 backdrop-blur-md z-[9999]">
+  <div class="relative flex items-center justify-center">
+    <p-progressSpinner strokeWidth="3" animationDuration=".8s" class="w-24 h-24"></p-progressSpinner>
+    <i class="pi pi-shield absolute text-2xl text-white animate-pulse"></i>
+  </div>
+  <span class="mt-4 text-white font-bold tracking-[0.2em] text-sm uppercase">Procesando...</span>
+</div>
+}
+
+<p-toast></p-toast>
+<router-outlet />
+

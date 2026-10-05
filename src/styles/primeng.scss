@@ -1,0 +1,380 @@
+/* ========================================
+   INPUTS
+   ======================================== */
+
+.p-inputtext {
+    padding: 0.85rem 1rem !important;
+    font-size: 0.95rem;
+    border-radius: 0.75rem !important;
+}
+
+
+/* ========================================
+   BOTONES PRIME
+   ======================================== */
+
+p-button .p-button {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+
+/* ========================================
+   DIALOG
+   ======================================== */
+
+.p-drawer {
+    background: rgb(var(--color-ui-surface)) !important;
+    color: rgb(var(--color-text-primary)) !important;
+    border-left: 1px solid rgb(var(--color-ui-border)) !important;
+}
+
+.p-drawer-header {
+    background: rgb(var(--color-ui-black)) !important;
+    color: rgb(var(--color-text-primary)) !important;
+    border-bottom: 1px solid rgb(var(--color-ui-border-soft));
+}
+
+.p-drawer-content {
+    background: rgb(var(--color-ui-surface)) !important;
+    color: rgb(var(--color-text-primary)) !important;
+}
+
+.p-dialog {
+    overflow: overlay;
+    border: 1px solid rgb(var(--color-brand-gold-hover)) !important;
+}
+
+.p-dialog-header {
+    background: rgb(var(--color-ui-black)) !important;
+    border-radius: 1rem 1rem 0 0;
+}
+
+.p-dialog-header-actions .p-ripple {
+    @apply rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-500;
+}
+
+.p-dialog-header-actions .p-ripple:hover {
+    @apply border border-amber-500/30 bg-amber-500 text-white;
+}
+
+.p-dialog-content {
+    background: rgb(var(--color-ui-card)) !important;
+    border: 1px solid rgb(var(--color-brand-gold-soft)) !important;
+}
+
+
+/* ========================================
+   AVATAR
+   ======================================== */
+
+.p-avatar {
+    background: rgb(var(--color-brand-gold)) !important;
+    color: rgb(var(--color-brand-dark)) !important;
+    font-weight: bold;
+}
+
+
+/* ========================================
+   CHECKBOX
+   ======================================== */
+
+.p-checkbox-box {
+    border: 1px solid rgb(var(--color-ui-border)) !important;
+}
+
+.p-checkbox-input:checked+.p-checkbox-box {
+    background: rgb(var(--color-brand-gold)) !important;
+    border-color: rgb(var(--color-brand-gold)) !important;
+}
+
+
+/* ========================================
+   SELECT / TREE
+   ======================================== */
+
+.p-select-list {
+    @apply rounded-xl border border-ui-border bg-ui-card shadow-lg;
+}
+
+.p-select-option,
+.p-select-label,
+.p-treeselect-label {
+    color: rgb(var(--color-text-primary)) !important;
+}
+
+.p-select-option:not(.p-select-option-selected):not(.p-disabled).p-focus {
+    background: rgb(var(--color-ui-elevated)) !important;
+    color: rgb(var(--color-text-primary)) !important;
+}
+
+.p-select-option.p-select-option-selected,
+.p-select-option.p-select-option-selected.p-focus {
+    background: rgb(var(--color-brand-gold)) !important;
+    color: rgb(var(--color-brand-black)) !important;
+}
+
+.p-tree-node-content.p-tree-node-selected {
+    background: rgb(var(--color-brand-gold)) !important;
+    color: rgb(var(--color-brand-black)) !important;
+}
+
+.p-tree-node-content.p-tree-node-selectable:hover {
+    background: rgb(var(--color-ui-elevated)) !important;
+    color: rgb(var(--color-text-primary)) !important;
+}
+
+.p-component-overlay {
+    background: rgb(var(--color-ui-card)) !important;
+    border: 1px solid rgb(var(--color-ui-border)) !important;
+}
+
+
+/* ========================================
+   PANELMENU BASE
+   ======================================== */
+
+.p-panelmenu {
+    background: transparent;
+}
+
+.p-panelmenu-panel {
+    background: transparent;
+    border-color: rgb(var(--color-ui-border-soft));
+}
+
+.p-panelmenu-item-link {
+    color: rgb(var(--color-text-secondary));
+}
+
+.p-panelmenu-item-link:hover {
+    background: rgb(var(--color-ui-elevated));
+    color: rgb(var(--color-brand-gold));
+}
+
+
+/* ========================================
+   TREE SELECT
+   ======================================== */
+
+.p-treeselect-tree-container {
+    background: rgb(var(--color-ui-card)) !important;
+    color: rgb(var(--color-text-primary)) !important;
+}
+
+.p-treeselect-panel,
+.p-treeselect-overlay,
+.p-treeselect-panel .p-tree,
+.p-treeselect-overlay .p-tree {
+    background: rgb(var(--color-ui-card)) !important;
+    border: 1px solid rgb(var(--color-ui-border)) !important;
+    color: rgb(var(--color-text-primary)) !important;
+}
+
+.p-treeselect-panel .p-tree-node-content,
+.p-treeselect-overlay .p-tree-node-content {
+    background: transparent !important;
+    color: rgb(var(--color-text-primary)) !important;
+}
+
+.p-treeselect-panel .p-tree-node-content:hover,
+.p-treeselect-overlay .p-tree-node-content:hover,
+.p-treeselect-panel .p-tree-node-content.p-tree-node-selectable:hover,
+.p-treeselect-overlay .p-tree-node-content.p-tree-node-selectable:hover {
+    background: rgb(var(--color-ui-elevated)) !important;
+    color: rgb(var(--color-text-primary)) !important;
+}
+
+.p-treeselect-panel .p-tree-node-content.p-tree-node-selected,
+.p-treeselect-overlay .p-tree-node-content.p-tree-node-selected {
+    background: rgb(var(--color-brand-gold)) !important;
+    color: rgb(var(--color-brand-black)) !important;
+}
+
+.p-treeselect-panel .p-tree-node-label,
+.p-treeselect-overlay .p-tree-node-label {
+    color: inherit !important;
+}
+
+
+/* ========================================
+   PASSWORD
+   ======================================== */
+
+p-password svg {
+    cursor: pointer;
+}
+
+
+/* ========================================
+   GALLERIA
+   ======================================== */
+
+.p-galleria {
+    @apply rounded-lg border border-brand-gold;
+}
+
+.p-galleria-thumbnails-content,
+.p-tree-node-toggle-button {
+    background: rgb(var(--color-ui-card)) !important;
+}
+
+.p-galleria-item img {
+    @apply my-10;
+}
+
+.p-galleria-thumbnails-content,
+.p-galleria-thumbnails {
+    @apply rounded-lg border border-ui-border;
+}
+
+
+/* ========================================
+   FILE UPLOAD
+   ======================================== */
+
+.p-fileupload p-button button,
+.p-fileupload p-button .button {
+    @apply rounded-lg border border-brand-gold/30 bg-brand-gold/10 text-brand-gold;
+}
+
+.p-fileupload p-button button:hover {
+    @apply border-brand-gold bg-brand-gold text-black;
+}
+
+
+/* ========================================
+   INPUT NUMBER
+   ======================================== */
+
+p-inputnumber,
+p-datepicker {
+    padding: 0 !important;
+}
+
+.p-inputnumber-button:hover,
+.p-inputnumber-button:active {
+    background: rgb(var(--color-brand-gold)) !important;
+    color: black !important;
+    border-color: rgb(var(--color-brand-gold)) !important;
+}
+
+
+/* ========================================
+   PAGINATOR SELECT
+   ======================================== */
+
+p-paginator {
+    @apply block;
+    --p-paginator-background: transparent;
+}
+
+p-paginator .p-paginator {
+    @apply border-0 bg-transparent text-text-secondary;
+    background: transparent !important;
+}
+
+p-paginator .p-paginator .p-paginator-content {
+    @apply border-0 bg-transparent;
+    background: transparent !important;
+}
+
+p-paginator .p-paginator > :not(.p-paginator-rpp-dropdown),
+p-paginator .p-paginator .p-paginator-content > * {
+    background-color: transparent !important;
+}
+
+p-paginator .p-paginator .p-paginator-current {
+    color: rgb(var(--color-text-secondary)) !important;
+}
+
+p-paginator .p-paginator .p-paginator-page,
+p-paginator .p-paginator .p-paginator-first,
+p-paginator .p-paginator .p-paginator-prev,
+p-paginator .p-paginator .p-paginator-next,
+p-paginator .p-paginator .p-paginator-last {
+    background: transparent !important;
+    color: rgb(var(--color-text-secondary)) !important;
+}
+
+p-paginator .p-paginator .p-paginator-page:hover,
+p-paginator .p-paginator .p-paginator-first:hover,
+p-paginator .p-paginator .p-paginator-prev:hover,
+p-paginator .p-paginator .p-paginator-next:hover,
+p-paginator .p-paginator .p-paginator-last:hover {
+    border-color: rgb(var(--color-brand-gold)) !important;
+    background: rgb(var(--color-brand-gold-soft)) !important;
+    color: rgb(var(--color-brand-gold)) !important;
+}
+
+p-paginator .p-paginator .p-paginator-page.p-highlight {
+    border-color: rgb(var(--color-brand-gold)) !important;
+    background: rgb(var(--color-brand-gold)) !important;
+    color: rgb(var(--color-brand-black)) !important;
+}
+
+p-paginator .p-paginator .p-paginator-rpp-dropdown,
+p-paginator .p-paginator .p-select {
+    @apply min-w-16 rounded-lg border border-brand-gold/30 bg-ui-card text-text-primary;
+    background-color: rgb(var(--color-ui-card)) !important;
+    border-color: rgb(var(--color-brand-gold) / 0.3) !important;
+}
+
+p-paginator p-select.p-paginator-rpp-dropdown,
+p-paginator p-select.p-paginator-rpp-dropdown.p-disabled {
+    --p-select-background: rgb(var(--color-ui-card));
+    --p-select-disabled-background: rgb(var(--color-ui-card));
+    --p-select-color: rgb(var(--color-text-primary));
+    --p-select-disabled-color: rgb(var(--color-text-primary));
+    background: rgb(var(--color-ui-card)) !important;
+    background-color: rgb(var(--color-ui-card)) !important;
+    border: 1px solid rgb(var(--color-brand-gold) / 0.3) !important;
+    color: rgb(var(--color-text-primary)) !important;
+    opacity: 1 !important;
+}
+
+p-paginator p-select.p-paginator-rpp-dropdown .p-select-label,
+p-paginator p-select.p-paginator-rpp-dropdown .p-select-dropdown {
+    background: transparent !important;
+    color: rgb(var(--color-text-primary)) !important;
+}
+
+p-paginator p-select.p-paginator-rpp-dropdown .p-select-dropdown {
+    color: rgb(var(--color-brand-gold)) !important;
+}
+
+p-paginator .p-paginator .p-paginator-rpp-dropdown:hover,
+p-paginator .p-paginator .p-select:hover {
+    @apply border-brand-gold bg-ui-card text-text-primary;
+}
+
+p-paginator .p-paginator .p-paginator-rpp-dropdown .p-select-label,
+p-paginator .p-paginator .p-paginator-rpp-dropdown .p-select-dropdown,
+p-paginator .p-paginator .p-select .p-select-label,
+p-paginator .p-paginator .p-select .p-select-dropdown {
+    @apply bg-transparent text-text-primary;
+}
+
+p-paginator .p-paginator .p-paginator-rpp-dropdown .p-select-label,
+p-paginator .p-paginator .p-select .p-select-label {
+    @apply text-text-primary;
+}
+
+p-paginator .p-paginator .p-paginator-rpp-dropdown .p-select-dropdown,
+p-paginator .p-paginator .p-select .p-select-dropdown {
+    color: rgb(var(--color-brand-gold)) !important;
+}
+
+p-paginator .p-paginator .p-paginator-rpp-dropdown.p-disabled,
+p-paginator .p-paginator .p-select.p-disabled {
+    @apply border-brand-gold/30 text-text-primary opacity-100;
+    background-color: rgb(var(--color-ui-card)) !important;
+}
+
+/* ========================================
+   TOAST
+   ======================================== */
+
+.p-toast {
+    z-index: 9999;
+}

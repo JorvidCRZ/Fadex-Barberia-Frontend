@@ -1,0 +1,22 @@
+@use './styles/theme';
+@use './styles/tokens';
+@use './styles/base';
+@use './styles/utilities';
+@use './styles/forms';
+@use './styles/badges';
+@use './styles/tables';
+@use './styles/primeng';
+@use './styles/sidebar';
+@use './styles/datepicker';
+@use './styles/tabs';
+@use './styles/animations';
+@use './styles/quill';
+@use './styles/products';
+@use './styles/buttons';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+// @import 'quill/dist/quill.snow.css';
+// @import 'primeicons/primeicons.css';

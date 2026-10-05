@@ -1,0 +1,66 @@
+:root {
+    /* ========================================
+     BRAND
+     ======================================== */
+
+    --color-brand-dark: 14 14 14;
+    --color-brand-black: 12 12 12;
+    --color-brand-white: 255 255 255;
+
+    --color-brand-red: 220 38 38;
+    --color-brand-amber: 245 158 11;
+
+    --color-brand-gold: 212 175 55;
+    --color-brand-gold-hover: 245 215 110;
+    --color-brand-gold-soft: 239 188 22 / 0.19;
+
+
+    /* ========================================
+     UI
+     ======================================== */
+
+    --color-ui-black: 12 12 12;
+    --color-ui-surface: 15 15 15;
+    --color-ui-card: 18 18 18;
+    --color-ui-elevated: 26 26 26;
+
+    --color-ui-border: 255 255 255 / 0.20;
+    --color-ui-border-soft: 255 255 255 / 0.06;
+
+
+    /* ========================================
+     TEXT
+     ======================================== */
+
+    --color-text-table: 255 255 255;
+    --color-text-table-sub: 212 175 55;
+
+    --color-text-primary: 255 255 255;
+    --color-text-secondary: 133 133 133;
+    --color-text-muted: 122 122 122;
+    --color-text-subtle: 82 82 82;
+
+
+    /* ========================================
+     STATUS
+     ======================================== */
+
+    --color-success: 34 197 94;
+    --color-warning: 245 158 11;
+    --color-danger: 239 68 68;
+    --color-info: 59 130 246;
+}
+
+html {
+    color-scheme: dark;
+}
+
+::selection {
+    background: rgb(var(--color-brand-gold));
+    color: rgb(var(--color-brand-black));
+}
+
+:focus-visible {
+    outline: 2px solid rgb(var(--color-brand-gold));
+    outline-offset: 2px;
+}

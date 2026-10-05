@@ -1,0 +1,60 @@
+<div class="servicio-detail-modal">
+  <div class="servicio-detail-modal-content">
+    <div class="servicio-detail-header">
+      <button type="button" class="servicio-detail-back-button" (click)="cerrar.emit()">
+        <i class="pi pi-arrow-left" aria-hidden="true"></i>
+        Volver
+      </button>
+    </div>
+
+    @if (cargando) {
+      <div class="servicio-detail-loading">Cargando detalle...</div>
+    } @else if (servicio) {
+      <div class="servicio-detail-layout">
+        <div class="servicio-detail-gallery">
+          <div class="servicio-detail-image">
+            <img [src]="servicio.urlsMultimedia[0] | safeImageUrl" [alt]="servicio.nombre"
+              (error)="img.src='/assets/banners/cortebarba.jpg'" #img />
+          </div>
+        </div>
+
+        <div class="servicio-detail-info">
+          <app-status-badge type="text" [value]="servicio.categoriaNombre" customClass="badge-text estado-servicio" />
+          <h2 class="servicio-detail-name">{{ servicio.nombre }}</h2>
+          <div class="servicio-detail-rating">
+            <i class="pi pi-verified" aria-hidden="true"></i>
+            <span>Atención profesional FadeX</span>
+          </div>
+          <p class="servicio-detail-price">S/ {{ servicio.precio }}</p>
+          <p class="servicio-detail-description">
+            {{ servicio.descripcion || 'Servicio profesional garantizado. Relájate y disfruta de una atención de primera calidad.' }}
+          </p>
+          <div class="servicio-detail-specs">
+            <div><span>Categoría</span><strong>{{ servicio.categoriaNombre }}</strong></div>
+            <div><span>Duración</span><strong>{{ servicio.duracion }} min aprox.</strong></div>
+          </div>
+          <div class="servicio-detail-benefit">
+            <i class="pi pi-check-circle" aria-hidden="true"></i>
+            <span><strong>Servicio personalizado</strong><small>Atención adaptada a tu estilo y preferencia.</small></span>
+          </div>
+        </div>
+
+        <aside class="servicio-detail-actions">
+          <div class="servicio-detail-buy">
+            <span class="servicio-detail-buy-label">Reserva segura</span>
+            <p class="servicio-detail-buy-price">S/ {{ servicio.precio }}</p>
+            <p class="servicio-detail-buy-caption">Precio del servicio</p>
+            <button type="button" class="servicio-detail-book-button" (click)="reservar.emit()">
+              <i class="pi pi-calendar" aria-hidden="true"></i>
+              Agendar cita
+            </button>
+            <div class="servicio-detail-subtotal">
+              <span>Total de la reserva</span>
+              <strong>S/ {{ servicio.precio }}</strong>
+            </div>
+          </div>
+        </aside>
+      </div>
+    }
+  </div>
+</div>

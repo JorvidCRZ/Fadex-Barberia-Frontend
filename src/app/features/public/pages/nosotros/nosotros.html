@@ -1,0 +1,81 @@
+<section class="inicio-hero">
+  <app-banner [banners]="banners"></app-banner>
+</section>
+
+<section class="bg-ui-black px-4 py-16">
+  <div class="mx-auto flex max-w-5xl flex-col items-center gap-10 lg:flex-row">
+    <div class="aspect-square w-full overflow-hidden rounded-2xl border border-ui-border-soft lg:w-1/2">
+      <img ngSrc="/assets/salon.jpg" width="800" height="800" priority alt="Interior de la barbería"
+        class="h-full w-full object-cover" />
+    </div>
+
+    <div class="w-full lg:w-1/2">
+      <p class="mb-3 text-sm font-semibold uppercase tracking-widest text-brand-gold">Nuestra historia</p>
+      <h2 class="mb-5 text-3xl font-bold uppercase tracking-wide text-text-primary">Más de 10 años cortando estilos</h2>
+      <div class="mb-6 h-1 w-16 rounded-full bg-brand-gold"></div>
+      <p class="mb-4 text-base leading-relaxed text-text-secondary"> Nacimos con la idea de recuperar la esencia de la barbería clásica: un lugar donde el hombre se sienta cómodo, bien atendido y salga sintiéndose otro. Desde nuestros inicios en un pequeño local del barrio, hemos crecido sin perder nuestra identidad.</p>
+      <p class="text-base leading-relaxed text-text-secondary">
+        Hoy somos un equipo apasionado por el oficio, en constante formación, comprometidos con ofrecer la mejor experiencia a cada cliente que cruza nuestra puerta.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="bg-ui-surface px-4 py-16">
+  <div class="mb-10 text-center">
+    <p class="mb-3 text-sm font-semibold uppercase tracking-widest text-brand-gold">Lo que nos define</p>
+    <h2 class="text-3xl font-bold uppercase tracking-wide text-text-primary">Nuestros valores</h2>
+    <div class="mx-auto mt-3 h-1 w-16 rounded-full bg-brand-gold"></div>
+  </div>
+
+  <div class="mx-auto grid max-w-5xl grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    @for (valor of valores; track valor.titulo) {
+      <article class="group flex flex-col gap-3 rounded-xl border border-ui-border-soft bg-ui-black p-5 transition-all duration-300 hover:border-brand-gold">
+        <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-brand-gold/10 text-brand-gold transition group-hover:bg-brand-gold/20">
+          <i [class]="valor.icono + ' text-xl'" aria-hidden="true"></i>
+        </div>
+        <h3 class="text-sm font-bold uppercase tracking-wide text-text-primary">{{ valor.titulo }}</h3>
+        <p class="text-xs leading-relaxed text-text-muted">{{ valor.descripcion }}</p>
+      </article>
+    }
+  </div>
+</section>
+
+<section class="bg-ui-black px-4 py-16">
+  <div class="mb-10 text-center">
+    <p class="mb-3 text-sm font-semibold uppercase tracking-widest text-brand-gold">Las manos detrás del corte</p>
+    <h2 class="text-3xl font-bold uppercase tracking-wide text-text-primary">Nuestro equipo</h2>
+    <div class="mx-auto mt-3 h-1 w-16 rounded-full bg-brand-gold"></div>
+  </div>
+
+  <div class="mx-auto grid max-w-4xl grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+    @for (barbero of equipo; track barbero.nombre) {
+      <article class="group flex flex-col rounded-xl border border-ui-border-soft bg-ui-card p-3 transition-all duration-300 hover:border-brand-gold">
+        <div class="mb-3 aspect-square w-full overflow-hidden rounded-lg bg-brand-white/5 transition group-hover:bg-brand-gold/10">
+          <img [ngSrc]="barbero.imagen" width="400" height="400" [alt]="barbero.nombre"
+            class="h-full w-full rounded-lg object-cover" />
+        </div>
+        <h3 class="text-xs font-bold leading-tight text-text-primary">{{ barbero.nombre }}</h3>
+        <p class="text-xs font-semibold uppercase tracking-wide text-brand-gold">{{ barbero.cargo }}</p>
+        <p class="mt-1 text-xs leading-relaxed text-text-muted">{{ barbero.descripcion }}</p>
+      </article>
+    }
+  </div>
+</section>
+
+<section class="bg-ui-surface px-4 py-16">
+  <div class="mb-10 text-center">
+    <p class="mb-3 text-sm font-semibold uppercase tracking-widest text-brand-gold">Nuestros logros</p>
+    <h2 class="text-3xl font-bold uppercase tracking-wide text-text-primary">En números</h2>
+    <div class="mx-auto mt-3 h-1 w-16 rounded-full bg-brand-gold"></div>
+  </div>
+
+  <div class="mx-auto grid max-w-4xl grid-cols-2 gap-4 lg:grid-cols-4">
+    @for (estadistica of estadisticas; track estadistica.etiqueta) {
+      <article class="rounded-xl border border-ui-border-soft bg-ui-black p-6 text-center transition-all duration-300 hover:border-brand-gold">
+        <p class="text-4xl font-bold text-brand-gold">{{ estadistica.valor }}</p>
+        <p class="mt-2 text-xs uppercase tracking-widest text-text-secondary">{{ estadistica.etiqueta }}</p>
+      </article>
+    }
+  </div>
+</section>

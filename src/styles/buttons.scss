@@ -1,0 +1,549 @@
+@mixin boton-base {
+    @apply inline-flex items-center justify-center rounded-xl px-6 py-3 font-bold transition-all duration-300 cursor-pointer;
+
+    &:hover {
+        @apply scale-105;
+    }
+
+    &:disabled {
+        @apply cursor-not-allowed opacity-50;
+
+        transform: none;
+    }
+}
+
+p-button.boton-submit,
+p-button.boton-danger {
+    display: block;
+    border: 0 !important;
+    background: transparent !important;
+    padding: 0 !important;
+}
+
+@mixin boton-tabla {
+    @apply inline-flex size-10 items-center justify-center rounded-lg mx-1 px-3 py-2 text-sm transition-all duration-200 cursor-pointer;
+
+    &:hover {
+        @apply scale-105;
+    }
+
+    &:disabled {
+        @apply cursor-not-allowed opacity-50;
+    }
+}
+
+
+/* ========================================
+   BOTONES GENERALES
+   ======================================== */
+
+.boton-ver {
+    @include boton-base;
+
+    @apply border border-teal-500/30 bg-teal-500/10 text-teal-400;
+
+    &:hover {
+        @apply border-teal-400 bg-teal-500 text-white;
+    }
+}
+
+button.boton-ver.p-button,
+p-button.boton-ver .p-button {
+    background: rgb(20 184 166 / 0.1) !important;
+    border: 1px solid rgb(20 184 166 / 0.3) !important;
+    color: rgb(45 212 191) !important;
+}
+
+button.boton-ver.p-button:hover,
+p-button.boton-ver .p-button:hover {
+    background: rgb(20 184 166) !important;
+    border-color: rgb(45 212 191) !important;
+    color: rgb(255 255 255) !important;
+}
+
+.boton-comprar,
+.boton-limpiar {
+    @include boton-base;
+
+    @apply border border-brand-gold/30 bg-brand-gold/10 text-brand-gold;
+
+    &:hover {
+        @apply border-brand-gold bg-brand-gold text-black;
+    }
+}
+
+button.boton-comprar.p-button,
+p-button.boton-comprar .p-button {
+    background: rgb(var(--color-brand-gold) / 0.1) !important;
+    border: 1px solid rgb(var(--color-brand-gold) / 0.3) !important;
+    color: rgb(var(--color-brand-gold)) !important;
+}
+
+button.boton-comprar.p-button:hover,
+p-button.boton-comprar .p-button:hover {
+    background: rgb(var(--color-brand-gold)) !important;
+    border-color: rgb(var(--color-brand-gold)) !important;
+    color: rgb(var(--color-brand-black)) !important;
+}
+
+button.boton-comprar.p-button:not(:disabled):active,
+p-button.boton-comprar .p-button:not(:disabled):active {
+    background: rgb(var(--color-brand-gold) / 0.1) !important;
+    border-color: rgb(var(--color-brand-gold) / 0.3) !important;
+    color: rgb(var(--color-brand-gold)) !important;
+}
+.boton-primary {
+    @include boton-base;
+
+    @apply border border-brand-gold/30 bg-brand-gold/10 text-brand-gold;
+
+    &:hover {
+        @apply border-brand-gold bg-brand-gold text-black;
+    }
+}
+
+p-button.boton-primary .p-button,
+button.boton-primary.p-button {
+    @apply border-brand-gold/30 bg-brand-gold/10 text-brand-gold;
+
+    &:hover {
+        @apply border-brand-gold bg-brand-gold text-black;
+    }
+}
+
+.boton-secondary {
+    @include boton-base;
+
+    @apply border border-ui-border bg-ui-card text-white;
+
+    &:hover {
+        @apply border-ui-border bg-ui-elevated;
+    }
+}
+
+p-button.boton-secondary .p-button,
+button.boton-secondary.p-button {
+    @apply border-ui-border bg-ui-card text-white;
+
+    &:hover {
+        @apply border-ui-border bg-ui-elevated;
+    }
+}
+
+p-button.boton-danger .p-button,
+button.boton-danger.p-button {
+    @apply border-red-400/30 bg-red-500/10 text-red-400;
+
+    &:hover {
+        @apply border-red-400 bg-red-500 text-white;
+    }
+}
+
+p-button .p-button.boton-delete.boton-eliminar-carrito,
+button.boton-delete.boton-eliminar-carrito.p-button {
+    @apply border border-red-400/30 bg-red-500/10 text-red-400;
+    width: 2rem !important;
+    min-width: 2rem !important;
+    height: 2.5rem !important;
+    padding: 0 !important;
+    border-radius: 0.35rem !important;
+}
+
+p-button .p-button.boton-delete.boton-eliminar-carrito:hover,
+button.boton-delete.boton-eliminar-carrito.p-button:hover {
+    @apply border-red-400 bg-red-500 text-white shadow-sm;
+}
+
+p-button .p-button.boton-delete.boton-eliminar-carrito:focus-visible,
+button.boton-delete.boton-eliminar-carrito.p-button:focus-visible {
+    @apply ring-2 ring-brand-red/30 ring-offset-0;
+}
+
+.boton-ghost {
+    @include boton-base;
+
+    @apply border border-ui-border bg-transparent text-white;
+
+    &:hover {
+        @apply border-ui-border bg-ui-elevated;
+    }
+}
+
+.boton-danger,
+.boton-delete {
+    @include boton-base;
+
+    @apply border border-red-400/30 bg-red-500/10 text-red-400;
+
+    &:hover {
+        @apply border-red-400 bg-red-500 text-white;
+    }
+}
+
+.boton-warning {
+    @include boton-base;
+
+    @apply border border-yellow-400/30 bg-yellow-500/10 text-yellow-400;
+
+    &:hover {
+        @apply bg-yellow-500 text-black;
+    }
+}
+
+.boton-anular {
+    @include boton-base;
+
+    @apply border border-amber-400 bg-amber-500/10 text-amber-400;
+
+    &:hover {
+        @apply border-amber-400 bg-amber-500 text-white;
+    }
+}
+
+.boton-submit {
+    @include boton-base;
+
+    @apply border border-blue-400 bg-blue-500/10 text-blue-400;
+
+    &:hover {
+        @apply bg-blue-500 text-black;
+    }
+}
+
+p-button.boton-submit .p-button,
+button.boton-submit.p-button {
+    @apply border-blue-400 bg-blue-500/10 text-blue-400;
+
+    &:hover {
+        @apply border-blue-400 bg-blue-500 text-black;
+    }
+}
+
+.boton-cancel {
+    @include boton-base;
+
+    @apply border border-gray-400 bg-gray-500/10 text-gray-400;
+
+    &:hover {
+        @apply bg-gray-500 text-black;
+    }
+}
+
+.boton-cierre {
+    @include boton-tabla;
+
+    @apply border border-amber-400 bg-amber-500/10 text-amber-400;
+
+    &:hover {
+        @apply border-amber-400 bg-amber-500 text-white;
+    }
+}
+
+.boton-logout {
+    @apply flex w-full cursor-pointer items-center gap-3 rounded-2xl border border-brand-red/30 px-4 py-3 text-left text-sm text-red-400 transition-all duration-200;
+
+    &:hover {
+        @apply border-brand-red bg-brand-red/20 text-red-400;
+    }
+}
+
+.boton-sidebar-toggle {
+    @apply inline-flex items-center justify-center rounded-md border border-ui-border bg-transparent p-2 text-brand-gold;
+
+    &:hover {
+        @apply border-brand-gold/40 bg-brand-gold/10 text-brand-gold-hover;
+    }
+}
+
+.boton-google {
+    @include boton-base;
+
+    @apply gap-3 rounded-full border border-ui-border bg-ui-black px-6 py-3 text-sm font-semibold text-white;
+
+    &:hover {
+        @apply border-brand-gold/50 bg-ui-elevated;
+    }
+}
+
+.boton-approve {
+    @include boton-base;
+
+    @apply border border-emerald-400 bg-emerald-500/10 text-emerald-400;
+
+    &:hover {
+        @apply bg-emerald-500 text-black;
+    }
+}
+
+.boton-reject {
+    @include boton-base;
+
+    @apply border border-amber-400 bg-amber-500/10 text-amber-400;
+
+    &:hover {
+        @apply bg-amber-500 text-black;
+    }
+}
+
+
+/* ========================================
+   BUSCAR
+   ======================================== */
+
+.boton-search {
+    @apply rounded-r-2xl bg-brand-gold px-5 py-2.5 font-medium text-black transition hover:bg-brand-gold-hover;
+}
+
+
+/* ========================================
+   BOTONES DE TABLA
+   ======================================== */
+
+.boton-tabla {
+    @include boton-tabla;
+}
+
+.boton-editar-tabla {
+    @include boton-tabla;
+
+    @apply border border-blue-500/30 bg-blue-500/10 text-blue-500;
+
+    &:hover {
+        @apply border-blue-500/30 bg-blue-500 text-white;
+    }
+}
+
+.boton-eliminar-tabla {
+    @include boton-tabla;
+
+    @apply border border-red-500/30 bg-red-500/10 text-red-500;
+
+    &:hover {
+        @apply border-red-500 bg-red-500 text-white;
+    }
+}
+
+.p-button.boton-eliminar-tabla {
+    border: 1px solid rgb(239 68 68 / 0.3) !important;
+    background: rgb(239 68 68 / 0.1) !important;
+    color: rgb(239 68 68) !important;
+}
+
+.p-button.boton-eliminar-tabla:not(:disabled):hover {
+    border-color: rgb(239 68 68) !important;
+    background: rgb(239 68 68) !important;
+    color: rgb(255 255 255) !important;
+}
+
+.boton-devolver-tabla {
+    @include boton-tabla;
+
+    @apply border border-violet-500/30 bg-violet-500/10 text-violet-500;
+
+    &:hover {
+        @apply border-violet-500/30 bg-violet-500 text-white;
+    }
+}
+
+.boton-ver-tabla {
+    @include boton-tabla;
+
+    @apply border border-green-500/30 bg-green-500/10 text-green-500;
+
+    &:hover {
+        @apply border-green-500/30 bg-green-500 text-white;
+    }
+
+    &:active,
+    &:focus,
+    &:focus-visible {
+        @apply border-green-500/30 bg-green-500 text-white;
+    }
+}
+
+.boton-agregar {
+    @include boton-tabla;
+
+    @apply border border-teal-500/30 bg-teal-500/10 text-teal-500;
+
+    &:hover {
+        @apply border-teal-500/30 bg-teal-500 text-white;
+    }
+}
+
+.boton-agregar-texto {
+    @include boton-base;
+
+    @apply w-auto border border-teal-500/30 bg-teal-500/10 text-teal-500;
+
+    &:hover {
+        @apply border-teal-500/30 bg-teal-500 text-white;
+    }
+}
+
+.boton-accion-cita {
+    @include boton-tabla;
+
+    @apply border border-blue-500/30 bg-blue-500/10 text-blue-500;
+
+    &:hover {
+        @apply border-blue-500/30 bg-blue-500 text-white;
+    }
+}
+
+.boton-accion-rojo {
+    @include boton-tabla;
+
+    @apply border border-red-500/30 bg-red-500/10 text-red-500;
+
+    &:hover {
+        @apply border-red-500/30 bg-red-500 text-white;
+    }
+}
+
+
+/* ========================================
+   BOTONES DE ESTADOS
+   ======================================== */
+
+.boton-cerrar-tabla {
+    @include boton-tabla;
+
+    @apply border border-amber-500 bg-amber-500 text-white;
+
+    &:hover {
+        @apply bg-amber-600;
+    }
+}
+
+.boton-close-tabla {
+    @include boton-tabla;
+
+    @apply border border-red-500 bg-red-500 text-white;
+
+    &:hover {
+        @apply bg-red-600;
+    }
+}
+
+.boton-close-aprobar {
+    @include boton-tabla;
+
+    @apply border border-blue-500 bg-blue-500 text-white;
+
+    &:hover {
+        @apply bg-blue-600;
+    }
+}
+
+.boton-close-devolver {
+    @include boton-tabla;
+
+    @apply border border-violet-500 bg-violet-500 text-white;
+
+    &:hover {
+        @apply bg-violet-600;
+    }
+}
+
+.boton-close-pagado {
+    @include boton-tabla;
+
+    @apply border border-orange-500 bg-orange-500 text-white;
+
+    &:hover {
+        @apply bg-orange-600;
+    }
+}
+
+.boton-close-preparando {
+    @include boton-tabla;
+
+    @apply border border-blue-500 bg-blue-500 text-white;
+
+    &:hover {
+        @apply bg-blue-600;
+    }
+}
+
+.boton-close-enviado {
+    @include boton-tabla;
+
+    @apply border border-sky-500 bg-sky-500 text-white;
+
+    &:hover {
+        @apply bg-sky-600;
+    }
+}
+
+.boton-close-entregado {
+    @include boton-tabla;
+
+    @apply border border-green-500 bg-green-500 text-white;
+
+    &:hover {
+        @apply bg-green-600;
+    }
+}
+
+
+/* ========================================
+   BOTONES CONFIRMACIÓN
+   ======================================== */
+
+.boton-confirm-pagado {
+    @include boton-base;
+
+    @apply bg-orange-600 text-white;
+
+    &:hover {
+        @apply bg-orange-700;
+    }
+}
+
+.boton-confirm-preparando {
+    @include boton-base;
+
+    @apply bg-blue-600 text-white;
+
+    &:hover {
+        @apply bg-blue-700;
+    }
+}
+
+.boton-confirm-enviado {
+    @include boton-base;
+
+    @apply bg-sky-600 text-white;
+
+    &:hover {
+        @apply bg-sky-700;
+    }
+}
+
+.boton-confirm-entregado {
+    @include boton-base;
+
+    @apply bg-green-600 text-white;
+
+    &:hover {
+        @apply bg-green-700;
+    }
+}
+
+
+/* ========================================
+   TAMAÑOS
+   ======================================== */
+
+.boton-tabla-sm .p-button {
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+}
+
+.boton-tabla-md .p-button {
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+}

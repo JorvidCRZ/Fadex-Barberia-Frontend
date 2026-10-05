@@ -1,0 +1,126 @@
+<section class="min-h-screen bg-ui-black relative overflow-hidden flex items-center justify-center px-4 py-10">
+  <div class="absolute top-10 left-10 opacity-5">
+    <i class="pi pi-sliders-h text-[16rem] text-brand-gold rotate-90"></i>
+  </div>
+
+  <div class="absolute bottom-10 right-10 opacity-5">
+    <i class="pi pi-sliders-h text-[16rem] text-brand-gold"></i>
+  </div>
+
+  <div
+    class="relative z-10 w-full max-w-5xl rounded-2xl overflow-hidden border border-brand-gold/30 bg-brand-black shadow-card grid grid-cols-1 lg:grid-cols-2">
+    <div class="bg-ui-surface p-8 lg:p-12 flex flex-col justify-center">
+      <div class="flex flex-col items-center text-center mb-8">
+        <app-logo></app-logo>
+        <h1 class="mt-5 text-2xl font-bold tracking-tight text-brand-white">Bienvenido de nuevo</h1>
+        <p class="mt-2 text-sm text-text-muted">Inicia sesión para gestionar tus reservas y compras.</p>
+      </div>
+
+      <form [formGroup]="formularioLogin" (ngSubmit)="login()" class="auth-form">
+        <div class="part-form">
+          <label for="username" class="label-form">Usuario</label>
+          <input pInputText formControlName="username" placeholder="Ingrese su usuario" autocomplete="username"
+            class="inputs-text" />
+          @if (campoInvalido('username')) {
+          <p-message severity="error" variant="simple" size="small">El usuario es obligatorio</p-message>
+          }
+        </div>
+
+        <div class="part-form">
+          <div class="flex items-center justify-between">
+            <label for="password" class="label-form">Contraseña</label>
+            <a routerLink="/forgot-password" class="text-xs font-medium text-brand-gold transition-colors hover:text-brand-gold-hover">¿La olvidaste?</a>
+          </div>
+          <p-password inputId="password" formControlName="password" [toggleMask]="true" [feedback]="false"
+            autocomplete="current-password" placeholder="••••••••" class="w-full" />
+          @if (campoInvalido('password')) {
+          <p-message severity="error" variant="simple" size="small">La contraseña es obligatoria</p-message>
+          }
+        </div>
+
+        <div class="flex items-center gap-2">
+          <p-checkbox formControlName="remember" binary="true"></p-checkbox>
+          <span class="text-text-secondary text-sm">Recordarme en este dispositivo</span>
+        </div>
+        <button pButton type="submit" label="Iniciar sesión" icon="pi pi-sign-in" [loading]="loading" class="boton-primary w-full"></button>
+
+        <div class="relative flex items-center py-2">
+          <div class="flex-grow border-t border-ui-border-soft"></div>
+          <span class="px-4 text-text-muted text-sm">O continúa con</span>
+          <div class="flex-grow border-t border-ui-border-soft"></div>
+        </div>
+
+        <div id="google-button" class="flex justify-center w-full min-h-[40px]"></div>
+        <p class="mt-2 text-center text-sm text-text-muted">¿No tienes cuenta?
+          <a routerLink="/register" class="font-semibold text-brand-gold transition-colors hover:text-brand-gold-hover">Regístrate gratis</a>
+        </p>
+      </form>
+    </div>
+
+    <div class="hidden lg:flex flex-col items-center justify-center bg-ui-black p-10 border-l border-brand-gold/20">
+      <div class="mb-5 flex size-16 items-center justify-center rounded-2xl border border-brand-gold/30 bg-brand-gold/10">
+        <i class="pi pi-qrcode text-3xl text-brand-gold"></i>
+      </div>
+      <p class="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">Acceso rápido</p>
+      <h2 class="mb-2 text-3xl font-bold text-brand-white">Entra con QR</h2>
+      <p class="mb-8 max-w-xs text-center text-sm leading-relaxed text-text-muted">Escanea el código de tu perfil y confirma tu identidad con tu PIN.</p>
+
+      <!-- Estado: inactivo -->
+      @if (!scannerEnabled && !qrScanned) {
+      <div class="flex flex-col items-center gap-4">
+        <div
+          class="flex w-full max-w-[280px] flex-col items-center gap-4 rounded-2xl border border-dashed border-brand-gold/40 bg-ui-surface p-8">
+          <div class="flex size-14 items-center justify-center rounded-full bg-brand-gold/10">
+            <i class="pi pi-camera text-2xl text-brand-gold"></i>
+          </div>
+          <div class="text-center">
+            <p class="font-semibold text-brand-white">Escanea tu código</p>
+            <p class="mt-1 text-xs text-text-muted">Activa la cámara para continuar</p>
+          </div>
+        </div>
+        <button pButton label="Activar escáner" icon="pi pi-camera" class="boton-primary w-full max-w-[280px]"
+          (click)="activarEscaner()"></button>
+      </div>
+      }
+
+      <!-- Estado: escaneando -->
+      @if (scannerEnabled && !qrScanned) {
+      <div class="flex flex-col items-center gap-4 w-full">
+        <div
+          class="rounded-2xl overflow-hidden border-4 border-brand-gold shadow-dialog w-[260px] h-[260px]">
+          <video #videoElement autoplay playsinline muted class="w-full h-full object-cover"></video>
+        </div>
+        <p class="text-text-muted text-xs text-center">
+          Apunta la cámara al código QR del usuario
+        </p>
+        <button pButton label="Cancelar" icon="pi pi-times" severity="secondary" class="w-full"
+          (click)="cancelarQr()"></button>
+      </div>
+      }
+
+      <!-- Estado: QR leído, pedir PIN -->
+      @if (qrScanned) {
+      <div class="flex flex-col items-center gap-4 w-full max-w-[280px]">
+        <div class="bg-success/10 border border-success/30 rounded-xl p-4 flex items-center gap-3 w-full">
+          <i class="pi pi-check-circle text-success text-xl"></i>
+          <p class="text-success text-sm">QR leído correctamente</p>
+        </div>
+
+        <div class="w-full">
+          <label class="text-text-secondary text-sm mb-2 block">Ingresa tu PIN</label>
+          <input pInputText type="password" [(ngModel)]="pin" maxlength="6" placeholder="● ● ● ●"
+            class="inputs-text text-center text-2xl tracking-[0.5em] w-full" (keyup.enter)="loginConQr()" />
+          @if (pinError) {
+          <p class="text-danger text-xs mt-2">{{ pinError }}</p>
+          }
+        </div>
+
+        <button pButton label="Ingresar" icon="pi pi-sign-in" [loading]="loadingQr" class="boton-primary w-full" (click)="loginConQr()"></button>
+
+        <button pButton label="Volver a escanear" icon="pi pi-refresh" severity="secondary" class="w-full" (click)="cancelarQr()"></button>
+      </div>
+      }
+
+    </div>
+  </div>
+</section>

@@ -1,0 +1,64 @@
+<footer class="border-t border-ui-border bg-ui-black px-2 pb-8 pt-12 sm:px-4 sm:pt-14 lg:px-6 xl:px-8 xl:pt-16">
+  <div class="container-main grid grid-cols-1 gap-10 text-center sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.3fr_1.3fr] lg:text-left xl:gap-12">
+    <div class="flex flex-col items-center gap-4 lg:items-start">
+      <a routerLink="/inicio" class="flex w-fit items-center gap-3">
+        <app-logo variant="icon" size="sm" />
+        <span class="text-xl font-bold text-brand-white sm:text-2xl"> Fadex Barber </span>
+      </a>
+      <p class="max-w-sm text-sm leading-relaxed text-text-secondary"> Estilo, precisión y actitud. Cortes modernos y clásicos para resaltar tu mejor versión.</p>
+    </div>
+
+    <div>
+      <h3 class="mb-4 font-semibold text-brand-white">Explorar</h3>
+      <ul class="flex flex-col gap-3">
+        @for (p of publicNav; track p.path) {
+          <li><a [routerLink]="p.path" class="text-text-secondary transition-colors hover:text-brand-gold"> {{ p.label }} </a></li>
+        }
+      </ul>
+    </div>
+
+    <div>
+      <h3 class="mb-4 font-semibold text-brand-white">Servicios</h3>
+      <ul class="flex flex-col gap-3">
+        @for (servicio of servicios; track servicio) {
+          <li><a routerLink="/servicios" class="text-text-secondary transition-colors hover:text-brand-gold" > {{ servicio }} </a></li>
+        }
+      </ul>
+    </div>
+
+    <div>
+      <h3 class="mb-4 font-semibold text-brand-white">Ayuda y legal</h3>
+      <ul class="flex flex-col gap-3">
+        <li><a routerLink="/preguntas-frecuentes" class="text-text-secondary transition-colors hover:text-brand-gold">Preguntas frecuentes</a></li>
+        <li><a routerLink="/reclamos" class="text-text-secondary transition-colors hover:text-brand-gold">Libro de reclamaciones</a></li>
+        <li><a routerLink="/terminos-condiciones" class="text-text-secondary transition-colors hover:text-brand-gold">Términos y condiciones</a></li>
+        <li><a routerLink="/politica-privacidad" class="text-text-secondary transition-colors hover:text-brand-gold">Política de privacidad</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <h3 class="mb-4 font-semibold text-brand-white"> Reserva tu cita </h3>
+      <ul class="flex flex-col gap-3 text-sm text-text-secondary">
+        @for (item of contacto; track item.texto) {
+          <li><a [routerLink]="item.ruta" class="transition-colors hover:text-brand-gold"> {{ item.texto }} </a></li>
+        }
+      </ul>
+
+      <a routerLink="/reservas" class="boton-primary mt-4 w-full rounded-full">
+        <i class="pi pi-calendar" aria-hidden="true"></i>
+        <span> Reservar cita </span>
+      </a>
+    </div>
+  </div>
+
+  <div class="mt-10 flex flex-col items-center justify-between gap-4 border-t border-[#1c1c1c] pt-6 text-center md:flex-row md:text-left" >
+    <p class="text-sm text-gray-500">© 2026 Fadex Barber. Todos los derechos reservados.</p>
+    <div class="flex gap-3">
+      @for (red of redesSociales; track red.label) {
+        <a [href]="red.url" target="_blank" rel="noopener noreferrer" [attr.aria-label]="red.label" styleClass="social-button">
+          <i [class]="'pi ' + red.icono" aria-hidden="true"></i>
+        </a>
+      }
+    </div>
+  </div>
+</footer>

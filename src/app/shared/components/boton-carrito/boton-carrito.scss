@@ -1,0 +1,9 @@
+p-button {
+    color: white;
+}
+
+p-button{
+    @media (width > 750px) {
+    z-index: 150;
+    }
+}

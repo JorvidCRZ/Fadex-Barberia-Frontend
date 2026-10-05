@@ -1,0 +1,80 @@
+<section class="producto-detail-modal">
+    <div class="container-main producto-detail-modal-content">
+        <div class="producto-detail-modal-close">
+            <button type="button" class="producto-detail-back-button" (click)="cerrar.emit()">
+                <i class="pi pi-arrow-left" aria-hidden="true"></i>
+                <span>Volver</span>
+            </button>
+            @if (producto) {
+                <span class="producto-detail-modal-code">SKU {{ producto.sku || 'FADEX' }}</span>
+            }
+        </div>
+
+        @if (cargando) {
+        <div class="producto-detail-loading">Cargando detalle...</div>
+        } @else if (producto) {
+        <div class="producto-page-panel producto-detail-layout">
+            <div class="producto-detail-gallery">
+                <div class="producto-detail-main-image producto-page-detail">
+                    <span class="producto-detail-image-label"><i class="pi pi-image"></i> Vista del producto</span>
+                    <p-image [src]="imagenSeleccionada | safeImageUrl" [alt]="producto.nombre" (error)="imagenFallback.src = '/assets/producto.webp'" #imagenFallback preview="true"/>
+                </div>
+
+                <div class="producto-detail-thumbs">
+                    @for (it of images; track it.itemImageSrc) {
+                        <button type="button" class="producto-detail-thumb" [class.selected]="it.itemImageSrc === imagenSeleccionada" (click)="seleccionarImagen(it.itemImageSrc)" [attr.aria-label]="'Ver imagen de ' + producto.nombre">
+                            <p-image [src]="it.thumbnailImageSrc | safeImageUrl" [alt]="producto.nombre" [class.selected]="it.itemImageSrc === imagenSeleccionada" preview="false"/>
+                        </button>
+                    }
+                </div>
+            </div>
+
+            <div class="producto-detail-info">
+                <app-status-badge type="text" [value]="producto.nombreCategoria" customClass="badge-text estado-producto"/>
+                <h1 class="producto-detail-name">{{ producto.nombre }}</h1>
+                <div class="producto-detail-rating">
+                    <i class="pi pi-verified producto-detail-rating-stars" aria-hidden="true"></i>
+                    <span>Producto profesional para barbería</span>
+                </div>
+                <div class="producto-detail-price-row">
+                    <div class="producto-detail-price">{{ (producto.precioPromo ?? producto.precioVenta ?? producto.precio) | soles}}</div>
+                </div>
+                <div class="producto-detail-desc">{{ producto.descripcion }}</div>
+                <div class="producto-detail-info-divider"></div>
+                <div class="producto-detail-specs">
+                    <div class="spec-row"><span>Marca</span><strong>FadeX</strong></div>
+                    <div class="spec-row"><span>Categoría</span><strong>{{ producto.nombreCategoria }}</strong></div>
+                    <div class="spec-row"><span>Disponibilidad</span><strong [class.producto-detail-stock-out]="!producto.stock">{{ producto.stock ? 'En stock' : 'Agotado' }}</strong></div>
+                </div>
+                <div class="producto-detail-features">
+                    <h2>Características principales</h2>
+                    <div class="producto-detail-feature">
+                        <i class="pi pi-check-circle" aria-hidden="true"></i>
+                        <span><strong>Calidad profesional</strong><small>Diseñado para el cuidado personal.</small></span>
+                    </div>
+                    <div class="producto-detail-feature">
+                        <i class="pi pi-shield" aria-hidden="true"></i>
+                        <span><strong>Compra segura</strong><small>Producto seleccionado por FadeX.</small></span>
+                    </div>
+                </div>
+            </div>
+
+            <aside class="producto-detail-actions">
+                <div class="producto-page-panel producto-detail-buy">
+                    <span class="producto-detail-buy-label">Compra segura</span>
+                    <div class="producto-detail-price">{{ (producto.precioPromo ?? producto.precioVenta ?? producto.precio) | soles}}</div>
+                    <div class="producto-detail-stock" [class.out]="!producto.stock">
+                        <i class="pi" [class.pi-check-circle]="producto.stock" [class.pi-times-circle]="!producto.stock"></i> {{ producto.stock ? 'En stock · ' + producto.stock + ' unidades' : 'Producto agotado' }}
+                    </div>
+                    <label class="producto-detail-quantity">Cantidad</label>
+                    <p-inputNumber [(ngModel)]="cantidad" [min]="1" [max]="cantidadMaxima" [showButtons]="true" buttonLayout="horizontal"></p-inputNumber>
+                    <button pButton type="button" class="boton-comprar" icon="pi pi-shopping-cart" label="Agregar al carrito" [disabled]="!producto.stock" (click)="agregarAlCarrito()"></button>
+                    <button pButton type="button" class="boton-ver" icon="pi pi-bolt" label="Comprar ahora" [disabled]="!producto.stock" (click)="agregarAlCarrito()"></button>
+                    <button pButton type="button" class="boton-secondary" icon="pi pi-shopping-bag" label="Ir al carrito" (click)="irCarrito()"></button>
+                    <div class="producto-detail-note"><span>Subtotal</span><strong>{{ subtotal | soles }}</strong></div>
+                </div>
+            </aside>
+        </div>
+        }
+    </div>
+</section>

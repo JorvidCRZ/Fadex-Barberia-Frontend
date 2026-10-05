@@ -1,0 +1,28 @@
+<div class="producto-card-container">
+  <p-card class="producto-card-shell carta">
+    <ng-template #header>
+      <div class="producto-card-media">
+        <img [alt]="producto.nombre" class="producto-card-image" [src]="getImagenProducto(producto) | safeImageUrl" (error)="imagenFallback.src = '/assets/producto.webp'" #imagenFallback />
+        <span class="producto-card-category-badge">
+          <app-status-badge type="text" [value]="producto.nombreCategoria" customClass="badge-text estado-producto"/>
+        </span>
+      </div>
+    </ng-template>
+
+    <ng-template #title>
+      <div class="producto-card-title">{{ producto.nombre }}</div>
+    </ng-template>
+    
+    <div class="producto-card-meta">
+      <span class="producto-card-price"> {{ producto.precio | soles }} </span>
+      <span class="producto-card-stock"> Stock: {{ producto.stock }} </span>
+    </div>
+
+    <ng-template #footer>
+      <div class="producto-card-actions">
+        <button pButton label="Ver" icon="pi pi-eye" class="boton-ver" (click)="onVer()"></button>
+        <button pButton type="button" icon="pi pi-shopping-cart" class="boton-comprar" [disabled]="!producto.stock" [attr.aria-label]="producto.stock ? 'Agregar al carrito' : 'Producto agotado'" (click)="agregarAlCarrito()"></button>
+      </div>
+    </ng-template>
+  </p-card>
+</div>

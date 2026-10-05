@@ -1,0 +1,125 @@
+<div class="container-main py-8 text-text-primary">
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_500px] gap-6">
+        <section class="rounded-3xl border border-ui-border bg-ui-card p-6 shadow-card">
+            <form [formGroup]="checkoutForm" class="checkout-form">
+                <div class="mb-2 flex items-start gap-3 border-b border-ui-border-soft pb-5">
+                    <div class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-brand-gold/10">
+                        <i class="pi pi-shopping-bag text-xl text-brand-gold" aria-hidden="true"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-text-primary">Finaliza tu pedido</h1>
+                        <p class="mt-1 text-sm text-text-muted">Completa los datos para preparar tu compra.</p>
+                    </div>
+                </div>
+
+                <div class="part-form">
+                    <label for="metodoEntrega" class="label-form">Método de entrega</label>
+                    <p-select inputId="metodoEntrega" formControlName="metodoEntrega" [options]="metodoEntregaOpciones" optionLabel="label" optionValue="value"></p-select>
+                </div>
+
+                <div class="part-form">
+                    <label for="metodoPago" class="label-form">Método de pago</label>
+                    <p-select inputId="metodoPago" formControlName="metodoPago" [options]="metodoPagoOpciones" optionLabel="label" optionValue="value"></p-select>
+                </div>
+                
+                <div class="part-form">
+                    <label for="observaciones" class="label-form">Observaciones</label>
+                    <textarea id="observaciones" rows="4" class="inputs-text" formControlName="observaciones" placeholder="Instrucciones adicionales..."></textarea>
+                </div>
+
+                <div class="part-form">
+                    <label for="notasCliente" class="label-form">Notas del cliente</label>
+                    <textarea id="notasCliente" rows="4" class="inputs-text" formControlName="notasCliente" placeholder="Notas adicionales..."></textarea>
+                </div>
+            </form>
+        </section>
+
+        <aside class="rounded-3xl border border-brand-gold/20 bg-ui-card p-6 shadow-card h-fit sticky top-4">
+            <div class="flex items-center gap-3 border-b border-ui-border-soft pb-4">
+                <i class="pi pi-receipt text-xl text-brand-gold" aria-hidden="true"></i>
+                <h2 class="text-xl font-semibold text-text-primary">Resumen del pedido</h2>
+            </div>
+            <div class="mt-6 space-y-4 text-text-secondary">
+
+                <div class="flex justify-between">
+                    <span>Productos</span>
+                    <span>{{ cantidadProductos() }}</span>
+                </div>
+
+                <div class="flex justify-between">
+                    <span>Subtotal</span>
+                    <span class="text-text-primary font-semibold">{{ subtotal | soles }}</span>
+                </div>
+
+                <div class="flex justify-between">
+                    <span>Envío</span>
+                    <span class="text-brand-gold font-semibold">
+                        {{ costoEnvio | soles  }}
+                    </span>
+                </div>
+
+                <div class="border-t border-ui-border pt-4 flex justify-between">
+
+                    <span class="font-bold text-text-primary">
+                        Total
+                    </span>
+
+                    <span class="text-xl font-bold text-brand-gold">
+                        {{ total | soles }}
+                    </span>
+
+                </div>
+
+            </div>
+
+            <div class="mt-5 rounded-xl bg-brand-gold/10 p-3 text-center text-xs text-text-secondary">
+                Revisa los datos antes de confirmar tu compra.
+            </div>
+            <p-button label="Continuar al pago" icon="pi pi-credit-card" styleClass="boton-primary w-full mt-4" (onClick)="irAPago()"></p-button>
+        </aside>
+    </div>
+
+    <section class="mt-6 rounded-3xl border border-ui-border bg-ui-card p-6 shadow-sm">
+
+        <div class="mb-5 flex items-center gap-3 border-b border-ui-border-soft pb-4">
+            <i class="pi pi-list text-brand-gold" aria-hidden="true"></i>
+            <h2 class="text-lg font-semibold text-text-primary">Productos del pedido</h2>
+        </div>
+
+        @if (carrito.items().length === 0) {
+        <div class="text-center py-12">
+            <i class="pi pi-shopping-cart text-4xl text-text-muted"></i>
+            <p class="mt-4 text-text-secondary">No hay productos en el carrito</p>
+        </div>
+
+        } @else {
+
+        <div class="space-y-4">
+            @for (item of carrito.items(); track item.producto.id) {
+            <div class="flex items-center justify-between border-b border-ui-border pb-3">
+
+                <div class="flex items-center gap-3">
+
+                    @if (item.producto.urlsMultimedia.length) {
+                        <img [src]="item.producto.urlsMultimedia[0] | safeImageUrl" class="w-14 h-14 object-cover rounded-lg border border-ui-border transform transition-transform hover:scale-110" />
+                    } @else {
+
+                    <div class="w-14 h-14 flex items-center justify-center rounded-lg border border-ui-border bg-ui-black text-text-muted">
+                        <i class="pi pi-image"></i>
+                    </div>
+                    }
+
+                    <div>
+                        <p class="font-semibold text-text-primary hover:underline hover:text-brand-gold">{{ item.producto.nombre }}</p>
+                        <p class="text-sm text-text-secondary  hover:underline hover:text-brand-gold">{{ item.producto.nombreCategoria }}</p>
+                    </div>
+
+                </div>
+                <p class="text-xs text-text-secondary">Cantidad: {{ item.cantidad }}</p>
+                <div class="font-bold text-brand-gold">{{ obtenerSubtotalItem(item) | soles }}</div>
+            </div>
+            }
+        </div>
+        }
+    </section>
+</div>

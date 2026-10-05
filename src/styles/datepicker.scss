@@ -1,0 +1,112 @@
+/* ========================================
+   DATEPICKER
+   ======================================== */
+
+.p-datepicker-panel {
+    background: rgb(var(--color-brand-dark)) !important;
+    border: 1px solid rgb(var(--color-ui-border)) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 32px rgb(0 0 0 / 0.6) !important;
+    padding: 1rem !important;
+}
+
+.p-datepicker-header {
+    background: transparent !important;
+    border-bottom: 1px solid rgb(var(--color-text-primary)) !important;
+    padding-bottom: 0.75rem !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.p-datepicker-select-month,
+.p-datepicker-select-year {
+    color: rgb(var(--color-text-primary)) !important;
+    font-weight: 600 !important;
+}
+
+.p-datepicker-select-month:hover,
+.p-datepicker-select-year:hover {
+    color: rgb(var(--color-brand-gold)) !important;
+}
+
+.p-datepicker-prev-button,
+.p-datepicker-next-button {
+    color: rgb(var(--color-text-secondary)) !important;
+}
+
+.p-datepicker-prev-button:hover,
+.p-datepicker-next-button:hover {
+    color: rgb(var(--color-brand-gold)) !important;
+    background: rgb(var(--color-brand-gold-soft)) !important;
+}
+
+.p-datepicker-dropdown {
+    background: rgb(var(--color-brand-dark)) !important;
+    border: 1px solid rgb(var(--color-ui-border)) !important;
+    color: rgb(var(--color-text-primary)) !important;
+}
+
+.p-datepicker-weekday {
+    color: rgb(var(--color-brand-gold)) !important;
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+}
+
+.p-datepicker-day {
+    color: rgb(var(--color-text-primary)) !important;
+    border-radius: 8px !important;
+    transition: all 0.2s !important;
+}
+
+.p-datepicker-day-selected,
+.p-datepicker-day.p-highlight {
+    background: rgb(var(--color-brand-gold)) !important;
+    color: #000 !important;
+    font-weight: 700 !important;
+}
+
+.p-datepicker-day:not(.p-disabled):hover {
+    background: rgb(var(--color-brand-gold-soft)) !important;
+    color: rgb(var(--color-brand-gold)) !important;
+}
+
+.p-datepicker-today .p-datepicker-day {
+    border: 1px solid rgb(var(--color-brand-gold)) !important;
+    color: rgb(var(--color-brand-gold)) !important;
+}
+
+.p-datepicker-day.p-disabled {
+    color: rgb(var(--color-text-subtle)) !important;
+    opacity: 0.4 !important;
+}
+
+.p-datepicker-other-month .p-datepicker-day {
+    color: rgb(var(--color-text-subtle)) !important;
+    opacity: 0.3 !important;
+}
+
+
+/* ========================================
+   TAMAÑOS
+   ======================================== */
+
+.p-datepicker-panel {
+    padding: 1rem 0 !important;
+}
+
+.p-datepicker-weekday-cell {
+    font-size: 0.75rem !important;
+}
+
+.p-datepicker-day-cell {
+    padding: 0 !important;
+}
+
+.p-datepicker-hour-picker,
+.p-datepicker-minute-picker,
+.p-datepicker-time-picker,
+.p-datepicker-day {
+    font-size: 0.75rem !important;
+    padding: 0.25rem !important;
+}

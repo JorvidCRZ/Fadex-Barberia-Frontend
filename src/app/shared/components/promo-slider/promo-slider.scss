@@ -1,0 +1,115 @@
+:host ::ng-deep .p-carousel-items-content {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+:host ::ng-deep .p-carousel-indicator.p-carousel-indicator-active .p-carousel-indicator-button {
+    background: #3b82f6 !important;
+}
+
+.p-carousel {
+    width: 100% !important;
+}
+
+:host ::ng-deep .p-carousel-content,
+:host ::ng-deep .p-carousel-viewport {
+    position: relative;
+}
+
+:host ::ng-deep .p-carousel {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+:host ::ng-deep .p-carousel-content-container,
+:host ::ng-deep .p-carousel-viewport {
+    width: 100% !important;
+}
+
+:host ::ng-deep .p-carousel-indicator-list {
+    margin-top: 15px;
+}
+
+:host ::ng-deep .p-carousel-indicator-button {
+    background: #d1d5db !important;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+}
+
+:host ::ng-deep .p-carousel-prev-button,
+:host ::ng-deep .p-carousel-next-button {
+    top: 50%;
+    z-index: 10;
+    position: absolute;
+    transform: translateY(-50%);
+}
+
+:host ::ng-deep .p-carousel-prev-button {left: 20px;}
+:host ::ng-deep .p-carousel-next-button {right: 20px;}
+
+:host ::ng-deep .p-carousel-prev-button button,
+:host ::ng-deep .p-carousel-next-button button {
+    color: white !important;
+    border-radius: 50% !important;
+    width: 60px;
+    height: 60px;
+    backdrop-filter: blur(8px);
+    padding: 3px;
+    background: rgba(0, 0, 0, 0.5) !important;
+}
+
+:host ::ng-deep .p-carousel-prev-button button:hover,
+:host ::ng-deep .p-carousel-next-button button:hover {
+    background: rgba(0, 0, 0, 0.9) !important;
+}
+
+:host ::ng-deep .p-carousel-prev-button .p-icon,
+:host ::ng-deep .p-carousel-next-button .p-icon {
+    width: 70px !important;
+    height: 70px !important;
+
+    @media (max-width: 640px) {
+        width: 40px !important;
+        height: 40px !important;
+        @media (max-width: 480px) {
+            width: 20px !important;
+            height: 20px !important;
+        }
+    }
+}
+
+:host ::ng-deep .p-carousel-prev-button svg{ 
+    padding-right: 10px; 
+    @media (max-width: 640px) {
+        padding-right: 5px; 
+        @media (max-width: 480px) {
+            padding-right: 2px; 
+        }
+    }
+}
+:host ::ng-deep .p-carousel-next-button svg{ 
+    padding-left: 10px;
+    @media (max-width: 640px) {
+        padding-left: 5px; 
+        @media (max-width: 480px) {
+            padding-left: 2px; 
+        }
+    }
+ }
+
+:host ::ng-deep .p-carousel-prev-button svg,
+:host ::ng-deep .p-carousel-next-button svg {
+    width: 70px !important;
+    height: 70px !important;
+
+    @media (max-width: 640px) {
+        width: 40px !important;
+        height: 40px !important;
+
+        @media (max-width: 480px) {
+            width: 20px !important;
+            height: 20px !important;
+        }
+    }
+}
