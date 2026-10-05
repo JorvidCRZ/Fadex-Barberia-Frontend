@@ -1,0 +1,85 @@
+<div class="corte-card">
+    <div class="corte-info">
+        <div class="titulo-row">
+            <h3>{{ corte.nombre }}</h3>
+            <span class="estado">Recomendado</span>
+        </div>
+
+        <div class="rating">
+            @for(star of [1,2,3,4,5]; track star){
+            <span class="star" [class.activa]="rating >= star" (click)="calificar(star)">★</span>
+            }
+        </div>
+
+        <p class="descripcion">{{ corte.descripcion }}</p>
+    </div>
+
+    <div class="acciones">
+        <button class="btn-ver" (click)="abrirModal()">Ver imagen</button>
+        <button class="btn-preview" (click)="probarConIA()">IA Face</button>
+        <button class="btn-like" [class.activo]="liked === true" (click)="like()">👍</button>
+        <button class="btn-dislike" [class.activo]="liked === false" (click)="dislike()">👎</button>
+    </div>
+</div>
+
+@if(modalIaAbierto){
+<div class="modal-backdrop" (click)="cerrarModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+
+    <!-- Cabecera -->
+    <header class="modal-header">
+      <div>
+        <h2>IA Face</h2>
+        <p class="subtitulo">{{ corte.nombre }}</p>
+      </div>
+      <button class="btn-cerrar" (click)="cerrarModal()" aria-label="Cerrar">✕</button>
+    </header>
+
+    <!-- Cuerpo: comparación lado a lado -->
+    <div class="modal-body">
+
+      <div class="foto-panel">
+        <span class="foto-label">Tu foto</span>
+        <div class="foto-container">
+          <img [src]="fotoPreview" alt="Tu foto" />
+        </div>
+      </div>
+
+      <div class="foto-panel">
+        <span class="foto-label">Resultado con IA</span>
+        <div class="foto-container resultado">
+
+          @if(cargandoIA){
+            <div class="ia-loading">
+              <div class="spinner"></div>
+              <p>{{ mensajeCargaActual }}</p>
+            </div>
+          }
+
+          @if(!cargandoIA && imagenIA){
+            <img [attr.src]="imagenIA" alt="Tu nuevo look" class="fade-in" />
+          }
+
+          @if(!cargandoIA && errorIA){
+            <div class="ia-error">
+              <span>⚠️</span>
+              <p>No se pudo generar la imagen. Intenta de nuevo.</p>
+            </div>
+          }
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Pie -->
+    <footer class="modal-footer">
+      <button class="btn-secundario" (click)="cerrarModal()">Cerrar</button>
+      <button class="btn-preview" (click)="probarConIA()" [disabled]="cargandoIA">
+        Volver a generar
+      </button>
+    </footer>
+
+  </div>
+</div>
+}

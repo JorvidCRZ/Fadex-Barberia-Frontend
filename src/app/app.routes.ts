@@ -8,13 +8,15 @@ import { RegisterComponent } from './features/auth/register/register.component';
 import { LoginComponent } from './features/auth/login/login.component';
 import { ForgotPasswordComponent } from './features/auth/forgot-password/forgot-password.component';
 import { PublicLayoutComponent } from './features/public/layout/public-layout.component';
-// import { DashboardClienteComponent } from './features/private/dashboard/dashboard-cliente/dashboard-cliente.component';
 import { InicioComponent } from './features/public/pages/inicio/inicio.component';
 import { CarritoComponent } from './features/public/pages/carrito/carrito.component';
 import { Error404Component } from './shared/components/error404/error404.component';
 import { ResetPasswordComponent } from './features/auth/reset-password/reset-password.component';
 import { CheckoutComponent } from './features/auth/checkout/checkout.component';
 import { PagoComponent } from './features/auth/pago/pago.component';
+import { DashboardBarberoComponent } from './features/private/layout/dashboard-barbero.component';
+import { DashboardClienteComponent } from './features/private/layout/dashboard-cliente.component';
+import { DashboardAdministrativoComponent } from './features/private/layout/dashboard-administrativo.component';
 // import { BarberoLayoutComponent } from './features/private/layout/barbero-layout.component';
 // import { DashboardAdministrativoComponent } from './features/private/dashboard/dashboard-administrativo/dashboard-administrativo.component';
 // import { RegistrarClient } from './features/private/components/gestion/clientes/registrar-client/registrar-client';
@@ -27,12 +29,12 @@ import { PagoComponent } from './features/auth/pago/pago.component';
 // import { PerfilDashboardBarbero } from './features/private/components/perfil-dashboard-barbero/perfil-dashboard-barbero';
 
 export const routes: Routes = [
-  // {
-    // path: 'dashboard/admin', component: DashboardAdministrativoComponent,
-    // canActivate: [authGuard], data: { roles: ['admin'] },
-    // children: [
-      // { path: '', redirectTo: 'resumen', pathMatch: 'full' },
-      // { path: 'resumen', loadComponent: () => import('./features/private/components/resumen/resumen').then(m => m.Resumen) },
+   {
+     path: 'dashboard/admin', component: DashboardAdministrativoComponent,
+    canActivate: [authGuard], data: { roles: ['admin'] },
+    children: [
+       { path: '', redirectTo: 'resumen', pathMatch: 'full' },
+      //  { path: 'resumen', loadComponent: () => import('./features/private/components/resumen/resumen').then(m => m.Resumen) },
       // {
         // path: 'catalogo', children: [
           // { path: 'categorias', loadComponent: () => import('./features/private/components/catalogo/categorias/categorias.component').then(m => m.CategoriasComponent) },
@@ -93,15 +95,15 @@ export const routes: Routes = [
           // { path: '', redirectTo: 'metricas', pathMatch: 'full' },
         // ]
       // },
-      // { path: '**', loadComponent: () => import('./shared/components/error404/error404.component').then(m => m.Error404Component) }
-    // ]
-  // },
+      { path: '**', loadComponent: () => import('./shared/components/error404/error404.component').then(m => m.Error404Component) }
+    ]
+  },
 
-  // {
-    // path: 'dashboard/barbero', component: BarberoLayoutComponent,
-    // canActivate: [authGuard], data: { roles: ['barbero'] },
-    // children: [
-      // { path: '', redirectTo: 'resumen', pathMatch: 'full' },
+  {
+    path: 'dashboard/barbero', component: DashboardBarberoComponent,
+    canActivate: [authGuard], data: { roles: ['barbero'] },
+    children: [
+      { path: '', redirectTo: 'resumen', pathMatch: 'full' },
       // { path: 'resumen', loadComponent: () => import('./features/private/components/resumen/resumen-barbero').then(m => m.ResumenBarbero) },
       // { path: 'reservas', loadComponent: () => import('./features/private/components/reserva/reserva').then(m => m.ReservaComponent) },
       // { path: 'cortes', loadComponent: () => import('./features/private/components/cortes/cortes').then(m => m.CortesComponent) },
@@ -123,9 +125,9 @@ export const routes: Routes = [
         // ]
       // },
       // { path: 'perfil', component: PerfilDashboardBarbero },
-      // { path: '**', loadComponent: () => import('./shared/components/error404/error404.component').then(m => m.Error404Component) }
-    // ]
-  // },
+      { path: '**', loadComponent: () => import('./shared/components/error404/error404.component').then(m => m.Error404Component) }
+     ]
+   },
 
   {
     path: '', component: PublicLayoutComponent, children: [
@@ -146,28 +148,28 @@ export const routes: Routes = [
       { path: 'checkout', component: CheckoutComponent, canActivate: [authGuard], data: { roles: ['cliente'] } },
       { path: 'pago', component: PagoComponent, canActivate: [authGuard], data: { roles: ['cliente'] } },
       { path: 'carrito', component: CarritoComponent },
-      // {
-        // path: 'mi-cuenta', component: DashboardClienteComponent,
-        // canActivate: [authGuard], data: { roles: ['cliente'] },
-        // children: [
-          // { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-          // { path: 'dashboard', loadComponent: () => import('./features/private/pages/resumen/resumen.component').then(m => m.ResumenComponent) },
-          // { path: 'reservar/agendar', loadComponent: () => import('./features/private/pages/reservar/reservar.component').then(m => m.ReservarComponent), canActivate: [authGuard] },
-          // { path: 'reservas/mis-reservas', loadComponent: () => import('./features/private/pages/mis-reservas/mis-reservas').then(m => m.MisReservasComponent) },
-          // { path: 'ia/analisis-facial', loadComponent: () => import('./features/private/pages/reconocimiento-facial/reconocimiento-facial').then(m => m.ReconocimientoFacial) },
-          // { path: 'historial', loadComponent: () => import('./features/private/pages/historial/historial.component').then(m => m.ClienteHistorialComponent) },
+      {
+        path: 'mi-cuenta', component: DashboardClienteComponent,
+        canActivate: [authGuard], data: { roles: ['cliente'] },
+        children: [
+          { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+          { path: 'dashboard', loadComponent: () => import('./features/private/pages/resumen/resumen.component').then(m => m.ResumenComponent) },
+          { path: 'reservar/agendar', loadComponent: () => import('./features/private/pages/reservar/reservar.component').then(m => m.ReservarComponent), canActivate: [authGuard] },
+          { path: 'reservas/mis-reservas', loadComponent: () => import('./features/private/pages/mis-reservas/mis-reservas.component').then(m => m.MisReservasComponent) },
+          { path: 'ia/analisis-facial', loadComponent: () => import('./features/private/pages/reconocimiento-facial/reconocimiento-facial.component').then(m => m.ReconocimientoFacialComponent) },
+          { path: 'historial', loadComponent: () => import('./features/private/pages/historial/historial.component').then(m => m.ClienteHistorialComponent) },
 
-          // {
-            // path: 'fidelizacion', children: [
-              // { path: '', loadComponent: () => import('./features/private/pages/fidelizacion/fidelizacion.component').then(m => m.FidelizacionComponent) }
-            // ]
-          // },
+          {
+            path: 'fidelizacion', children: [
+              { path: '', loadComponent: () => import('./features/private/pages/fidelizacion/fidelizacion.component').then(m => m.FidelizacionComponent) }
+            ]
+          },
 
-          // { path: 'perfil', loadComponent: () => import('./features/private/pages/perfil/perfil.component').then(m => m.PerfilComponent) },
+          { path: 'perfil', loadComponent: () => import('./features/private/pages/perfil/perfil.component').then(m => m.PerfilComponent) },
           // {path: 'checkout/:reservaId', loadComponent: () => import('./features/private/pages/checkout/checkout').then(m => m.CheckoutComponent)},
-          // { path: '**', loadComponent: () => import('./shared/components/error404/error404.component').then(m => m.Error404Component) }
-        // ]
-      // },
+          { path: '**', loadComponent: () => import('./shared/components/error404/error404.component').then(m => m.Error404Component) }
+        ]
+      },
       { path: '**', component: Error404Component }
     ]
   },
