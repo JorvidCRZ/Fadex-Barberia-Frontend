@@ -26,7 +26,7 @@ import { ReclamoPublicoRequest } from '../../../../core/models/operaciones/recla
 export class ReclamosComponent implements OnInit {
   private fb = inject(FormBuilder);
   private reclamoService = inject(ReclamoService);
-  private notify = inject(NotificationService);
+  // private notify = inject(NotificationService);
 
   form!: FormGroup;
   formSubmitted = false;
@@ -112,12 +112,12 @@ export class ReclamosComponent implements OnInit {
     const rechazados = nuevos.length - validos.length;
 
     if (rechazados > 0) {
-      this.notify.showWarn(`${rechazados} archivo(s) no cumplen con el formato o tamaño permitido.`);
+      // this.notify.showWarn(`${rechazados} archivo(s) no cumplen con el formato o tamaño permitido.`);
     }
 
     const excedentes = Math.max(0, this.archivos.length + validos.length - 5);
     if (excedentes > 0) {
-      this.notify.showWarn('Solo puedes adjuntar hasta 5 archivos.');
+      // this.notify.showWarn('Solo puedes adjuntar hasta 5 archivos.');
     }
 
     this.archivos = [...this.archivos, ...validos].slice(0, 5);
@@ -167,12 +167,12 @@ export class ReclamosComponent implements OnInit {
           this.enviando = false;
           this.enviado = true;
           this.numeroReclamo = res.data.numeroReclamo;
-          this.notify.showSuccess(res.message);
+          // this.notify.showSuccess(res.message);
           this.onLimpiar();
         },
         error: (error) => {
           this.enviando = false;
-          this.notify.showHttpError(error.message);
+          // this.notify.showHttpError(error.message);
         }
       });
   }

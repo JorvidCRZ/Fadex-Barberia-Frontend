@@ -312,7 +312,7 @@
 
         <label class="flex items-start gap-3 cursor-pointer">
           <p-checkbox formControlName="aceptaTerminos" [binary]="true" />
-          <span class="text-text-secondary text-xs leading-relaxed">He leído y acepto los <span class="text-brand-gold underline cursor-pointer">Términos y Condiciones</span> del servicio de reclamaciones.</span>
+          <span class="text-text-secondary text-xs leading-relaxed">He leído y acepto los <a href="/terminos-condiciones/ " target="_blank" rel="noopener noreferrer"><span class="text-brand-gold underline cursor-pointer">Términos y Condiciones</span> </a> del servicio de reclamaciones.</span>
         </label>
 
         @if (formSubmitted && (form.get('aceptaVeracidad')?.invalid || form.get('aceptaDatos')?.invalid || form.get('aceptaTerminos')?.invalid)) {
