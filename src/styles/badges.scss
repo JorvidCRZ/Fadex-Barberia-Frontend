@@ -61,8 +61,7 @@
    ESTADOS GENERALES
    ======================================== */
 
-.estado-producto,
-.estado-reserva {
+.estado-reserva,.estado-producto {
     @include badge-base;
 
     @apply border-blue-500/30 bg-blue-500/10 text-blue-400;
@@ -71,7 +70,9 @@
 .estado-servicio {
     @include badge-base;
 
-    @apply border-purple-500/30 bg-purple-500/10 text-purple-400;
+    border-color: rgb(168 85 247 / 0.3) !important;
+    background: rgb(168 85 247 / 0.1) !important;
+    color: rgb(192 132 252) !important;
 }
 
 .estado-descuento {

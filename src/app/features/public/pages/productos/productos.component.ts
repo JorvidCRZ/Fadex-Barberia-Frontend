@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { PaginatorModule } from 'primeng/paginator';
 import { PaginatorState } from 'primeng/paginator';
@@ -16,12 +17,13 @@ import { Producto, ProductoFiltro } from '../../../../core/models/catalogos/prod
 import { Categoria, CategoriaTipo } from '../../../../core/models/catalogos/categorias.model';
 import { FILTROS_PRODUCTO_PUBLICO } from '../../../../core/config/filtros.config';
 import { buildCategoryTree } from '../../../../shared/utils/buildCategoryTree.component';
+import { ProductoDetalleComponent } from './producto-detalle/producto-detalle.component';
 
 @Component({
   standalone: true,
   selector: 'app-producto',
   imports: [CommonModule, FormsModule, ProductoListaComponent, PaginatorModule, InputNumberModule, TreeSelectModule,
-    ButtonModule, FiltrosComponent
+    ButtonModule, FiltrosComponent, ProductoDetalleComponent
   ],
   templateUrl: './productos.html'
 })
@@ -30,6 +32,7 @@ export class ProductComponent implements OnInit {
   private readonly productoService = inject(ProductoService);
   private readonly categoriaService = inject(CategoriaService);
   private readonly notify = inject(NotificationService);
+  private readonly route = inject(ActivatedRoute);
 
   readonly moneda = INVENTARIO_CONFIG.MONEDA;
 
@@ -42,9 +45,24 @@ export class ProductComponent implements OnInit {
   totalRecords = 0;
   texto = 'Productos';
   categoriasMap = new Map<number, Categoria>();
+  productoSeleccionado: Producto | null = null;
+  private productoSolicitadoId: number | null = null;
   ngOnInit(): void {
+    this.route.queryParamMap.subscribe(params => {
+      const id = Number(params.get('productoId'));
+      this.productoSolicitadoId = Number.isFinite(id) && id > 0 ? id : null;
+      this.abrirProductoSolicitado();
+    });
     this.cargarCategorias();
     this.cargarProductos(this.page, this.size);
+  }
+
+  verProducto(producto: Producto): void {
+    this.productoSeleccionado = producto;
+  }
+
+  cerrarDetalle(): void {
+    this.productoSeleccionado = null;
   }
 
   cargarCategorias(): void {
@@ -67,13 +85,26 @@ export class ProductComponent implements OnInit {
         this.productos = resp.data.content;
         this.totalRecords = resp.data.totalElements ?? this.productos.length;
         this.cargando = false;
-      }
-      , error: (error) => {
+        this.abrirProductoSolicitado();
+      },
+      error: (error) => {
         this.notify.showHttpError(error.message);
         this.productos = [];
         this.cargando = false;
       }
     });
+  }
+
+  private abrirProductoSolicitado(): void {
+    if (!this.productoSolicitadoId || this.cargando) {
+      return;
+    }
+
+    const producto = this.productos.find(item => item.id === this.productoSolicitadoId);
+    if (producto) {
+      this.productoSeleccionado = producto;
+      this.productoSolicitadoId = null;
+    }
   }
 
   private obtenerIdsHojas(nodo: any): number[] {

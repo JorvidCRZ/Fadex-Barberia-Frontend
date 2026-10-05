@@ -4,16 +4,16 @@ import { guestGuard } from './core/guards/guest.guard';
 import { NosotrosComponent } from './features/public/pages/nosotros/nosotros..component';
 import { ReservasComponent } from './features/public/pages/reservas/reservas.component';
 import { ReclamosComponent } from './features/public/pages/reclamos/reclamos.component';
-// import { RegisterComponent } from './features/auth/register/register.component';
-// import { LoginComponent } from './features/auth/login/login.component';
-// import { ForgotPasswordComponent } from './features/auth/forgot-password/forgot-password.component';
-// import { ResetPassword } from './features/auth/reset-password/reset-password';
+import { RegisterComponent } from './features/auth/register/register.component';
+import { LoginComponent } from './features/auth/login/login.component';
+import { ForgotPasswordComponent } from './features/auth/forgot-password/forgot-password.component';
 import { PublicLayoutComponent } from './features/public/layout/public-layout.component';
 // import { DashboardClienteComponent } from './features/private/dashboard/dashboard-cliente/dashboard-cliente.component';
-// import { Error404Component } from './shared/components/error404/error404.component';
 import { InicioComponent } from './features/public/pages/inicio/inicio.component';
 import { CarritoComponent } from './features/public/pages/carrito/carrito.component';
 import { Error404Component } from './shared/components/error404/error404.component';
+import { ResetPasswordComponent } from './features/auth/reset-password/reset-password.component';
+import { CheckoutComponent } from './features/auth/checkout/checkout.component';
 // import { BarberoLayoutComponent } from './features/private/layout/barbero-layout.component';
 // import { DashboardAdministrativoComponent } from './features/private/dashboard/dashboard-administrativo/dashboard-administrativo.component';
 // import { RegistrarClient } from './features/private/components/gestion/clientes/registrar-client/registrar-client';
@@ -131,16 +131,18 @@ export const routes: Routes = [
       { path: '', redirectTo: 'inicio', pathMatch: 'full' },
       { path: 'inicio', component: InicioComponent },
       { path: 'nosotros', component: NosotrosComponent },
+      { path: 'terminos-condiciones', loadComponent: () => import('./features/public/pages/terminos-condiciones/terminos-condiciones.component').then(m => m.TerminosCondicionesComponent) },
+      { path: 'politica-privacidad', loadComponent: () => import('./features/public/pages/politica-privacidad/politica-privacidad.component').then(m => m.PoliticaPrivacidadComponent) },
+      { path: 'preguntas-frecuentes', loadComponent: () => import('./features/public/pages/preguntas-frecuentes/preguntas-frecuentes.component').then(m => m.PreguntasFrecuentesComponent) },
       { path: 'productos', loadComponent: () => import('./features/public/pages/productos/productos.component').then(m => m.ProductComponent) },
-      // { path: 'forgot-password', component: ForgotPasswordComponent },
-      // { path: 'reset-password', component: ResetPassword },
-      // { path: 'productos/detalle/:id', loadComponent: () => import('./features/public/pages/productos/producto-detalle/producto-detalle.component').then(m => m.ProductoDetalleComponent) },
+      { path: 'forgot-password', component: ForgotPasswordComponent },
+      { path: 'reset-password', component: ResetPasswordComponent },
       { path: 'servicios', loadComponent: () => import('./features/public/pages/servicios/servicios.component').then(m => m.ServiciosComponent) },
       { path: 'reclamos', component: ReclamosComponent },
       { path: 'reservas', component: ReservasComponent },
-      // { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
-      // { path: 'register', component: RegisterComponent },
-      // { path: 'checkout', component: CheckoutComponent, canActivate: [authGuard], data: { roles: ['cliente'] } },
+      { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
+      { path: 'register', component: RegisterComponent },
+      { path: 'checkout', component: CheckoutComponent, canActivate: [authGuard], data: { roles: ['cliente'] } },
       { path: 'carrito', component: CarritoComponent },
       // {
         // path: 'mi-cuenta', component: DashboardClienteComponent,

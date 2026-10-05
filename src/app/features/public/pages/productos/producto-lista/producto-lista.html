@@ -5,7 +5,7 @@
 <div class="producto-list-grid">
     @for (producto of productos; track producto.id) {
         <div>
-            <app-producto-card [producto]="producto"></app-producto-card>
+            <app-producto-card [producto]="producto" (verProducto)="verProductoDetalle($event)"></app-producto-card>
         </div>
     }
 </div>

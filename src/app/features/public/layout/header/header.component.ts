@@ -1,9 +1,9 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { LogoComponent } from '../../../../shared/components/logo/logo.component';
 import { PUBLIC_PAGES } from '../../../../core/config/sites.config';
 import { TokenService } from '../../../../core/services/auth/token.service';
-import { CarritoItem } from '../../../../core/models/catalogos/carrito.model';
+import { CarritoService } from '../../../../core/services/catalogos/carrito.service';
 
 @Component({
   selector: 'app-header',
@@ -13,9 +13,10 @@ import { CarritoItem } from '../../../../core/models/catalogos/carrito.model';
 })
 export class HeaderComponent {
   private tokenService = inject(TokenService);
+  private carritoService = inject(CarritoService);
   publicNav = PUBLIC_PAGES;
-  isAuthenticated = this.tokenService.isLogged();
-  profileLink = [this.tokenService.getHomeByRole()];
+  isAuthenticated = this.tokenService.isAuthenticated;
+  profileLink = computed(() => [this.tokenService.getHomeByRole()]);
 
   mobileActions = [
     {label: 'Carrito',icon: 'pi pi-shopping-cart',route: '/carrito',requiresAuth: false,badge: '0',},
@@ -23,6 +24,5 @@ export class HeaderComponent {
     { label: 'Reclamos', icon: 'pi pi-book', route: '/reclamos', requiresAuth: true, badge: null },
   ];
 
-  private items = signal<CarritoItem[]>([]);
-  cartItemCount = computed(() => this.items().reduce((total, item) => total + item.cantidad, 0));
+  cartItemCount = this.carritoService.cantidad;
 }

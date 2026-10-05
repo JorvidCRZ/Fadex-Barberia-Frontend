@@ -1,0 +1,25 @@
+<main class="bg-ui-black px-4 py-12 text-text-primary sm:py-16">
+  <div class="mx-auto max-w-4xl">
+    <header class="mb-10 text-center">
+      <p class="mb-3 text-sm font-semibold uppercase tracking-widest text-brand-gold">Ayuda</p>
+      <h1 class="text-3xl font-bold uppercase tracking-wide sm:text-4xl">Preguntas frecuentes</h1>
+      <p class="mx-auto mt-4 max-w-2xl text-text-secondary">
+        Encuentra respuestas rápidas sobre reservas, servicios, productos y tu cuenta.
+      </p>
+    </header>
+
+    <section class="space-y-3" aria-label="Preguntas frecuentes">
+      @for (pregunta of preguntas; track pregunta.pregunta) {
+        <details class="group rounded-2xl border border-ui-border bg-ui-card">
+          <summary class="flex cursor-pointer list-none items-center justify-between gap-4 p-5 font-semibold text-text-primary transition hover:text-brand-gold [&::-webkit-details-marker]:hidden">
+            <span>{{ pregunta.pregunta }}</span>
+            <i class="pi pi-plus text-brand-gold transition-transform group-open:rotate-45" aria-hidden="true"></i>
+          </summary>
+          <p class="border-t border-ui-border px-5 pb-5 pt-4 leading-relaxed text-text-secondary">
+            {{ pregunta.respuesta }}
+          </p>
+        </details>
+      }
+    </section>
+  </div>
+</main>

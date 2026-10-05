@@ -1,20 +1,26 @@
-<section class="min-h-screen bg-black flex items-center justify-center px-4 py-12">
+<section class="min-h-screen bg-ui-black flex items-center justify-center px-4 py-12">
   <div class="w-full max-w-3xl flex flex-col items-center gap-8">
-    <div class="flex flex-col items-center gap-3">
+    <div class="flex flex-col items-center gap-3 text-center">
       <app-logo />
-      <h1 class="text-white text-2xl font-bold tracking-widest uppercase">
-        Fadex <span class="text-yellow-500">Barber</span>
-      </h1>
-      <p class="text-gray-500 text-sm">Crea tu cuenta y empieza a reservar</p>
+      <h1 class="mt-2 text-3xl font-bold tracking-tight text-brand-white">Crea tu cuenta</h1>
+      <p class="max-w-md text-sm leading-relaxed text-text-muted">Únete a Fadex Barber y gestiona tus reservas de forma rápida y sencilla.</p>
     </div>
 
     <form [formGroup]="registerForm" (ngSubmit)="onSubmit()"
-      class="w-full bg-[#0c0c0c] border border-white/10 rounded-2xl p-6 sm:p-8 flex flex-col gap-5">
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      class="form-base auth-form w-full sm:p-8">
+      <div class="mb-1 flex items-center gap-3">
+        <i class="pi pi-user text-brand-gold" aria-hidden="true"></i>
+        <div>
+          <h2 class="font-semibold text-brand-white">Datos personales</h2>
+          <p class="text-xs text-text-muted">Cuéntanos un poco sobre ti</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div class="part-form">
           <label for="nombre">Nombre</label>
           <input pInputText type="text" id="nombre" formControlName="nombre" placeholder="Juan"
-            class="w-full inputs-text" [class.border-red-500]="isInvalid('nombre')" />
+            class="inputs-text" [class.border-danger]="isInvalid('nombre')" />
           @if (isInvalid('nombre')) {
           @if (registerForm.get('nombre')?.errors?.['required']) {
           <p-message severity="error" variant="simple" size="small">El nombre es obligatorio</p-message>
@@ -29,7 +35,7 @@
         <div class="part-form">
           <label for="apellido">Apellido</label>
           <input pInputText type="text" id="apellido" formControlName="apellido" placeholder="Pérez"
-            class="w-full inputs-text" [class.border-red-500]="isInvalid('apellido')" />
+            class="inputs-text" [class.border-danger]="isInvalid('apellido')" />
           @if (isInvalid('apellido')) {
           @if (registerForm.get('apellido')?.errors?.['required']) {
           <p-message severity="error" variant="simple" size="small">El apellido es obligatorio</p-message>
@@ -44,7 +50,7 @@
         <div class="part-form">
           <label for="telefono">Teléfono</label>
           <input pInputText type="tel" id="telefono" formControlName="telefono" placeholder="999 888 777"
-            class="w-full inputs-text" [class.border-red-500]="isInvalid('telefono')" />
+            class="inputs-text" [class.border-danger]="isInvalid('telefono')" />
           @if (isInvalid('telefono')) {
           @if (registerForm.get('telefono')?.errors?.['required']) {
           <p-message severity="error" variant="simple" size="small">El teléfono es obligatorio</p-message>
@@ -58,7 +64,7 @@
         <div class="part-form">
           <label for="email">Correo electrónico</label>
           <input pInputText id="email" type="email" formControlName="email" placeholder="tucorreo@email.com"
-            class="w-full inputs-text" [class.border-red-500]="isInvalid('email')" />
+            class="inputs-text" [class.border-danger]="isInvalid('email')" />
           @if (isInvalid('email')) {
           @if (registerForm.get('email')?.errors?.['required']) {
           <p-message severity="error" variant="simple" size="small">El correo es obligatorio</p-message>
@@ -73,11 +79,19 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div class="mt-2 flex items-center gap-3 border-t border-ui-border-soft pt-5">
+        <i class="pi pi-lock text-brand-gold" aria-hidden="true"></i>
+        <div>
+          <h2 class="font-semibold text-brand-white">Acceso seguro</h2>
+          <p class="text-xs text-text-muted">Crea tus credenciales de acceso</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div class="part-form">
           <label for="username">Username</label>
           <input pInputText id="username" type="text" formControlName="username" placeholder="tuusername"
-            class="w-full inputs-text" [class.border-red-500]="isInvalid('username')" />
+            class="inputs-text" [class.border-danger]="isInvalid('username')" />
           @if (isInvalid('username')) {
           @if (registerForm.get('username')?.errors?.['required']) {
           <p-message severity="error" variant="simple" size="small">El username es obligatorio</p-message>
@@ -97,24 +111,24 @@
           <p-password 
           [toggleMask]="true" 
           id="password" formControlName="password" autocomplete="off" class="w-full" [feedback]="false"
-            [class.border-red-500]="isInvalid('password')" />
+            [class.border-danger]="isInvalid('password')" />
           @if (isInvalid('password')) {
           <p-message severity="error" variant="simple" size="small">{{
             passwordError
             }}</p-message>
           }
           @if (passwordCtrl?.dirty && !passwordCtrl?.valid) {
-          <ul class="mt-1 text-xs text-gray-400 space-y-0.5 pl-1">
-            <li [class.text-green-400]="!passwordCtrl?.errors?.['minLength']">
+          <ul class="mt-1 rounded-lg border border-ui-border-soft bg-ui-surface p-3 text-xs text-text-secondary space-y-0.5 pl-1">
+            <li [class.text-success]="!passwordCtrl?.errors?.['minLength']">
               ✓ Mínimo 8 caracteres
             </li>
-            <li [class.text-green-400]="!passwordCtrl?.errors?.['sinMayuscula']">
+            <li [class.text-success]="!passwordCtrl?.errors?.['sinMayuscula']">
               ✓ Al menos una mayúscula
             </li>
-            <li [class.text-green-400]="!passwordCtrl?.errors?.['sinNumero']">
+            <li [class.text-success]="!passwordCtrl?.errors?.['sinNumero']">
               ✓ Al menos un número
             </li>
-            <li [class.text-green-400]="!passwordCtrl?.errors?.['sinSimbolo']">
+            <li [class.text-success]="!passwordCtrl?.errors?.['sinSimbolo']">
               ✓ Al menos un símbolo (@, #, !...)
             </li>
           </ul>
@@ -126,7 +140,7 @@
           <p-password 
           [toggleMask]="true" 
           id="passwordConfirm" formControlName="passwordConfirm" autocomplete="off" class="w-full"
-            [feedback]="false" [class.border-red-500]="
+            [feedback]="false" [class.border-danger]="
               isInvalid('passwordConfirm') ||
               (submitted && registerForm.errors?.['passwordsNoCoinciden'])
             " />
@@ -136,15 +150,15 @@
         </div>
 
         <div class="col-span-full">
-          <label class="flex items-start gap-3 cursor-pointer group">
+          <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-ui-border-soft bg-ui-surface p-4 group">
             <div class="relative mt-0.5 shrink-0">
               <p-checkbox formControlName="terminos" [binary]="true" />
             </div>
-            <span class="text-gray-400 text-sm leading-relaxed group-hover:text-white transition-colors">
+            <span class="text-text-secondary text-sm leading-relaxed group-hover:text-brand-white transition-colors">
               Acepto los
-              <a href="#" class="text-yellow-500 hover:text-yellow-400 transition-colors">términos y condiciones</a>
+              <a routerLink="/terminos-condiciones" class="text-brand-gold hover:text-brand-gold-hover transition-colors">términos y condiciones</a>
               y la
-              <a href="#" class="text-yellow-500 hover:text-yellow-400 transition-colors">política de privacidad</a>
+              <a routerLink="/politica-privacidad" class="text-brand-gold hover:text-brand-gold-hover transition-colors">política de privacidad</a>
             </span>
           </label>
           @if (isInvalid('terminos')) {
@@ -158,15 +172,15 @@
         </div>
         }
 
-        <div class="col-span-full flex flex-col gap-3 pt-4 text-center">
-          <button pButton type="submit" [disabled]="loading" class="w-full boton-primary">
+        <div class="col-span-full flex flex-col gap-4 border-t border-ui-border-soft pt-5 text-center">
+          <button pButton type="submit" icon="pi pi-user-plus" [disabled]="loading" class="w-full boton-primary">
             {{ loading ? 'Creando cuenta...' : 'Crear cuenta' }}
           </button>
 
           <div class="flex items-center gap-3">
-            <div class="flex-1 h-px bg-white/10"></div>
-            <span class="text-gray-600 text-xs text-center">o regístrate con</span>
-            <div class="flex-1 h-px bg-white/10"></div>
+            <div class="h-px flex-1 bg-ui-border-soft"></div>
+            <span class="text-text-subtle text-xs text-center">o regístrate con</span>
+            <div class="h-px flex-1 bg-ui-border-soft"></div>
           </div>
 
           <div id="google-register-button" class="flex justify-center w-full min-h-[40px]"></div>
@@ -174,9 +188,9 @@
       </div>
     </form>
 
-    <p class="text-gray-500 text-sm text-center">
+    <p class="text-center text-sm text-text-muted">
       ¿Ya tienes cuenta?
-      <a routerLink="/login" class="text-brand-gold hover:text-brand-gold-hover transition-colors cursor-pointer">
+      <a routerLink="/login" class="font-semibold text-brand-gold transition-colors hover:text-brand-gold-hover">
         Inicia sesión
       </a>
     </p>

@@ -1,61 +1,65 @@
-import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Observable, of } from 'rxjs';
+import { CATEGORIAS_MOCK } from '../../config/categorias-mock.config';
+import { mockPage, mockResponse } from '../../config/mock-response.config';
+import { Categoria, CategoriaFiltro, CategoriaRequest, CategoriaTipo } from '../../models/catalogos/categorias.model';
 import { ApiResponse, Page } from '../../models/common/index.model';
-import { of, tap } from 'rxjs';
-import { Categoria, CategoriaFiltro, CategoriaRequest, CategoriaTipo, } from '../../models/catalogos/categorias.model';
-import { environment } from '../../../../environments/environment.development';
-import { buildHttpParamsComponent } from '../../../shared/utils/build-http-params.component';
 
-@Injectable({
-    providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class CategoriaService {
-    private http = inject(HttpClient);
-    private apiUrl = `${environment.apiUrl}/categorias`;
+    private readonly categorias = [...CATEGORIAS_MOCK];
     private categoriasCache: Categoria[] | null = null;
 
     clearCategoriasCache(): void {
         this.categoriasCache = null;
     }
 
-    obtenerCategorias(page = 0, size = 10) {
-        return this.http.get<ApiResponse<Page<Categoria>>>(this.apiUrl, { params: buildHttpParamsComponent({ page, size }) });
+    obtenerCategorias(page = 0, size = 10): Observable<ApiResponse<Page<Categoria>>> {
+        return of(mockResponse(mockPage(this.categorias, page, size)));
     }
 
-    obtenerCategoriasConFiltro(filter?: CategoriaFiltro) {
-        return this.http.get<ApiResponse<Page<Categoria>>>(this.apiUrl, { params: buildHttpParamsComponent(filter) });
+    obtenerCategoriasConFiltro(filter: CategoriaFiltro = {}): Observable<ApiResponse<Page<Categoria>>> {
+        const filtradas = this.categorias.filter(categoria =>
+            (filter.nombre == null || categoria.nombre.toLowerCase().includes(filter.nombre.toLowerCase())) &&
+            (filter.estado == null || categoria.estado === filter.estado) &&
+            (filter.tipo == null || categoria.tipo === filter.tipo)
+        );
+        return of(mockResponse(mockPage(filtradas, filter.page ?? 0, filter.size ?? 10)));
     }
 
-    obtenerCategoriasPadre() {
-        return this.http.get<ApiResponse<Categoria[]>>(`${this.apiUrl}/padres`);
+    obtenerCategoriasPadre(): Observable<ApiResponse<Categoria[]>> {
+        return of(mockResponse(this.categorias.filter(categoria => categoria.padreId === null)));
     }
 
-    obtenerCategoriasActivas() {
-        if (this.categoriasCache) { return of({ data: { content: this.categoriasCache } } as ApiResponse<Page<Categoria>>); }
-        return this.http.get<ApiResponse<Page<Categoria>>>(this.apiUrl, { params: buildHttpParamsComponent({ estado: true, size: 1000 }) }).pipe(tap(resp => { this.categoriasCache = resp.data.content; }));
+    obtenerCategoriasActivas(): Observable<ApiResponse<Page<Categoria>>> {
+        if (!this.categoriasCache) {
+            this.categoriasCache = this.categorias.filter(categoria => categoria.estado);
+        }
+        return of(mockResponse(mockPage(this.categoriasCache, 0, 1000)));
     }
 
-    obtenerCategoriasPorTipo(tipo: CategoriaTipo) {
-        return this.http.get<ApiResponse<Page<Categoria>>>(this.apiUrl, { params: buildHttpParamsComponent({ estado: true, tipo, size: 1000 }) });
+    obtenerCategoriasPorTipo(tipo: CategoriaTipo): Observable<ApiResponse<Page<Categoria>>> {
+        return of(mockResponse(mockPage(this.categorias.filter(categoria => categoria.tipo === tipo && categoria.estado), 0, 1000)));
     }
 
-    buscarCategoriaPorId(id: number) {
-        return this.http.get<ApiResponse<Categoria>>(`${this.apiUrl}/${id}`);
+    buscarCategoriaPorId(id: number): Observable<ApiResponse<Categoria>> {
+        return of(mockResponse(this.categorias.find(categoria => categoria.id === id) ?? null as unknown as Categoria));
     }
 
-    crearCategoria(data: CategoriaRequest) {
-        return this.http.post<ApiResponse<Categoria>>(this.apiUrl, data);
+    crearCategoria(data: CategoriaRequest): Observable<ApiResponse<Categoria>> {
+        return of(mockResponse({ ...data, id: this.categorias.length + 1, padreNombre: null }));
     }
 
-    actualizarCategoria(id: number, data: CategoriaRequest) {
-        return this.http.put<ApiResponse<Categoria>>(`${this.apiUrl}/${id}`, data);
+    actualizarCategoria(id: number, data: CategoriaRequest): Observable<ApiResponse<Categoria>> {
+        return of(mockResponse({ ...data, id, padreNombre: null }));
     }
 
-    cambiarEstado(id: number, estado: boolean) {
-        return this.http.patch<ApiResponse<Categoria>>(`${this.apiUrl}/${id}/estado`, {}, { params: buildHttpParamsComponent({ estado }) });
+    cambiarEstado(id: number, estado: boolean): Observable<ApiResponse<Categoria>> {
+        const categoria = this.categorias.find(item => item.id === id);
+        return of(mockResponse({ ...(categoria ?? this.categorias[0]), estado }));
     }
 
-    eliminarCategoria(id: number) {
-        return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/${id}`);
+    eliminarCategoria(_id: number): Observable<ApiResponse<void>> {
+        return of(mockResponse(undefined));
     }
 }

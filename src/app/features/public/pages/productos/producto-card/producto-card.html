@@ -1,9 +1,9 @@
-<div class="flex justify-center p-0 md:p-6">
-  <p-card class="producto-card-shell carta" [style]="{ width: '20rem'}">
+<div class="producto-card-container">
+  <p-card class="producto-card-shell carta">
     <ng-template #header>
       <div class="producto-card-media">
-        <img alt="Card" class="producto-card-image" [src]="getImagenProducto(producto) | safeImageUrl" />
-        <span class="absolute top-2 left-2 bg-black/50 rounded-full px-2 py-1">
+        <img [alt]="producto.nombre" class="producto-card-image" [src]="getImagenProducto(producto) | safeImageUrl" (error)="imagenFallback.src = '/assets/producto.webp'" #imagenFallback />
+        <span class="producto-card-category-badge">
           <app-status-badge type="text" [value]="producto.nombreCategoria" customClass="badge-text estado-producto"/>
         </span>
       </div>
@@ -19,9 +19,9 @@
     </div>
 
     <ng-template #footer>
-      <div class="producto-card-actions contenedor align-bottom">
+      <div class="producto-card-actions">
         <button pButton label="Ver" icon="pi pi-eye" class="boton-ver" (click)="onVer()"></button>
-        <button pButton type="button" icon="pi pi-shopping-cart" class="boton-comprar" (click)="agregarAlCarrito()"></button>
+        <button pButton type="button" icon="pi pi-shopping-cart" class="boton-comprar" [disabled]="!producto.stock" [attr.aria-label]="producto.stock ? 'Agregar al carrito' : 'Producto agotado'" (click)="agregarAlCarrito()"></button>
       </div>
     </ng-template>
   </p-card>

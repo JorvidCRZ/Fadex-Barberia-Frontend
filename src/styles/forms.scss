@@ -36,6 +36,14 @@
     @apply rounded-2xl border border-ui-border bg-ui-card p-6 shadow-sm;
 }
 
+.auth-form {
+    @apply flex flex-col gap-5;
+}
+
+.checkout-form {
+    @apply flex flex-col gap-6;
+}
+
 .inputs-text {
     @include input-base;
 }
@@ -59,6 +67,25 @@ p-multiselect,
 p-fileUpload,
 app-search-bar input {
     @include input-base;
+}
+
+/* Evita que el navegador reemplace el tema oscuro al autocompletar campos. */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+.p-inputtext:-webkit-autofill,
+.p-inputtext:-webkit-autofill:hover,
+.p-inputtext:-webkit-autofill:focus,
+.p-password-input:-webkit-autofill,
+.p-password-input:-webkit-autofill:hover,
+.p-password-input:-webkit-autofill:focus {
+    -webkit-text-fill-color: rgb(var(--color-text-primary)) !important;
+    -webkit-box-shadow: 0 0 0 1000px rgb(var(--color-ui-card)) inset !important;
+    caret-color: rgb(var(--color-text-primary));
+    transition: background-color 9999s ease-in-out 0s;
 }
 
 .p-input-icon-left>input {
@@ -93,7 +120,7 @@ app-search-bar input {
 /* ========================================
    FORMULARIO DE RECLAMOS / PRIME INPUTS
    ======================================== */
-
+*,
 app-reclamos {
     .p-inputtext,
     .p-inputnumber-input,
@@ -194,7 +221,7 @@ p-datepicker.ng-invalid.ng-touched .p-datepicker-input,
 p-datepicker.ng-invalid.ng-dirty .p-datepicker-input,
 p-inputnumber.ng-invalid.ng-touched .p-inputnumber-input,
 p-inputnumber.ng-invalid.ng-dirty .p-inputnumber-input {
-    @apply border-red-500 ring-1 ring-red-500;
+    @apply border-danger ring-1 ring-danger;
 }
 
 .p-inputtext.ng-valid.ng-touched,

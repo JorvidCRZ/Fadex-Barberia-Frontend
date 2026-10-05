@@ -7,6 +7,10 @@ module.exports = {
 
   theme: {
     extend: {
+      boxShadow: {
+        card: 'var(--shadow-card)',
+        dialog: 'var(--shadow-dialog)'
+      },
       colors: {
         'brand-dark': 'rgb(var(--color-brand-dark) / <alpha-value>)',
         'brand-black': 'rgb(var(--color-brand-black) / <alpha-value>)',
@@ -32,7 +36,12 @@ module.exports = {
         'text-primary': 'rgb(var(--color-text-primary))',
         'text-secondary': 'rgb(var(--color-text-secondary))',
         'text-muted': 'rgb(var(--color-text-muted))',
-        'text-subtle': 'rgb(var(--color-text-subtle))'
+        'text-subtle': 'rgb(var(--color-text-subtle))',
+
+        success: 'rgb(var(--color-success) / <alpha-value>)',
+        warning: 'rgb(var(--color-warning) / <alpha-value>)',
+        danger: 'rgb(var(--color-danger) / <alpha-value>)',
+        info: 'rgb(var(--color-info) / <alpha-value>)'
       }
     }
   },

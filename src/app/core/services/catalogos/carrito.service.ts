@@ -41,7 +41,7 @@ export class CarritoService {
     // =========================
 
     agregarProducto(producto: Producto, cantidad: number = 1): void {
-        if (cantidad <= 0) return;
+        if (cantidad <= 0 || producto.stock <= 0) return;
 
         const items = [...this._items()];
         const index = items.findIndex(i => i.producto.id === producto.id);
@@ -49,12 +49,12 @@ export class CarritoService {
         if (index !== -1) {
             items[index] = {
                 ...items[index],
-                cantidad: items[index].cantidad + cantidad
+                cantidad: Math.min(items[index].cantidad + cantidad, producto.stock)
             };
         } else {
             items.push({
                 producto,
-                cantidad,
+                cantidad: Math.min(cantidad, producto.stock),
             });
         }
 
@@ -73,7 +73,7 @@ export class CarritoService {
         if (items[index]) {
             items[index] = {
                 ...items[index],
-                cantidad
+                cantidad: Math.min(cantidad, items[index].producto.stock)
             };
 
             this._items.set(items);

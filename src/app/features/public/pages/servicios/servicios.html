@@ -24,11 +24,10 @@
     <div class="mt-8">
       <app-servicio-lista [servicios]="servicios" [cargando]="cargando" (seleccionado)="abrirDetalle($event)" />
 		</div>
-
-    @if (totalRecords > size) { 
+    
+    <div class="producto-page-paginator">
       <p-paginator [first]="page * size" [rows]="size" [totalRecords]="totalRecords" [rowsPerPageOptions]="[10, 20, 50]" [showCurrentPageReport]="true" currentPageReportTemplate="Página {currentPage} de {totalPages} · {totalRecords} servicio(s)" (onPageChange)="onPaginatorChange($event)" />
-    }
-
+		</div>
   </div>
 </section>
 

@@ -20,6 +20,10 @@ export class SafeImageUrlPipe implements PipeTransform {
       return normalizedUrl;
     }
 
+    if (normalizedUrl.startsWith('/assets/') || normalizedUrl.startsWith('assets/')) {
+      return normalizedUrl.startsWith('/') ? normalizedUrl : `/${normalizedUrl}`;
+    }
+
     const base = this.apiBaseUrl.replace(/\/$/, '');
     const cleanUrl = normalizedUrl.replace(/^\/+/, '');
 

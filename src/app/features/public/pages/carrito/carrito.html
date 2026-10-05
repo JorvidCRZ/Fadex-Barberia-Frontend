@@ -57,17 +57,19 @@
                                 <td class="px-5 py-4">
                                     <div class="flex items-center gap-4">
 
-                                        <div class="h-16 w-16 overflow-hidden rounded-xl border border-ui-border bg-ui-black flex items-center justify-center">
+                                        <button type="button" class="h-16 w-16 cursor-pointer overflow-hidden rounded-xl border border-ui-border bg-ui-black flex items-center justify-center transition hover:border-brand-gold hover:ring-2 hover:ring-brand-gold/20" (click)="verProducto(item.producto.id)" [attr.aria-label]="'Ver detalle de ' + item.producto.nombre">
 
                                             @if (item.producto.urlsMultimedia.length) {
                                                 <img [src]="item.producto.urlsMultimedia[0] | safeImageUrl" class="h-full w-full object-contain p-2 transition-transform hover:scale-110" />
                                             } @else {
                                                 <i class="pi pi-image text-text-muted text-2xl"></i>
                                             }
-                                        </div>
+                                        </button>
 
                                         <div class="min-w-0">
-                                            <p class="font-semibold text-text-primary hover:text-brand-gold">{{ item.producto.nombre }}</p>
+                                            <button type="button" class="text-left font-semibold text-text-primary transition-colors hover:text-brand-gold" (click)="verProducto(item.producto.id)">
+                                                {{ item.producto.nombre }}
+                                            </button>
                                             <p class="text-sm text-text-secondary hover:text-brand-gold">{{ item.producto.nombreCategoria }}</p>
                                         </div>
                                     </div>
@@ -77,9 +79,9 @@
 
                                 <td class="px-5 py-4 text-center">
                                     <div class="flex items-center justify-center gap-2">
-                                        <button class="size-10 rounded bg-ui-elevated hover:bg-brand-gold text-2xl transition cursor-pointer"(click)="actualizarCantidad(i, item.cantidad - 1)">-</button>
+                                        <button class="size-10 rounded bg-ui-elevated hover:bg-brand-gold text-2xl transition cursor-pointer" (click)="actualizarCantidad(i, item.cantidad - 1)" [attr.aria-label]="'Disminuir cantidad de ' + item.producto.nombre">-</button>
                                         <span class="w-10 text-center font-semibold text-text-primary">{{ item.cantidad }}</span>
-                                        <button class="size-10 rounded bg-ui-elevated hover:bg-brand-gold text-2xl transition cursor-pointer"(click)="actualizarCantidad(i, item.cantidad + 1)">+</button>
+                                        <button class="size-10 rounded bg-ui-elevated hover:bg-brand-gold text-2xl transition cursor-pointer" [disabled]="item.cantidad >= item.producto.stock" (click)="actualizarCantidad(i, item.cantidad + 1)" [attr.aria-label]="'Aumentar cantidad de ' + item.producto.nombre">+</button>
                                     </div>
                                 </td>
                                 <td class="px-5 py-4 text-right font-bold text-brand-gold">{{ item.cantidad * (item.producto.precioPromo ?? item.producto.precioVenta ?? item.producto.precio) | soles }}</td>

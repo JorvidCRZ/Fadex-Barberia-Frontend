@@ -35,6 +35,42 @@
    PRODUCT DETAIL
    ======================================== */
 
+.producto-detail-modal {
+    @apply fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-brand-black/90 p-4 backdrop-blur-sm md:p-8;
+}
+
+.producto-detail-modal-content {
+    @apply my-auto w-full max-w-7xl rounded-2xl border border-brand-gold/50 bg-ui-surface p-6 shadow-2xl md:p-8;
+}
+
+.producto-detail-modal-close {
+    @apply mb-8 flex items-center justify-between gap-4;
+}
+
+.producto-detail-modal-code {
+    @apply text-xs text-text-muted;
+}
+
+.producto-detail-back-button {
+    @apply flex cursor-pointer items-center gap-2 rounded-lg border border-brand-gold/40 bg-brand-gold/10 px-4 py-2 text-sm font-medium text-brand-gold transition-colors;
+}
+
+.producto-detail-back-button:hover {
+    @apply bg-brand-gold/20 text-brand-gold-hover;
+}
+
+.producto-detail-modal .producto-detail-layout {
+    @apply border-0 bg-transparent;
+}
+
+.producto-detail-modal .producto-detail-buy {
+    @apply border border-ui-border-soft bg-ui-surface;
+}
+
+.producto-detail-modal .producto-detail-note {
+    @apply border-brand-gold/20 bg-brand-gold/10;
+}
+
 .producto-detail-page {
     @apply bg-brand-dark px-4 pb-10 pt-6 text-brand-white sm:px-6 lg:px-8;
 }
@@ -54,7 +90,7 @@
 }
 
 .producto-detail-layout {
-    @apply grid gap-10 rounded-3xl shadow-black/30 backdrop-blur-sm lg:p-8;
+    @apply grid gap-8 rounded-3xl shadow-black/30 backdrop-blur-sm lg:gap-12 lg:p-0;
 
     grid-template-columns: 1fr;
 }
@@ -69,24 +105,34 @@
 }
 
 .producto-detail-main-image {
-    @apply overflow-hidden rounded-3xl border border-brand-gold bg-ui-card;
+    @apply relative flex min-h-72 items-center justify-center overflow-hidden rounded-2xl border border-ui-border-soft bg-ui-black;
+}
+
+.producto-detail-image-label {
+    @apply absolute left-4 top-4 z-10 rounded-full border border-ui-border-soft bg-ui-black/80 px-3 py-1 text-xs font-medium text-text-secondary;
 }
 
 .producto-detail-main-image img {
-    @apply w-full object-contain;
+    @apply h-full w-full object-cover;
 
     height: 28rem;
-    border-radius: 12px;
-    box-shadow: 0 16px 36px rgb(0 0 0 / 0.5);
 }
 
 .producto-detail-thumbs {
     display: flex;
-    align-items: center;
-    gap: 12px;
-    width: 100%;
-    height: 64px;
-    margin-top: 1rem;
+    flex-direction: column;
+    gap: 0.75rem;
+    order: 2;
+}
+
+.producto-detail-thumb {
+    @apply flex h-16 w-16 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-ui-border bg-ui-surface p-1 transition-all duration-200;
+}
+
+.producto-detail-thumb:hover,
+.producto-detail-thumb.selected {
+    @apply border-brand-gold bg-brand-gold/10 shadow-lg shadow-brand-gold/10;
+    transform: translateY(-2px);
 }
 
 .producto-detail-thumb img {
@@ -95,14 +141,10 @@
     object-fit: cover;
     border-radius: 8px;
     cursor: pointer;
-    border: 2px solid transparent;
-    transition: all 0.15s;
 }
 
 .producto-detail-thumb img.selected {
-    transform: scale(1.03);
-    box-shadow: 0 8px 20px rgb(0 0 0 / 0.55);
-    border-color: rgb(var(--color-brand-gold));
+    border-color: transparent;
 }
 
 
@@ -113,9 +155,17 @@
 .producto-detail-name {
     color: rgb(var(--color-text-primary));
     font-weight: 800;
-    font-size: 1.6rem;
+    font-size: clamp(1.8rem, 3vw, 2.7rem);
     letter-spacing: 0.4px;
     margin-bottom: 0.5rem;
+}
+
+.producto-detail-rating {
+    @apply mb-5 flex flex-wrap items-center gap-3 text-sm text-text-muted;
+}
+
+.producto-detail-rating-stars {
+    @apply tracking-[0.2em] text-brand-gold;
 }
 
 .producto-detail-price {
@@ -128,20 +178,76 @@
 .producto-detail-desc {
     color: rgb(var(--color-text-secondary));
     line-height: 1.65;
-    margin-top: 0.9rem;
+    margin-top: 1.25rem;
     letter-spacing: 0.2px;
 }
 
 .producto-detail-price-row {
-    @apply flex items-end justify-between gap-4 border-t border-ui-border-soft pt-4;
+    @apply flex items-end justify-between gap-4 border-y border-ui-border-soft py-4;
+}
+
+.producto-detail-info-divider {
+    @apply my-6 h-px bg-ui-border-soft;
 }
 
 .producto-detail-stock {
-    @apply text-sm text-text-secondary;
+    @apply flex items-center gap-2 text-sm text-success;
+}
+
+.producto-detail-stock.out {
+    @apply text-danger;
+}
+
+.producto-detail-stock-out {
+    @apply text-danger;
 }
 
 .producto-detail-quantity {
     @apply flex flex-col gap-2;
+}
+
+.producto-detail-specs {
+    @apply flex flex-col gap-4;
+}
+
+.producto-detail-specs .spec-row {
+    @apply grid grid-cols-2 gap-4 text-sm;
+}
+
+.producto-detail-specs .spec-row span {
+    @apply font-semibold text-text-primary;
+}
+
+.producto-detail-specs .spec-row strong {
+    @apply font-normal text-text-secondary;
+}
+
+.producto-detail-features {
+    @apply mt-8 border-t border-ui-border-soft pt-6;
+}
+
+.producto-detail-features h2 {
+    @apply mb-5 text-lg font-bold text-text-primary;
+}
+
+.producto-detail-feature {
+    @apply mb-4 flex items-start gap-3 text-sm text-text-secondary;
+}
+
+.producto-detail-feature i {
+    @apply mt-0.5 text-lg text-brand-gold;
+}
+
+.producto-detail-feature span {
+    @apply flex flex-col gap-1;
+}
+
+.producto-detail-feature strong {
+    @apply text-text-primary;
+}
+
+.producto-detail-feature small {
+    @apply text-text-secondary;
 }
 
 
@@ -153,15 +259,35 @@
     background: linear-gradient(180deg,
             rgb(18 18 18),
             rgb(22 22 22 / 0.95));
-    padding: 1.15rem;
+    padding: 1.25rem;
     border-radius: 12px;
+}
+
+.producto-detail-buy-label {
+    @apply mb-3 block text-xs font-semibold uppercase tracking-[0.18em] text-text-muted;
 }
 
 .producto-detail-buy .p-button {
     width: 100%;
-    margin-top: 0.7rem;
-    padding: 0.75rem 1rem;
+    margin-top: 0.55rem;
+    padding: 0.65rem 1rem;
     border-radius: 10px;
+}
+
+.producto-detail-buy .p-inputnumber {
+    display: flex;
+    width: 100%;
+    margin: 0.15rem 0 0.45rem;
+}
+
+.producto-detail-buy .p-inputnumber-input {
+    min-width: 0;
+    height: 2.7rem;
+}
+
+.producto-detail-buy .p-inputnumber-button {
+    width: 2.35rem;
+    height: 2.7rem;
 }
 
 
@@ -170,7 +296,11 @@
    ======================================== */
 
 .producto-detail-note {
-    @apply flex items-center justify-between rounded-2xl border border-ui-border-soft bg-white/5 px-4 py-3 text-sm text-brand-white;
+    @apply mt-3 flex items-center justify-between rounded-xl border border-ui-border-soft bg-ui-card px-4 py-3 text-sm text-text-secondary;
+}
+
+.producto-detail-note strong {
+    @apply text-base text-text-primary;
 }
 
 
@@ -182,12 +312,197 @@
     @apply mt-8 grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
 }
 
+.producto-list-grid > div {
+    @apply h-full;
+}
+
 .producto-list-empty {
     @apply col-span-full py-10 text-center text-text-secondary;
 }
 
+/* ========================================
+   SERVICE DETAIL
+   ======================================== */
+
+.servicio-detail-modal {
+    @apply fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-brand-black/90 p-4 backdrop-blur-sm md:p-8;
+}
+
+.servicio-detail-modal-content {
+    @apply my-auto w-full max-w-7xl rounded-2xl border border-brand-gold/50 bg-ui-surface p-6 shadow-2xl md:p-8;
+}
+
+.servicio-detail-header {
+    @apply mb-8 flex items-center;
+}
+
+.servicio-detail-back-button {
+    @apply flex cursor-pointer items-center gap-2 rounded-lg border border-brand-gold/40 bg-brand-gold/10 px-4 py-2 text-sm font-medium text-brand-gold transition-colors;
+}
+
+.servicio-detail-back-button:hover {
+    @apply bg-brand-gold/20 text-brand-gold-hover;
+}
+
+.servicio-detail-layout {
+    @apply grid gap-8 lg:grid-cols-[minmax(280px,380px)_minmax(0,1fr)_300px] lg:gap-12;
+}
+
+.servicio-detail-image {
+    @apply aspect-square overflow-hidden rounded-2xl border border-ui-border-soft bg-ui-black;
+}
+
+.servicio-detail-image img {
+    @apply h-full w-full object-cover;
+}
+
+.servicio-detail-info {
+    @apply flex flex-col;
+}
+
+.servicio-detail-name {
+    @apply mt-3 text-3xl font-extrabold leading-tight text-text-primary lg:text-4xl;
+}
+
+.servicio-detail-rating {
+    @apply mt-4 flex items-center gap-3 text-sm text-text-muted;
+}
+
+.servicio-detail-rating i {
+    @apply text-teal-400;
+}
+
+.servicio-detail-price,
+.servicio-detail-buy-price {
+    @apply font-black text-brand-gold;
+}
+
+.servicio-detail-price {
+    @apply mt-6 text-3xl;
+}
+
+.servicio-detail-description {
+    @apply mt-5 border-y border-ui-border-soft py-5 text-sm leading-relaxed text-text-secondary;
+}
+
+.servicio-detail-specs {
+    @apply mt-6 flex flex-col gap-4 text-sm;
+}
+
+.servicio-detail-specs div {
+    @apply grid grid-cols-2 gap-4;
+}
+
+.servicio-detail-specs span {
+    @apply font-semibold text-text-primary;
+}
+
+.servicio-detail-specs strong {
+    @apply font-normal text-text-secondary;
+}
+
+.servicio-detail-benefit {
+    @apply mt-8 flex items-start gap-3 border-t border-ui-border-soft pt-6 text-sm text-text-secondary;
+}
+
+.servicio-detail-benefit i {
+    @apply mt-0.5 text-lg text-teal-400;
+}
+
+.servicio-detail-benefit span {
+    @apply flex flex-col gap-1;
+}
+
+.servicio-detail-benefit strong {
+    @apply text-text-primary;
+}
+
+.servicio-detail-benefit small {
+    @apply text-text-secondary;
+}
+
+.servicio-detail-buy {
+    @apply rounded-2xl border border-ui-border-soft bg-ui-card p-5;
+}
+
+.servicio-detail-buy-label {
+    @apply block text-xs font-semibold uppercase tracking-[0.18em] text-text-muted;
+}
+
+.servicio-detail-buy-price {
+    @apply mt-4 text-2xl;
+}
+
+.servicio-detail-buy-caption {
+    @apply mt-1 border-b border-ui-border-soft pb-5 text-xs text-text-muted;
+}
+
+.servicio-detail-book-button {
+    @apply mt-5 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-teal-400 bg-teal-500 px-4 py-3 font-bold uppercase tracking-wide text-white transition-colors;
+}
+
+.servicio-detail-book-button:hover {
+    @apply bg-teal-400 text-brand-black;
+}
+
+.servicio-detail-subtotal {
+    @apply mt-5 flex items-center justify-between border-t border-ui-border-soft pt-4 text-sm text-text-secondary;
+}
+
+.servicio-detail-subtotal strong {
+    @apply text-text-primary;
+}
+
+.servicio-detail-loading {
+    @apply rounded-2xl border border-ui-border-soft bg-ui-card p-8 text-center text-text-secondary;
+}
+
+@media (max-width: 1024px) {
+    .servicio-detail-layout {
+        @apply grid-cols-1;
+    }
+
+    .servicio-detail-image {
+        max-height: 55vh;
+    }
+
+    .servicio-detail-buy {
+        max-width: 420px;
+        margin-inline: auto;
+        width: 100%;
+    }
+}
+
 .producto-card-shell {
-    @apply overflow-hidden rounded-3xl border border-ui-border bg-ui-card shadow-lg shadow-black/20 transition-transform duration-300 hover:-translate-y-1 hover:shadow-2xl;
+    @apply block h-full w-full overflow-hidden rounded-3xl border border-ui-border bg-ui-card shadow-lg shadow-black/20 transition-transform duration-300 hover:-translate-y-1 hover:shadow-2xl;
+}
+
+.producto-card-container {
+    @apply flex h-full w-full justify-center p-0 md:p-2;
+}
+
+.producto-card-shell.p-card {
+    @apply flex h-full w-full flex-col;
+}
+
+.producto-card-shell .p-card-header {
+    @apply shrink-0;
+}
+
+.producto-card-shell .p-card-body {
+    @apply flex flex-1 flex-col;
+}
+
+.producto-card-shell .p-card-title {
+    @apply min-h-7;
+}
+
+.producto-card-shell .p-card-content {
+    @apply flex flex-1 flex-col;
+}
+
+.producto-card-shell .p-card-footer {
+    @apply mt-auto;
 }
 
 .producto-card-media {
@@ -230,7 +545,15 @@
 }
 
 .producto-card-actions {
-    @apply mt-4 flex gap-2;
+    @apply mt-4 flex items-center justify-between gap-2;
+}
+
+.producto-card-actions .boton-ver {
+    @apply flex-1;
+}
+
+.producto-card-actions .boton-comprar {
+    @apply size-12 shrink-0 px-0;
 }
 
 
@@ -246,9 +569,20 @@
 
     .producto-detail-gallery {
         display: grid;
-        grid-template-columns: 72px 1fr;
-        gap: 32px;
+        grid-template-columns: 72px minmax(0, 1fr);
+        grid-template-areas: "thumbs main";
+        gap: 1rem;
         align-items: start;
+    }
+
+    .producto-detail-main-image {
+        grid-area: main;
+        min-height: 0;
+    }
+
+    .producto-detail-thumbs {
+        grid-area: thumbs;
+        margin-top: 0;
     }
 
     .producto-detail-buy {

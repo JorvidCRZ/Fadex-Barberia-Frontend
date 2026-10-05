@@ -1,7 +1,7 @@
 <div (click)="onSeleccionar()" class="relative bg-brand-black border border-ui-border-soft hover:border-brand-gold rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-brand-gold/10 group flex flex-col cursor-pointer">
 
     <div class="w-full aspect-square bg-brand-white/5 group-hover:bg-brand-gold/10 transition overflow-hidden">
-        <img [src]="servicio.urlsMultimedia[0] | safeImageUrl" [alt]="servicio.nombre" (error)="img.src='/assets/cortebarba.jpg'" #img class="w-full h-full object-cover transform group-hover:scale-110 transition duration-300" />
+        <img [src]="servicio.urlsMultimedia[0] | safeImageUrl" [alt]="servicio.nombre" (error)="img.src='/assets/banners/cortebarba.jpg'" #img class="w-full h-full object-cover transform group-hover:scale-110 transition duration-300" />
     </div>
 
     <div class="p-3 flex flex-col flex-1">

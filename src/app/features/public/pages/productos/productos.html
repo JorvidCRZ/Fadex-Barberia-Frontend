@@ -1,6 +1,6 @@
 <section class="producto-page-hero">
 	<div class="absolute inset-0">
-		<img src="/assets/cortebarba.jpg" alt="Productos Barbería"
+		<img src="/assets/banners/banner-producto.webp" alt="Productos Barbería"
 			class="h-full w-full object-cover object-[center_60%] opacity-30" />
 		<div class="producto-page-overlay"></div>
 	</div>
@@ -26,7 +26,7 @@
 		</div>
 
 		<div class="mt-8">
-			<app-producto-lista [productos]="productos" />
+			<app-producto-lista [productos]="productos" (verProducto)="verProducto($event)" />
 		</div>
 
 		<div class="producto-page-paginator">
@@ -34,3 +34,10 @@
 		</div>
 	</div>
 </section>
+
+@if (productoSeleccionado) {
+	<app-producto-detalle
+		[producto]="productoSeleccionado"
+		(cerrar)="cerrarDetalle()"
+	/>
+}

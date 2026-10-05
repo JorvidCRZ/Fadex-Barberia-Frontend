@@ -55,4 +55,8 @@ export class CarritoComponent {
   continuarCompra(): void {
     this.router.navigate(['/productos']);
   }
+
+  verProducto(id: number): void {
+    this.router.navigate(['/productos'], { queryParams: { productoId: id } });
+  }
 }

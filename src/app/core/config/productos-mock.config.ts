@@ -1,0 +1,22 @@
+import { Producto } from '../models/catalogos/productos.model';
+
+export const PRODUCTOS_MOCK: Producto[] = [
+  {
+    id: 1, sku: 'FADEX-CERA-01', nombre: 'Cera Matte Fadex', descripcion: 'Fijación firme con acabado mate para estilos definidos.', precio: 35, precioVenta: 35, precioPromo: null, stock: 18, estado: true, publicado: true, idCategoria: 1, nombreCategoria: 'Cuidado capilar', urlsMultimedia: ['/assets/producto.webp'],
+  },
+  {
+    id: 2, sku: 'FADEX-POMADA-01', nombre: 'Pomada Premium', descripcion: 'Brillo natural y fijación flexible para un acabado elegante.', precio: 42, precioVenta: 42, precioPromo: 37, stock: 12, estado: true, publicado: true, idCategoria: 1, nombreCategoria: 'Cuidado capilar', urlsMultimedia: ['/assets/tratamientocap.webp'],
+  },
+  {
+    id: 3, sku: 'FADEX-BARBA-01', nombre: 'Aceite para Barba', descripcion: 'Nutre, suaviza y perfuma la barba sin dejar sensación grasa.', precio: 39, precioVenta: 39, precioPromo: null, stock: 20, estado: true, publicado: true, idCategoria: 2, nombreCategoria: 'Barba y afeitado', urlsMultimedia: ['/assets/servicios/arreglo-barba.webp'],
+  },
+  {
+    id: 4, sku: 'FADEX-SHAMPOO-01', nombre: 'Shampoo Barbers', descripcion: 'Limpieza suave para mantener el cabello saludable.', precio: 28, precioVenta: 28, precioPromo: null, stock: 25, estado: true, publicado: true, idCategoria: 1, nombreCategoria: 'Cuidado capilar', urlsMultimedia: ['/assets/masajecapilar.webp'],
+  },
+  {
+    id: 5, sku: 'FADEX-PEINE-01', nombre: 'Peine Profesional', descripcion: 'Peine resistente ideal para peinados y retoques diarios.', precio: 18, precioVenta: 18, precioPromo: null, stock: 30, estado: true, publicado: true, idCategoria: 3, nombreCategoria: 'Accesorios', urlsMultimedia: ['/assets/tijeras.jpg'],
+  },
+  {
+    id: 6, sku: 'FADEX-BALM-01', nombre: 'Bálsamo After Shave', descripcion: 'Refresca y calma la piel después del afeitado.', precio: 32, precioVenta: 32, precioPromo: 29, stock: 15, estado: true, publicado: true, idCategoria: 2, nombreCategoria: 'Barba y afeitado', urlsMultimedia: ['/assets/servicios/afeitado.jpg'],
+  },
+];

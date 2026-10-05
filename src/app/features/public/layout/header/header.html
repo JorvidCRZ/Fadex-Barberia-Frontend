@@ -20,14 +20,14 @@
         <span class="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-brand-gold text-xs font-bold text-black">{{ cartItemCount() }}</span>
       </a>
 
-      @if (isAuthenticated) {
+      @if (isAuthenticated()) {
         <div class="flex items-center gap-4 border-r border-ui-border pr-5">
           <a routerLink="/reclamos" aria-label="Reclamos" class="flex h-9 w-9 items-center justify-center rounded-lg text-brand-white transition-all hover:bg-ui-surface hover:text-brand-gold">
             <i class="pi pi-book text-lg" aria-hidden="true"></i>
           </a>
         </div>
 
-         <a [routerLink]="profileLink" aria-label="Perfil" class="flex h-10 w-10 items-center justify-center rounded-full bg-brand-gold text-black transition-all hover:scale-110 hover:bg-brand-gold-hover">
+         <a [routerLink]="profileLink()" aria-label="Perfil" class="flex h-10 w-10 items-center justify-center rounded-full bg-brand-gold text-black transition-all hover:scale-110 hover:bg-brand-gold-hover">
            <i class="pi pi-user text-lg" aria-hidden="true"></i>
          </a>
         
@@ -54,13 +54,13 @@
             <span class="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-brand-gold text-xs font-bold text-black"> {{ cartItemCount() }} </span>
           </a>
 
-          @if (isAuthenticated) {
+          @if (isAuthenticated()) {
             <a routerLink="/reclamos" aria-label="Reclamos" class="flex flex-col items-center justify-center gap-1 rounded-lg p-2 text-xs text-brand-white transition hover:bg-ui-elevated hover:text-brand-gold">
               <i class="pi pi-book" aria-hidden="true"></i>
               <span>Reclamos</span>
             </a>
 
-            <a [routerLink]="profileLink" aria-label="Perfil" class="flex h-10 w-10 items-center justify-center self-center justify-self-center rounded-full bg-brand-gold text-black transition-all hover:scale-110 hover:bg-brand-gold-hover">
+            <a [routerLink]="profileLink()" aria-label="Perfil" class="flex h-10 w-10 items-center justify-center self-center justify-self-center rounded-full bg-brand-gold text-black transition-all hover:scale-110 hover:bg-brand-gold-hover">
               <i class="pi pi-user text-lg" aria-hidden="true"></i>
             </a>
           } @else {

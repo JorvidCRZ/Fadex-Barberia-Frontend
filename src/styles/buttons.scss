@@ -39,6 +39,20 @@
     }
 }
 
+button.boton-ver.p-button,
+p-button.boton-ver .p-button {
+    background: rgb(20 184 166 / 0.1) !important;
+    border: 1px solid rgb(20 184 166 / 0.3) !important;
+    color: rgb(45 212 191) !important;
+}
+
+button.boton-ver.p-button:hover,
+p-button.boton-ver .p-button:hover {
+    background: rgb(20 184 166) !important;
+    border-color: rgb(45 212 191) !important;
+    color: rgb(255 255 255) !important;
+}
+
 .boton-comprar,
 .boton-limpiar {
     @include boton-base;
@@ -50,6 +64,26 @@
     }
 }
 
+button.boton-comprar.p-button,
+p-button.boton-comprar .p-button {
+    background: rgb(var(--color-brand-gold) / 0.1) !important;
+    border: 1px solid rgb(var(--color-brand-gold) / 0.3) !important;
+    color: rgb(var(--color-brand-gold)) !important;
+}
+
+button.boton-comprar.p-button:hover,
+p-button.boton-comprar .p-button:hover {
+    background: rgb(var(--color-brand-gold)) !important;
+    border-color: rgb(var(--color-brand-gold)) !important;
+    color: rgb(var(--color-brand-black)) !important;
+}
+
+button.boton-comprar.p-button:not(:disabled):active,
+p-button.boton-comprar .p-button:not(:disabled):active {
+    background: rgb(var(--color-brand-gold) / 0.1) !important;
+    border-color: rgb(var(--color-brand-gold) / 0.3) !important;
+    color: rgb(var(--color-brand-gold)) !important;
+}
 .boton-primary {
     @include boton-base;
 

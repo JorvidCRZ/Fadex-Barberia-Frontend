@@ -26,7 +26,6 @@ export class CheckoutComponent implements OnInit {
   private fb = inject(FormBuilder);
   private router = inject(Router);
   private notify = inject(NotificationService);
-
   private ventaService = inject(VentaService);
   readonly carrito = inject(CarritoService);
 

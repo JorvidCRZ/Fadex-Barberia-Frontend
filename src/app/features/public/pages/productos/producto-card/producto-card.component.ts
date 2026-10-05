@@ -1,7 +1,6 @@
-import { Router } from '@angular/router';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
-import { Component, Input, inject } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { SolesPipe } from '../../../../../shared/pipes/moneda.pipe';
 import { Producto } from '../../../../../core/models/catalogos/productos.model';
 import { SafeImageUrlPipe } from '../../../../../shared/pipes/safe-image-url.pipe';
@@ -14,17 +13,19 @@ import { StatusBadgeComponent } from '../../../../../shared/components/status-ba
   selector: 'app-producto-card',
   imports: [ButtonModule, CardModule, SolesPipe, SafeImageUrlPipe, StatusBadgeComponent],
   templateUrl: './producto-card.html',
-  styleUrls: ['./producto-card.scss'],
+  styleUrl: './producto-card.scss',
 })
 export class ProductoCardComponent {
-  private readonly router = inject(Router);
   private readonly carritoService = inject(CarritoService);
   private readonly notificationService = inject(NotificationService);
 
   @Input() producto!: Producto;
+  @Output() verProducto = new EventEmitter<Producto>();
 
   onVer(): void {
-    if (this.producto) {this.router.navigate(['/productos/detalle', this.producto.id]);}
+    if (this.producto) {
+      this.verProducto.emit(this.producto);
+    }
   }
 
   getImagenProducto(producto: Producto): string {

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { jwtDecode } from "jwt-decode";
 import { BehaviorSubject } from 'rxjs';
 
@@ -10,10 +10,12 @@ export class TokenService {
   private ACCESS_TOKEN = 'access_token';
   private REFRESH_TOKEN = 'refresh_token';
   private PermisosSubject = new BehaviorSubject<string[]>([]);
+  readonly isAuthenticated = signal(!!this.getAccessToken());
   permisos$ = this.PermisosSubject.asObservable();
 
   saveAccessToken(token: string) {
     localStorage.setItem(this.ACCESS_TOKEN, token);
+    this.isAuthenticated.set(true);
     const permisos = this.getPermisos();
     this.PermisosSubject.next(permisos);
   }
@@ -33,6 +35,7 @@ export class TokenService {
   clearTokens() {
     localStorage.removeItem(this.ACCESS_TOKEN);
     localStorage.removeItem(this.REFRESH_TOKEN);
+    this.isAuthenticated.set(false);
     this.PermisosSubject.next([]);
   }
 

@@ -76,6 +76,7 @@ export class BotonCarritoComponent {
   }
 
   irDetalleProducto(item: CarritoItem): void {
-    void this.router.navigate(['/productos'], { queryParams: { id: item.producto.id } });
+    this.visible = false;
+    void this.router.navigate(['/productos'], { queryParams: { productoId: item.producto.id } });
   }
 }

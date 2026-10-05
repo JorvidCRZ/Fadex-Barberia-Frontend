@@ -28,7 +28,7 @@ export const passwordMatchValidator: ValidatorFn = (control: AbstractControl): V
   imports: [CommonModule, ReactiveFormsModule, RouterModule, InputTextModule, ButtonModule, MessageModule, LogoComponent],
   templateUrl: './reset-password.html'
 })
-export class ResetPassword implements OnInit {
+export class ResetPasswordComponent implements OnInit {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private route = inject(ActivatedRoute);

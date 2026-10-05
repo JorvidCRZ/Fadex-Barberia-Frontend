@@ -1,63 +1,90 @@
-import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { ApiResponse, Page } from '../../models/common/index.model';
+import { Injectable } from '@angular/core';
+import { Observable, of } from 'rxjs';
+import { PRODUCTOS_MOCK } from '../../config/productos-mock.config';
+import { mockPage, mockResponse } from '../../config/mock-response.config';
 import { Producto, ProductoFiltro, ProductoRequest } from '../../models/catalogos/productos.model';
-import { environment } from '../../../../environments/environment.development';
-import { buildHttpParamsComponent } from '../../../shared/utils/build-http-params.component';
-import { buildFormData } from '../../../shared/utils/build-form-data.component';
+import { ApiResponse, Page } from '../../models/common/index.model';
 
-@Injectable({
-    providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class ProductoService {
-    private http = inject(HttpClient);
-    private apiUrl = `${environment.apiUrl}/productos`;
+    private readonly productos = [...PRODUCTOS_MOCK];
 
-    obtenerProductosPublico(filter?: ProductoFiltro) {
-        return this.http.get<ApiResponse<Page<Producto>>>(`${this.apiUrl}/publicados`, { params: buildHttpParamsComponent(filter) });
+    obtenerProductosPublico(filter: ProductoFiltro = {}): Observable<ApiResponse<Page<Producto>>> {
+        return of(mockResponse(mockPage(this.filtrar(filter, true), filter.page ?? 0, filter.size ?? 12)));
     }
 
-    obtenerProductosPublicoId(id: number) {
-        return this.http.get<ApiResponse<Producto>>(`${this.apiUrl}/publicados/${id}`);
+    obtenerProductosPublicoId(id: number): Observable<ApiResponse<Producto>> {
+        return this.buscarProductoPublico(id);
     }
 
-    obtenerProductoId(id: number) {
-        return this.http.get<ApiResponse<Producto>>(`${this.apiUrl}/${id}`);
+    obtenerProductoId(id: number): Observable<ApiResponse<Producto>> {
+        return this.buscarProducto(id);
     }
 
-    obtenerProductos(page = 0, size = 10) {
-        return this.http.get<ApiResponse<Page<Producto>>>(this.apiUrl, { params: buildHttpParamsComponent({ page, size }) });
+    obtenerProductos(page = 0, size = 10): Observable<ApiResponse<Page<Producto>>> {
+        return of(mockResponse(mockPage(this.productos, page, size)));
     }
 
-    obtenerProductosConFiltro(filter?: ProductoFiltro) {
-        return this.http.get<ApiResponse<Page<Producto>>>(this.apiUrl, { params: buildHttpParamsComponent(filter) });
+    obtenerProductosConFiltro(filter: ProductoFiltro = {}): Observable<ApiResponse<Page<Producto>>> {
+        return of(mockResponse(mockPage(this.filtrar(filter), filter.page ?? 0, filter.size ?? 10)));
     }
 
-    obtenerProductosActivos() {
-        return this.http.get<ApiResponse<Page<Producto>>>(this.apiUrl, { params: buildHttpParamsComponent({ estado: true, size: 1000 }) });
+    obtenerProductosActivos(): Observable<ApiResponse<Page<Producto>>> {
+        return of(mockResponse(mockPage(this.productos.filter(producto => producto.estado), 0, 1000)));
     }
 
-    buscarProductoPorId(id: number) {
-        return this.http.get<ApiResponse<Producto>>(`${this.apiUrl}/${id}`);
+    buscarProductoPorId(id: number): Observable<ApiResponse<Producto>> {
+        return this.buscarProducto(id);
     }
 
-    crearProducto(data: ProductoRequest, imagenes?: File[]) {
-        return this.http.post<ApiResponse<Producto>>(this.apiUrl, buildFormData('producto', data, imagenes));
+    crearProducto(data: ProductoRequest, _imagenes?: File[]): Observable<ApiResponse<Producto>> {
+        const producto = { ...data, id: this.productos.length + 1, nombreCategoria: '', urlsMultimedia: [] } as Producto;
+        return of(mockResponse(producto));
     }
 
-    actualizarProducto(id: number, data: ProductoRequest, imagenes?: File[]) {
-        return this.http.put<ApiResponse<Producto>>(`${this.apiUrl}/${id}`, buildFormData('producto', data, imagenes));
+    actualizarProducto(id: number, data: ProductoRequest, _imagenes?: File[]): Observable<ApiResponse<Producto>> {
+        const producto = { ...data, id, nombreCategoria: '', urlsMultimedia: [] } as Producto;
+        return of(mockResponse(producto));
     }
 
-    cambiarEstado(id: number, estado: boolean) {
-        return this.http.patch<ApiResponse<Producto>>(`${this.apiUrl}/${id}/estado`, {}, { params: buildHttpParamsComponent({ estado }) });
+    cambiarEstado(id: number, estado: boolean): Observable<ApiResponse<Producto>> {
+        const producto = this.productos.find(item => item.id === id);
+        return of(mockResponse({ ...(producto ?? this.productos[0]), estado }));
     }
 
-    cambiarPublicado(id: number, publicado: boolean) {
-        return this.http.patch<ApiResponse<Producto>>(`${this.apiUrl}/${id}/publicacion`, {}, { params: buildHttpParamsComponent({ publicado }) });
+    cambiarPublicado(id: number, publicado: boolean): Observable<ApiResponse<Producto>> {
+        const producto = this.productos.find(item => item.id === id);
+        return of(mockResponse({ ...(producto ?? this.productos[0]), publicado }));
     }
 
-    eliminarProducto(id: number) {
-        return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/${id}`);
+    eliminarProducto(id: number): Observable<ApiResponse<void>> {
+        return of(mockResponse(undefined));
+    }
+
+    private buscarProductoPublico(id: number): Observable<ApiResponse<Producto>> {
+        const producto = this.productos.find(item => item.id === id && item.publicado && item.estado);
+        return producto ? of(mockResponse(producto)) : this.productoNoEncontrado();
+    }
+
+    private buscarProducto(id: number): Observable<ApiResponse<Producto>> {
+        const producto = this.productos.find(item => item.id === id);
+        return producto ? of(mockResponse(producto)) : this.productoNoEncontrado();
+    }
+
+    private productoNoEncontrado(): Observable<ApiResponse<Producto>> {
+        return of(mockResponse(null as unknown as Producto));
+    }
+
+    private filtrar(filter: ProductoFiltro, soloPublicados = false): Producto[] {
+        const nombre = filter.nombre?.trim().toLowerCase();
+        return this.productos.filter(producto =>
+            (!soloPublicados || (producto.publicado && producto.estado)) &&
+            (!nombre || producto.nombre.toLowerCase().includes(nombre)) &&
+            (filter.idCategoria == null || producto.idCategoria === filter.idCategoria) &&
+            (filter.estado == null || producto.estado === filter.estado) &&
+            (filter.publicado == null || producto.publicado === filter.publicado) &&
+            (filter.precioMin == null || producto.precio >= filter.precioMin) &&
+            (filter.precioMax == null || producto.precio <= filter.precioMax)
+        );
     }
 }
