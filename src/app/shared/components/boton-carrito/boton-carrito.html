@@ -1,4 +1,4 @@
-<p-drawer [(visible)]="visible" position="right" [modal]="true" [showCloseIcon]="false" [blockScroll]="true" styleClass="w-full max-w-[28rem]">
+<p-drawer [(visible)]="visible" position="right" [modal]="false" [showCloseIcon]="false" [blockScroll]="false" (onHide)="cerrarCarrito()" styleClass="w-full max-w-[28rem]">
   <ng-template pTemplate="header">
     <div class="flex w-full items-center justify-between gap-3 pr-3">
       <div>
@@ -7,7 +7,7 @@
       </div>
       <div class="flex items-center gap-3">
         <div class="rounded-full bg-ui-elevated px-3 py-1 text-sm font-semibold text-text-secondary">{{ cantidad() }} item(s)</div>
-        <button type="button" class="boton-cierre" aria-label="Cerrar carrito" (click)="visible = false">
+        <button type="button" class="boton-cierre" aria-label="Cerrar carrito" (click)="cerrarCarrito()">
           <i class="pi pi-times" aria-hidden="true"></i>
         </button>
       </div>
@@ -40,7 +40,7 @@
                     <p class="text-[11px] uppercase tracking-wide text-text-muted">Precio</p>
                     <span class="mr-2 font-semibold text-text-primary">{{ (item.producto.precioPromo ?? item.producto.precioVenta ?? item.producto.precio) | moneda }}</span>
                   </div>
-                  <p-button icon="pi pi-trash" severity="danger" [text]="true" [rounded]="true" (click)="eliminarProducto(i)" />
+                  <p-button icon="pi pi-trash" severity="danger" [text]="true" styleClass="boton-delete boton-eliminar-carrito" (click)="eliminarProducto(i)" />
                 </div>
               </div>
             </div>
@@ -90,7 +90,7 @@
 
         <div class="flex flex-col gap-2">
           <p-button label="Proceder al pago" routerLink="/carrito" icon="pi pi-credit-card" class="boton-submit" />
-          <p-button label="Vaciar carrito" icon="pi pi-times" severity="danger" [text]="true" class="boton-limpiar" (click)="vaciarCarrito()" />
+          <p-button label="Vaciar carrito" icon="pi pi-times" class="boton-danger" (click)="vaciarCarrito()" />
         </div>
       </div>
     </div>

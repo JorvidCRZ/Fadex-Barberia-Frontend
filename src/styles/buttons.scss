@@ -12,6 +12,14 @@
     }
 }
 
+p-button.boton-submit,
+p-button.boton-danger {
+    display: block;
+    border: 0 !important;
+    background: transparent !important;
+    padding: 0 !important;
+}
+
 @mixin boton-tabla {
     @apply inline-flex size-10 items-center justify-center rounded-lg mx-1 px-3 py-2 text-sm transition-all duration-200 cursor-pointer;
 
@@ -122,6 +130,35 @@ button.boton-secondary.p-button {
     }
 }
 
+p-button.boton-danger .p-button,
+button.boton-danger.p-button {
+    @apply border-red-400/30 bg-red-500/10 text-red-400;
+
+    &:hover {
+        @apply border-red-400 bg-red-500 text-white;
+    }
+}
+
+p-button .p-button.boton-delete.boton-eliminar-carrito,
+button.boton-delete.boton-eliminar-carrito.p-button {
+    @apply border border-red-400/30 bg-red-500/10 text-red-400;
+    width: 2rem !important;
+    min-width: 2rem !important;
+    height: 2.5rem !important;
+    padding: 0 !important;
+    border-radius: 0.35rem !important;
+}
+
+p-button .p-button.boton-delete.boton-eliminar-carrito:hover,
+button.boton-delete.boton-eliminar-carrito.p-button:hover {
+    @apply border-red-400 bg-red-500 text-white shadow-sm;
+}
+
+p-button .p-button.boton-delete.boton-eliminar-carrito:focus-visible,
+button.boton-delete.boton-eliminar-carrito.p-button:focus-visible {
+    @apply ring-2 ring-brand-red/30 ring-offset-0;
+}
+
 .boton-ghost {
     @include boton-base;
 
@@ -170,6 +207,15 @@ button.boton-secondary.p-button {
 
     &:hover {
         @apply bg-blue-500 text-black;
+    }
+}
+
+p-button.boton-submit .p-button,
+button.boton-submit.p-button {
+    @apply border-blue-400 bg-blue-500/10 text-blue-400;
+
+    &:hover {
+        @apply border-blue-400 bg-blue-500 text-black;
     }
 }
 
@@ -273,8 +319,20 @@ button.boton-secondary.p-button {
     @apply border border-red-500/30 bg-red-500/10 text-red-500;
 
     &:hover {
-        @apply border-red-500/30 bg-red-500 text-white;
+        @apply border-red-500 bg-red-500 text-white;
     }
+}
+
+.p-button.boton-eliminar-tabla {
+    border: 1px solid rgb(239 68 68 / 0.3) !important;
+    background: rgb(239 68 68 / 0.1) !important;
+    color: rgb(239 68 68) !important;
+}
+
+.p-button.boton-eliminar-tabla:not(:disabled):hover {
+    border-color: rgb(239 68 68) !important;
+    background: rgb(239 68 68) !important;
+    color: rgb(255 255 255) !important;
 }
 
 .boton-devolver-tabla {

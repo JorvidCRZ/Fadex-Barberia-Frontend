@@ -1,5 +1,6 @@
 export const environment = {
   production: false,
+  useMockData: false,
   apiUrl: 'http://localhost:8081/api/v1',
   apiBaseUrl: 'http://localhost:8081',
   nombre_negocio: 'Ultimate Protector',

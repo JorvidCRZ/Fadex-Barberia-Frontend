@@ -36,19 +36,42 @@ export class ConfiguracionService {
         ].filter(r => !!r.url);
     });
 
-  
+    private readonly configuracionMock: ConfiguracionPublica = {
+        nombre: 'FadeX Barbería',
+        direccion: 'Lima, Perú',
+        correo: 'contacto@fadexbarberia.com',
+        telefono: '',
+        sitioWeb: '',
+        logoUrl: null,
+        facebook: 'https://www.facebook.com/fadexbarberia',
+        instagram: 'https://www.instagram.com/fadexbarberia/',
+        tiktok: 'https://www.tiktok.com/@fadexbarberia',
+        whatsapp: WHATSAPP_TEMPORAL_URL,
+        monedaBase: 'PEN',
+        tipoCambioDolar: 1,
+        politicaPrivacidad: null,
+        terminosCondiciones: null,
+        politicaDevoluciones: null,
+    };
+
     cargarConfiguracion() {
         if (this._config()) return;
+
+        if (environment.useMockData) {
+            this._config.set(this.configuracionMock);
+            this.guardarValoresBase(this.configuracionMock);
+            return;
+        }
+
         this.http.get<ApiResponse<ConfiguracionPublica>>(`${this.apiUrl}/publica`).subscribe({
             next: (res) => {
                 if (!res.data) return;
                 this._config.set(res.data);
+                this.guardarValoresBase(res.data);
             },
             error: () => {
                 this._config.set(null);
-                sessionStorage.setItem('monedaBase', 'PEN');
-                sessionStorage.setItem('tipoCambio', '1');
-                sessionStorage.setItem('igv', '18');
+                this.guardarValoresBase(this.configuracionMock);
             }
         });
     }
@@ -60,5 +83,11 @@ export class ConfiguracionService {
 
     obtenerConfiguracionPublica() {
         return this.http.get<ApiResponse<ConfiguracionPublica>>(`${this.apiUrl}/publica`);
+    }
+
+    private guardarValoresBase(configuracion: ConfiguracionPublica): void {
+        sessionStorage.setItem('monedaBase', configuracion.monedaBase);
+        sessionStorage.setItem('tipoCambio', String(configuracion.tipoCambioDolar));
+        sessionStorage.setItem('igv', '18');
     }
 }

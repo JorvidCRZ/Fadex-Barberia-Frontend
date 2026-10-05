@@ -563,7 +563,7 @@
 
 @media (min-width: 1024px) {
     .producto-detail-layout {
-        grid-template-columns: 380px minmax(0, 1fr) 320px;
+        grid-template-columns: 420px minmax(0, 1fr) 300px;
         align-items: start;
     }
 
@@ -578,6 +578,10 @@
     .producto-detail-main-image {
         grid-area: main;
         min-height: 0;
+    }
+
+    .producto-detail-main-image img {
+        height: 32rem;
     }
 
     .producto-detail-thumbs {

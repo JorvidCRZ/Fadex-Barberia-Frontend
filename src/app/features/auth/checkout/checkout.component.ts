@@ -91,6 +91,20 @@ export class CheckoutComponent implements OnInit {
     });
   }
 
+  irAPago(): void {
+    this.formSubmitted = true;
+    if (this.checkoutForm.invalid) {
+      this.notify.showWarn('Complete los datos requeridos');
+      return;
+    }
+    if (this.carrito.items().length === 0) {
+      this.notify.showWarn('El carrito está vacío');
+      return;
+    }
+
+    this.router.navigate(['/pago']);
+  }
+
   get subtotal(): number {
     return this.carrito.subtotal();
   }

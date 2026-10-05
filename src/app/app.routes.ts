@@ -14,6 +14,7 @@ import { CarritoComponent } from './features/public/pages/carrito/carrito.compon
 import { Error404Component } from './shared/components/error404/error404.component';
 import { ResetPasswordComponent } from './features/auth/reset-password/reset-password.component';
 import { CheckoutComponent } from './features/auth/checkout/checkout.component';
+import { PagoComponent } from './features/auth/pago/pago.component';
 // import { BarberoLayoutComponent } from './features/private/layout/barbero-layout.component';
 // import { DashboardAdministrativoComponent } from './features/private/dashboard/dashboard-administrativo/dashboard-administrativo.component';
 // import { RegistrarClient } from './features/private/components/gestion/clientes/registrar-client/registrar-client';
@@ -143,6 +144,7 @@ export const routes: Routes = [
       { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
       { path: 'register', component: RegisterComponent },
       { path: 'checkout', component: CheckoutComponent, canActivate: [authGuard], data: { roles: ['cliente'] } },
+      { path: 'pago', component: PagoComponent, canActivate: [authGuard], data: { roles: ['cliente'] } },
       { path: 'carrito', component: CarritoComponent },
       // {
         // path: 'mi-cuenta', component: DashboardClienteComponent,

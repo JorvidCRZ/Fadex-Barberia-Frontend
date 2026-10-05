@@ -1,11 +1,12 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map, Observable, tap } from 'rxjs';
+import { map, Observable, of, tap, throwError } from 'rxjs';
 import { TokenService } from './token.service';
 import { environment } from '../../../../environments/environment';
 import { RefreshRequest } from '../../models/auth/refreshRequest.model';
 import { LoginRequest, LoginResponse } from '../../models/auth/loginResponse.model';
 import { ApiResponse } from '../../models/common/index.model';
+import { createMockLoginResponse, findMockAuthUser } from '../../config/auth-mock.config';
 
 @Injectable({
   providedIn: 'root',
@@ -16,10 +17,30 @@ export class AuthService {
   private tokenService = inject(TokenService);
 
   login(data: LoginRequest): Observable<LoginResponse> {
+    if (environment.useMockData) {
+      const user = findMockAuthUser(data);
+
+      if (!user) {
+        return throwError(() => ({
+          status: 401,
+          error: { message: 'Usuario o contraseña incorrectos' },
+        }));
+      }
+
+      return of(createMockLoginResponse(user)).pipe(this.persistLogin());
+    }
+
     return this.http.post<ApiResponse<LoginResponse>>(this.API + "/login", data).pipe(map(res => res.data), tap(data => {
       this.tokenService.saveAccessToken(data.accessToken);
       this.tokenService.saveRefreshToken(data.refreshToken);
     }));
+  }
+
+  private persistLogin() {
+    return tap((data: LoginResponse) => {
+      this.tokenService.saveAccessToken(data.accessToken);
+      this.tokenService.saveRefreshToken(data.refreshToken);
+    });
   }
 
   loginWithGoogle(idToken: string): Observable<LoginResponse> {

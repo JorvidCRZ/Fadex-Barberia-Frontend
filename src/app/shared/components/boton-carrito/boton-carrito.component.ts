@@ -57,6 +57,12 @@ export class BotonCarritoComponent {
     this.carritoService.vaciarCarrito();
   }
 
+  cerrarCarrito(): void {
+    this.visible = false;
+    document.body.classList.remove('p-overflow-hidden');
+    document.body.style.removeProperty('overflow');
+  }
+
   obtenerSubtotalItem(item: CarritoItem): number {
     return item.cantidad * obtenerPrecio(item.producto);
   }
@@ -76,7 +82,7 @@ export class BotonCarritoComponent {
   }
 
   irDetalleProducto(item: CarritoItem): void {
-    this.visible = false;
+    this.cerrarCarrito();
     void this.router.navigate(['/productos'], { queryParams: { productoId: item.producto.id } });
   }
 }

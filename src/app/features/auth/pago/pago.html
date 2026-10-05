@@ -1,0 +1,88 @@
+<div class="min-h-screen bg-brand-black px-4 py-10 text-text-primary sm:px-6 lg:px-8">
+  <div class="mx-auto max-w-5xl">
+    @if (compraCompletada()) {
+      <section class="mx-auto max-w-xl rounded-3xl border border-brand-gold/30 bg-ui-card p-8 text-center shadow-card">
+        <div class="mx-auto flex size-16 items-center justify-center rounded-full bg-green-500/15 text-green-400">
+          <i class="pi pi-check text-3xl" aria-hidden="true"></i>
+        </div>
+        <h1 class="mt-5 text-2xl font-bold text-text-primary">¡Compra simulada realizada!</h1>
+        <p class="mt-2 text-text-secondary">Tu venta fue procesada correctamente en modo frontend.</p>
+        <p-button label="Volver al inicio" icon="pi pi-home" styleClass="boton-primary mt-6" (onClick)="volverAInicio()" />
+      </section>
+    } @else {
+      <div class="mb-8 text-center">
+        <p class="text-sm font-semibold uppercase tracking-[0.2em] text-text-secondary">Pago simulado</p>
+        <h1 class="mt-2 text-3xl font-bold text-text-primary">Finaliza tu transacción</h1>
+        <p class="mt-2 text-text-secondary">Selecciona un método de pago para simular la venta.</p>
+      </div>
+
+      <section class="grid overflow-hidden rounded-3xl border border-ui-border bg-ui-card shadow-card lg:grid-cols-[260px_1fr]">
+        <nav class="border-b border-ui-border bg-ui-black p-3 lg:border-b-0 lg:border-r" aria-label="Métodos de pago">
+          @for (metodo of metodos; track metodo.id) {
+            <button
+              type="button"
+              class="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm transition-colors"
+              [class.bg-brand-gold/10]="metodoSeleccionado() === metodo.id"
+              [class.text-brand-gold]="metodoSeleccionado() === metodo.id"
+              [class.text-text-secondary]="metodoSeleccionado() !== metodo.id"
+              (click)="seleccionarMetodo(metodo.id)">
+              <i class="pi {{ metodo.icono }}" aria-hidden="true"></i>
+              <span>{{ metodo.nombre }}</span>
+            </button>
+          }
+        </nav>
+
+        <div class="p-6 sm:p-8">
+          <div class="flex items-center justify-between border-b border-ui-border-soft pb-5">
+            <span class="text-text-secondary">{{ cantidadProductos() }} producto(s)</span>
+            <strong class="text-2xl text-brand-gold">{{ carrito.total() | soles }}</strong>
+          </div>
+
+          @switch (metodoSeleccionado()) {
+            @case ('TARJETA') {
+              <div class="mt-6 space-y-4">
+                <div>
+                  <label class="label-form" for="numeroTarjeta">Número de tarjeta</label>
+                  <input id="numeroTarjeta" class="inputs-text w-full" placeholder="#### #### #### ####" />
+                </div>
+                <div class="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label class="label-form" for="vencimiento">Vencimiento</label>
+                    <input id="vencimiento" class="inputs-text w-full" placeholder="MM/AA" />
+                  </div>
+                  <div>
+                    <label class="label-form" for="cvv">Código de seguridad</label>
+                    <input id="cvv" class="inputs-text w-full" placeholder="CVV" />
+                  </div>
+                </div>
+                <div>
+                  <label class="label-form" for="correoPago">Correo electrónico</label>
+                  <input id="correoPago" type="email" class="inputs-text w-full" placeholder="correo@ejemplo.com" />
+                </div>
+              </div>
+            }
+            @case ('YAPE') {
+              <div class="mt-8 text-center">
+                <i class="pi pi-mobile text-5xl text-fuchsia-400" aria-hidden="true"></i>
+                <h2 class="mt-4 text-xl font-bold">Aprueba tu compra con Yape</h2>
+                <p class="mx-auto mt-2 max-w-md text-sm text-text-secondary">Esta es una simulación. No se realizará ningún cobro real.</p>
+              </div>
+            }
+            @case ('BANCA') {
+              <div class="mt-8 text-center">
+                <i class="pi pi-building text-5xl text-brand-gold" aria-hidden="true"></i>
+                <h2 class="mt-4 text-xl font-bold">Pago por banca móvil o internet</h2>
+                <p class="mx-auto mt-2 max-w-md text-sm text-text-secondary">Generaremos un código de pago simulado para continuar.</p>
+              </div>
+            }
+          }
+
+          <div class="mt-8 flex flex-col-reverse justify-between gap-3 border-t border-ui-border-soft pt-5 sm:flex-row">
+            <p-button label="Volver al checkout" icon="pi pi-arrow-left" styleClass="boton-secondary" (onClick)="volverAlCheckout()" />
+            <p-button label="Simular pago" icon="pi pi-check" styleClass="boton-primary" [loading]="procesando()" (onClick)="simularPago()" />
+          </div>
+        </div>
+      </section>
+    }
+  </div>
+</div>

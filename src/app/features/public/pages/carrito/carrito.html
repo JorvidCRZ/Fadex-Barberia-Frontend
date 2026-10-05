@@ -85,7 +85,7 @@
                                     </div>
                                 </td>
                                 <td class="px-5 py-4 text-right font-bold text-brand-gold">{{ item.cantidad * (item.producto.precioPromo ?? item.producto.precioVenta ?? item.producto.precio) | soles }}</td>
-                                <td class="px-5 py-4 text-center"><p-button class="boton-eliminar-tabla"(click)="eliminarProducto(i)"> <i class="pi pi-trash"></i></p-button></td>
+                                <td class="px-5 py-4 text-center"><p-button styleClass="boton-eliminar-tabla" icon="pi pi-trash" ariaLabel="Eliminar producto" (click)="eliminarProducto(i)" /></td>
                             </tr>
                         }
                     </tbody>
