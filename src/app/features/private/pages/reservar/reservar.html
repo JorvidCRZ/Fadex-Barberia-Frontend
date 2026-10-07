@@ -1,333 +1,168 @@
-<div class="fixed inset-0 z-50 bg-[#050505] overflow-y-auto px-4 py-8" (click)="cancelar()">
-  <button
-    type="button"
-    aria-label="Cerrar"
-    (click)="cancelar()"
-    class="fixed right-6 top-4 text-xl text-gray-400 transition-colors hover:text-white"
-  >
-    ✕
-  </button>
+<p-dialog
+  [(visible)]="visible"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '60rem' }"
+  [breakpoints]="{ '1199px': '90vw' }"
+  (onShow)="alAbrir()">
 
-  <div class="mx-auto max-w-6xl" (click)="$event.stopPropagation()">
-    <div class="grid gap-8 lg:grid-cols-[minmax(0,1.7fr)_360px]">
-      <div class="pt-6 text-white">
-        <p class="text-xs font-semibold uppercase tracking-[0.22em] text-[#d4a733]">Reserva</p>
-        <h1 class="mt-3 text-4xl font-bold tracking-tight text-white">Agendar una cita</h1>
-        <p class="mt-2 text-base text-gray-400">Completa el formulario para programar tu próxima visita.</p>
+  <ng-template pTemplate="header">
+    <app-dialog-header title="Agendar una cita" icono="calendar-plus" mode="crear" />
+  </ng-template>
 
-        <div class="mt-8 flex items-center gap-3">
-          <div class="flex h-11 w-11 items-center justify-center rounded-full border border-[#d4a733] bg-[#d4a733]/10 text-[#d4a733]">
-            <i class="pi pi-user text-lg"></i>
-          </div>
-          <div>
-            <p class="text-[1.05rem] font-semibold leading-none text-white">Jorvix</p>
-            <p class="mt-1 text-sm text-gray-400">Cliente</p>
-          </div>
-        </div>
+  <div class="grid gap-6 lg:grid-cols-5">
 
-        <form [formGroup]="citaForm" class="mt-8 space-y-6">
-          <div>
-            <label class="mb-2 block text-base font-medium text-white">
-              Barbero <span class="text-red-500">*</span>
-            </label>
-            <p-select
-              formControlName="barberoId"
-              appendTo="body"
-              [options]="(barberos$ | async) || []"
-              optionLabel="nombreCompleto"
-              optionValue="barberoId"
-              placeholder="Selecciona un barbero"
-              class="w-full"
-              [class.border-red-500]="barberoInvalido"
-            >
-              <ng-template let-barbero pTemplate="item">
-                <div class="flex items-center gap-3">
-                  <div class="flex h-9 w-9 items-center justify-center rounded-full bg-[#d4a733]/15 text-[#d4a733]">
-                    <i class="pi pi-user text-sm"></i>
-                  </div>
-                  <div>
-                    <div class="font-medium text-white">{{ barbero.nombreCompleto }}</div>
-                    <div class="text-xs text-gray-500">{{ barbero.especialidad || 'Barbero' }}</div>
-                  </div>
-                </div>
-              </ng-template>
-            </p-select>
-            @if (barberoInvalido) {
-              <p class="mt-1 text-xs text-red-500">Selecciona un barbero</p>
-            }
-          </div>
+    <!-- ───────── Formulario ───────── -->
+    <form [formGroup]="citaForm" class="lg:col-span-3">
 
-          <div>
-            <label class="mb-2 block text-sm font-medium text-white">
-              Disponibilidad
-            </label>
-            <div class="flex flex-wrap gap-2">
-              @for (d of diasChips; track d.fecha.getTime()) {
-                <button
-                  type="button"
-                  (click)="seleccionarDia(d.fecha)"
-                  [title]="d.fecha | date: 'dd/MM/yyyy'"
-                  class="min-w-[74px] rounded-lg border px-4 py-2 text-sm font-semibold transition-all"
-                  [class]="
-                    esDiaActivo(d.fecha)
-                      ? 'border-[#d4a733] bg-[#d4a733] text-black shadow-[0_0_0_1px_rgba(212,167,51,0.7)]'
-                      : 'border-[#2a2a2a] bg-[#1a1a1a] text-white hover:bg-[#242424]'
-                  "
-                >
-                  {{ d.etiqueta }}
-                </button>
-              }
-            </div>
-
-            @if (fechaInvalida) {
-              <p class="mt-1 text-xs text-red-500">{{ fechaErrorMensaje }}</p>
-            }
-          </div>
-
-          <div>
-            <label class="mb-2 block text-sm font-medium text-white">
-              Hora <span class="text-red-500">*</span>
-            </label>
-            <div class="flex flex-wrap gap-2">
-              @for (hora of horariosDisponibles; track hora.value) {
-                <button
-                  type="button"
-                  (click)="seleccionarHora(hora.value)"
-                  class="min-w-[64px] rounded-md border px-3 py-2 text-sm font-medium transition-all"
-                  [class]="
-                    esHoraActiva(hora.value)
-                      ? 'border-[#d4a733] bg-[#d4a733] text-black'
-                      : 'border-[#2c2c2c] bg-[#1b1b1b] text-white hover:bg-[#242424]'
-                  "
-                >
-                  {{ hora.label }}
-                </button>
-              }
-            </div>
-            @if (horaInvalida && citaForm.get('hora')?.errors?.['noDisponible']) {
-              <p class="mt-1 flex items-center gap-1 text-xs text-orange-400">
-                <i class="pi pi-clock"></i>
-                Horario no disponible, selecciona otra hora
-              </p>
-            }
-            @if (horaInvalida && !citaForm.get('hora')?.errors?.['noDisponible']) {
-              <p class="mt-1 text-xs text-red-500">Selecciona una hora</p>
-            }
-          </div>
-
-          <div>
-            <div class="mb-2 flex items-center justify-between gap-3">
-              <label class="block text-base font-medium text-white">
-                Servicio <span class="text-red-500">*</span>
-              </label>
-              <span class="text-xs text-gray-400">Tiempo aprox.</span>
-            </div>
-            <div class="grid grid-cols-[minmax(0,1fr)_90px] items-center gap-3">
-              <p-select
-                formControlName="servicioId"
-                appendTo="body"
-                [options]="(servicios$ | async) || []"
-                optionLabel="nombre"
-                optionValue="servicioId"
-                placeholder="Selecciona un servicio"
-                class="w-full"
-                [class.border-red-500]="servicioInvalido"
-              >
-                <ng-template let-servicio pTemplate="item">
-                  <div class="flex justify-between items-center gap-4">
-                    <div>
-                      <div class="font-medium text-white">{{ servicio.nombre }}</div>
-                      <div class="text-xs text-gray-500">{{ servicio.duracion || 30 }} min</div>
-                    </div>
-                    <div class="text-sm font-semibold text-[#d4a733]">
-                      {{ servicio.precio | currency: 'PEN ' }}
-                    </div>
-                  </div>
-                </ng-template>
-              </p-select>
-              <div class="rounded-lg border border-[#2a2a2a] bg-[#1b1b1b] px-3 py-2 text-center text-sm text-white">
-                {{ getServicioDuracion() }} min
+      <div class="part-form">
+        <label>Barbero <span class="text-danger">*</span></label>
+        <p-select formControlName="barberoId" [options]="(barberos$ | async) || []"
+          optionLabel="nombreCompleto" optionValue="barberoId"
+          placeholder="Selecciona un barbero" appendTo="body">
+          <ng-template let-barbero pTemplate="item">
+            <div class="flex items-center gap-3">
+              <div class="flex size-9 items-center justify-center rounded-full border border-brand-gold/20 bg-brand-gold/10">
+                <i class="pi pi-user text-brand-gold"></i>
+              </div>
+              <div>
+                <div class="font-medium text-text-primary">{{ barbero.nombreCompleto }}</div>
+                <div class="text-xs text-text-muted">{{ barbero.especialidad || 'Barbero' }}</div>
               </div>
             </div>
-            @if (servicioInvalido) {
-              <p class="mt-1 text-xs text-red-500">Selecciona un servicio</p>
-            }
-          </div>
-
-          <div>
-            <div class="mb-2 flex items-center justify-between gap-3">
-              <label class="block text-sm font-medium text-white">
-                Notas adicionales
-              </label>
-              <span class="text-xs text-gray-500">{{ citaForm.get('notas')?.value?.length || 0 }}/200</span>
-            </div>
-            <textarea
-              pInputTextarea
-              formControlName="notas"
-              rows="3"
-              placeholder="Cuéntanos alguna indicación"
-              class="w-full resize-none rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] text-white placeholder:text-gray-500"
-            >
-            </textarea>
-          </div>
-
-          <div>
-            <label class="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                formControlName="aceptaTerminos"
-                class="!h-4 !w-4 !min-h-4 !min-w-4 !rounded !border-0 bg-black text-[#d4a733] focus:ring-[#d4a733] focus:ring-offset-black"
-              />
-              <span class="text-sm text-gray-300">
-                Acepto los
-                <a href="#" class="text-[#d4a733] hover:text-[#e2b63d]">términos y condiciones</a>
-              </span>
-            </label>
-            @if (terminosInvalido) {
-              <p class="mt-1 text-xs text-red-500">Debes aceptar los términos para continuar</p>
-            }
-          </div>
-        </form>
-      </div>
-
-      <aside class="pt-6">
-        <div class="rounded-2xl border border-[#2a2a2a] bg-[#0d0d0d]/90 p-5 text-white shadow-[0_0_0_1px_rgba(255,255,255,0.02)]">
-          <h3 class="text-2xl font-semibold text-white">Resumen de la cita</h3>
-
-          <div class="mt-6 space-y-4">
-            <div class="flex items-center justify-between gap-3 border-b border-[#1e1e1e] pb-3">
-              <span class="text-gray-400">Barbero</span>
-              <span class="font-medium text-white">{{ getBarberoNombre() }}</span>
-            </div>
-
-            <div class="flex items-center justify-between gap-3 border-b border-[#1e1e1e] pb-3">
-              <span class="text-gray-400">Servicio</span>
-              <span class="font-medium text-white">{{ getServicioNombre() }}</span>
-            </div>
-
-            <div class="flex items-center justify-between gap-3 border-b border-[#1e1e1e] pb-3">
-              <span class="text-gray-400">Duración</span>
-              <span class="font-medium text-white">{{ getServicioDuracion() }} min</span>
-            </div>
-
-            <div class="flex items-center justify-between gap-3 border-b border-[#1e1e1e] pb-3">
-              <span class="text-gray-400">Fecha</span>
-              <span class="font-medium text-white">{{ getFechaFormateada() || 'Jueves' }}</span>
-            </div>
-
-            <div class="flex items-center justify-between gap-3">
-              <span class="text-gray-400">Hora</span>
-              <span class="font-medium text-white">{{ citaForm.get('hora')?.value || '—' }}</span>
-            </div>
-          </div>
-
-          <div class="mt-7 border-t border-[#1e1e1e] pt-5">
-            <div class="flex items-center justify-between gap-3 text-lg font-semibold text-white">
-              <span>Total a pagar</span>
-              <span class="text-[#d4a733]">S/ {{ getServicioPrecio() | number: '1.2-2' }}</span>
-            </div>
-
-            <ul class="mt-5 space-y-3 text-sm text-gray-400">
-              <li class="flex items-start gap-2">
-                <span class="mt-1.5 h-1.5 w-1.5 rounded-full bg-[#d4a733]"></span>
-                <span>Pago contra entrega en el local</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <span class="mt-1.5 h-1.5 w-1.5 rounded-full bg-[#d4a733]"></span>
-                <span>Llegar 10 minutos antes de tu cita</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <span class="mt-1.5 h-1.5 w-1.5 rounded-full bg-[#d4a733]"></span>
-                <span>Cancelación con 2 horas de anticipación</span>
-              </li>
-            </ul>
-          </div>
-
-          <button
-            type="button"
-            (click)="guardarCita()"
-            [disabled]="citaForm.invalid"
-            class="mt-7 flex w-full items-center justify-center gap-2 rounded-xl bg-[#d4a733] px-4 py-3 text-base font-semibold text-black transition-opacity hover:bg-[#e2b63d] disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <i class="pi pi-calendar-plus"></i>
-            Agendar cita
-          </button>
-        </div>
-      </aside>
-    </div>
-  </div>
-</div>
-
-<div
-  *ngIf="showConfirmDialog"
-  class="fixed inset-0 z-[60] flex items-center justify-center bg-black/90"
-  (click)="showConfirmDialog = false"
->
-  <div
-    class="w-full max-w-md rounded-2xl border border-neutral-800 bg-neutral-900 shadow-2xl"
-    (click)="$event.stopPropagation()"
-  >
-    <div class="rounded-t-2xl bg-gradient-to-r from-yellow-500 to-yellow-600 px-6 py-4">
-      <div class="flex items-center gap-3">
-        <i class="pi pi-question-circle text-2xl text-black"></i>
-        <h3 class="m-0 text-xl font-semibold text-black">Confirmar cita</h3>
-      </div>
-    </div>
-
-    <div class="p-6">
-      <div class="mb-4 flex items-center gap-3 rounded-xl border border-yellow-500/20 bg-yellow-500/10 p-3">
-        <i class="pi pi-info-circle text-2xl text-yellow-500"></i>
-        <div>
-          <h4 class="m-0 text-white font-semibold">¿Estás seguro?</h4>
-          <p class="m-0 text-sm text-gray-400">Confirma los detalles de tu cita</p>
-        </div>
-      </div>
-
-      <div class="space-y-3">
-        <div class="flex justify-between border-b border-neutral-800 py-2">
-          <span class="font-medium text-gray-400">Barbero:</span>
-          <span class="text-white">{{ getBarberoNombre() }}</span>
-        </div>
-        <div class="flex justify-between border-b border-neutral-800 py-2">
-          <span class="font-medium text-gray-400">Servicio:</span>
-          <span class="text-white">{{ getServicioNombre() }}</span>
-        </div>
-        <div class="flex justify-between border-b border-neutral-800 py-2">
-          <span class="font-medium text-gray-400">Fecha:</span>
-          <span class="text-white">{{ citaForm.get('fecha')?.value | date: 'dd/MM/yyyy' }}</span>
-        </div>
-        <div class="flex justify-between border-b border-neutral-800 py-2">
-          <span class="font-medium text-gray-400">Hora:</span>
-          <span class="text-white">{{ citaForm.get('hora')?.value }}</span>
-        </div>
-        <div class="flex justify-between py-2">
-          <span class="font-medium text-gray-400">Total:</span>
-          <span class="text-lg font-bold text-yellow-500">{{ getServicioPrecio() | currency: 'PEN ' }}</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="flex justify-end gap-3 rounded-b-2xl bg-black px-6 py-4">
-      <button
-        (click)="showConfirmDialog = false"
-        class="rounded-lg bg-neutral-800 px-4 py-2 text-gray-300 transition-colors hover:bg-neutral-700"
-      >
-        Cancelar
-      </button>
-      <button
-        (click)="confirmarGuardar()"
-        [disabled]="isLoading"
-        class="flex items-center gap-2 rounded-lg bg-yellow-500 px-4 py-2 text-black transition-colors hover:bg-yellow-600 disabled:opacity-50"
-      >
-        @if (isLoading) {
-          <div class="h-4 w-4 animate-spin rounded-full border-2 border-black border-t-transparent"></div>
-        } @else {
-          <i class="pi pi-check"></i>
+          </ng-template>
+        </p-select>
+        @if (invalido('barberoId')) {
+          <span class="text-xs text-danger">Selecciona un barbero</span>
         }
-        Confirmar cita
-      </button>
-    </div>
-  </div>
-</div>
+      </div>
 
-<p-toast position="top-right"></p-toast>
+      <div class="part-form">
+        <label>Servicio <span class="text-danger">*</span></label>
+        <p-select formControlName="servicioId" [options]="(servicios$ | async) || []"
+          optionLabel="nombre" optionValue="servicioId"
+          placeholder="Selecciona un servicio" appendTo="body">
+          <ng-template let-servicio pTemplate="item">
+            <div class="flex w-full items-center justify-between gap-4">
+              <div>
+                <div class="font-medium text-text-primary">{{ servicio.nombre }}</div>
+                <div class="text-xs text-text-muted">{{ servicio.duracion || 30 }} min</div>
+              </div>
+              <span class="font-semibold text-brand-gold">{{ servicio.precio | currency:'PEN ' }}</span>
+            </div>
+          </ng-template>
+        </p-select>
+        @if (invalido('servicioId')) {
+          <span class="text-xs text-danger">Selecciona un servicio</span>
+        }
+      </div>
+
+      <div class="grid gap-4 md:grid-cols-2">
+
+        <div class="part-form">
+          <label>Fecha <span class="text-danger">*</span></label>
+          <p-datepicker formControlName="fecha" dateFormat="dd/mm/yy" appendTo="body"
+            [minDate]="minDate" [maxDate]="maxDate" [disabledDays]="[0]" [showIcon]="true"
+            styleClass="w-full" (onSelect)="alCambiarFecha()" />
+          @if (invalido('fecha')) {
+            <span class="text-xs text-danger">{{ errorFecha }}</span>
+          }
+        </div>
+
+        <div class="part-form">
+          <label>Hora <span class="text-danger">*</span></label>
+          <p-select formControlName="hora" [options]="horariosDisponibles"
+            optionLabel="label" optionValue="value"
+            placeholder="Selecciona una hora" appendTo="body" />
+          @if (invalido('hora')) {
+            <span class="text-xs text-danger">Selecciona una hora</span>
+          }
+        </div>
+
+      </div>
+
+      <div class="part-form">
+        <label>Notas adicionales (opcional)</label>
+        <textarea formControlName="notas" rows="3" class="resize-none"
+          placeholder="¿Alguna indicación especial? (corte específico, alergias, etc.)"></textarea>
+        <span class="text-xs text-text-muted">{{ citaForm.controls.notas.value?.length || 0 }}/300 caracteres</span>
+      </div>
+
+      <div class="part-form">
+        <div class="flex items-center gap-3">
+          <p-checkbox formControlName="aceptaTerminos" inputId="terminos" [binary]="true" />
+          <label for="terminos" class="cursor-pointer py-0 font-normal">
+            Acepto los <a href="#" class="text-brand-gold hover:text-brand-gold-hover">términos y condiciones</a>
+          </label>
+        </div>
+        @if (invalido('aceptaTerminos')) {
+          <span class="text-xs text-danger">Debes aceptar los términos para continuar</span>
+        }
+      </div>
+
+    </form>
+
+    <!-- ───────── Resumen ───────── -->
+    <aside class="flex flex-col gap-4 self-start rounded-2xl border border-brand-gold/20 bg-ui-surface p-5 lg:col-span-2">
+
+      <h3 class="flex items-center gap-2 text-base font-semibold text-brand-gold">
+        <i class="pi pi-receipt"></i> Resumen de la cita
+      </h3>
+
+      <dl class="flex flex-col gap-3 text-sm">
+        <div class="border-b border-ui-border-soft pb-3">
+          <dt class="text-text-muted">Barbero</dt>
+          <dd class="font-medium text-text-primary">{{ barberoSel?.nombreCompleto || '—' }}</dd>
+        </div>
+
+        <div class="border-b border-ui-border-soft pb-3">
+          <dt class="text-text-muted">Servicio</dt>
+          <dd class="font-medium text-text-primary">{{ servicioSel?.nombre || '—' }}</dd>
+          @if (servicioSel) {
+            <dd class="text-xs text-text-muted">Duración: {{ servicioSel.duracion || 30 }} min</dd>
+          }
+        </div>
+
+        <div class="border-b border-ui-border-soft pb-3">
+          <dt class="text-text-muted">Fecha y hora</dt>
+          <dd class="font-medium text-text-primary">
+            @if (citaForm.controls.fecha.value) {
+              {{ citaForm.controls.fecha.value | date:'dd/MM/yyyy' }}
+              {{ citaForm.controls.hora.value ? '· ' + citaForm.controls.hora.value : '' }}
+            } @else { — }
+          </dd>
+        </div>
+
+        <div class="flex items-center justify-between text-base font-semibold">
+          <dt class="text-text-primary">Total a pagar</dt>
+          <dd class="text-brand-gold">{{ (servicioSel?.precio || 0) | currency:'PEN ' }}</dd>
+        </div>
+      </dl>
+
+      <ul class="flex flex-col gap-2 text-xs text-text-muted">
+        <li class="flex items-start gap-2"><i class="pi pi-check-circle mt-0.5 text-success"></i> Pago contra entrega en el local</li>
+        <li class="flex items-start gap-2"><i class="pi pi-clock mt-0.5 text-brand-gold"></i> Llegar 10 minutos antes de tu cita</li>
+        <li class="flex items-start gap-2"><i class="pi pi-info-circle mt-0.5 text-info"></i> Cancelación con 2 horas de anticipación</li>
+      </ul>
+
+    </aside>
+
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button type="button" class="boton-secondary gap-2" (click)="cerrar()">
+      <i class="pi pi-times"></i> Cancelar
+    </button>
+
+    <button type="button" class="boton-primary gap-2"
+      (click)="guardar()" [disabled]="citaForm.invalid || guardando()">
+      @if (guardando()) {
+        <i class="pi pi-spin pi-spinner"></i> Agendando...
+      } @else {
+        <i class="pi pi-calendar-plus"></i> Agendar cita
+      }
+    </button>
+  </ng-template>
+
+</p-dialog>

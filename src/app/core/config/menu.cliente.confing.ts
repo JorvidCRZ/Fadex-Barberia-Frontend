@@ -9,9 +9,10 @@ export const CLIENTE_MENU = [
     },
 
     {
-        label: "Reservas",
+        label: "Mis Reservas",
         icon: "pi pi-calendar",
         routerLink: ["reservas/mis-reservas"],
+        permission: "RESERVA_READ_OWN"
     },
 
     {

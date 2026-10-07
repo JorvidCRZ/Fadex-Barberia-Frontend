@@ -1,420 +1,234 @@
+import { Component, inject, model, output, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { CardModule } from 'primeng/card';
-import { ChipModule } from 'primeng/chip';
-import { BadgeModule } from 'primeng/badge';
-import { ToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
-import { ButtonModule } from 'primeng/button';
+import {
+  AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators,
+} from '@angular/forms';
+import { DialogModule } from 'primeng/dialog';
 import { SelectModule } from 'primeng/select';
-import { DividerModule } from 'primeng/divider';
-import { IftaLabelModule } from 'primeng/iftalabel';
 import { DatePickerModule } from 'primeng/datepicker';
-import { CommonModule, AsyncPipe, DatePipe } from '@angular/common';
-import { Component, inject, OnInit, OnDestroy } from '@angular/core';
-import { TokenService } from '../../../../core/services/auth/token.service';
+import { CheckboxModule } from 'primeng/checkbox';
+import { MessageService } from 'primeng/api';
+import { catchError, finalize, map, Observable, of } from 'rxjs';
+import { Servicio } from '../../../../core/models/catalogos/servicios.model';
 import { Barbero } from '../../../../core/models/gestion/barbero/barbero.model';
 import { ReservaRequest } from '../../../../core/models/reserva/reservaRequest';
-import { BarberoService } from '../../../../core/services/gestion/barbero.service';
+import { TokenService } from '../../../../core/services/auth/token.service';
 import { ServicioService } from '../../../../core/services/catalogos/servicio.service';
+import { BarberoService } from '../../../../core/services/gestion/barbero.service';
 import { ReservaService } from '../../../../core/services/operaciones/reserva.service';
-import { Servicio, ServicioFiltro } from '../../../../core/models/catalogos/servicios.model';
-import {FormBuilder,ReactiveFormsModule,Validators,AbstractControl,ValidationErrors} from '@angular/forms';
-import { map, Observable, of, Subject, takeUntil, debounceTime, switchMap, catchError, finalize } from 'rxjs';
-import { environment } from '../../../../../environments/environment';
+import { DialogHeaderComponent } from '../../../../shared/components/dialog-header/dialog-header.component';
 
+// TODO: ajusta la ruta a donde tengas DialogHeaderComponent
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+const fechaValida = (control: AbstractControl): ValidationErrors | null => {
+  const fecha = control.value as Date | null;
+  if (!fecha) return null;
+
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  const f = new Date(fecha);
+  f.setHours(0, 0, 0, 0);
+
+  if (f < hoy) return { fechaInvalida: true };
+  if (f.getDay() === 0) return { domingo: true };
+  return null;
+};
+
+/** 09:00 → 18:30 cada 30 min */
+const HORARIOS = Array.from({ length: 20 }, (_, i) => {
+  const mins = 9 * 60 + i * 30;
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  const mm = String(m).padStart(2, '0');
+  return {
+    value: `${String(h).padStart(2, '0')}:${mm}`,
+    label: `${String(h % 12 || 12).padStart(2, '0')}:${mm} ${h < 12 ? 'AM' : 'PM'}`,
+  };
+});
+
+// ── Componente ───────────────────────────────────────────────────────────────
+
+/**
+ * Usa el MessageService del componente padre (debe tener <p-toast /> y
+ * `providers: [MessageService]`, como ya lo tiene MisReservas).
+ */
 @Component({
-  selector: 'app-sacar-cita',
+  selector: 'app-reservar',
   standalone: true,
-  imports: [CommonModule,AsyncPipe,DatePipe,ReactiveFormsModule,SelectModule,IftaLabelModule,ButtonModule,
-    ToastModule,CardModule,DividerModule,DatePickerModule,BadgeModule,ChipModule],
-  providers: [MessageService],
+  imports: [CommonModule, ReactiveFormsModule, DialogModule, SelectModule, DatePickerModule, CheckboxModule, DialogHeaderComponent],
   templateUrl: './reservar.html',
 })
-export class ReservarComponent implements OnInit, OnDestroy {
+export class ReservarComponent {
+  private readonly fb = inject(FormBuilder);
+  private readonly router = inject(Router);
+  private readonly messageService = inject(MessageService);
+  private readonly tokenService = inject(TokenService);
+  private readonly barberoService = inject(BarberoService);
+  private readonly servicioService = inject(ServicioService);
+  private readonly reservaService = inject(ReservaService);
 
-  private fb = inject(FormBuilder);
-  private barberoService = inject(BarberoService);
-  private servicioService = inject(ServicioService);
-  private reservaService = inject(ReservaService);
-  private tokenService = inject(TokenService);
-  private messageService = inject(MessageService);
-  private router = inject(Router);
+  /** Se usa con [(visible)] desde el padre */
+  visible = model(false);
+  /** Se emite al crear la reserva, para que el padre recargue la tabla */
+  creada = output<void>();
 
-  private destroy$ = new Subject<void>();
+  guardando = signal(false);
 
-  barberos$!: Observable<Barbero[]>;
+  barberos$!: Observable<any[]>;
   servicios$!: Observable<Servicio[]>;
+  private barberosCache: any[] = [];
+  private serviciosCache: Servicio[] = [];
+  private datosCargados = false;
 
-  isLoading = false;
-  checkingDisponibility = false;
-  showConfirmDialog = false;
-  reservaPreview: any = null;
-  today = new Date();
-
-  barberosCache: any[] = [];
-  serviciosCache: Servicio[] = [];
-  servicioFiltro: ServicioFiltro = { page: 0, size: 1000 };
-
-  minDateCita: Date = this.calcularFechaMinima();
-  maxDateCita: Date = this.calcularFechaMaxima();
-
-  horariosDisponibles: { label: string; value: string }[] = [];
-
-  private readonly TODOS_LOS_HORARIOS: { label: string; value: string }[] = [
-    { label: '09:00 AM', value: '09:00' },
-    { label: '09:30 AM', value: '09:30' },
-    { label: '10:00 AM', value: '10:00' },
-    { label: '10:30 AM', value: '10:30' },
-    { label: '11:00 AM', value: '11:00' },
-    { label: '11:30 AM', value: '11:30' },
-    { label: '12:00 PM', value: '12:00' },
-    { label: '12:30 PM', value: '12:30' },
-    { label: '01:00 PM', value: '13:00' },
-    { label: '01:30 PM', value: '13:30' },
-    { label: '02:00 PM', value: '14:00' },
-    { label: '02:30 PM', value: '14:30' },
-    { label: '03:00 PM', value: '15:00' },
-    { label: '03:30 PM', value: '15:30' },
-    { label: '04:00 PM', value: '16:00' },
-    { label: '04:30 PM', value: '16:30' },
-    { label: '05:00 PM', value: '17:00' },
-    { label: '05:30 PM', value: '17:30' },
-    { label: '06:00 PM', value: '18:00' },
-    { label: '06:30 PM', value: '18:30' },
-  ];
-
-  clienteActual: any = {
-    id: null,
-    nombre: '',
-    apellido: '',
-    email: '',
-    telefono: ''
-  };
+  readonly minDate = this.hoy();
+  readonly maxDate = this.hoy(3);
+  horariosDisponibles = HORARIOS;
 
   citaForm = this.fb.group({
-    barberoId: [null, [Validators.required]],
-    servicioId: [null, [Validators.required]],
-    fecha: [null as Date | null, [Validators.required, this.fechaValida.bind(this)]],
+    barberoId: [null as number | null, [Validators.required]],
+    servicioId: [null as number | null, [Validators.required]],
+    fecha: [null as Date | null, [Validators.required, fechaValida]],
     hora: [null as string | null, [Validators.required]],
     notas: ['', [Validators.maxLength(300)]],
-    aceptaTerminos: [false, [Validators.requiredTrue]]
+    aceptaTerminos: [false, [Validators.requiredTrue]],
   });
 
+  // ── Apertura / cierre ──────────────────────────────────────────────────────
 
-
-  ngOnInit(): void {
-    this.cargarClienteDesdeToken();
-    this.cargarDatos();
-    this.horariosDisponibles = this.calcularHorarios();
-    this.generarDiasChips();
+  alAbrir(): void {
+    if (!this.datosCargados) this.cargarDatos();
+    this.citaForm.reset({ notas: '', aceptaTerminos: false });
+    this.horariosDisponibles = HORARIOS;
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+  cerrar(): void {
+    this.visible.set(false);
   }
 
+  // ── Carga de datos (solo la primera vez que se abre) ───────────────────────
 
+  private cargarDatos(): void {
+    this.datosCargados = true;
 
-  private calcularFechaMinima(): Date {
-    const hoy = new Date();
-    hoy.setHours(0, 0, 0, 0);
-    return hoy;
+    this.barberos$ = this.barberoService.listar(0, 1000).pipe(
+      map((res) => {
+        this.barberosCache = (res?.data?.content ?? []).map((b: Barbero) => ({
+          ...b,
+          nombreCompleto: `${b.persona?.nombre ?? ''} ${b.persona?.apellido ?? ''}`.trim(),
+        }));
+        return this.barberosCache;
+      }),
+      catchError(() => {
+        this.toast('error', 'Error', 'No se pudieron cargar los barberos');
+        return of([]);
+      }),
+    );
+
+    this.servicios$ = this.servicioService.obtenerServicioPublicos({ size: 1000, page: 0 }).pipe(
+      map((res) => {
+        this.serviciosCache = res?.data?.content ?? [];
+        return this.serviciosCache;
+      }),
+      catchError(() => {
+        this.toast('error', 'Error', 'No se pudieron cargar los servicios');
+        return of([]);
+      }),
+    );
   }
 
-  private calcularFechaMaxima(): Date {
-    const max = new Date();
-    max.setMonth(max.getMonth() + 3);
-    max.setHours(0, 0, 0, 0);
-    return max;
-  }
+  // ── Fecha / horarios ───────────────────────────────────────────────────────
 
-  getFechaMinimaInput(): string {
-    return this.minDateCita.toISOString().split('T')[0];
-  }
-
-  getFechaMaximaInput(): string {
-    return this.maxDateCita.toISOString().split('T')[0];
-  }
-
-  getFechaMinima(): Date {
-    return this.minDateCita;
-  }
-
-  getFechaFormateada(): string {
-    const fecha = this.citaForm.get('fecha')?.value;
-    if (!fecha) return '';
-    return (fecha as Date).toLocaleDateString('es-ES', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  }
-
-  fechaValida(control: AbstractControl): ValidationErrors | null {
-    const fecha = control.value as Date;
-
-    if (!fecha) return null;
-
-    const hoy = new Date();
-    hoy.setHours(0, 0, 0, 0);
-
-    const fechaComparar = new Date(fecha);
-    fechaComparar.setHours(0, 0, 0, 0);
-
-    if (fechaComparar < hoy) {
-      return { fechaInvalida: true };
-    }
-
-    if (fechaComparar.getDay() === 0) {
-      return { domingo: true };
-    }
-
-    return null;
-  }
-
-  
-
-  onFechaChange(): void {
-    this.citaForm.get('hora')?.reset();
+  alCambiarFecha(): void {
+    this.citaForm.controls.hora.reset();
     this.horariosDisponibles = this.calcularHorarios();
   }
 
-  private calcularHorarios(): { label: string; value: string }[] {
-    const fechaSeleccionada:any = this.citaForm.get('fecha')?.value;
-    if (!fechaSeleccionada) return this.TODOS_LOS_HORARIOS;
+  /** Si la fecha es hoy, solo muestra horas posteriores a la actual */
+  private calcularHorarios() {
+    const fecha = this.citaForm.controls.fecha.value;
+    const ahora = new Date();
+    if (!fecha || fecha.toDateString() !== ahora.toDateString()) return HORARIOS;
 
-    const hoy = new Date();
-
- 
-    const fechaForm = fechaSeleccionada instanceof Date
-      ? new Date(fechaSeleccionada)
-      : new Date((fechaSeleccionada as string) + 'T00:00:00');
-
-    const esHoy =
-      fechaForm.getFullYear() === hoy.getFullYear() &&
-      fechaForm.getMonth() === hoy.getMonth() &&
-      fechaForm.getDate() === hoy.getDate();
-
-    if (!esHoy) return this.TODOS_LOS_HORARIOS;
-
-    const horaActual = hoy.getHours();
-    const minActual = hoy.getMinutes();
-
-    return this.TODOS_LOS_HORARIOS.filter(h => {
+    const minutosAhora = ahora.getHours() * 60 + ahora.getMinutes();
+    return HORARIOS.filter((h) => {
       const [hh, mm] = h.value.split(':').map(Number);
-      if (hh < horaActual) return false;
-      if (hh === horaActual && mm <= minActual) return false;
-      return true;
+      return hh * 60 + mm > minutosAhora;
     });
   }
 
+  // ── Resumen ────────────────────────────────────────────────────────────────
 
+  get barberoSel() {
+    const id = this.citaForm.controls.barberoId.value;
+    return this.barberosCache.find((b) => b.barberoId === id);
+  }
 
-  private cargarClienteDesdeToken(): void {
-    const decodedToken = this.tokenService.getDecodedToken();
-    const userId = this.tokenService.getUserId();
-    const userDisplayName = this.tokenService.getUserDisplayName();
+  get servicioSel() {
+    const id = this.citaForm.controls.servicioId.value;
+    return this.serviciosCache.find((s) => s.servicioId === id);
+  }
 
-    if (!userId || !this.tokenService.isLogged()) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Sesión no válida',
-        detail: 'Por favor inicia sesión nuevamente'
-      });
+  // ── Validación en template ─────────────────────────────────────────────────
+
+  invalido(campo: string): boolean {
+    const c = this.citaForm.get(campo);
+    return !!c?.invalid && c.touched;
+  }
+
+  get errorFecha(): string {
+    const errors = this.citaForm.controls.fecha.errors;
+    if (errors?.['fechaInvalida']) return 'La fecha no puede ser anterior a hoy';
+    if (errors?.['domingo']) return 'No atendemos los domingos';
+    return 'La fecha es requerida';
+  }
+
+  // ── Guardar ────────────────────────────────────────────────────────────────
+
+  guardar(): void {
+    if (this.citaForm.invalid) {
+      this.citaForm.markAllAsTouched();
+      return;
+    }
+
+    if (!this.tokenService.isLogged()) {
+      this.toast('error', 'Sesión no válida', 'Por favor inicia sesión nuevamente');
       this.router.navigate(['/login']);
       return;
     }
 
-    const nombreCompleto = userDisplayName || decodedToken?.nombreCompleto || decodedToken?.fullName || '';
-    const nombreParts = nombreCompleto.split(' ');
+    const f = this.citaForm.getRawValue();
+    const fecha = f.fecha as Date;
 
-    this.clienteActual = {
-      id: userId,
-      nombre: nombreParts[0] || decodedToken?.nombre || decodedToken?.given_name || 'Cliente',
-      apellido: nombreParts.slice(1).join(' ') || decodedToken?.apellido || decodedToken?.family_name || '',
-      email: decodedToken?.email || decodedToken?.sub || '',
-      telefono: decodedToken?.telefono || decodedToken?.phone || '',
-      username: decodedToken?.username || decodedToken?.sub || ''
-    };
-  }
-
-  private cargarDatos(): void {
-    if (environment.useMockData) {
-      const mockBarberos = [
-        { barberoId: 1, persona: { nombre: 'Carlos', apellido: 'Ramírez' }, especialidad: 'Corte clásico' },
-        { barberoId: 2, persona: { nombre: 'Miguel', apellido: 'Torres' }, especialidad: 'Barba y perfilado' },
-        { barberoId: 3, persona: { nombre: 'Diego', apellido: 'Santos' }, especialidad: 'Fade moderno' },
-      ].map((barbero: any) => ({
-        ...barbero,
-        id: barbero.barberoId,
-        nombreCompleto: `${barbero.persona?.nombre ?? ''} ${barbero.persona?.apellido ?? ''}`.trim(),
-      }));
-
-      this.barberosCache = mockBarberos;
-      this.barberos$ = of(mockBarberos);
-
-      this.serviciosCache = [
-        {
-          servicioId: 1,
-          nombre: 'Corte clásico',
-          duracion: 30,
-          precio: 35,
-          categoriaId: 1,
-          categoriaNombre: 'Cortes',
-          publicado: true,
-          estado: true,
-          urlsMultimedia: []
-        },
-        {
-          servicioId: 2,
-          nombre: 'Arreglo de barba',
-          duracion: 25,
-          precio: 30,
-          categoriaId: 1,
-          categoriaNombre: 'Barba',
-          publicado: true,
-          estado: true,
-          urlsMultimedia: []
-        },
-        {
-          servicioId: 3,
-          nombre: 'Fade moderno',
-          duracion: 45,
-          precio: 50,
-          categoriaId: 1,
-          categoriaNombre: 'Cortes',
-          publicado: true,
-          estado: true,
-          urlsMultimedia: []
-        },
-      ];
-      this.servicios$ = of(this.serviciosCache);
-      return;
-    }
-
-    this.barberos$ = this.barberoService.listar(0, 1000).pipe(
-      map(response => {
-        if (response?.data?.content) {
-          this.barberosCache = response.data.content.map((barbero: Barbero) => ({
-            ...barbero,
-            id: barbero.barberoId || barbero.barberoId,
-            nombreCompleto: `${barbero.persona?.nombre ?? ''} ${barbero.persona?.apellido ?? ''}`.trim()
-          }));
-          return this.barberosCache;
-        }
-        return [];
-      })
-    );
-
-    this.servicios$ = this.servicioService.obtenerServicioPublicos({ size: 1000, page: 0 }).pipe(
-      map(response => {
-        if (response?.data?.content) {
-          this.serviciosCache = response.data.content;
-          return this.serviciosCache;
-        }
-        return [];
-      }),
-      catchError((error) => {
-        console.error('Error cargando servicios:', error);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'No se pudieron cargar los servicios'
-        });
-        return of([]);
-      })
-    );
-  }
-
-
-  guardarCita(): void {
-    if (this.citaForm.invalid) {
-      this.citaForm.markAllAsTouched();
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Formulario inválido',
-        detail: 'Por favor completa todos los campos requeridos y acepta los términos'
-      });
-      return;
-    }
-
-    const reserva = this.citaForm.getRawValue();
-
-    this.reservaPreview = {
-      ...reserva,
-      fechaFormateada: reserva.fecha ? new Date(reserva.fecha).toLocaleDateString('es-ES', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      }) : ''
+    const request: ReservaRequest = {
+      clienteId: Number(this.tokenService.getUserId()),
+      barberoId: f.barberoId!,
+      servicioId: f.servicioId!,
+      fecha: [
+        fecha.getFullYear(),
+        String(fecha.getMonth() + 1).padStart(2, '0'),
+        String(fecha.getDate()).padStart(2, '0'),
+      ].join('-'),
+      horaInicio: f.hora!,
+      observacion: f.notas ?? '',
     };
 
-    this.showConfirmDialog = true;
-  }
+    this.guardando.set(true);
 
-  confirmarGuardar(): void {
-    this.showConfirmDialog = false;
-    this.isLoading = true;
-
-    const form = this.citaForm.getRawValue();
-
-    if (!form.fecha) {
-      this.isLoading = false;
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Fecha inválida',
-        detail: 'La fecha es requerida'
-      });
-      return;
-    }
-
-    const fecha = new Date(form.fecha as string | Date);
-
-    const reservaRequest: ReservaRequest = {
-      clienteId: Number(this.clienteActual.id),
-      barberoId: form.barberoId!,
-      servicioId: form.servicioId!,
-      fecha: fecha.toISOString().split('T')[0],
-      horaInicio: form.hora!,
-      observacion: form.notas ?? ''
-    };
-
-    console.log('Payload enviado:', reservaRequest);
-
-    this.reservaService.guardarReserva(reservaRequest)
-      .pipe(
-        finalize(() => {
-          this.isLoading = false;
-        })
-      )
+    this.reservaService
+      .guardarReserva(request)
+      .pipe(finalize(() => this.guardando.set(false)))
       .subscribe({
-        next: (response: any) => {
-          console.log('Respuesta crear reserva:', response);
-
-          this.messageService.add({
-            severity: 'success',
-            summary: '¡Cita agendada!',
-            detail: 'Tu cita ha sido agendada exitosamente',
-            life: 3000
-          });
-
-          setTimeout(() => {
-            this.router.navigate(['/mi-cuenta/reservas/mis-reservas']);
-          }, 2000);
+        next: () => {
+          this.toast('success', '¡Cita agendada!', 'Tu cita fue agendada exitosamente');
+          this.cerrar();
+          this.creada.emit();
         },
         error: (error) => {
-          console.error('Error al guardar reserva:', error);
-
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error del servidor',
-            detail: error?.error?.message ?? 'Ocurrió un error al agendar la cita.',
-            life: 4000
-          });
-        }
+          this.toast('error', 'Error del servidor', error?.error?.message ?? 'Ocurrió un error al agendar la cita.');
+        },
       });
   }
   diasChips: { fecha: Date; etiqueta: string }[] = [];
@@ -451,69 +265,16 @@ esDiaActivo(d: Date): boolean {
     return (this.citaForm.get('hora')?.value ?? null) === hora;
   }
 
-  getBarberoNombre(): string {
-    const barberoId = this.citaForm.get('barberoId')?.value;
-    const barbero = this.barberosCache.find(b => (b.barberoId === barberoId || b.id === barberoId));
-    return barbero?.nombreCompleto || 'Cargando...';
+  // ── Utils ──────────────────────────────────────────────────────────────────
+
+  private hoy(mesesExtra = 0): Date {
+    const d = new Date();
+    d.setMonth(d.getMonth() + mesesExtra);
+    d.setHours(0, 0, 0, 0);
+    return d;
   }
 
-  getServicioNombre(): string {
-    const servicioId = this.citaForm.get('servicioId')?.value;
-    if (servicioId == null) return 'Cargando...';
-    const servicio = this.serviciosCache.find(s => (s.servicioId === servicioId || s.servicioId === servicioId));
-    return servicio?.nombre || 'Cargando...';
-  }
-
-  getServicioPrecio(): number {
-    const servicioId = this.citaForm.get('servicioId')?.value;
-    if (servicioId == null) return 0;
-    const servicio = this.serviciosCache.find(s => (s.servicioId === servicioId || s.servicioId === servicioId));
-    return servicio?.precio || 0;
-  }
-
-  getServicioDuracion(): number {
-    const servicioId = this.citaForm.get('servicioId')?.value;
-    if (servicioId == null) return 30;
-    const servicio = this.serviciosCache.find(s => (s.servicioId === servicioId || s.servicioId === servicioId));
-    return servicio?.duracion || 30;
-  }
-
-cancelar(): void {
-  this.router.navigate(['/mi-cuenta/reservas/mis-reservas']);
-}
-
-  get barberoInvalido(): boolean {
-    const control = this.citaForm.get('barberoId');
-    return !!control?.invalid && control.touched;
-  }
-
-  get servicioInvalido(): boolean {
-    const control = this.citaForm.get('servicioId');
-    return !!control?.invalid && control.touched;
-  }
-
-  get fechaInvalida(): boolean {
-    const control = this.citaForm.get('fecha');
-    return !!control?.invalid && control.touched;
-  }
-
-  get horaInvalida(): boolean {
-    const control = this.citaForm.get('hora');
-    return !!control?.invalid && control.touched;
-  }
-
-  get terminosInvalido(): boolean {
-    const control = this.citaForm.get('aceptaTerminos');
-    return !!control?.invalid && control.touched;
-  }
-
-  get fechaErrorMensaje(): string {
-    const control = this.citaForm.get('fecha');
-    if (control?.errors?.['fechaInvalida']) return 'La fecha no puede ser anterior a hoy';
-    return 'La fecha es requerida';
-  }
-
-  getNombreCompletoCliente(): string {
-    return `${this.clienteActual.nombre} ${this.clienteActual.apellido}`.trim() || this.clienteActual.username || 'Cliente';
+  private toast(severity: 'success' | 'error', summary: string, detail: string): void {
+    this.messageService.add({ severity, summary, detail, life: 3000 });
   }
 }
