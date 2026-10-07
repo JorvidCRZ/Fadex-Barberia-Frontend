@@ -69,7 +69,6 @@ export class MisReservasComponent implements OnInit {
   cargarMisReservas(event?: TableLazyLoadEvent): void {
     this.loading = true;
 
-    // Obtener página y tamaño del evento de PrimeNG
     const page = event ? Math.floor((event.first || 0) / (event.rows || this.rows)) : this.currentPage;
     const size = event?.rows || this.rows;
 
@@ -77,13 +76,27 @@ export class MisReservasComponent implements OnInit {
     this.rows = size;
 
     if (environment.useMockData) {
-      const filtradas = RESERVAS_MOCK.filter(reserva =>
-        !this.estadoFiltro || reserva.estadoReserva === this.estadoFiltro,
-      );
-      const inicio = page * size;
-      this.reservas = filtradas.slice(inicio, inicio + size);
-      this.totalRecords = filtradas.length;
-      this.loading = false;
+      this.reservaService.getMisReservas(page, size)
+        .pipe(finalize(() => this.loading = false))
+        .subscribe({
+          next: (response: ApiResponse<Page<Reserva>>) => {
+            if (response.success && response.data) {
+              const reservas = response.data.content.filter(reserva =>
+                !this.estadoFiltro || reserva.estadoReserva === this.estadoFiltro,
+              );
+
+              this.reservas = reservas;
+              this.totalRecords = reservas.length;
+            } else {
+              this.reservas = [];
+              this.totalRecords = 0;
+            }
+          },
+          error: () => {
+            this.reservas = [];
+            this.totalRecords = 0;
+          }
+        });
       return;
     }
 
@@ -99,18 +112,14 @@ export class MisReservasComponent implements OnInit {
           console.log('Respuesta del API:', response);
 
           if (response.success && response.data) {
-            // Mapear los campos correctamente
             this.reservas = response.data.content.map(item => ({
               ...item,
-              id: item.id, // Asegurar que id esté disponible
-              estado: item.estadoReserva // Normalizar el nombre del campo
+              id: item.id,
+              estado: item.estadoReserva
             }));
 
             this.totalRecords = response.data.totalElements;
             this.rows = response.data.pageSize || size;
-
-            console.log(`Reservas cargadas: ${this.reservas.length} de ${this.totalRecords}`);
-            console.log('Primera reserva:', this.reservas[0]);
           } else {
             console.warn('La respuesta no tiene datos:', response);
             this.reservas = [];

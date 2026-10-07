@@ -20,6 +20,7 @@ import { ReservaService } from '../../../../core/services/operaciones/reserva.se
 import { Servicio, ServicioFiltro } from '../../../../core/models/catalogos/servicios.model';
 import {FormBuilder,ReactiveFormsModule,Validators,AbstractControl,ValidationErrors} from '@angular/forms';
 import { map, Observable, of, Subject, takeUntil, debounceTime, switchMap, catchError, finalize } from 'rxjs';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-sacar-cita',
@@ -93,8 +94,8 @@ export class ReservarComponent implements OnInit, OnDestroy {
   citaForm = this.fb.group({
     barberoId: [null, [Validators.required]],
     servicioId: [null, [Validators.required]],
-    fecha: [null, [Validators.required, this.fechaValida.bind(this)]],
-    hora: [null, [Validators.required]],
+    fecha: [null as Date | null, [Validators.required, this.fechaValida.bind(this)]],
+    hora: [null as string | null, [Validators.required]],
     notas: ['', [Validators.maxLength(300)]],
     aceptaTerminos: [false, [Validators.requiredTrue]]
   });
@@ -105,6 +106,7 @@ export class ReservarComponent implements OnInit, OnDestroy {
     this.cargarClienteDesdeToken();
     this.cargarDatos();
     this.horariosDisponibles = this.calcularHorarios();
+    this.generarDiasChips();
   }
 
   ngOnDestroy(): void {
@@ -239,6 +241,58 @@ export class ReservarComponent implements OnInit, OnDestroy {
   }
 
   private cargarDatos(): void {
+    if (environment.useMockData) {
+      const mockBarberos = [
+        { barberoId: 1, persona: { nombre: 'Carlos', apellido: 'Ramírez' }, especialidad: 'Corte clásico' },
+        { barberoId: 2, persona: { nombre: 'Miguel', apellido: 'Torres' }, especialidad: 'Barba y perfilado' },
+        { barberoId: 3, persona: { nombre: 'Diego', apellido: 'Santos' }, especialidad: 'Fade moderno' },
+      ].map((barbero: any) => ({
+        ...barbero,
+        id: barbero.barberoId,
+        nombreCompleto: `${barbero.persona?.nombre ?? ''} ${barbero.persona?.apellido ?? ''}`.trim(),
+      }));
+
+      this.barberosCache = mockBarberos;
+      this.barberos$ = of(mockBarberos);
+
+      this.serviciosCache = [
+        {
+          servicioId: 1,
+          nombre: 'Corte clásico',
+          duracion: 30,
+          precio: 35,
+          categoriaId: 1,
+          categoriaNombre: 'Cortes',
+          publicado: true,
+          estado: true,
+          urlsMultimedia: []
+        },
+        {
+          servicioId: 2,
+          nombre: 'Arreglo de barba',
+          duracion: 25,
+          precio: 30,
+          categoriaId: 1,
+          categoriaNombre: 'Barba',
+          publicado: true,
+          estado: true,
+          urlsMultimedia: []
+        },
+        {
+          servicioId: 3,
+          nombre: 'Fade moderno',
+          duracion: 45,
+          precio: 50,
+          categoriaId: 1,
+          categoriaNombre: 'Cortes',
+          publicado: true,
+          estado: true,
+          urlsMultimedia: []
+        },
+      ];
+      this.servicios$ = of(this.serviciosCache);
+      return;
+    }
 
     this.barberos$ = this.barberoService.listar(0, 1000).pipe(
       map(response => {
@@ -363,6 +417,39 @@ export class ReservarComponent implements OnInit, OnDestroy {
         }
       });
   }
+  diasChips: { fecha: Date; etiqueta: string }[] = [];
+
+private generarDiasChips(cantidad = 7): void {
+  const nombres = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+  const inicio = new Date(this.minDateCita);
+  this.diasChips = [];
+  for (let i = 0; i < cantidad; i++) {
+    const d = new Date(inicio);
+    d.setDate(inicio.getDate() + i);
+    if (this.maxDateCita && d > this.maxDateCita) break;
+    this.diasChips.push({ fecha: d, etiqueta: nombres[d.getDay()] });
+  }
+}
+
+seleccionarDia(fecha: Date): void {
+  this.citaForm.patchValue({ fecha });
+  this.citaForm.get('fecha')?.markAsTouched();
+  this.onFechaChange();
+}
+
+esDiaActivo(d: Date): boolean {
+  const v = this.citaForm.get('fecha')?.value;
+  return !!v && new Date(v).toDateString() === d.toDateString();
+}
+
+  seleccionarHora(hora: string | null): void {
+    this.citaForm.patchValue({ hora });
+    this.citaForm.get('hora')?.markAsTouched();
+  }
+
+  esHoraActiva(hora: string): boolean {
+    return (this.citaForm.get('hora')?.value ?? null) === hora;
+  }
 
   getBarberoNombre(): string {
     const barberoId = this.citaForm.get('barberoId')?.value;
@@ -391,9 +478,9 @@ export class ReservarComponent implements OnInit, OnDestroy {
     return servicio?.duracion || 30;
   }
 
-  cancelar(): void {
-    this.router.navigate(['/dashboard/cliente/inicio']);
-  }
+cancelar(): void {
+  this.router.navigate(['/mi-cuenta/reservas/mis-reservas']);
+}
 
   get barberoInvalido(): boolean {
     const control = this.citaForm.get('barberoId');

@@ -11,20 +11,7 @@ export const CLIENTE_MENU = [
     {
         label: "Reservas",
         icon: "pi pi-calendar",
-        items: [
-            {
-                label: "Agendar Cita",
-                icon: "pi pi-plus-circle",
-                routerLink: ["reservar/agendar"],
-                permission: "RESERVA_CREATE"
-            },
-            {
-                label: "Mis Reservas",
-                icon: "pi pi-clock",
-                routerLink: ["reservas/mis-reservas"],
-                permission: "RESERVA_READ_OWN"
-            }
-        ]
+        routerLink: ["reservas/mis-reservas"],
     },
 
     {
