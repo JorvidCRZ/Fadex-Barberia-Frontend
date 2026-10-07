@@ -33,4 +33,4 @@ export interface SidebarItem {
 
 export interface BannerRequest extends BannerBase { }
 export interface Banner extends BannerBase { id: number; urlImagen: string; }
-export type BannerSeccion = 'HOME_TOP' | 'NOSOTROS_TOP' | 'HOME_BOTTOM';
+export type BannerSeccion = 'HOME_TOP' | 'NOSOTROS_TOP' | 'SERVICES_TOP' | 'PRODUCTO_TOP';

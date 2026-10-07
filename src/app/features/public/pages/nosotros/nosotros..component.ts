@@ -1,12 +1,11 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
-import { RouterLink } from '@angular/router';
-import { BannerComponent } from '../../../../shared/components/banner/banner.component';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { NOSOTROS_BANNERS } from '../../../../core/config/banner.config';
+import { BannerComponent } from '../../../../shared/components/banner/banner.component';
 
 @Component({
   selector: 'app-nosotros',
-  imports: [NgOptimizedImage, RouterLink, BannerComponent],
+  imports: [NgOptimizedImage, BannerComponent],
   templateUrl: './nosotros.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

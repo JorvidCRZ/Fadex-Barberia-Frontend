@@ -1,14 +1,6 @@
 <!-- Hero -->
-<section class="relative h-64 sm:h-80 w-full flex items-center justify-center overflow-hidden">
-  <div class="absolute inset-0">
-    <img src="/assets/cortebarba.jpg" alt="Servicios Barbería" class="w-full h-full object-cover object-center" />
-    <div class="absolute inset-0 bg-brand-black/70"></div>
-  </div>
-  <div class="relative z-10 text-center px-6 max-w-3xl">
-    <p class="text-brand-gold text-sm font-semibold tracking-widest uppercase mb-3">Lo que ofrecemos</p>
-    <h1 class="text-4xl md:text-5xl font-bold tracking-wide uppercase text-brand-white">Nuestros Servicios</h1>
-    <p class="mt-4 text-text-secondary text-lg">Precisión, estilo y cuidado en cada corte.</p>
-  </div>
+<section class="inicio-hero">
+	<app-banner [banners]="banners"></app-banner>
 </section>
 
 <section class="bg-brand-black py-10 px-4">

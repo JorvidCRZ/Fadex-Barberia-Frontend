@@ -11,11 +11,31 @@ export const HOME_BANNERS: Banner[] = [
     urlImagen: '/assets/banners/banner-producto.webp', urlDestino: '/productos', seccion: 'HOME_TOP', fechaInicio: null,fechaFin: null,},
   {id: 5, orden: 5, titulo: 'Nuestro local', subtitulo: 'Un espacio diseñado para tu comodidad y estilo', activo: true,
     urlImagen: '/assets/banners/banner-local.webp', seccion: 'NOSOTROS_TOP', fechaInicio: null,fechaFin: null,},
-
+  {id: 6, orden: 6, titulo: 'Local ', subtitulo: 'Un espacio diseñado para tu comodidad y estilo', activo: true,
+    urlImagen: '/assets/banners/banner-local1.webp', seccion: 'NOSOTROS_TOP', fechaInicio: null,fechaFin: null,},
+  {id: 7, orden: 7, titulo: 'Nuestros Servicios', subtitulo: 'Precisión, estilo y cuidado en cada corte.', activo: true,
+    urlImagen: '/assets/banners/banner-servicio1.webp', seccion: 'SERVICES_TOP', fechaInicio: null,fechaFin: null,},
+  {id: 8, orden: 8, titulo: 'Cuidado de barba', subtitulo: 'Detalles que definen tu estilo', activo: true,
+    urlImagen: '/assets/banners/banner-servicio2.webp', seccion: 'SERVICES_TOP', fechaInicio: null,fechaFin: null,},
+  {id: 9,orden: 9,titulo: 'Cortes modernos',subtitulo: 'Estilo y precisión en cada detalle',activo: true,
+    urlImagen: '/assets/banners/banner-servicio.jpg',seccion: 'SERVICES_TOP',fechaInicio: null,fechaFin: null,},
+  {id: 10, orden: 10, titulo: 'Nuestros Productos', subtitulo: 'Explora los productos disponibles para mantener tu estilo en casa con una búsqueda rápida y filtros claros.', activo: true,
+    urlImagen: '/assets/banners/banner-producto1.webp', seccion: 'PRODUCTO_TOP', fechaInicio: null,fechaFin: null,},
+  {id: 11, orden: 11, titulo: 'Tienda online', subtitulo: 'Productos de calidad para tu cuidado personal', activo: true, 
+    urlImagen: '/assets/banners/banner-producto.webp', seccion: 'PRODUCTO_TOP', fechaInicio: null,fechaFin: null,},
+    
       // titulo: 'Barbería clásica',subtitulo: 'La experiencia Fadex para tu mejor versión',activo: true, tituloBoton: 'Reservar cita',
     // urlImagen: '/assets/homepage.webp', urlDestino: '/reservas', seccion: 'HOME_TOP', fechaInicio: null, fechaFin: null,},
 ];
 
 export const NOSOTROS_BANNERS = HOME_BANNERS.filter(
   (banner) => banner.seccion === 'NOSOTROS_TOP'
+);
+
+export const SERVICIOS_BANNERS = HOME_BANNERS.filter(
+  (banner) => banner.seccion === 'SERVICES_TOP'
+);
+
+export const PRODUCTOS_BANNERS = HOME_BANNERS.filter(
+  (banner) => banner.seccion === 'PRODUCTO_TOP'
 );

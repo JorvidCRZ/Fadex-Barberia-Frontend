@@ -1,183 +1,243 @@
-import { TagModule } from 'primeng/tag';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import { Observable, map, of, switchMap } from 'rxjs';
+import { InputTextModule } from 'primeng/inputtext';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
-import { ButtonModule } from 'primeng/button';
-import { CommonModule } from '@angular/common';
-import { DividerModule } from 'primeng/divider';
-import { InputTextModule } from 'primeng/inputtext';
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { ApiResponse } from '../../../../core/models/common/index.model';
+import { Persona } from '../../../../core/models/gestion/persona/persona.model';
+import { PersonaUpdateRequest } from '../../../../core/models/gestion/persona/persona-update.model';
 import { AuthService } from '../../../../core/services/auth/auth.service';
 import { ClienteService } from '../../../../core/services/gestion/cliente.service';
+import { BarberoService } from '../../../../core/services/gestion/barbero.service';
 import { PersonaService } from '../../../../core/services/gestion/persona.service';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
 
-// ─── DTOs ─────────────────────────────────────────────────────────────────────
+// ─── Modelo ───────────────────────────────────────────────────────────────────
 
-export interface PerfilClienteDTO {
-  idPersona: number;
+type RolPerfil = 'ADMIN' | 'BARBERO' | 'CLIENTE';
+type CampoPassword = 'actual' | 'nueva' | 'confirmar';
+
+interface PerfilCuenta {
+  personaId: number;
+  usuarioId?: number;
   nombre: string;
   apellido: string;
   telefono: string;
   email: string;
+  usuario?: string;
   fechaRegistro?: string;
+  descripcion?: string;   // barbero
+  permisos?: string[];    // admin
 }
 
-export interface ActualizarPerfilClienteDTO {
-  nombre: string;
-  apellido: string;
-  telefono: string;
-  email: string;
-}
+// ─── Constantes ───────────────────────────────────────────────────────────────
 
-export interface CambiarPasswordDTO {
-  passwordActual: string;
-  passwordNueva: string;
-  confirmarPassword: string;
-}
+const ROL_LABEL: Record<RolPerfil, string> = {
+  ADMIN: 'Administrador',
+  BARBERO: 'Barbero',
+  CLIENTE: 'Cliente',
+};
+
+// Clases completas en el .ts para que Tailwind las detecte
+const NIVELES = [
+  { label: '', bar: '', text: '' },
+  { label: 'Muy débil', bar: 'bg-danger', text: 'text-danger' },
+  { label: 'Débil', bar: 'bg-orange-400', text: 'text-orange-400' },
+  { label: 'Moderada', bar: 'bg-yellow-400', text: 'text-yellow-400' },
+  { label: 'Fuerte', bar: 'bg-success', text: 'text-success' },
+];
+
+// Pega aquí tu lista de permisos del admin
+const PERMISOS_ADMIN: string[] = [
+  'BARBERO_CREATE', 'BARBERO_VIEW', 'BARBERO_UPDATE', 'BARBERO_DELETE',
+];
+
+const passwordsCoinciden = (g: AbstractControl): ValidationErrors | null =>
+  g.get('passwordNueva')?.value === g.get('confirmarPassword')?.value ? null : { noCoinciden: true };
+
+const desdePersona = (p: Persona): PerfilCuenta => ({
+  personaId: p.personaId,
+  usuarioId: p.usuario?.idUsuario,
+  nombre: p.nombre,
+  apellido: p.apellido,
+  telefono: p.telefono ?? '',
+  email: p.email,
+  usuario: p.usuario?.user,
+});
+
+// ─── Componente ───────────────────────────────────────────────────────────────
 
 @Component({
   selector: 'app-perfil',
   standalone: true,
-  imports: [CommonModule,FormsModule,ReactiveFormsModule,ButtonModule,InputTextModule,DividerModule,TagModule,ToastModule,],
+  imports: [ReactiveFormsModule, InputTextModule, ToastModule],
   providers: [MessageService],
-  templateUrl: './perfil.html'
+  templateUrl: './perfil.html',
 })
 export class PerfilComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
-  private readonly messageService = inject(MessageService);
-  private readonly clienteService = inject(ClienteService);
+  private readonly toast = inject(MessageService);
   private readonly personaService = inject(PersonaService);
   private readonly authService = inject(AuthService);
-  // ── Estado ─────────────────────────────────────────────────────────────────
+  private readonly clienteService = inject(ClienteService);
+  private readonly barberoService = inject(BarberoService);
 
+  // El rol viene de la ruta: data: { rol: 'CLIENTE' | 'BARBERO' | 'ADMIN' }
+  readonly rol = inject(ActivatedRoute).snapshot.data['rol'] as RolPerfil;
+  readonly rolLabel = ROL_LABEL[this.rol];
+
+  // ── Estado ──
+  perfil = signal<PerfilCuenta>({ personaId: 0, nombre: '', apellido: '', telefono: '', email: '' });
   cargando = signal(false);
   guardandoPerfil = signal(false);
   guardandoPassword = signal(false);
+  visible = signal<Record<CampoPassword, boolean>>({ actual: false, nueva: false, confirmar: false });
 
-  mostrarPasswordActual = signal(false);
-  mostrarPasswordNueva = signal(false);
-  mostrarConfirmar = signal(false);
+  readonly camposPassword = [
+    { control: 'passwordActual', key: 'actual', label: 'Contraseña actual', placeholder: '••••••••', error: 'La contraseña actual es requerida.' },
+    { control: 'passwordNueva', key: 'nueva', label: 'Nueva contraseña', placeholder: 'Mín. 8 caracteres', error: 'Mínimo 8 caracteres.' },
+    { control: 'confirmarPassword', key: 'confirmar', label: 'Confirmar contraseña', placeholder: 'Repite la nueva contraseña', error: 'Confirma tu nueva contraseña.' },
+  ] as const;
 
-  perfil: PerfilClienteDTO = {
-    idPersona: 0,
-    nombre: '',
-    apellido: '',
-    telefono: '',
-    email: '',
-  };
+  // ── Formularios ──
+  formPerfil = this.fb.group({
+    nombre: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
+    apellido: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
+    email: [{ value: '', disabled: true }],
+    telefono: ['', [Validators.pattern(/^\d{9,15}$/)]],
+  });
 
-  formPerfil!: FormGroup;
-  formPassword!: FormGroup;
+  formPassword = this.fb.group(
+    {
+      passwordActual: ['', [Validators.required, Validators.minLength(6)]],
+      passwordNueva: ['', [Validators.required, Validators.minLength(8)]],
+      confirmarPassword: ['', [Validators.required]],
+    },
+    { validators: passwordsCoinciden },
+  );
 
-  // ── Ciclo de vida ──────────────────────────────────────────────────────────
+  // ── Derivados ──
+  iniciales = computed(() => {
+    const p = this.perfil();
+    return ((p.nombre?.[0] ?? '') + (p.apellido?.[0] ?? '')).toUpperCase() || '··';
+  });
 
+  miembroDesde = computed(() => {
+    const f = this.perfil().fechaRegistro;
+    if (!f) return '';
+    const d = new Date(f);
+    return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString('es-PE', { month: 'long', year: 'numeric' });
+  });
+
+  get seguridad() {
+    const v: string = this.formPassword.get('passwordNueva')?.value ?? '';
+    const nivel = [v.length >= 8, /[A-Z]/.test(v), /[0-9]/.test(v), /[^A-Za-z0-9]/.test(v)]
+      .filter(Boolean).length;
+    return { nivel, ...NIVELES[nivel] };
+  }
+
+  get noCoinciden(): boolean {
+    return !!this.formPassword.errors?.['noCoinciden']
+      && !!this.formPassword.get('confirmarPassword')?.touched;
+  }
+
+  // ── Carga ──
   ngOnInit(): void {
-    this.initForms();
-    this.cargarPerfil();
+    this.cargar();
   }
 
-  // ── Inicialización de formularios ──────────────────────────────────────────
-
-  private initForms(): void {
-    this.formPerfil = this.fb.group({
-      nombre: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
-      apellido: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
-      email: [{ value: '', disabled: true }],
-      telefono: ['', [Validators.pattern(/^\d{9,15}$/)]],
-    });
-
-    this.formPassword = this.fb.group(
-      {
-        passwordActual: ['', [Validators.required, Validators.minLength(6)]],
-        passwordNueva: ['', [Validators.required, Validators.minLength(8)]],
-        confirmarPassword: ['', [Validators.required]],
-      },
-      { validators: this.passwordsCoinciden },
-    );
-  }
-
-  // ── Carga del perfil ───────────────────────────────────────────────────────
-
-  cargarPerfil(): void {
+  cargar(): void {
     this.cargando.set(true);
 
-    this.clienteService.obtenerPerfilPropio().subscribe({
-      next: (res: ApiResponse<any>) => {
-        const data = res.data;
-        const persona = data.persona;
-
-        this.perfil = {
-          idPersona: persona.personaId,
-          nombre: persona.nombre,
-          apellido: persona.apellido,
-          telefono: persona.telefono,
-          email: persona.email,
-          fechaRegistro: data.fechaRegistro,
-        };
-
+    this.obtenerPerfil().subscribe({
+      next: (p) => {
+        this.perfil.set(p);
         this.formPerfil.patchValue({
-          nombre: persona.nombre,
-          apellido: persona.apellido,
-          telefono: persona.telefono,
-          email: persona.email,
+          nombre: p.nombre,
+          apellido: p.apellido,
+          telefono: p.telefono,
+          email: p.email,
         });
-
         this.cargando.set(false);
       },
       error: () => {
         this.cargando.set(false);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'No se pudo cargar el perfil.',
-          life: 3000,
-        });
+        this.notificar('error', 'Error', 'No se pudo cargar el perfil.');
       },
     });
   }
 
-  // ── Guardar perfil ─────────────────────────────────────────────────────────
+  // Lo único que cambia según el rol es de dónde salen los datos
+  private obtenerPerfil(): Observable<PerfilCuenta> {
+    switch (this.rol) {
+      case 'CLIENTE':
+        return this.clienteService.obtenerPerfilPropio().pipe(
+          map(({ data }) => ({ ...desdePersona(data.persona), fechaRegistro: data.fechaRegistro })),
+        );
 
+      case 'BARBERO':
+        return this.barberoService.obtenerMiBarberoId().pipe(
+          switchMap((r) => this.barberoService.obtenerPorId(r.data)),
+          map(({ data }) => ({
+            ...desdePersona(data.persona),
+            descripcion: data.descripcion || 'Sin descripción disponible',
+          })),
+        );
+
+      case 'ADMIN':
+        // Mock hasta que exista el endpoint real
+        return of({
+          personaId: 1,
+          usuarioId: 1,
+          nombre: 'Admin',
+          apellido: 'Sistema',
+          telefono: '900000000',
+          email: 'admin@gmail.com',
+          usuario: 'admin1',
+          permisos: PERMISOS_ADMIN,
+        });
+    }
+  }
+
+  // ── Acciones ──
   guardarPerfil(): void {
     if (this.formPerfil.invalid) {
       this.formPerfil.markAllAsTouched();
       return;
     }
 
+    const p = this.perfil();
+    if (!p.personaId && !p.usuarioId) {
+      this.notificar('error', 'Error', 'No se pudo identificar tu perfil.');
+      return;
+    }
+
     this.guardandoPerfil.set(true);
 
-    const dto: ActualizarPerfilClienteDTO = {
-      nombre: this.formPerfil.value.nombre,
-      apellido: this.formPerfil.value.apellido,
-      telefono: this.formPerfil.value.telefono,
-      email: this.perfil.email, // viene del perfil, el campo está disabled
+    const { nombre, apellido, telefono } = this.formPerfil.getRawValue();
+    const dto: PersonaUpdateRequest = {
+      nombre: nombre!,
+      apellido: apellido!,
+      telefono: telefono ?? '',
+      email: p.email,
     };
 
-    this.personaService.actualizarPersona(this.perfil.idPersona, dto).subscribe({
+    const request$: Observable<unknown> = p.personaId
+      ? this.personaService.actualizarPersona(p.personaId, dto)
+      : this.personaService.actualizarPersonaPorUsuarioId(p.usuarioId!, dto);
+
+    request$.subscribe({
       next: () => {
-        this.perfil = { ...this.perfil, ...dto };
         this.guardandoPerfil.set(false);
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Perfil actualizado',
-          detail: 'Los datos se guardaron correctamente.',
-          life: 3000,
-        });
+        this.perfil.update((actual) => ({ ...actual, ...dto }));
+        this.notificar('success', 'Perfil actualizado', 'Los datos se guardaron correctamente.');
       },
       error: () => {
         this.guardandoPerfil.set(false);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'No se pudo guardar el perfil.',
-          life: 3000,
-        });
+        this.notificar('error', 'Error', 'No se pudo guardar el perfil.');
       },
     });
   }
-
-  // ── Cambiar contraseña ─────────────────────────────────────────────────────
 
   cambiarPassword(): void {
     if (this.formPassword.invalid) {
@@ -187,111 +247,32 @@ export class PerfilComponent implements OnInit {
 
     this.guardandoPassword.set(true);
 
-    this.authService
-      .cambiarPassword(
-        this.formPassword.value.passwordActual,
-        this.formPassword.value.passwordNueva,
-      )
-      .subscribe({
-        next: () => {
-          this.guardandoPassword.set(false);
-          this.formPassword.reset();
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Contraseña actualizada',
-            detail: 'Tu contraseña fue cambiada exitosamente.',
-            life: 3000,
-          });
-        },
-        error: (err) => {
-          this.guardandoPassword.set(false);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: err.error?.message ?? 'La contraseña actual es incorrecta.',
-            life: 3000,
-          });
-        },
-      });
+    const { passwordActual, passwordNueva } = this.formPassword.getRawValue();
+
+    this.authService.cambiarPassword(passwordActual!, passwordNueva!).subscribe({
+      next: () => {
+        this.guardandoPassword.set(false);
+        this.formPassword.reset();
+        this.notificar('success', 'Contraseña actualizada', 'Tu contraseña fue cambiada exitosamente.');
+      },
+      error: (err) => {
+        this.guardandoPassword.set(false);
+        this.notificar('error', 'Error', err.error?.message ?? 'La contraseña actual es incorrecta.');
+      },
+    });
   }
 
-  // ── Validador personalizado ────────────────────────────────────────────────
-
-  private passwordsCoinciden(group: FormGroup) {
-    const nueva = group.get('passwordNueva')?.value;
-    const confirmar = group.get('confirmarPassword')?.value;
-    return nueva === confirmar ? null : { noCoinciden: true };
+  toggleVisible(campo: CampoPassword): void {
+    this.visible.update((v) => ({ ...v, [campo]: !v[campo] }));
   }
 
-  // ── Helpers de UI ──────────────────────────────────────────────────────────
-
-  get inicialesAvatar(): string {
-    const n = this.perfil.nombre?.[0] ?? '';
-    const a = this.perfil.apellido?.[0] ?? '';
-    return (n + a).toUpperCase();
+  campoInvalido(form: AbstractControl, campo: string): boolean {
+    const c = form.get(campo);
+    return !!(c?.invalid && c?.touched);
   }
 
-  get miembroDesde(): string {
-    if (!this.perfil.fechaRegistro) return '—';
-    const fecha = new Date(this.perfil.fechaRegistro);
-    return fecha
-      .toLocaleDateString('es-ES', {
-        month: 'long',
-        year: 'numeric',
-      })
-      .toUpperCase();
+  private notificar(severity: 'success' | 'error', summary: string, detail: string): void {
+    this.toast.add({ severity, summary, detail, life: 3000 });
   }
 
-  campoInvalido(form: FormGroup, campo: string): boolean {
-    const ctrl = form.get(campo);
-    return !!(ctrl?.invalid && ctrl?.touched);
-  }
-
-  toggleVisible(campo: 'actual' | 'nueva' | 'confirmar'): void {
-    if (campo === 'actual') this.mostrarPasswordActual.update((v) => !v);
-    if (campo === 'nueva') this.mostrarPasswordNueva.update((v) => !v);
-    if (campo === 'confirmar') this.mostrarConfirmar.update((v) => !v);
-  }
-
-  // ── Indicador de seguridad ─────────────────────────────────────────────────
-
-  get nivelSeguridad(): number {
-    const val: string = this.formPassword.get('passwordNueva')?.value ?? '';
-    let nivel = 0;
-    if (val.length >= 8) nivel++;
-    if (/[A-Z]/.test(val)) nivel++;
-    if (/[0-9]/.test(val)) nivel++;
-    if (/[^A-Za-z0-9]/.test(val)) nivel++;
-    return nivel;
-  }
-
-  get colorSeguridad(): string {
-    const colores: Record<number, string> = {
-      1: 'bg-red-500',
-      2: 'bg-orange-400',
-      3: 'bg-yellow-400',
-      4: 'bg-green-500',
-    };
-    return colores[this.nivelSeguridad] ?? 'bg-zinc-700';
-  }
-
-  get textoSeguridad(): string {
-    const labels: Record<number, string> = {
-      1: 'Muy débil',
-      2: 'Débil',
-      3: 'Moderada',
-      4: 'Fuerte',
-    };
-    return labels[this.nivelSeguridad] ?? '';
-  }
-
-  get textoColorSeguridad(): string {
-    const colores: Record<number, string> = {
-      1: 'text-red-400',
-      2: 'text-orange-400',
-      3: 'text-yellow-400',
-      4: 'text-green-400',
-    };
-    return colores[this.nivelSeguridad] ?? 'text-zinc-400';
-  }
 }

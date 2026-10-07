@@ -165,7 +165,7 @@ export const routes: Routes = [
             ]
           },
 
-          { path: 'perfil', loadComponent: () => import('./features/private/pages/perfil/perfil.component').then(m => m.PerfilComponent) },
+          { path: 'perfil', loadComponent: () => import('./features/private/pages/perfil/perfil.component').then(m => m.PerfilComponent), data: { roles: ['cliente'] } },
           // {path: 'checkout/:reservaId', loadComponent: () => import('./features/private/pages/checkout/checkout').then(m => m.CheckoutComponent)},
           { path: '**', loadComponent: () => import('./shared/components/error404/error404.component').then(m => m.Error404Component) }
         ]
