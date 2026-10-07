@@ -1,11 +1,15 @@
 import { Router } from '@angular/router';
+import { TableModule } from 'primeng/table';  
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
-import { ResumenCliente } from '../../../../core/services/gestion/resumen-cliente.service';
-import { ClienteDetalleResumenDTO, ServicioResponseDTO } from '../../../../core/models/gestion/cliente/ClienteResumen.model';
+import { StatsCard } from '../../../../core/models/common/card.model';
 import { environment } from '../../../../../environments/environment';
-import { HISTORIAL_RECIENTE_MOCK, PROXIMAS_CITAS_MOCK, RESUMEN_CLIENTE_MOCK } from '../../../../core/config/privado-mock.config';
 import { TokenService } from '../../../../core/services/auth/token.service';
+import { StatsComponent } from '../../../../shared/components/stats/stats.component';
+import { ResumenCliente } from '../../../../core/services/gestion/resumen-cliente.service';
+import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
+import { ClienteDetalleResumenDTO, ServicioResponseDTO } from '../../../../core/models/gestion/cliente/ClienteResumen.model';
+import { HISTORIAL_RECIENTE_MOCK, PROXIMAS_CITAS_MOCK, RESUMEN_CLIENTE_MOCK } from '../../../../core/config/privado-mock.config';
 
 interface CitaResumen {
   reservaId: number;
@@ -20,9 +24,8 @@ interface CitaResumen {
 @Component({
   selector: 'app-resumen',
   standalone: true,
-  imports: [CommonModule],
-  templateUrl: './resumen.html',
-  styleUrl: './resumen.scss',
+  imports: [StatsComponent, StatusBadgeComponent, TableModule, CommonModule],
+  templateUrl: './resumen.html'
 })
 export class ResumenComponent implements OnInit {
   private svc    = inject(ResumenCliente);
@@ -147,4 +150,13 @@ formatUltimaVisita(fecha: string): string {
   return `Hace ${meses} mes${meses > 1 ? 'es' : ''}`;
 }
 
+get statsItems(): StatsCard[] {
+  if (!this.kpis) return [];
+  return [
+    { title: 'Cortes', value: this.kpis.totalCortes, description: 'Últimas semanas', icon: 'pi pi-scissors' },
+    { title: 'Total gastado', value: `S/ ${this.kpis.totalGastado}`, description: 'Acumulado', icon: 'pi pi-wallet', accentClass: 'bg-green-500', accentTextClass: 'text-green-400', iconBgClass: 'bg-green-500/10' },
+    { title: 'Última visita', value: this.formatFechaCorta(this.kpis.ultimaVisita), description: this.formatUltimaVisita(this.kpis.ultimaVisita), icon: 'pi pi-calendar', accentClass: 'bg-blue-500', accentTextClass: 'text-blue-400', iconBgClass: 'bg-blue-500/10' },
+    { title: 'Reservas activas', value: this.kpis.totalReservas, description: 'Próximas citas', icon: 'pi pi-book', accentClass: 'bg-teal-500', accentTextClass: 'text-teal-400', iconBgClass: 'bg-teal-500/10' },
+  ];
+}
 }

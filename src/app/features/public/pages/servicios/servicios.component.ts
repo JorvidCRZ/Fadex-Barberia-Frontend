@@ -13,11 +13,13 @@ import { ServicioDetalleComponent } from './servicio-detalle/servicio-detalle.co
 import { FiltrosComponent } from '../../../../shared/components/filtros/filtros.component';
 import { NotificationService } from '../../../../core/services/common/notification.service';
 import { Servicio, ServicioFiltro } from '../../../../core/models/catalogos/servicios.model';
+import { BannerComponent } from '../../../../shared/components/banner/banner.component';
+import { SERVICIOS_BANNERS } from '../../../../core/config/banner.config';
 
 @Component({
   standalone: true,
   selector: 'app-servicios',
-  imports: [CommonModule, PaginatorModule, ServicioListaComponent, ServicioDetalleComponent, FiltrosComponent],
+  imports: [CommonModule, PaginatorModule, ServicioListaComponent, ServicioDetalleComponent, FiltrosComponent,BannerComponent],
   templateUrl: './servicios.html'
 })
 export class ServiciosComponent implements OnInit {
@@ -27,6 +29,7 @@ export class ServiciosComponent implements OnInit {
   private readonly categoriaService = inject(CategoriaService);
   private readonly notify = inject(NotificationService);
 
+  banners = [...SERVICIOS_BANNERS];
   servicios: Servicio[] = [];
   cargando = true;
   servicioSeleccionado: Servicio | null = null;

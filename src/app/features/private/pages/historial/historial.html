@@ -85,7 +85,7 @@
               No se encontraron registros de atenciones para los filtros aplicados.
             </p>
 
-            <button *ngIf="filtros?.estado || filtros?.desde || filtros?.hasta"
+            <button *ngIf="filtros.estado || filtros.desde || filtros.hasta"
                     (click)="onLimpiar()"
                     class="mt-4 px-4 py-2 bg-[#C9A84C] text-black font-semibold rounded-md text-sm hover:bg-[#e0bc55] transition-colors">
               Limpiar Filtros
