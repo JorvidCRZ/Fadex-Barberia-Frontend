@@ -15,7 +15,7 @@ type Periodo = 'hoy';
   standalone: true,
   imports: [CommonModule, DatePipe],
   templateUrl: './resumen.html',
-  styleUrl: './resumen.css',
+  styleUrl: './resumen.scss',
 })
 export class Resumen implements OnInit, OnDestroy {
 

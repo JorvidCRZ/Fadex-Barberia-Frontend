@@ -14,7 +14,7 @@ import { Cita, DiaResumen } from '@/app/core/models/gestion/barbero/barbero-resu
   standalone: true,
   imports: [CommonModule],
   templateUrl: './resumen-barbero.html',
-  styleUrl: './resumen-barbero.css',
+  styleUrl: './resumen-barbero.scss',
 })
 export class ResumenBarbero implements OnInit {
 
