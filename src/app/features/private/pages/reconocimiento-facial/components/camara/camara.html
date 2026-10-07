@@ -1,0 +1,41 @@
+<div class="camara-card">
+
+  <div class="camara-container">
+    <video #video autoplay playsinline></video>
+
+    @if (!camaraActiva) {
+      <div class="camara-overlay">
+        <div class="overlay-content">
+          <div class="camera-icon">
+            <i class="pi pi-camera"></i>
+          </div>
+
+          <span>Activa la cámara para comenzar</span>
+          <small>También puedes cargar una imagen desde tu dispositivo</small>
+        </div>
+      </div>
+    }
+  </div>
+
+  <canvas #canvas hidden> </canvas>
+
+  @if (fotoCapturada) {
+    <div class="mensaje-exito">✓ Foto tomada exitosamente</div>
+  }
+
+  <div class="acciones">
+    @if (!camaraActiva) {
+      <button class="boton-primary w-full" type="button" (click)="activarCamara()">
+        <i class="pi pi-camera" aria-hidden="true"></i>
+        Activar cámara
+      </button>
+    }
+
+    @if (camaraActiva) {
+      <button class="boton-secondary w-full" type="button" (click)="tomarFoto()">
+        <i class="pi pi-camera" aria-hidden="true"></i>
+        Tomar foto
+      </button>
+    }
+  </div>
+</div>

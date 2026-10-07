@@ -1,0 +1,259 @@
+<div class="dashboard">
+
+  <!-- HEADER -->
+  <div class="dashboard__header">
+
+    <div>
+      <h1 class="dashboard__title">
+        Hola, {{ username }} 👋
+      </h1>
+
+      <p class="dashboard__subtitle">
+        Bienvenido nuevamente a Fadex Barber
+      </p>
+    </div>
+
+  </div>
+
+  <!-- LOADING -->
+  <div *ngIf="loading" class="prediccion-loading">
+    <i class="pi pi-spin pi-spinner mr-2"></i>
+    Cargando datos...
+  </div>
+
+  <!-- ERROR -->
+  <div *ngIf="error && !loading" class="dashboard__error">
+    <i class="pi pi-exclamation-triangle mr-2"></i>
+    {{ error }}
+  </div>
+
+  <ng-container *ngIf="!loading && !error">
+
+    <!-- KPI GRID -->
+    <section class="mb-10">
+
+      <div *ngIf="kpis; else kpiSkeleton" class="kpi-grid">
+
+        <!-- CORTES -->
+        <div class="kpi-card">
+
+          <div class="kpi-card__icon">
+            <i class="pi pi-scissors"></i>
+          </div>
+
+          <div class="kpi-card__label">
+            CORTES
+          </div>
+
+          <div class="kpi-card__value">
+            {{ kpis.totalCortes }}
+          </div>
+
+          <div class="kpi-card__delta kpi-card__delta--positive">
+            Últimos semanas
+          </div>
+
+        </div>
+        
+
+        <!-- TOTAL GASTADO -->
+        <div class="kpi-card">
+
+          <div class="kpi-card__icon">
+            <i class="pi pi-wallet"></i>
+          </div>
+
+          <div class="kpi-card__label">
+            TOTAL GASTADO
+          </div>
+
+          <div class="kpi-card__value">
+            S/ {{ kpis.totalGastado | number:'1.0-0' }}
+          </div>
+
+          <div class="kpi-card__delta kpi-card__delta--positive">
+            Acumulado
+          </div>
+
+        </div>
+
+        <!-- ÚLTIMA VISITA -->
+        <div class="kpi-card">
+
+          <div class="kpi-card__icon">
+            <i class="pi pi-calendar"></i>
+          </div>
+
+          <div class="kpi-card__label">
+            ÚLTIMA VISITA
+          </div>
+
+          <div class="kpi-card__value">
+            {{ formatFechaCorta(kpis.ultimaVisita) }}
+          </div>
+
+          <div class="kpi-card__delta kpi-card__delta--positive">
+            {{ formatUltimaVisita(kpis.ultimaVisita) }}
+          </div>
+
+        </div>
+
+        <!-- RESERVAS ACTIVAS -->
+        <div class="kpi-card">
+
+          <div class="kpi-card__icon">
+            <i class="pi pi-book"></i>
+          </div>
+
+          <div class="kpi-card__label">
+            RESERVAS ACTIVAS
+          </div>
+
+          <div class="kpi-card__value">
+            {{ kpis.totalReservas }}
+          </div>
+
+          <div class="kpi-card__delta kpi-card__delta--positive">
+            Próximas citas
+          </div>
+
+        </div>
+
+      </div>
+
+      <ng-template #kpiSkeleton>
+        <div class="kpi-grid">
+          <div
+            class="kpi-card kpi-card--skeleton"
+            *ngFor="let i of [1,2,3,4]">
+          </div>
+        </div>
+      </ng-template>
+
+    </section>
+    
+
+<!-- PRÓXIMAS CITAS -->
+<section class="mb-10">
+
+  <div class="flex items-center justify-between mb-6">
+    <h2 class="text-xl font-bold text-white">Próximas citas</h2>
+  </div>
+
+  <div *ngIf="proximasCitas.length; else sinCita" class="next-appointments-grid">
+    <div class="next-appointment-card" *ngFor="let cita of proximasCitas">
+      <span class="next-appointment-label">PRÓXIMA CITA</span>
+      <h3 class="next-appointment-service">{{ cita.servicio }}</h3>
+      <div class="next-appointment-bottom">
+        <div>
+          <div class="next-appointment-barber">
+            <i class="pi pi-user"></i> {{ cita.barbero }}
+          </div>
+          <div class="next-appointment-date">
+            {{ formatFechaCita(cita.fecha) }} · {{ cita.hora }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #sinCita>
+    <div class="empty-card">
+      <p class="text-text-muted">No tienes citas programadas</p>
+    </div>
+  </ng-template>
+
+</section>
+
+
+    <!-- ACTIVIDAD RECIENTE -->
+    <section class="citas-section">
+
+      <div class="citas-section__header">
+
+        <h2 class="citas-section__title">
+          Actividad reciente
+        </h2>
+
+        <button
+          class="period-btn"
+          (click)="onVerHistorial()">
+
+          Ver historial completo
+
+        </button>
+
+      </div>
+
+      <div class="citas-table-wrapper">
+
+        <table class="citas-table">
+
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Servicio</th>
+              <th>Barbero</th>
+              <th>Monto</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <tr *ngFor="let item of historialReciente">
+
+              <td>
+                {{ formatFechaTabla(item.fecha) }}
+              </td>
+
+              <td>
+
+                <div class="cliente-nombre">
+                  {{ item.servicio }}
+                </div>
+
+              </td>
+
+              <td>
+
+                <span class="hora">
+                  {{ item.barbero }}
+                </span>
+
+              </td>
+
+<td>
+  <span class="servicio-badge badge-base">
+    {{ item.monto === 'Gratis' || item.monto === '—' ? item.monto : 'S/ ' + item.monto }}
+  </span>
+</td>
+
+              <td>
+
+                <span
+                  [ngClass]="{
+                    'status-pill status-pill-completada': item.estado === 'COMPLETADA',
+                    'status-pill status-pill-cancelada': item.estado === 'CANCELADA',
+                    'status-pill status-pill-confirmada': item.estado === 'CONFIRMADA'
+                  }">
+
+                  {{ item.estado }}
+
+                </span>
+
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+  </ng-container>
+
+</div>

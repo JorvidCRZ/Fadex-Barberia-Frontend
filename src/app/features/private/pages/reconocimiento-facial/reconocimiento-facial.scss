@@ -1,0 +1,98 @@
+/* =============================================
+   reconocimiento-facial.css — FadEx theme
+   ============================================= */
+
+/* ── Contenedor principal ── */
+.contenedor-ia {
+  @apply mx-auto flex w-full max-w-4xl flex-col gap-5;
+}
+
+/* ── Estado cámara: centrado y acotado ── */
+.estado-camara {
+  @apply mx-auto flex w-full max-w-3xl flex-col gap-5;
+}
+
+/* app-camara ocupa el ancho completo dentro de su columna */
+.estado-camara app-camara {
+  width: 100%;
+}
+
+/* ── Botón analizar ── */
+.btn-analizar {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 13px 0;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: transparent;
+  color: var(--gold);
+  border: 1.5px solid var(--gold);
+  border-radius: 3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.15s;
+}
+
+.btn-analizar:hover:not(:disabled) {
+  background: rgba(201, 162, 39, 0.08);
+}
+
+.btn-analizar:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ── Error ── */
+.error-mensaje {
+  @apply mx-auto flex w-full max-w-3xl items-center gap-2 rounded-xl px-4 py-3 text-sm;
+}
+
+/* ── Estado resultado ── */
+.estado-resultado {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+}
+
+/* app-resultado ocupa todo el ancho */
+.estado-resultado app-resultado {
+  width: 100%;
+}
+
+/* ── Botón reiniciar ── */
+.btn-reiniciar {
+  width: 100%;
+  padding: 11px 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid rgba(240, 236, 224, 0.12);
+  border-radius: 3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.btn-reiniciar:hover {
+  border-color: rgba(201, 162, 39, 0.3);
+  color: var(--gold);
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .contenedor-ia { @apply gap-4; }
+}
+
