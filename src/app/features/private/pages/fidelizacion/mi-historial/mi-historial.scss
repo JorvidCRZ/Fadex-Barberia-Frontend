@@ -1,0 +1,244 @@
+.seg-header {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin-bottom: 1rem
+}
+
+.seg-header i {
+    color: #f5b93b
+}
+
+.seg-header h2 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #f2f2f2
+}
+
+.seg-columns {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem
+}
+
+@media (min-width:992px) {
+    .seg-columns {
+        grid-template-columns: 1fr 1fr
+    }
+}
+
+/* ===== Forzar tema oscuro en p-card (por defecto trae fondo blanco) ===== */
+::ng-deep .seg-columns .p-card {
+    background: #121212;
+    color: #e5e5e5;
+    border: 1px solid #262626;
+    border-radius: 12px;
+    box-shadow: none;
+}
+
+::ng-deep .seg-columns .p-card .p-card-body {
+    padding: 0;
+}
+
+::ng-deep .seg-columns .p-card .p-card-content {
+    padding: 0 1.25rem 1.25rem;
+}
+
+.card-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem 0 1.25rem
+}
+
+.card-header-row .title {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-weight: 600;
+    color: #f2f2f2
+}
+
+.card-header-row .title i {
+    color: #f5b93b
+}
+
+.card-header-row .subtitle {
+    font-size: .8rem;
+    color: #8a8a8a
+}
+
+/* Botón "Ver todos" / "Reintentar" en texto dorado sobre fondo oscuro */
+::ng-deep .card-header-row .p-button,
+::ng-deep .empty-state ~ .p-button,
+::ng-deep .p-card .p-button.p-button-text {
+    color: #f5b93b;
+}
+
+::ng-deep .p-card .p-button.p-button-text:hover {
+    background: rgba(245, 185, 59, .08);
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2.5rem 1rem;
+    color: #8a8a8a
+}
+
+.empty-state i {
+    font-size: 2rem;
+    margin-bottom: .5rem;
+    color: #4a4a4a
+}
+
+.empty-state small {
+    display: block;
+    margin-top: .25rem;
+    color: #6a6a6a
+}
+
+.giro-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: .75rem
+}
+
+@media (min-width:576px) {
+    .giro-grid {
+        grid-template-columns: 1fr 1fr
+    }
+}
+
+.giro-item {
+    border: 1px solid #262626;
+    border-radius: 10px;
+    padding: 1rem;
+    background: #0a0a0a;
+    transition: border-color .15s ease
+}
+
+.giro-item:hover {
+    border-color: #f5b93b
+}
+
+.giro-item .giro-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: .5rem
+}
+
+.giro-item .ruleta {
+    font-size: .72rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    color: #8a8a8a
+}
+
+.giro-item .premio {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #f5b93b;
+    margin-top: .15rem
+}
+
+.giro-item .giro-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: .75rem;
+    font-size: .75rem;
+    color: #8a8a8a
+}
+
+/* Tag "Giro #N" en tono neutro oscuro */
+::ng-deep .giro-item .p-tag {
+    background: #262626;
+    color: #d4d4d4;
+}
+
+.mov-marker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    background: #1c1c1c
+}
+
+.mov-marker.sev-warn {
+    color: #f5b93b
+}
+
+.mov-marker.sev-success {
+    color: #34d399
+}
+
+.mov-marker.sev-info {
+    color: #60a5fa
+}
+
+.mov-marker.sev-secondary {
+    color: #9ca3af
+}
+
+.mov-content {
+    padding-bottom: .5rem
+}
+
+.mov-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem
+}
+
+.mov-desc {
+    font-size: .9rem;
+    color: #e5e5e5
+}
+
+.mov-meta {
+    font-size: .75rem;
+    color: #8a8a8a;
+    margin-top: .15rem;
+    text-transform: uppercase;
+    letter-spacing: .02em
+}
+
+/* Tags de puntos (+N / -N) */
+::ng-deep .mov-row .p-tag-success {
+    background: rgba(52, 211, 153, .12);
+    color: #34d399;
+}
+
+::ng-deep .mov-row .p-tag-danger {
+    background: rgba(248, 113, 113, .12);
+    color: #f87171;
+}
+
+/* Línea y separadores del timeline en tono oscuro */
+::ng-deep .p-timeline .p-timeline-event-connector {
+    background-color: #262626;
+}
+
+.skeleton-stack {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem
+}
+
+/* Skeletons oscuros en vez del gris claro por defecto */
+::ng-deep .p-card .p-skeleton {
+    background-color: #1c1c1c;
+}
+
+::ng-deep .p-card .p-skeleton::after {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, .06) 50%, rgba(255, 255, 255, 0) 100%);
+}

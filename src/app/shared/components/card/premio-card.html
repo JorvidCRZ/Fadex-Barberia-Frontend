@@ -1,0 +1,39 @@
+<div class="flex bg-ui-card border border-ui-border rounded-2xl overflow-hidden">
+    <div class="relative aspect-square overflow-hidden bg-surface-100">
+        @if (premio.imagen) {
+            <p-image [src]="premio.imagen | safeImageUrl" [alt]="premio.titulo" preview="true" class="w-50 h-50 rounded-l-xl object-cover transition duration-300 group-hover:scale-105"></p-image>
+        } @else {
+            <div class="flex items-center justify-center w-50 h-50">
+                <i class="pi pi-image text-4xl text-surface-400"></i>
+            </div>
+        }
+
+        @if (mostrarBadge) {
+            <div class="absolute left-3 top-3">
+                <app-status-badge type="text" [value]="premio.badge ?? premio.tipo"/>
+            </div>  
+        }
+    </div>
+
+    <div class="flex flex-1 flex-col gap-2 p-5 bg-ui-card">
+        <h3 class="line-clamp-2 text-xl font-bold text-text-primary">{{ premio.titulo }}</h3>
+        @if (mostrarSubtitulo && premio.subtitulo) {
+            <p class="text-sm text-brand-gold">{{ premio.subtitulo }}</p>
+        }
+    
+        @if (mostrarDescripcion && premio.descripcion) {
+            <p class="line-clamp-3 text-sm text-text-secondary">{{ premio.descripcion }}</p>
+        }
+    
+        <div class="mt-auto flex items-center justify-between border-t border-ui-border pt-3">
+            @if (mostrarPrecio && premio.precio != null) {
+                <span class="text-xl font-bold text-brand-gold">{{ premio.precio | soles }}</span>
+            } @else {
+                <span></span>
+            }
+            @if (editable) {
+                <p-button icon="pi pi-pencil" class="boton-editar-tabla" (click)="editar.emit()"></p-button>
+            }
+        </div>
+    </div>
+</div>

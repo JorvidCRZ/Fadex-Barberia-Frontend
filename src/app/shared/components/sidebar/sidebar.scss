@@ -1,0 +1,231 @@
+/* PANEL */
+:host {
+  display: block;
+  background: #0c0c0c;
+}
+
+.sidebar-shell {
+  position: relative;
+  background: #0c0c0c;
+}
+
+.sidebar-menu {
+  overscroll-behavior: contain;
+}
+
+.sidebar-compact-brand {
+  min-height: 6rem;
+}
+
+.brand-mark-compact {
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-bottom: 0;
+}
+
+.sidebar-initial {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  line-height: 1;
+  display: block;
+  margin-top: -0.35rem;
+  text-shadow: 0 0 0.5rem rgba(212, 175, 55, 0.22);
+}
+
+/* ── COLLAPSED ───────────────────────────────────────────── */
+:host(.sidebar-collapsed) .sidebar-shell {
+  align-items: center;
+}
+
+:host(.sidebar-collapsed) .sidebar-brand {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+:host(.sidebar-collapsed) ::ng-deep .custom-panelmenu .p-panelmenu-header-link,
+:host(.sidebar-collapsed) ::ng-deep .custom-panelmenu .p-menuitem-link,
+:host(.sidebar-collapsed) ::ng-deep .custom-panelmenu .p-panelmenu-item-content {
+  width: 3.6rem;
+  min-height: 3.6rem;
+  justify-content: center;
+  padding: 0.7rem !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  gap: 0 !important;
+}
+
+:host(.sidebar-collapsed) ::ng-deep .custom-panelmenu .p-menuitem-text,
+:host(.sidebar-collapsed) ::ng-deep .custom-panelmenu .p-panelmenu-header-label,
+:host(.sidebar-collapsed) ::ng-deep .custom-panelmenu .p-menuitem-label,
+:host(.sidebar-collapsed) ::ng-deep .custom-panelmenu .p-panelmenu-submenu-icon,
+:host(.sidebar-collapsed) ::ng-deep .custom-panelmenu .p-panelmenu-header-label + .p-panelmenu-submenu-icon {
+  display: none !important;
+}
+
+:host(.sidebar-collapsed) ::ng-deep .custom-panelmenu .p-panelmenu-item-icon,
+:host(.sidebar-collapsed) ::ng-deep .custom-panelmenu .p-panelmenu-header-icon,
+:host(.sidebar-collapsed) ::ng-deep .custom-panelmenu .p-icon {
+  margin-right: 0 !important;
+}
+
+:host(.sidebar-collapsed) ::ng-deep .custom-panelmenu .p-panelmenu-panel {
+  margin-bottom: .4rem;
+  padding: 0;
+  background: transparent;
+}
+
+:host(.sidebar-collapsed) ::ng-deep .custom-panelmenu .p-panelmenu-header-link:hover,
+:host(.sidebar-collapsed) ::ng-deep .custom-panelmenu .p-panelmenu-item-content:hover {
+  transform: translateY(-1px);
+}
+
+:host(.sidebar-collapsed) .sidebar-footer .boton-logout span span {
+  display: none;
+}
+
+:host(.sidebar-collapsed) .sidebar-footer .boton-logout {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  justify-content: center;
+}
+
+:host(.sidebar-collapsed) .sidebar-footer {
+  padding: 0.75rem 0.5rem;
+}
+
+/* ── PANEL BASE ──────────────────────────────────────────── */
+:host ::ng-deep .custom-panelmenu .p-panelmenu-panel {
+  margin-bottom: .25rem;   /* antes .8rem — menos separación */
+  background: transparent;
+  border: none;
+}
+
+/* ── PADRES E HIJOS ──────────────────────────────────────── */
+:host ::ng-deep .custom-panelmenu .p-panelmenu-item-content {
+  padding: inherit !important;
+  margin: .15rem 0 !important;   /* antes .5rem — más compacto */
+  place-content: center;
+}
+
+:host ::ng-deep .custom-panelmenu .p-panelmenu-item-content .p-panelmenu-item-icon {
+  margin-right: .5rem;
+}
+
+/* Items principales */
+:host ::ng-deep .custom-panelmenu > .p-panelmenu-panel 
+.p-panelmenu-header-link {
+  justify-content: flex-start;
+}
+
+
+/* Subitems dentro de un panel */
+:host ::ng-deep .custom-panelmenu 
+.p-panelmenu-content .p-panelmenu-item-link {
+  margin-left: 1rem !important;
+  width: calc(100% - 1rem);
+  justify-content: flex-start;
+}
+
+:host ::ng-deep .custom-panelmenu .p-panelmenu-item-content,
+:host ::ng-deep .custom-panelmenu .p-panelmenu-header-link,
+:host ::ng-deep .custom-panelmenu .p-menuitem-link {
+  width: 100%;
+  display: flex;
+  min-height: 2.8rem;           /* antes 3.2rem — más slim */
+  padding: .65rem .9rem;        /* antes .95rem 1rem */
+  border-radius: 8px;           /* antes 1rem — menos redondeado, más sofisticado */
+  align-items: center;
+  gap: .75rem;
+  color: rgba(255,255,255,0.75) !important;   /* blanco con opacidad — más sutil */
+  background: transparent !important;          /* sin fondo por defecto */
+  border: 1px solid transparent !important;    /* borde invisible por defecto */
+  font-size: .875rem;
+  font-weight: 400;             /* antes 500 — más ligero */
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  transition: all .2s ease;
+}
+
+:host ::ng-deep .custom-panelmenu .p-panelmenu-item-content svg {
+  margin-right: .5rem;
+}
+
+/* ── ICONOS ──────────────────────────────────────────────── */
+:host ::ng-deep .custom-panelmenu .p-panelmenu-header-icon,
+:host ::ng-deep .custom-panelmenu .p-panelmenu-item-icon,
+:host ::ng-deep .custom-panelmenu .p-panelmenu-submenu-icon,
+:host ::ng-deep .custom-panelmenu .p-icon {
+  color: var(--color-brand-gold) !important;
+  font-size: .875rem;
+}
+
+:host ::ng-deep .custom-panelmenu .p-panelmenu-item,
+:host ::ng-deep .custom-panelmenu .p-panelmenu-submenu {
+  width: 100%;
+}
+
+/* ── HOVER ───────────────────────────────────────────────── */
+:host ::ng-deep .custom-panelmenu .p-panelmenu-header-link:hover,
+:host ::ng-deep .custom-panelmenu .p-panelmenu-item-content:hover {
+  background: rgba(212, 175, 55, 0.08) !important;
+  border-color: rgba(212, 175, 55, 0.2) !important;
+  color: #ffffff !important;
+  transform: translateX(3px);
+}
+
+/* ── ACTIVO ──────────────────────────────────────────────── */
+:host ::ng-deep .custom-panelmenu .p-menuitem-link-active,
+:host ::ng-deep .custom-panelmenu .p-menuitem-link.router-link-active,
+:host ::ng-deep .custom-panelmenu .p-menuitem-active>.p-panelmenu-header>.p-panelmenu-header-content {
+  background: rgba(212, 175, 55, 0.1) !important;
+  border-color: rgba(212, 175, 55, 0.35) !important;
+  color: var(--color-brand-gold) !important;
+}
+
+/* ── CONTENEDOR HEADER/ITEM ──────────────────────────────── */
+:host ::ng-deep .custom-panelmenu .p-panelmenu-header-content,
+:host ::ng-deep .custom-panelmenu .p-menuitem-content {
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all .2s ease;
+}
+
+/* ── TEXTO ───────────────────────────────────────────────── */
+:host ::ng-deep .custom-panelmenu .p-menuitem-text,
+:host ::ng-deep .custom-panelmenu .p-panelmenu-header-label,
+:host ::ng-deep .custom-panelmenu .p-menuitem-label {
+  font-size: .875rem;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+/* ── PANEL / NG-STAR ─────────────────────────────────────── */
+:host ::ng-deep .custom-panelmenu .p-panelmenu-panel,
+:host ::ng-deep .custom-panelmenu :ng-star-inserted {
+  background: transparent;
+  border: none;
+  padding: .2rem 0 .1rem;
+}
+
+:host(.sidebar-collapsed) ::ng-deep .custom-panelmenu .p-panelmenu-panel,
+:host(.sidebar-collapsed) ::ng-deep .custom-panelmenu :ng-star-inserted {
+  background: transparent !important;
+}
+
+/* ── ANIMACIÓN EXPAND ────────────────────────────────────── */
+:host ::ng-deep .custom-panelmenu .p-panelmenu-expanded {
+  animation: fadeInMenu .2s ease;
+}
+
+@keyframes fadeInMenu {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
