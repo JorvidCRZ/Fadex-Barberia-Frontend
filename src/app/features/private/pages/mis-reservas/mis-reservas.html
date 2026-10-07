@@ -10,20 +10,13 @@
       <p class="text-sm text-text-muted">Consulta, paga o cancela tus citas</p>
     </div>
 
-    <div class="flex justify-center gap-3">
-      <button type="button" class="boton-ghost gap-2" (click)="recargar()">
-        <i class="pi pi-refresh"></i> Recargar
-      </button>
-      <button type="button" class="boton-primary gap-2" (click)="abrirNuevaReserva()">
-        <i class="pi pi-plus"></i> Nueva reserva
-      </button>
+    <div class="flex items-center justify-center gap-3">
+      <app-button variant="secondary" size="sm" icon="refresh" label="Recargar" (clicked)="recargar()" />
+      <app-button variant="primary" size="sm" icon="plus" label="Nueva reserva" (clicked)="abrirNuevaReserva()" />
     </div>
-
   </aside>
 
   <!-- Tabla -->
-  <div class="table-base overflow-hidden">
-    <div class="overflow-x-auto">
       <p-table #dt [value]="reservas" [lazy]="true" (onLazyLoad)="onLazyLoad($event)" [paginator]="true"
         [rows]="rows" [totalRecords]="totalRecords" [loading]="loading" dataKey="reservaId"
         [showCurrentPageReport]="true"
@@ -65,27 +58,29 @@
             </td>
 
             <td class="px-6 py-4">
-              <p class="text-sm font-medium text-text-primary">{{ reserva.fecha | date:'dd/MM/yyyy' }}</p>
+              <p class="text-sm font-medium text-text-primary">{{ reserva.fecha | dateHelper }}</p>
             </td>
 
             <td class="px-6 py-4">
-              <span class="font-bold text-brand-gold">{{ reserva.total | currency:'PEN ' }}</span>
+              <span class="font-bold text-brand-gold">{{ reserva.total | moneda }}</span>
             </td>
 
             <td class="px-6 py-4">
-              <p-tag [value]="(reserva.estadoReserva || '').replace('_', ' ')" [severity]="getSeverity(reserva.estadoReserva)" [rounded]="true" />
+              <app-status-badge type="text" [value]="reserva.estadoReserva"></app-status-badge>
             </td>
 
             <td class="px-6 py-4">
               <div class="flex items-center justify-center">
 
                 @if (puedePagar(reserva)) {
-                    <p-button icon="pi pi-credit-card" class="boton-ver-tabla" pTooltip="Pagar reserva" (click)="irAPagar(reserva)"></p-button>
+                  <app-button variant="ver-tabla" icon="credit-card" tooltip="Pagar reserva" (clicked)="irAPagar(reserva)" />
                 }
                 @if (puedeCancelar(reserva)) {
-                  <p-button icon="pi pi-times" class="boton-eliminar-tabla" pTooltip="Cancelar reserva" (click)="cancelarReserva(reserva)"></p-button>
+                  <app-button variant="eliminar-tabla" icon="times" tooltip="Cancelar reserva" (clicked)="cancelarReserva(reserva)" />
                 }
-
+                @if (!puedePagar(reserva) && !puedeCancelar(reserva)) {
+                  <span class="text-text-muted">—</span>
+                }
               </div>
             </td>
 
@@ -119,14 +114,10 @@
 
       </p-table>
     </div>
-  </div>
-
-</div>
 
 <!-- Modal: nueva reserva -->
 <app-reservar [(visible)]="dialogNuevaReserva" (creada)="onReservaCreada()" />
 
-<p-confirmDialog [style]="{ width: '450px' }" acceptButtonStyleClass="p-button-danger"
-  rejectButtonStyleClass="p-button-secondary" />
+<p-confirmDialog [style]="{ width: '450px' }" acceptButtonStyleClass="p-button-danger" rejectButtonStyleClass="p-button-secondary" />
 
 <p-toast position="top-right" />

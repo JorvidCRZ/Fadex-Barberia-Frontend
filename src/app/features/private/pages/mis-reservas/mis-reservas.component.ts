@@ -17,22 +17,18 @@ import { ReservaService } from '../../../../core/services/operaciones/reserva.se
 import { environment } from '../../../../../environments/environment';
 import { RESERVAS_MOCK } from '../../../../core/config/privado-mock.config';
 import { ReservarComponent } from '../reservar/reservar.component';
+import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
+import { MonedaPipe } from '../../../../shared/pipes/moneda.pipe';
+import { DateFormatPipe } from '../../../../shared/pipes/dat.pipe';
+import { ButtonComponent } from '../../../../shared/components/button/button.component';
 
 type Severidad = 'success' | 'info' | 'warn' | 'danger' | 'secondary';
 
 @Component({
   selector: 'app-mis-reservas',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    TableModule,
-    ButtonModule,
-    TagModule,
-    ToastModule,
-    TooltipModule,
-    ConfirmDialogModule,
-    ReservarComponent,
+  imports: [CommonModule,FormsModule,TableModule,ButtonModule,TagModule,ToastModule,TooltipModule,ConfirmDialogModule,
+    ReservarComponent,StatusBadgeComponent,DateFormatPipe, MonedaPipe,ButtonComponent
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './mis-reservas.html',

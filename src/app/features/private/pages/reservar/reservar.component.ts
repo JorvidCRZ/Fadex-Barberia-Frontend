@@ -9,16 +9,22 @@ import { SelectModule } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
 import { CheckboxModule } from 'primeng/checkbox';
 import { MessageService } from 'primeng/api';
-import { catchError, finalize, map, Observable, of } from 'rxjs';
+import { catchError, delay, finalize, map, Observable, of } from 'rxjs';
 import { Servicio } from '../../../../core/models/catalogos/servicios.model';
 import { Barbero } from '../../../../core/models/gestion/barbero/barbero.model';
+import { Reserva } from '../../../../core/models/operaciones/Reserva.model';
+import { EstadoReserva } from '../../../../core/models/operaciones/EstadoReserva';
+import { TipoReserva } from '../../../../core/models/operaciones/TipoRserva';
 import { ReservaRequest } from '../../../../core/models/reserva/reservaRequest';
 import { TokenService } from '../../../../core/services/auth/token.service';
 import { ServicioService } from '../../../../core/services/catalogos/servicio.service';
 import { BarberoService } from '../../../../core/services/gestion/barbero.service';
 import { ReservaService } from '../../../../core/services/operaciones/reserva.service';
-
-// TODO: ajusta la ruta a donde tengas DialogHeaderComponent
+import { BARBEROS_MOCK, RESERVAS_MOCK, SERVICIOS_MOCK } from '../../../../core/config/privado-mock.config';
+import { environment } from '../../../../../environments/environment';
+import { DialogHeaderComponent } from '../../../../shared/components/dialog-header/dialog-header.component';
+import { ButtonComponent } from '../../../../shared/components/button/button.component';
+import { MonedaPipe } from '../../../../shared/pipes/moneda.pipe';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -53,11 +59,14 @@ const HORARIOS = Array.from({ length: 20 }, (_, i) => {
 /**
  * Usa el MessageService del componente padre (debe tener <p-toast /> y
  * `providers: [MessageService]`, como ya lo tiene MisReservas).
+ *
+ * Con environment.useMockData = true no llama al backend: carga barberos y servicios
+ * desde privado-mock.config y agrega la reserva (PENDIENTE_PAGO) a RESERVAS_MOCK.
  */
 @Component({
   selector: 'app-reservar',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, DialogModule, SelectModule, DatePickerModule, CheckboxModule],
+  imports: [CommonModule, ReactiveFormsModule, DialogModule, SelectModule, DatePickerModule, CheckboxModule, DialogHeaderComponent],
   templateUrl: './reservar.html',
 })
 export class ReservarComponent implements OnInit {
@@ -222,7 +231,15 @@ export class ReservarComponent implements OnInit {
   private cargarDatos(): void {
     this.datosCargados = true;
 
-    this.barberos$ = this.barberoService.listar(0, 1000).pipe(
+    const barberosOrigen$: Observable<any> = environment.useMockData
+      ? of({ data: { content: BARBEROS_MOCK } })
+      : this.barberoService.listar(0, 1000);
+
+    const serviciosOrigen$: Observable<any> = environment.useMockData
+      ? of({ data: { content: SERVICIOS_MOCK } })
+      : this.servicioService.obtenerServicioPublicos({ size: 1000, page: 0 });
+
+    this.barberos$ = barberosOrigen$.pipe(
       map((res) => {
         const data = (res?.data?.content ?? []) as Barbero[];
         this.barberosCache = data.length > 0
@@ -248,7 +265,7 @@ export class ReservarComponent implements OnInit {
       }),
     );
 
-    this.servicios$ = this.servicioService.obtenerServicioPublicos({ size: 1000, page: 0 }).pipe(
+    this.servicios$ = serviciosOrigen$.pipe(
       map((res) => {
         this.serviciosCache = res?.data?.content ?? [];
         return this.serviciosCache;
@@ -314,6 +331,11 @@ export class ReservarComponent implements OnInit {
       return;
     }
 
+    if (environment.useMockData) {
+      this.guardarMock();
+      return;
+    }
+
     if (!this.tokenService.isLogged()) {
       this.toast('error', 'Sesión no válida', 'Por favor inicia sesión nuevamente');
       this.router.navigate(['/login']);
@@ -342,15 +364,52 @@ export class ReservarComponent implements OnInit {
       .guardarReserva(request)
       .pipe(finalize(() => this.guardando.set(false)))
       .subscribe({
-        next: () => {
-          this.toast('success', '¡Cita agendada!', 'Tu cita fue agendada exitosamente');
-          this.cerrar();
-          this.creada.emit();
-        },
+        next: () => this.alGuardar(),
         error: (error) => {
           this.toast('error', 'Error del servidor', error?.error?.message ?? 'Ocurrió un error al agendar la cita.');
         },
       });
+  }
+
+  /** Modo frontend: agrega la reserva a RESERVAS_MOCK (queda PENDIENTE_PAGO para probar pagar/cancelar) */
+  private guardarMock(): void {
+    const f = this.citaForm.getRawValue();
+    const [hh, mm] = f.hora!.split(':').map(Number);
+    const duracion = Number((this.servicioSel as any)?.duracion ?? 30);
+
+    const inicio = new Date(f.fecha!);
+    inicio.setHours(hh, mm, 0, 0);
+    const fin = new Date(inicio.getTime() + duracion * 60_000);
+
+    const id = Math.max(0, ...RESERVAS_MOCK.map((r) => r.reservaId)) + 1;
+
+    const nueva: Reserva = {
+      id,
+      reservaId: id,
+      clienteNombre: 'Cliente Demo',
+      barberoNombre: this.barberoSel?.nombreCompleto ?? '',
+      servicio: (this.servicioSel as any)?.nombre ?? '',
+      fecha: inicio,
+      horaInicio: inicio,
+      horaFin: fin,
+      tipoReserva: TipoReserva.RESERVA_PRESENCIAL_INSTANTANEO,
+      total: Number((this.servicioSel as any)?.precio ?? 0),
+      estadoReserva: EstadoReserva.PENDIENTE_PAGO,
+    };
+
+    this.guardando.set(true);
+    of(null)
+      .pipe(delay(400), finalize(() => this.guardando.set(false)))
+      .subscribe(() => {
+        RESERVAS_MOCK.unshift(nueva);
+        this.alGuardar();
+      });
+  }
+
+  private alGuardar(): void {
+    this.toast('success', '¡Cita agendada!', 'Tu cita fue agendada exitosamente');
+    this.cerrar();
+    this.creada.emit();
   }
 
   // ── Utils ──────────────────────────────────────────────────────────────────
