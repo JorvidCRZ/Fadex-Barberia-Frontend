@@ -17,6 +17,7 @@ import { PagoComponent } from './features/auth/pago/pago.component';
 import { DashboardBarberoComponent } from './features/private/layout/dashboard-barbero.component';
 import { DashboardClienteComponent } from './features/private/layout/dashboard-cliente.component';
 import { DashboardAdministrativoComponent } from './features/private/layout/dashboard-administrativo.component';
+import { CheckoutComponent as CheckoutReservaComponent } from './features/private/pages/checkout/checkout.component';
 // import { BarberoLayoutComponent } from './features/private/layout/barbero-layout.component';
 // import { DashboardAdministrativoComponent } from './features/private/dashboard/dashboard-administrativo/dashboard-administrativo.component';
 // import { RegistrarClient } from './features/private/components/gestion/clientes/registrar-client/registrar-client';
@@ -156,6 +157,7 @@ export const routes: Routes = [
           { path: 'dashboard', loadComponent: () => import('./features/private/pages/resumen/resumen.component').then(m => m.ResumenComponent) },
           { path: 'reservar/agendar', loadComponent: () => import('./features/private/pages/reservar/reservar.component').then(m => m.ReservarComponent), canActivate: [authGuard] },
           { path: 'reservas/mis-reservas', loadComponent: () => import('./features/private/pages/mis-reservas/mis-reservas.component').then(m => m.MisReservasComponent) },
+          { path: 'checkout/:reservaId', component: CheckoutReservaComponent, canActivate: [authGuard], data: { roles: ['cliente'] } },
           { path: 'ia/analisis-facial', loadComponent: () => import('./features/private/pages/reconocimiento-facial/reconocimiento-facial.component').then(m => m.ReconocimientoFacialComponent) },
           { path: 'historial', loadComponent: () => import('./features/private/pages/historial/historial.component').then(m => m.ClienteHistorialComponent) },
 

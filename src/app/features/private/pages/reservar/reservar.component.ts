@@ -1,4 +1,4 @@
-import { Component, inject, model, output, signal } from '@angular/core';
+import { Component, inject, model, OnInit, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import {
@@ -17,7 +17,6 @@ import { TokenService } from '../../../../core/services/auth/token.service';
 import { ServicioService } from '../../../../core/services/catalogos/servicio.service';
 import { BarberoService } from '../../../../core/services/gestion/barbero.service';
 import { ReservaService } from '../../../../core/services/operaciones/reserva.service';
-import { DialogHeaderComponent } from '../../../../shared/components/dialog-header/dialog-header.component';
 
 // TODO: ajusta la ruta a donde tengas DialogHeaderComponent
 
@@ -58,10 +57,10 @@ const HORARIOS = Array.from({ length: 20 }, (_, i) => {
 @Component({
   selector: 'app-reservar',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, DialogModule, SelectModule, DatePickerModule, CheckboxModule, DialogHeaderComponent],
+  imports: [CommonModule, ReactiveFormsModule, DialogModule, SelectModule, DatePickerModule, CheckboxModule],
   templateUrl: './reservar.html',
 })
-export class ReservarComponent {
+export class ReservarComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly messageService = inject(MessageService);
@@ -76,6 +75,10 @@ export class ReservarComponent {
   creada = output<void>();
 
   guardando = signal(false);
+
+  usuarioNombre = ''; // TODO: nombre del usuario logueado
+
+  diasDisponibles: { valor: string; label: string; fecha: Date }[] = [];
 
   barberos$!: Observable<any[]>;
   servicios$!: Observable<Servicio[]>;
@@ -96,12 +99,118 @@ export class ReservarComponent {
     aceptaTerminos: [false, [Validators.requiredTrue]],
   });
 
+  ngOnInit(): void {
+    this.generarDias();
+  }
+
+  private generarDias(cantidad = 5): void {
+    const dias = [];
+    const d = new Date();
+    while (dias.length < cantidad) {
+      if (d.getDay() !== 0) {
+        const nombre = d.toLocaleDateString('es-PE', { weekday: 'long' });
+        dias.push({
+          valor: d.toDateString(),
+          label: nombre.charAt(0).toUpperCase() + nombre.slice(1),
+          fecha: new Date(d),
+        });
+      }
+      d.setDate(d.getDate() + 1);
+    }
+    this.diasDisponibles = dias;
+  }
+
+  esDiaActivo(dia: { fecha: Date }): boolean {
+    const f = this.citaForm.controls.fecha.value;
+    return !!f && new Date(f).toDateString() === dia.fecha.toDateString();
+  }
+
+  elegirDia(dia: { fecha: Date }): void {
+    this.citaForm.controls.fecha.setValue(dia.fecha);
+    this.citaForm.controls.fecha.markAsDirty();
+    this.alCambiarFecha();
+  }
+
+  elegirHora(valor: string): void {
+    this.citaForm.controls.hora.setValue(valor);
+    this.citaForm.controls.hora.markAsDirty();
+  }
+
+  chipClass(activo: boolean): string {
+    return 'rounded-lg px-4 py-2 text-sm font-semibold transition-colors ' +
+      (activo ? 'bg-brand-gold text-black' : 'bg-white/5 text-text-primary hover:bg-white/10');
+  }
+
   // ── Apertura / cierre ──────────────────────────────────────────────────────
 
   alAbrir(): void {
     if (!this.datosCargados) this.cargarDatos();
     this.citaForm.reset({ notas: '', aceptaTerminos: false });
+
+    if (this.barberosCache.length > 0) {
+      this.citaForm.patchValue({ barberoId: this.barberosCache[0].barberoId });
+    }
+
     this.horariosDisponibles = HORARIOS;
+  }
+
+  private crearBarberosPorDefecto(): any[] {
+    return [
+      {
+        barberoId: 1001,
+        experiencia: 5,
+        fechaIngreso: '2024-01-10',
+        ocupado: false,
+        sueldo: 0,
+        comision: 0,
+        descripcion: 'Barbero principal',
+        persona: {
+          personaId: 1001,
+          nombre: 'Carlos',
+          apellido: 'Ramírez',
+          telefono: '999111222',
+          email: 'carlos@fadex.com',
+          usuario: { idUsuario: 1001, user: 'carlos', qrToken: 'demo-1' },
+        },
+        nombreCompleto: 'Carlos Ramírez',
+      },
+      {
+        barberoId: 1002,
+        experiencia: 4,
+        fechaIngreso: '2024-02-14',
+        ocupado: false,
+        sueldo: 0,
+        comision: 0,
+        descripcion: 'Barbero de cortes premium',
+        persona: {
+          personaId: 1002,
+          nombre: 'Carlos ',
+          apellido: 'Ramírez',
+          telefono: '999333444',
+          email: 'miguel@fadex.com',
+          usuario: { idUsuario: 1002, user: 'miguel', qrToken: 'demo-2' },
+        },
+        nombreCompleto: 'Carlos Ramírez',
+      },
+      {
+        barberoId: 1003,
+        experiencia: 3,
+        fechaIngreso: '2024-03-21',
+        ocupado: false,
+        sueldo: 0,
+        comision: 0,
+        descripcion: 'Barbero de estilo moderno',
+        persona: {
+          personaId: 1003,
+          nombre: 'Ana',
+          apellido: 'Gómez',
+          telefono: '999555666',
+          email: 'ana@fadex.com',
+          usuario: { idUsuario: 1003, user: 'ana', qrToken: 'demo-3' },
+        },
+        nombreCompleto: 'Ana Gómez',
+      },
+    ];
   }
 
   cerrar(): void {
@@ -115,15 +224,27 @@ export class ReservarComponent {
 
     this.barberos$ = this.barberoService.listar(0, 1000).pipe(
       map((res) => {
-        this.barberosCache = (res?.data?.content ?? []).map((b: Barbero) => ({
-          ...b,
-          nombreCompleto: `${b.persona?.nombre ?? ''} ${b.persona?.apellido ?? ''}`.trim(),
-        }));
+        const data = (res?.data?.content ?? []) as Barbero[];
+        this.barberosCache = data.length > 0
+          ? data.map((b: Barbero) => ({
+              ...b,
+              nombreCompleto: `${b.persona?.nombre ?? ''} ${b.persona?.apellido ?? ''}`.trim(),
+            }))
+          : this.crearBarberosPorDefecto();
+
+        if (!this.citaForm.controls.barberoId.value && this.barberosCache.length > 0) {
+          this.citaForm.patchValue({ barberoId: this.barberosCache[0].barberoId });
+        }
+
         return this.barberosCache;
       }),
       catchError(() => {
-        this.toast('error', 'Error', 'No se pudieron cargar los barberos');
-        return of([]);
+        this.barberosCache = this.crearBarberosPorDefecto();
+        if (!this.citaForm.controls.barberoId.value && this.barberosCache.length > 0) {
+          this.citaForm.patchValue({ barberoId: this.barberosCache[0].barberoId });
+        }
+        this.toast('error', 'Error', 'No se pudieron cargar los barberos, se muestran los predeterminados');
+        return of(this.barberosCache);
       }),
     );
 
@@ -230,39 +351,6 @@ export class ReservarComponent {
           this.toast('error', 'Error del servidor', error?.error?.message ?? 'Ocurrió un error al agendar la cita.');
         },
       });
-  }
-  diasChips: { fecha: Date; etiqueta: string }[] = [];
-
-private generarDiasChips(cantidad = 7): void {
-  const nombres = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-  const inicio = new Date(this.minDateCita);
-  this.diasChips = [];
-  for (let i = 0; i < cantidad; i++) {
-    const d = new Date(inicio);
-    d.setDate(inicio.getDate() + i);
-    if (this.maxDateCita && d > this.maxDateCita) break;
-    this.diasChips.push({ fecha: d, etiqueta: nombres[d.getDay()] });
-  }
-}
-
-seleccionarDia(fecha: Date): void {
-  this.citaForm.patchValue({ fecha });
-  this.citaForm.get('fecha')?.markAsTouched();
-  this.onFechaChange();
-}
-
-esDiaActivo(d: Date): boolean {
-  const v = this.citaForm.get('fecha')?.value;
-  return !!v && new Date(v).toDateString() === d.toDateString();
-}
-
-  seleccionarHora(hora: string | null): void {
-    this.citaForm.patchValue({ hora });
-    this.citaForm.get('hora')?.markAsTouched();
-  }
-
-  esHoraActiva(hora: string): boolean {
-    return (this.citaForm.get('hora')?.value ?? null) === hora;
   }
 
   // ── Utils ──────────────────────────────────────────────────────────────────
