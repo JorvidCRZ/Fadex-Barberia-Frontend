@@ -7,10 +7,9 @@ import { TagModule } from 'primeng/tag';
 import { SkeletonModule } from 'primeng/skeleton';
 import { TimelineModule } from 'primeng/timeline';
 import { MessageModule } from 'primeng/message';
-import { GiroService } from '../../../../../core/services/ruleta/giro.service';
-import { FidelizacionMovimientoService } from '../../../../../core/services/fidelizacion/movimiento.service';
 import { GiroResponse } from '../../../../../core/models/ruleta/giro.model';
 import { Movimiento, Origen } from '../../../../../core/models/fidelizacion/movimiento.model';
+import { FIDELIZACION_GIROS_MOCK, FIDELIZACION_MOVIMIENTOS_MOCK } from '../../../../../core/config/fidelizacion-mock.config';
 
 @Component({
   selector: 'app-mi-historial',
@@ -20,8 +19,9 @@ import { Movimiento, Origen } from '../../../../../core/models/fidelizacion/movi
   styleUrl: './mi-historial.scss',
 })
 export class MiHistorialComponent implements OnInit {
-  private giroService = inject(GiroService);
-  private movimientoService = inject(FidelizacionMovimientoService);
+  // Backend:
+  // private giroService = inject(GiroService);
+  // private movimientoService = inject(FidelizacionMovimientoService);
 
   readonly Origen = Origen;
 
@@ -46,16 +46,11 @@ export class MiHistorialComponent implements OnInit {
     this.cargandoGiros.set(true);
     this.errorGiros.set(null);
 
-    this.giroService.obtenerMisGiros().subscribe({
-      next: (res) => {
-        this.giros.set(res.data ?? []);
-        this.cargandoGiros.set(false);
-      },
-      error: () => {
-        this.errorGiros.set('No se pudieron cargar tus giros. Intenta de nuevo.');
-        this.cargandoGiros.set(false);
-      }
-    });
+    this.giros.set([...FIDELIZACION_GIROS_MOCK]);
+    this.cargandoGiros.set(false);
+
+    // Backend:
+    // this.giroService.obtenerMisGiros().subscribe({ ... });
   }
 
   formatearProbabilidad(prob: number): string {
@@ -67,32 +62,22 @@ export class MiHistorialComponent implements OnInit {
     this.cargandoMovimientos.set(true);
     this.errorMovimientos.set(null);
 
-    this.movimientoService.obtenerUltimosMovimientos(limite).subscribe({
-      next: (res) => {
-        this.movimientos.set(res.data ?? []);
-        this.cargandoMovimientos.set(false);
-      },
-      error: () => {
-        this.errorMovimientos.set('No se pudieron cargar tus movimientos.');
-        this.cargandoMovimientos.set(false);
-      }
-    });
+    this.movimientos.set(FIDELIZACION_MOVIMIENTOS_MOCK.slice(0, limite));
+    this.cargandoMovimientos.set(false);
+
+    // Backend:
+    // this.movimientoService.obtenerUltimosMovimientos(limite).subscribe({ ... });
   }
 
   cargarMovimientosTodos(): void {
     this.cargandoMovimientos.set(true);
     this.errorMovimientos.set(null);
 
-    this.movimientoService.obtenerMisMovimientos().subscribe({
-      next: (res) => {
-        this.movimientos.set(res.data ?? []);
-        this.cargandoMovimientos.set(false);
-      },
-      error: () => {
-        this.errorMovimientos.set('No se pudieron cargar tus movimientos.');
-        this.cargandoMovimientos.set(false);
-      }
-    });
+    this.movimientos.set([...FIDELIZACION_MOVIMIENTOS_MOCK]);
+    this.cargandoMovimientos.set(false);
+
+    // Backend:
+    // this.movimientoService.obtenerMisMovimientos().subscribe({ ... });
   }
 
   toggleVistaMovimientos(): void {

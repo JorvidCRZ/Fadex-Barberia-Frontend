@@ -41,6 +41,16 @@ export class ClienteHistorialComponent implements OnInit {
   displayModal = false;
   reservaSeleccionada: HistorialClienteModel | null = null;
 
+  get comprobanteTitulo(): string {
+    return this.reservaSeleccionada?.tipoComprobante === 'FACTURA'
+      ? 'Factura electrónica'
+      : 'Boleta electrónica';
+  }
+
+  get comprobanteDisponible(): boolean {
+    return !!this.reservaSeleccionada?.tipoComprobante;
+  }
+
   ngOnInit(): void {
     this.cargarHistorial();
   }
@@ -103,5 +113,10 @@ export class ClienteHistorialComponent implements OnInit {
   verDetalle(reserva: HistorialClienteModel): void {
     this.reservaSeleccionada = reserva;
     this.displayModal = true;
+  }
+
+  cerrarComprobante(): void {
+    this.displayModal = false;
+    this.reservaSeleccionada = null;
   }
 }

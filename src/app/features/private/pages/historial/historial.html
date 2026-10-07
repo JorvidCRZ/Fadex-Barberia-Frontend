@@ -24,7 +24,7 @@
   (limpiar)="onLimpiar()">
 </app-filtros>
 
-<div class="border border-[#C9A84C]/30 rounded-lg bg-[#0a0a0a]">
+<div class="rounded-lg border border-ui-border bg-ui-card">
   <p-table [value]="historial" [lazy]="true" (onLazyLoad)="onLazyLoad($event)"
            [paginator]="true" [rows]="pageSize" [totalRecords]="totalRecords"
            [loading]="loading" [rowsPerPageOptions]="[10, 20, 50]"
@@ -32,62 +32,75 @@
 
     <ng-template pTemplate="header">
       <tr>
-        <th>Fecha</th>
+        <th>Reserva</th>
+        <th>Fecha y hora</th>
         <th>Barbero</th>
         <th>Servicio</th>
+        <th class="text-right">Monto</th>
         <th class="text-center">Estado</th>
-        <th class="text-right">Total</th>
         <th class="text-center">Acciones</th>
       </tr>
     </ng-template>
 
     <ng-template pTemplate="body" let-reserva>
       <tr class="group">
-        <td>
-          <span class="p-column-title font-bold text-[#C9A84C] block md:hidden">Fecha:</span>
-          {{ reserva.fecha | date:'dd/MM/yyyy' }}
+        <td class="font-medium text-brand-gold">
+          <span class="p-column-title block font-bold text-brand-gold md:hidden">Reserva:</span>
+          #FX-{{ reserva.id | number:'4.0-0' }}
         </td>
         <td>
-          <span class="p-column-title font-bold text-[#C9A84C] block md:hidden">Barbero:</span>
+          <span class="p-column-title block font-bold text-brand-gold md:hidden">Fecha y hora:</span>
+          <span class="block">{{ reserva.fecha | date:'d MMM. y' }}</span>
+          <span class="block text-text-muted">{{ reserva.horaInicio }}</span>
+        </td>
+        <td>
+          <span class="p-column-title block font-bold text-brand-gold md:hidden">Barbero:</span>
           {{ reserva.nombreBarbero }}
         </td>
         <td>
-          <span class="p-column-title font-bold text-[#C9A84C] block md:hidden">Servicio:</span>
+          <span class="p-column-title block font-bold text-brand-gold md:hidden">Servicio:</span>
           <span class="truncate max-w-[200px] block" [title]="reserva.nombreServicio">
             {{ reserva.nombreServicio }}
           </span>
         </td>
+        <td class="text-right font-medium">
+          <span class="p-column-title block text-left font-bold text-brand-gold md:hidden">Monto:</span>
+          <span class="font-semibold text-brand-gold">S/ {{ reserva.total | number:'1.2-2' }}</span>
+        </td>
         <td class="text-center">
-          <span class="p-column-title font-bold text-[#C9A84C] block md:hidden">Estado:</span>
+          <span class="p-column-title block font-bold text-brand-gold md:hidden">Estado:</span>
           <app-status-badge type="text" [value]="reserva.estadoReserva"></app-status-badge>
         </td>
-        <td class="text-right font-medium">
-          <span class="p-column-title font-bold text-[#C9A84C] block md:hidden text-left">Total:</span>
-          S/ {{ reserva.total | number:'1.2-2' }}
-        </td>
         <td class="text-center">
-          <button (click)="verDetalle(reserva)"
-                  pTooltip="Ver Detalle"
-                  tooltipPosition="top"
-                  class="w-8 h-8 rounded-full text-gray-400 hover:text-[#C9A84C] hover:bg-[#C9A84C]/10 transition-colors flex items-center justify-center mx-auto">
-            <i class="pi pi-eye"></i>
-          </button>
+          @if (reserva.tipoComprobante) {
+            <button type="button" (click)="verDetalle(reserva)"
+                    class="inline-flex items-center gap-2 rounded-md border border-brand-gold/40 px-3 py-2 text-xs font-semibold text-text-primary transition-colors hover:border-brand-gold hover:bg-brand-gold/10">
+              <i class="pi pi-eye"></i>
+              Ver {{ reserva.tipoComprobante === 'FACTURA' ? 'factura' : 'boleta' }}
+            </button>
+          } @else {
+            <button type="button" disabled
+                    class="inline-flex items-center gap-2 rounded-md border border-ui-border px-3 py-2 text-xs text-text-muted opacity-70">
+              <i class="pi pi-eye-slash"></i>
+              Sin comprobante
+            </button>
+          }
         </td>
       </tr>
     </ng-template>
 
     <ng-template pTemplate="emptymessage">
       <tr>
-        <td colspan="6" class="text-center py-16">
-          <div class="flex flex-col items-center justify-center text-gray-400">
-            <i class="pi pi-calendar-times text-3xl mb-4 opacity-50"></i>
+        <td colspan="7" class="py-16 text-center">
+          <div class="flex flex-col items-center justify-center text-text-muted">
+            <i class="pi pi-calendar-times mb-4 text-3xl opacity-50"></i>
             <p class="text-sm m-0">
               No se encontraron registros de atenciones para los filtros aplicados.
             </p>
 
             <button *ngIf="filtros.estado || filtros.desde || filtros.hasta"
                     (click)="onLimpiar()"
-                    class="mt-4 px-4 py-2 bg-[#C9A84C] text-black font-semibold rounded-md text-sm hover:bg-[#e0bc55] transition-colors">
+                    class="mt-4 rounded-md bg-brand-gold px-4 py-2 text-sm font-semibold text-brand-black transition-colors hover:bg-brand-gold-hover">
               Limpiar Filtros
             </button>
 
@@ -103,64 +116,54 @@
   </p-table>
 </div>
 
-<p-dialog [(visible)]="displayModal" [modal]="true" [draggable]="false" [resizable]="false" 
-          styleClass="w-11/12 md:w-5/12 bg-[#0a0a0a] text-white border border-[#C9A84C]/30 rounded-lg shadow-2xl" 
-          header="Detalle de Atención" [baseZIndex]="10000">
+<p-dialog [(visible)]="displayModal" [modal]="true" [draggable]="false" [resizable]="false"
+          styleClass="w-11/12 md:w-5/12 bg-ui-card text-text-primary border border-brand-gold/30 rounded-lg shadow-2xl"
+          [header]="comprobanteTitulo" [baseZIndex]="10000">
   
   <ng-template pTemplate="content">
-    <div *ngIf="reservaSeleccionada" class="p-4 space-y-5">
-      <div class="flex justify-between items-center border-b border-white/10 pb-4">
+    <div *ngIf="reservaSeleccionada" class="space-y-5 p-5">
+      <div class="flex items-start gap-3">
+        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-gold/15 text-brand-gold">
+          <i class="pi pi-receipt text-xl"></i>
+        </div>
         <div>
-          <p class="text-[10px] text-gray-400 tracking-[0.1em] uppercase mb-1">Fecha de Reserva</p>
-          <p class="text-lg font-bold text-[#C9A84C]">{{ reservaSeleccionada.fecha | date:'dd/MM/yyyy' }}</p>
-        </div>
-        <div class="text-right">
-          <app-status-badge type="text" [value]="reservaSeleccionada.estadoReserva"></app-status-badge>
+          <h2 class="m-0 text-xl font-bold text-text-primary">{{ comprobanteTitulo }}</h2>
+          <p class="m-0 text-sm text-text-muted">Comprobante de la reserva #FX-{{ reservaSeleccionada.id | number:'4.0-0' }}</p>
         </div>
       </div>
 
-      <div class="grid grid-cols-2 gap-4">
-        <div class="bg-[#121212] p-4 rounded-md border border-white/5">
-          <p class="text-[10px] text-gray-400 tracking-[0.1em] uppercase mb-1">Barbero</p>
-          <p class="font-medium text-white">{{ reservaSeleccionada.nombreBarbero }}</p>
-        </div>
-        <div class="bg-[#121212] p-4 rounded-md border border-white/5">
-          <p class="text-[10px] text-gray-400 tracking-[0.1em] uppercase mb-1">Tipo</p>
-          <p class="font-medium text-white">{{ reservaSeleccionada.tipoReserva }}</p>
-        </div>
+      <div class="rounded-lg border border-ui-border bg-ui-black p-5 text-center">
+        <p class="m-0 text-lg font-bold text-text-primary">FADEX BARBER</p>
+        <p class="m-0 text-sm text-text-muted">RUC {{ reservaSeleccionada.ruc || '20601234567' }}</p>
+        <p class="mb-0 mt-3 font-semibold text-brand-gold">{{ reservaSeleccionada.numeroComprobante || 'Comprobante pendiente' }}</p>
       </div>
 
-      <div>
-        <p class="text-[10px] text-gray-400 tracking-[0.1em] uppercase mb-2">Servicio Realizado</p>
-        <div class="bg-[#121212] border border-white/5 rounded-md p-3 flex items-center">
-          <i class="pi pi-check-circle text-[#C9A84C] mr-3"></i>
-          <span class="text-gray-200">{{ reservaSeleccionada.nombreServicio }}</span>
-        </div>
+      <div class="grid gap-4 border-b border-ui-border pb-4 text-sm sm:grid-cols-2">
+        <div class="flex justify-between gap-4"><span class="text-text-muted">Fecha y hora</span><span class="text-right text-text-primary">{{ reservaSeleccionada.fecha | date:'d MMM. y' }} · {{ reservaSeleccionada.horaInicio }}</span></div>
+        <div class="flex justify-between gap-4"><span class="text-text-muted">Servicio</span><span class="text-right text-text-primary">{{ reservaSeleccionada.nombreServicio }}</span></div>
+        <div class="flex justify-between gap-4"><span class="text-text-muted">Barbero</span><span class="text-right text-text-primary">{{ reservaSeleccionada.nombreBarbero }}</span></div>
+        <div class="flex justify-between gap-4"><span class="text-text-muted">Método de pago</span><span class="text-right text-text-primary">{{ reservaSeleccionada.metodoPago || 'No registrado' }}</span></div>
       </div>
 
-      <div class="flex justify-between items-center bg-[#121212] p-4 rounded-md border border-[#C9A84C]/20 mt-4">
-        <div>
-          <p class="text-[10px] text-gray-400 tracking-[0.1em] uppercase mb-1">Horario</p>
-          <p class="text-white font-mono">{{ reservaSeleccionada.horaInicio }} - {{ reservaSeleccionada.horaFin }}</p>
-        </div>
-        <div class="text-right">
-          <p class="text-[10px] text-gray-400 tracking-[0.1em] uppercase mb-1">Total Pagado</p>
-          <p class="text-2xl font-bold text-[#C9A84C]">S/ {{ reservaSeleccionada.total | number:'1.2-2' }}</p>
-        </div>
-      </div>
-
-      <div *ngIf="reservaSeleccionada.observacion" class="mt-4">
-        <p class="text-[10px] text-gray-400 tracking-[0.1em] uppercase mb-2">Observaciones</p>
-        <p class="text-sm text-gray-400 italic bg-[#121212] p-4 rounded-md border border-white/5 m-0">{{ reservaSeleccionada.observacion }}</p>
+      <div class="flex items-center justify-between border-t border-brand-gold/30 pt-4">
+        <span class="font-semibold text-text-primary">Total pagado</span>
+        <span class="text-lg font-bold text-brand-gold">S/ {{ reservaSeleccionada.total | number:'1.2-2' }}</span>
       </div>
     </div>
   </ng-template>
 
   <ng-template pTemplate="footer">
-    <button (click)="displayModal=false" 
-            class="px-6 py-2 bg-transparent border border-[#C9A84C] text-[#C9A84C] rounded-md hover:bg-[#C9A84C] hover:text-black transition-colors font-semibold text-sm">
+    <button (click)="cerrarComprobante()"
+            class="rounded-md border border-brand-gold px-6 py-2 text-sm font-semibold text-brand-gold transition-colors hover:bg-brand-gold hover:text-brand-black">
       Cerrar
     </button>
+    @if (comprobanteDisponible) {
+      <button type="button" onclick="window.print()"
+              class="inline-flex items-center gap-2 rounded-md bg-brand-gold px-4 py-2 text-sm font-semibold text-brand-black transition-colors hover:bg-brand-gold-hover">
+        <i class="pi pi-file-pdf"></i>
+        Imprimir comprobante
+      </button>
+    }
   </ng-template>
 </p-dialog>
 

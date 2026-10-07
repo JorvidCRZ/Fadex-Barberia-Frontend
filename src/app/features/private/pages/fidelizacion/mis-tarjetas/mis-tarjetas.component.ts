@@ -1,25 +1,21 @@
-import { ToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { MiRuletaComponent } from '../mi-ruleta/mi-ruleta.component';
 import { RecompensaObtenida } from '../../../../../core/models/ruleta/recompensa.model';
 import { FidelizacionTarjetaResponse } from '../../../../../core/models/fidelizacion/tarjeta.model';
-import { FidelizacionTarjetaService } from '../../../../../core/services/fidelizacion/tarjeta.service';
+import { FIDELIZACION_TARJETAS_MOCK } from '../../../../../core/config/fidelizacion-mock.config';
 import { TarjetaGraficoComponent } from '../../../../../shared/components/tarjeta/tarjeta-grafico.component';
 
 
 @Component({
   selector: 'app-mis-tarjetas',
   standalone: true,
-  imports: [CommonModule, ToastModule, TarjetaGraficoComponent, MiRuletaComponent],
-  providers: [MessageService],
+  imports: [CommonModule, TarjetaGraficoComponent, MiRuletaComponent],
   templateUrl: './mis-tarjetas.html'
 })
 export class MisTarjetasComponent implements OnInit {
 
-  private tarjetaService = inject(FidelizacionTarjetaService);
-  private messageService = inject(MessageService);
+  // Backend: private tarjetaService = inject(FidelizacionTarjetaService);
 
   misTarjetas: FidelizacionTarjetaResponse[] = [];
   cargando = true;
@@ -35,17 +31,11 @@ export class MisTarjetasComponent implements OnInit {
   cargarMisTarjetas(): void {
     this.cargando = true;
     this.error = null;
-    this.tarjetaService.obtenerMisTarjetas().subscribe({
-      next: (res) => {
-        this.misTarjetas = res.data;
-        this.cargando = false;
-      },
-      error: (err) => {
-        this.error = 'No se pudieron cargar tus tarjetas.';
-        this.cargando = false;
-        console.error(err);
-      },
-    });
+    this.misTarjetas = FIDELIZACION_TARJETAS_MOCK.map(tarjeta => ({ ...tarjeta }));
+    this.cargando = false;
+
+    // Backend:
+    // this.tarjetaService.obtenerMisTarjetas().subscribe({ ... });
   }
 
   // Se dispara tanto desde (canjear) como desde (verRuleta) del app-tarjeta-grafico:
@@ -67,12 +57,9 @@ export class MisTarjetasComponent implements OnInit {
   }
 
   onGiroRealizado(recompensa: RecompensaObtenida): void {
-    this.messageService.add({
-      severity: 'success',
-      summary: recompensa.premioMayor ? '¡Premio mayor! 🎉' : '¡Ganaste un premio!',
-      detail: recompensa.itemNombre,
-      life: 4500,
-    });
-    this.cargarMisTarjetas();
+    void recompensa;
+    if (this.tarjetaRuletaSeleccionada) {
+      this.tarjetaRuletaSeleccionada.girosDisponibles = 0;
+    }
   }
 }

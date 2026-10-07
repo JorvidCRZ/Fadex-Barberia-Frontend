@@ -32,8 +32,8 @@ export const routes: Routes = [
      path: 'dashboard/admin', component: DashboardAdministrativoComponent,
     canActivate: [authGuard], data: { roles: ['admin'] },
     children: [
-      { path: '', redirectTo: 'resumen', pathMatch: 'full' },
-       // { path: 'resumen', loadComponent: () => import('./features/private/components/resumen/resumen').then(m => m.Resumen) },
+       { path: '', redirectTo: 'resumen', pathMatch: 'full' },
+        { path: 'resumen', loadComponent: () => import('./features/private/components/resumen/resumen').then(m => m.Resumen) },
        {
          path: 'catalogo', children: [
            { path: 'categorias', loadComponent: () => import('./features/private/components/catalogo/categorias/categorias.component').then(m => m.CategoriasComponent) },
@@ -42,25 +42,25 @@ export const routes: Routes = [
            { path: 'servicios', loadComponent: () => import('./features/private/components/catalogo/servicios/servicios.component').then(m => m.ServiciosComponent) },
          ]
        },
-       // {
-       //   path: 'operaciones', children: [
-       //     { path: 'pos', loadComponent: () => import('./features/private/components/operaciones/ventas/pos/pos.component').then(m => m.PosComponent) },
-       //     { path: 'ventas', loadComponent: () => import('./features/private/components/operaciones/ventas/ventas.component').then(m => m.VentasComponent) },
-       //     { path: 'reservas', loadComponent: () => import('./features/private/components/operaciones/reservas/reserva-list/reserva-list').then(m => m.ReservaList) },
-       //     { path: 'reservas/nueva', loadComponent: () => import('./features/private/components/operaciones/reservas/reserva-create/create-reserva/create-reserva').then(m => m.CreateReserva) },
-       //     { path: 'reservas/calendario', loadComponent: () => import('./features/private/components/operaciones/reservas/reserva-calendar/reserva-calendar').then(m => m.CalendarReservas) },
-       //     { path: 'pagos', loadComponent: () => import('./features/private/components/operaciones/pagos/pagos.component').then(m => m.PagosComponent) },
-       //     { path: 'reclamos', loadComponent: () => import('./features/private/components/operaciones/reclamos/reclamos.component').then(m => m.ReclamosComponent) },
-       //     { path: 'reclamos/:id', loadComponent: () => import('./features/private/components/operaciones/reclamos/reclamo-detalle/reclamo-detalle.component').then(m => m.ReclamoDetalleComponent) }
-       //   ]
-       // },
-       // {
-       //   path: 'sueldos',
-       //   children: [
-       //     { path: '', loadComponent: () => import('./features/private/components/sueldos/sueldos').then(m => m.Sueldos) },
-       //     { path: ':id', loadComponent: () => import('./features/private/components/sueldos/mi-sueldo-analisis/mi-sueldo-analisis').then(m => m.MiSueldoAnalisis) }
-       //   ]
-       // },
+       {
+         path: 'operaciones', children: [
+           { path: 'pos', loadComponent: () => import('./features/private/components/operaciones/ventas/pos/pos.component').then(m => m.PosComponent) },
+           { path: 'ventas', loadComponent: () => import('./features/private/components/operaciones/ventas/ventas.component').then(m => m.VentasComponent) },
+           { path: 'reservas', loadComponent: () => import('./features/private/components/operaciones/reservas/reserva-list/reserva-list').then(m => m.ReservaList) },
+           { path: 'reservas/nueva', loadComponent: () => import('./features/private/components/operaciones/reservas/reserva-create/create-reserva/create-reserva').then(m => m.CreateReserva) },
+           { path: 'reservas/calendario', loadComponent: () => import('./features/private/components/operaciones/reservas/reserva-calendar/reserva-calendar').then(m => m.CalendarReservas) },
+           { path: 'pagos', loadComponent: () => import('./features/private/components/operaciones/pagos/pagos.component').then(m => m.PagosComponent) },
+           { path: 'reclamos', loadComponent: () => import('./features/private/components/operaciones/reclamos/reclamos.component').then(m => m.ReclamosComponent) },
+           { path: 'reclamos/:id', loadComponent: () => import('./features/private/components/operaciones/reclamos/reclamo-detalle/reclamo-detalle.component').then(m => m.ReclamoDetalleComponent) }
+         ]
+       },
+       {
+         path: 'sueldos',
+         children: [
+           { path: '', loadComponent: () => import('./features/private/components/sueldos/sueldos').then(m => m.Sueldos) },
+           { path: ':id', loadComponent: () => import('./features/private/components/sueldos/mi-sueldo-analisis/mi-sueldo-analisis').then(m => m.MiSueldoAnalisis) }
+         ]
+       },
        {
          path: 'gestion', children: [
            { path: 'clientes', loadComponent: () => import('./features/private/components/gestion/clientes/clientes').then(m => m.Clientes) },
@@ -73,29 +73,28 @@ export const routes: Routes = [
            { path: 'usuarios/:id', component: PerfilUsuario },
         ]
        },
-       // {
-       //   path: 'fidelizacion', children: [
-       //     { path: 'seguimiento', loadComponent: () => import('./features/private/components/fidelizacion/seguimiento/seguimiento.component').then(m => m.SeguimientoComponent) },
-       //     { path: 'reglas', loadComponent: () => import('./features/private/components/fidelizacion/fidelizacion.component').then(m => m.FidelizacionAdminComponent) },
-       //     { path: 'ruletas', loadComponent: () => import('./features/private/components/ruleta/ruletas-admin/ruletas-admin.component').then(m => m.RuletasAdminComponent) }
-       //   ]
-       // },
-       // {
-       //   path: 'sistema', children: [
-       //     { path: 'configuracion', loadComponent: () => import('./features/private/components/sistema/configuracion').then(m => m.Configuracion) },
-       //   ]
-       // },
-       // {
-       //   path: 'analisis', children: [
-       //     { path: 'metricas', loadComponent: () => import('./features/private/components/analisis/metricas/metricas').then(m => m.MetricasComponent) },
-       //     { path: 'reportes', loadComponent: () => import('./features/private/components/analisis/reportes/reportes').then(m => m.ReportesComponent) },
-       //     { path: 'predicciones', loadComponent: () => import('./features/private/components/analisis/predicciones/predicciones').then(m => m.Predicciones) },
-       //     { path: '', redirectTo: 'metricas', pathMatch: 'full' },
-       //   ]
-       // },
-       { path: '**', loadComponent: () => import('./shared/components/error404/error404.component').then(m => m.Error404Component) }
     ]
   },
+       {
+         path: 'fidelizacion', children: [
+           { path: 'seguimiento', loadComponent: () => import('./features/private/components/fidelizacion/seguimiento/seguimiento.component').then(m => m.SeguimientoComponent) },
+           { path: 'reglas', loadComponent: () => import('./features/private/components/fidelizacion/fidelizacion.component').then(m => m.FidelizacionAdminComponent) },
+           //{ path: 'ruletas', loadComponent: () => import('./features/private/components/ruleta/ruletas-admin/ruletas-admin.component').then(m => m.RuletasAdminComponent) }
+         ]
+       },
+       {
+         path: 'sistema', children: [
+           { path: 'configuracion', loadComponent: () => import('./features/private/components/sistema/configuracion').then(m => m.Configuracion) },
+         ]
+       },
+       {
+         path: 'analisis', children: [
+           { path: 'metricas', loadComponent: () => import('./features/private/components/analisis/metricas/metricas').then(m => m.MetricasComponent) },
+           { path: 'reportes', loadComponent: () => import('./features/private/components/analisis/reportes/reportes').then(m => m.ReportesComponent) },
+           { path: 'predicciones', loadComponent: () => import('./features/private/components/analisis/predicciones/predicciones').then(m => m.Predicciones) },
+           { path: '', redirectTo: 'metricas', pathMatch: 'full' },
+         ]
+       },
 
   {
     path: 'dashboard/barbero', component: DashboardBarberoComponent,
@@ -109,7 +108,7 @@ export const routes: Routes = [
          path: 'operaciones', children: [
            { path: 'pos', loadComponent: () => import('./features/private/components/operaciones/ventas/pos/pos.component').then(m => m.PosComponent) }, 
            { path: 'ventas', loadComponent: () => import('./features/private/components/operaciones/ventas/ventas.component').then(m => m.VentasComponent) },
-          // { path: 'reservas', loadComponent: () => import('./features/private/components/operaciones/reservas/reserva-list/reserva-list').then(m => m.ReservaList) },
+          { path: 'reservas', loadComponent: () => import('./features/private/components/operaciones/reservas/reserva-list/reserva-list').then(m => m.ReservaList) },
           { path: 'pagos', loadComponent: () => import('./features/private/components/operaciones/pagos/pagos.component').then(m => m.PagosComponent) },
          ]
        },

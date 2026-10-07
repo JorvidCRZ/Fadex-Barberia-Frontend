@@ -79,16 +79,17 @@
     <div class="resultado-overlay" *ngIf="mostrarResultado()" (click)="cerrarResultado()">
         <div class="resultado-card" (click)="$event.stopPropagation()">
             <div class="resultado-header">
-                <span class="resultado-badge"><i class="pi pi-sparkles"></i>¡Felicidades!</span>
+                <span class="resultado-badge"><i class="pi pi-crown"></i>Premio desbloqueado</span>
             </div>
             <div class="resultado-media">
                 <div class="resultado-imagen" *ngIf="premioGanador()?.imagen">
                     <img [src]="premioGanador()?.imagen | safeImageUrl" [alt]="premioGanador()?.label">
                 </div>
                 <div class="resultado-icono" *ngIf="!premioGanador()?.imagen">
-                    <i class="pi" [ngClass]="obtenerIcono(premioGanador()?.tipoPremio)"></i>
+                    <i class="pi pi-crown"></i>
                 </div>
             </div>
+            <p class="resultado-eyebrow">FADEX BARBER · FIDELIZACIÓN</p>
             <h2 class="resultado-titulo">{{ premioGanador()?.label }}</h2>
             <p class="resultado-sub" *ngIf="premioGanador()?.descripcion">{{ premioGanador()?.descripcion }}</p>
             <div class="resultado-info">
@@ -96,7 +97,8 @@
                     <i class="pi icono" [ngClass]="obtenerIcono(premioGanador()?.tipoPremio)"></i>{{ premioGanador()?.tipoPremio }}
                 </div>
             </div>
-            <button pButton class="boton-primary" (click)="cerrarResultado()">Reclamar premio</button>
+            <div class="resultado-divider"></div>
+            <button pButton class="resultado-accion" (click)="cerrarResultado()"><i class="pi pi-gift"></i> Reclamar premio</button>
         </div>
     </div>
 </div>

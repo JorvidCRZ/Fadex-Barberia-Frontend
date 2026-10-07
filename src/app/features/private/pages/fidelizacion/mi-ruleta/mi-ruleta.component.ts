@@ -1,11 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { RuletaSegmento } from '../../../../../core/models/ruleta/ruleta-grafico.model';
 import { RecompensaObtenida } from '../../../../../core/models/ruleta/recompensa.model';
-import { RuletaEngineService } from '../../../../../core/services/ruleta/engine.service';
-import { RuletaItemService } from '../../../../../core/services/ruleta/ruleta-item.service';
-import { NotificationService } from '../../../../../core/services/common/notification.service';
 import { FidelizacionTarjetaResponse } from '../../../../../core/models/fidelizacion/tarjeta.model';
-import { ConfiguracionService } from '../../../../../core/services/fidelizacion/configuracion.service';
+import { FIDELIZACION_SEGMENTOS_MOCK } from '../../../../../core/config/fidelizacion-mock.config';
 import { RuletaGraficoComponent } from '../../../../../shared/components/ruleta/ruleta-grafico.component';
 import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, ViewChild, inject } from '@angular/core';
 
@@ -21,10 +18,11 @@ export class MiRuletaComponent implements OnInit, OnChanges {
   @Output() girado = new EventEmitter<RecompensaObtenida>();
   @ViewChild(RuletaGraficoComponent) ruletaGraficoRef?: RuletaGraficoComponent;
 
-  private configuracionService = inject(ConfiguracionService);
-  private ruletaItemService = inject(RuletaItemService);
-  private ruletaEngineService = inject(RuletaEngineService);
-  private notify = inject(NotificationService);
+  // Backend:
+  // private configuracionService = inject(ConfiguracionService);
+  // private ruletaItemService = inject(RuletaItemService);
+  // private ruletaEngineService = inject(RuletaEngineService);
+  // private notify = inject(NotificationService);
 
   musicaActiva = false;
   cargando = true;
@@ -58,29 +56,21 @@ export class MiRuletaComponent implements OnInit, OnChanges {
     // ⚠️ Ajusta 'tarjetaId' si el campo real en FidelizacionTarjetaResponse se llama distinto
     const tarjetaId = this.tarjeta.id;
 
-    this.ruletaEngineService.girarTarjeta(tarjetaId).subscribe({
-      next: (resp) => {
-        const recompensa = resp.data;
-        const segmentoGanador = this.segmentos.find(s => s.id === recompensa.itemId);
+    const segmentoGanador = this.segmentos[Math.floor(Math.random() * this.segmentos.length)];
+    if (!segmentoGanador) return;
+    const recompensa: RecompensaObtenida = {
+      id: Date.now(), giroId: Date.now(), clienteId: this.tarjeta.clienteId,
+      clienteNombre: this.tarjeta.clienteNombreCompleto, itemId: Number(segmentoGanador.id),
+      itemNombre: segmentoGanador.label, itemImagen: segmentoGanador.imagen ?? '', colorHex: '#c9a84c',
+      premioMayor: false, estado: 'PENDIENTE' as RecompensaObtenida['estado'], observacion: 'Premio generado en memoria',
+      codigoCanje: `FX-MOCK-${Date.now()}`, fechaObtencion: new Date().toISOString(), createdAt: new Date().toISOString(),
+    };
+    const segmentoConResultado: RuletaSegmento = { ...segmentoGanador, data: recompensa };
+    this.ruletaGraficoRef?.girarHaciaResultado(segmentoConResultado);
+    this.tarjeta.girosDisponibles = Math.max(0, this.tarjeta.girosDisponibles - 1);
+    this.girado.emit(recompensa);
 
-        if (!segmentoGanador) {
-          this.notify.showHttpError('No se pudo ubicar el premio obtenido en la ruleta.');
-          this.ruletaGraficoRef?.cancelarGiro();
-          return;
-        }
-
-        // Le pegamos la recompensa completa (código de canje, premio mayor, etc.) por si se necesita mostrar
-        const segmentoConResultado: RuletaSegmento = { ...segmentoGanador, data: recompensa };
-
-        this.ruletaGraficoRef?.girarHaciaResultado(segmentoConResultado);
-        this.tarjeta.girosDisponibles = Math.max(0, this.tarjeta.girosDisponibles - 1);
-        this.girado.emit(recompensa);
-      },
-      error: (err) => {
-        this.notify.showHttpError(err?.error?.message ?? 'No se pudo ejecutar el giro.');
-        this.ruletaGraficoRef?.cancelarGiro();
-      },
-    });
+    // Backend: this.ruletaEngineService.girarTarjeta(tarjetaId).subscribe({ ... });
   }
 
   private cargar(): void {
@@ -88,44 +78,14 @@ export class MiRuletaComponent implements OnInit, OnChanges {
     this.error = null;
     this.segmentos = [];
 
-    this.configuracionService.obtenerConfiguraciones({ categoriaId: this.tarjeta.categoriaId }).subscribe({
-      next: (resp) => {
-        const config = resp.data.content[0];
-        if (!config?.ruletaId) {
-          this.error = 'Esta categoría no tiene una ruleta configurada.';
-          this.cargando = false;
-          return;
-        }
-        this.ruletaNombre = config.ruletaNombre ?? '';
-        this.cargarItems(config.ruletaId);
-      },
-      error: (err) => {
-        this.notify.showHttpError(err.message);
-        this.error = 'No se pudo cargar la configuración.';
-        this.cargando = false;
-      },
-    });
+    this.ruletaNombre = 'Ruleta FadeX';
+    this.segmentos = FIDELIZACION_SEGMENTOS_MOCK.map(segmento => ({ ...segmento }));
+    this.cargando = false;
+
+    // Backend:
+    // this.configuracionService.obtenerConfiguraciones(...).subscribe(...);
   }
 
-  private cargarItems(ruletaId: number): void {
-    this.ruletaItemService.obtenerItems({ ruletaId, activo: true, sort: 'ordenDisplay,asc' }).subscribe({
-      next: (resp) => {
-        this.segmentos = resp.data.content.map((item) => ({
-          id: item.itemId,
-          label: item.nombre,
-          sublabel: item.descripcion,
-          descripcion: item.descripcion,
-          peso: item.probabilidad,
-          imagen: item.imagenUrl,
-          tipoPremio: item.tipoPremio,
-        } as RuletaSegmento));
-        this.cargando = false;
-      },
-      error: (err) => {
-        this.notify.showHttpError(err.message);
-        this.error = 'No se pudieron cargar los premios.';
-        this.cargando = false;
-      },
-    });
-  }
+  // Backend: carga de ítems de la ruleta conservada para reactivar con la API.
+  // private cargarItems(ruletaId: number): void { ... }
 }
