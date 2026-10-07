@@ -1,0 +1,20 @@
+.tabla-filter {
+  height: 36px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  background: var(--neutral-primary-lighter, #1a1a1a);
+  border: 1px solid var(--neutral-primary-border, #2f2f2f);
+  color: var(--neutral-primary-darker, #e8e0d0);
+}
+
+.tabla-filter:hover {
+  border-color: var(--brand-primary, #C8A455);
+}
+
+.tabla-filter:focus {
+  outline: none;
+  border-color: var(--brand-primary, #C8A455);
+  box-shadow: 0 0 0 2px rgba(200, 164, 85, 0.2);
+}

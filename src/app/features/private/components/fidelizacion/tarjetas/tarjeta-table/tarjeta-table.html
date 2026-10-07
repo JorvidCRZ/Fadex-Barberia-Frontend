@@ -1,0 +1,123 @@
+<div class="relative w-full overflow-x-auto">
+    <p-table [value]="tarjetas" [loading]="!cargado" dataKey="id" [lazy]="true" [paginator]="true" [rows]="rows" [totalRecords]="totalRecords" 
+    (onLazyLoad)="lazyLoad.emit($event)" [tableStyle]="{ 'min-width': '900px' }" class="rounded-xl">
+        <ng-template #header>
+            <tr>
+                <th class="whitespace-nowrap text-center">Cliente</th>
+                <th class="whitespace-nowrap text-center">Categoría</th>
+                <th class="whitespace-nowrap text-center">Progreso</th>
+                <th class="whitespace-nowrap text-center">Giros</th>
+                <th class="whitespace-nowrap text-center">Activo</th>
+                <th class="whitespace-nowrap text-center">Ciclo activo</th>
+                <th class="whitespace-nowrap text-center">Acciones</th>
+            </tr>
+        </ng-template>
+        
+        <ng-template #body let-t let-expanded="expanded" pTemplate="body">
+            <tr>
+                <td class="whitespace-nowrap text-center">
+                    <p-button type="button" [pRowToggler]="t" [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'" class="boton-expandir-tabla"></p-button>
+                    <span class="ml-2">{{ t.clienteNombreCompleto }}</span>
+                </td>
+                <td class="whitespace-nowrap text-center">{{ t.categoriaNombre }}</td>
+                <td class="whitespace-nowrap text-center">
+                    <div class="flex flex-col items-center gap-1 mx-auto" style="min-width: 90px;">
+                        <span class="text-xs text-text-tertiary">{{ t.progreso }} pts</span>
+                        <div class="w-full h-1.5 rounded-full bg-ui-elevated overflow-hidden">
+                            <div class="h-full bg-brand-gold" [style.width.%]="progresoPct(t)"></div>
+                        </div>
+                    </div>
+                </td>
+                <td class="whitespace-nowrap text-center">{{ t.girosDisponibles }} / {{ t.totalGiros }}</td>
+                <td class="whitespace-nowrap text-center">
+                    <div class="flex items-center justify-center gap-2">
+                        <app-status-badge type="boolean" [value]="t.activo" trueLabel="Activo" falseLabel="Inactivo" />
+                        <p-toggleSwitch [ngModel]="t.activo" (onChange)="estado.emit({ tarjeta: t, campo: 'activo', valor: $event.checked })" class="scale-90" />
+                    </div>
+                </td>
+                <td class="whitespace-nowrap text-center">
+                    <div class="flex items-center justify-center gap-2">
+                        <app-status-badge type="boolean" [value]="t.cicloActivo" trueLabel="Activo" falseLabel="Inactivo" />
+                        <p-toggleSwitch [ngModel]="t.cicloActivo" (onChange)="estado.emit({ tarjeta: t, campo: 'cicloActivo', valor: $event.checked })" class="scale-90" />
+                    </div>
+                </td>
+                <td class="whitespace-nowrap text-center">
+                    <div class="flex flex-row justify-center">
+                        <p-button icon="pi pi-eye" class="boton-editar-tabla" (click)="verPreview.emit(t)"></p-button>
+                        <p-button icon="pi pi-trash" class="boton-eliminar-tabla" (click)="pedirConfirmacion(t, $event)"></p-button>
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+        <ng-template #expandedrow pTemplate="rowExpansion" let-t>
+            <tr>
+                <td colspan="7" class="p-0">
+                    <div class="p-5 bg-ui-surface border border-brand-gold-soft rounded-lg">
+                        <div class="flex items-center justify-between mb-5 pb-4 border-b border-ui-borderSoft">
+                            <div> <h3 class="font-semibold text-brand-white text-base">Tarjeta de fidelización</h3>
+                                <p class="text-xs text-text-secondary">Información completa de la tarjeta.</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <app-status-badge type="boolean" [value]="t.activo" trueLabel="Activa" falseLabel="Inactiva" />
+                                <app-status-badge type="boolean" [value]="t.cicloActivo" trueLabel="Ciclo activo" falseLabel="Ciclo cerrado" />
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+                            <div class="rounded-lg border border-ui-borderSoft bg-ui-card p-4">
+                                <span class="text-xs uppercase text-text-muted">Cliente</span>
+                                <div class="mt-1 font-semibold">{{ t.clienteNombreCompleto }}</div>
+                            </div>
+                            <div class="rounded-lg border border-ui-borderSoft bg-ui-card p-4">
+                                <span class="text-xs uppercase text-text-muted">Categoría</span>
+                                <div class="mt-1 font-semibold">{{ t.categoriaNombre }}</div>
+                            </div>
+                            <div class="rounded-lg border border-ui-borderSoft bg-ui-card p-4">
+                                <span class="text-xs uppercase text-text-muted">Progreso</span>
+                                <div class="mt-2">
+                                    <div class="flex justify-between text-xs mb-1">
+                                        <span>{{ t.progreso }} pts</span>
+                                        <span>{{ progresoPct(t) | number:'1.0-0' }}%</span>
+                                    </div>
+                                    <div class="h-2 rounded-full bg-ui-elevated overflow-hidden">
+                                        <div class="h-full bg-brand-gold" [style.width.%]="progresoPct(t)">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="rounded-lg border border-ui-borderSoft bg-ui-card p-4">
+                                <span class="text-xs uppercase text-text-muted">Giros</span>
+                                <div class="mt-1 font-semibold">{{ t.girosDisponibles }}/{{ t.totalGiros }}</div>
+                            </div>
+                            <div class="rounded-lg border border-ui-borderSoft bg-ui-card p-4">
+                                <span class="text-xs uppercase text-text-muted">Estado tarjeta</span>
+                                <div class="mt-2">
+                                    <app-status-badge type="boolean" [value]="t.activo" trueLabel="Activa" falseLabel="Inactiva" />
+                                </div>
+                            </div>
+                            <div class="rounded-lg border border-ui-borderSoft bg-ui-card p-4">
+                                <span class="text-xs uppercase text-text-muted">Estado ciclo</span>
+                                <div class="mt-2">
+                                    <app-status-badge type="boolean" [value]="t.cicloActivo" trueLabel="Activo" falseLabel="Cerrado" />
+                                </div>
+                            </div>
+                            <div class="rounded-lg border border-ui-borderSoft bg-ui-card p-4">
+                                <span class="text-xs uppercase text-text-muted">ID Tarjeta</span>
+                                <div class="mt-1 font-semibold">#{{ t.id }}</div>
+                            </div>
+                            <div class="rounded-lg border border-ui-borderSoft bg-ui-card p-4 flex flex-col justify-center">
+                                <button pButton icon="pi pi-eye" label="Ver tarjeta" class="boton-primary w-full" (click)="verPreview.emit(t)"></button>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+        <ng-template #emptymessage>
+            <tr>
+                <td colspan="7" class="text-center py-6 text-text-tertiary">Aún no hay tarjetas de fidelización registradas.</td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>
+
+<app-confirm-popover [visible]="mostrarConfirmacion" [mensaje]="mensajeConfirmacion" [icono]="'pi-id-card'" [titulo]="'Eliminar Tarjeta'" (confirm)="confirmarEliminar()" (cancel)="cancelarEliminar()"/>

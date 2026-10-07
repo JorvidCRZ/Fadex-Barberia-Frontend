@@ -1,0 +1,15 @@
+<div class="flex flex-col gap-4">
+    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <h2 class="font-semibold text-brand-white">Reglas de puntos</h2>
+        <button pButton label="Nueva regla" icon="pi pi-plus" class="p-button-sm boton-primary" (click)="abrirCrear()"></button>
+    </div>
+    <app-filtros [fields]="filtrosFields" [titulo]="texto" [text]="texto" [acordeon]="true" (buscar)="onBuscar($event)" (limpiar)="onLimpiar()"/>
+    <app-regla-table [reglas]="reglas" [cargado]="cargado" [totalRecords]="totalRecords" [rows]="rows" [icono]="icono" (lazyLoad)="onLazyLoad($event)" (estado)="onCambiarEstado($event)" (editar)="abrirEditar($event)" (eliminar)="eliminarRegla($event)" />
+</div>
+
+<p-dialog [(visible)]="mostrarFormulario" [modal]="true" [dismissableMask]="true" [closable]="true" [style]="{ width: '90vw', maxWidth: '50rem' }" (onHide)="onDialogHide()">
+    <ng-template pTemplate="header">
+        <app-dialog-header [icono]="icono" [title]="reglaSeleccionada ? 'Editar Regla' : 'Nueva Regla'" [mode]="reglaSeleccionada ? 'editar' : 'crear'" />
+    </ng-template>
+    <app-regla-form [categorias]="categorias" [regla]="reglaSeleccionada" [categorias]="categorias" [resetTrigger]="resetFormTrigger" (guardar)="guardarRegla($event)" (cancelarEvento)="cerrarFormulario()" />
+</p-dialog>

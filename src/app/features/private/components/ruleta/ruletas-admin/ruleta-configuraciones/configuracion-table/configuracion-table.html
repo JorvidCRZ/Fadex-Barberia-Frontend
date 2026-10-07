@@ -1,0 +1,117 @@
+<div class="p-4 md:p-6 lg:p-8 bg-neutral-primary-lighter rounded-base shadow-sm">
+    <div class="relative w-full overflow-x-auto">
+        <p-table [value]="configuraciones" [lazy]="true" (onLazyLoad)="lazyLoad.emit($event)" [paginator]="true"
+            [rows]="rows" [totalRecords]="totalRecords" [loading]="!cargado" dataKey="configuracionId" expandableRows [showCurrentPageReport]="true"
+            currentPageReportTemplate="Viendo {first} a {last} de {totalRecords} entradas"
+            [tableStyle]="{ 'min-width': '900px' }" class="rounded-xl">
+
+            <ng-template #header>
+                <tr>
+                    <th class="whitespace-nowrap text-center">Categoría</th>
+                    <th class="whitespace-nowrap text-center">Meta (puntos)</th>
+                    <th class="whitespace-nowrap text-center">Giros por meta</th>
+                    <th class="whitespace-nowrap text-center">Ruleta asignada</th>
+                    <th class="whitespace-nowrap text-center">Mostrar siempre</th>
+                    <th class="whitespace-nowrap text-center">Crear tarjeta automática</th>
+                    <th class="whitespace-nowrap text-center">Estado</th>
+                    <th class="whitespace-nowrap text-center">Última actualización</th>
+                    <th class="whitespace-nowrap text-center">Acciones</th>
+                </tr>
+            </ng-template>
+
+            <ng-template #body let-configuracion let-expanded="expanded" pTemplate="body">
+                <tr>
+                    <td class="px-4 py-2 whitespace-nowrap text-center">
+                        <p-button type="button" [pRowToggler]="configuracion" [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'" class="boton-expandir-tabla"></p-button>
+                        <span class="ml-2">{{ configuracion.categoriaNombre }}</span>
+                    </td>
+                    <td class="whitespace-nowrap text-center">{{ configuracion.meta }}</td>
+                    <td class="whitespace-nowrap text-center">
+                        <app-status-badge type="text" [value]="configuracion.girosPorMeta" customClass="badge-text estado-producto"/>
+                    </td>
+                    <td class="whitespace-nowrap text-center">
+                        <app-status-badge type="text" [value]="configuracion.ruletaNombre || 'Sin asignar'" customClass="badge-text estado-producto"/>
+                    </td>
+                    <td class="whitespace-nowrap text-center">
+                        <div class="flex items-center justify-center gap-2">    
+                            <app-status-badge type="boolean" [value]="configuracion.mostrarSiempre" trueLabel="Sí" falseLabel="No" />
+                            <p-toggleSwitch [ngModel]="configuracion.mostrarSiempre" (onChange)="cambiarMostrarSiempre(configuracion, $event)" class="scale-90" />
+                        </div>
+                    </td>
+                    <td class="whitespace-nowrap text-center">
+                        <div class="flex items-center justify-center gap-2">    
+                            <app-status-badge type="boolean" [value]="configuracion.crearTarjetaAutomatica" trueLabel="Sí" falseLabel="No" />
+                            <p-toggleSwitch [ngModel]="configuracion.crearTarjetaAutomatica" (onChange)="cambiarCrearTarjetaAutomatica(configuracion, $event)" class="scale-90" />
+                        </div>
+                    </td>   
+                    <td class="whitespace-nowrap text-center">
+                        <div class="flex items-center justify-center gap-2">
+                            <app-status-badge type="boolean" [value]="configuracion.activa" trueLabel="Activa" falseLabel="Inactiva" />
+                            <p-toggleSwitch [ngModel]="configuracion.activa" (onChange)="cambiarEstadoConfiguracion(configuracion, $event)" class="scale-90" />
+                        </div>
+                    </td>
+                    <td class="whitespace-nowrap text-center">{{ configuracion.updatedAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                    <td class="whitespace-nowrap text-center">
+                        <div class="flex flex-row justify-center">
+                            <p-button icon="pi pi-pencil" class="boton-editar-tabla" (click)="editarConfiguracion(configuracion)"></p-button>
+                            <p-button icon="pi pi-trash" class="boton-eliminar-tabla" (click)="pedirConfirmacion(configuracion, $event)"></p-button>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+
+            <ng-template #expandedrow pTemplate="rowExpansion" let-configuracion>
+                <tr>
+                    <td colspan="8" class="p-0">
+                        <div class="p-4 bg-ui-surface rounded-lg shadow-sm border border-brand-gold-soft">
+                            <div class="flex items-center justify-between gap-3 mb-4 pb-3 border-b border-ui-borderSoft">
+                                <div>
+                                    <h3 class="text-sm font-semibold text-brand-white">Detalles de la configuración</h3>
+                                    <p class="text-xs text-text-secondary">Información adicional y estado actual de la regla.</p>
+                                </div>
+                                <app-status-badge type="boolean" [value]="configuracion.activa" trueLabel="Activa" falseLabel="Inactiva" />
+                            </div>
+
+                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 text-sm">
+                                <div class="flex flex-col gap-1 rounded-lg bg-ui-card p-3 border border-ui-borderSoft">
+                                    <span class="text-xs uppercase tracking-wide text-text-muted">Categoría</span>
+                                    <span class="font-medium text-brand-white">{{ configuracion.categoriaNombre }}</span>
+                                </div>
+                                <div class="flex flex-col gap-1 rounded-lg bg-ui-card p-3 border border-ui-borderSoft">
+                                    <span class="text-xs uppercase tracking-wide text-text-muted">Ruleta asignada</span>
+                                    <span class="font-medium text-brand-white">{{ configuracion.ruletaNombre || 'Sin asignar' }}</span>
+                                </div>
+                                <div class="flex flex-col gap-1 rounded-lg bg-ui-card p-3 border border-ui-borderSoft">
+                                    <span class="text-xs uppercase tracking-wide text-text-muted">Meta</span>
+                                    <span class="font-medium text-brand-white">{{ configuracion.meta }} puntos</span>
+                                </div>
+                                <div class="flex flex-col gap-1 rounded-lg bg-ui-card p-3 border border-ui-borderSoft">
+                                    <span class="text-xs uppercase tracking-wide text-text-muted">ID</span>
+                                    <span class="font-medium text-brand-white">#{{ configuracion.configuracionId }}</span>
+                                </div>
+                                <div class="flex flex-col gap-1 rounded-lg bg-ui-card p-3 border border-ui-borderSoft">
+                                    <span class="text-xs uppercase tracking-wide text-text-muted">Mostrar siempre</span>
+                                    <app-status-badge type="boolean" [value]="configuracion.mostrarSiempre" trueLabel="Sí" falseLabel="No" />
+                                </div>
+                                <div class="flex flex-col gap-1 rounded-lg bg-ui-card p-3 border border-ui-borderSoft">
+                                    <span class="text-xs uppercase tracking-wide text-text-muted">Crear tarjeta automática</span>
+                                    <app-status-badge type="boolean" [value]="configuracion.crearTarjetaAutomatica" trueLabel="Sí" falseLabel="No" />
+                                </div>
+                                <div class="flex flex-col gap-1 rounded-lg bg-ui-card p-3 border border-ui-borderSoft">
+                                    <span class="text-xs uppercase tracking-wide text-text-muted">Última actualización</span>
+                                    <span class="font-medium text-brand-white">{{ configuracion.updatedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+                                </div>
+                                <div class="flex flex-col gap-1 rounded-lg bg-ui-card p-3 border border-ui-borderSoft">
+                                    <span class="text-xs uppercase tracking-wide text-text-muted">Creado</span>
+                                    <span class="font-medium text-brand-white">{{ configuracion.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+</div>
+
+<app-confirm-popover [visible]="mostrarConfirmacion" [mensaje]="mensajeConfirmacion" [icono]="icono" [titulo]="'Eliminar Configuración'" (confirm)="confirmarEliminar()" (cancel)="cancelarEliminar()"/>

@@ -1,0 +1,77 @@
+<div class="table-base p-6 flex flex-col gap-5">
+
+  <div class="flex items-center justify-between">
+    <h2 class="text-base font-semibold text-brand-gold flex items-center gap-2">
+      <i class="pi pi-user"></i> Datos del Barbero
+    </h2>
+
+    <div class="flex gap-2">
+      <button *ngIf="!editando" (click)="onEditar()"
+        style="background-color: transparent; border: 1.5px solid #C9A84C; color: #C9A84C; cursor: pointer;"
+        class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-200 active:scale-95"
+        onmouseover="this.style.backgroundColor='#C9A84C'; this.style.color='#0a0a0a';"
+        onmouseout="this.style.backgroundColor='transparent'; this.style.color='#C9A84C';">
+        <i class="pi pi-pencil"></i>
+        Editar
+      </button>
+
+      <button *ngIf="editando" (click)="onGuardar()" [disabled]="guardando"
+        style="background-color: transparent; border: 1.5px solid #22c55e; color: #22c55e; cursor: pointer;"
+        class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+        onmouseover="if(!this.disabled) this.style.backgroundColor='#22c55e'; if(!this.disabled) this.style.color='#0a0a0a';"
+        onmouseout="this.style.backgroundColor='transparent'; this.style.color='#22c55e';">
+        <i class="pi pi-check"></i>
+        {{ guardando ? 'Guardando...' : 'Guardar' }}
+      </button>
+
+      <button *ngIf="editando" (click)="onCancelar()" [disabled]="guardando"
+        style="background-color: transparent; border: 1.5px solid #ef4444; color: #ef4444; cursor: pointer;"
+        class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+        onmouseover="if(!this.disabled) this.style.backgroundColor='#ef4444'; if(!this.disabled) this.style.color='#0a0a0a';"
+        onmouseout="this.style.backgroundColor='transparent'; this.style.color='#ef4444';">
+        <i class="pi pi-times"></i>
+        Cancelar
+      </button>
+    </div>
+  </div>
+
+  <p-divider styleClass="border-zinc-700 mt-0" />
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+    <!-- Nombre -->
+    <div class="flex flex-col gap-1">
+      <label class="text-xs text-zinc-400 font-medium uppercase tracking-wide">Nombre</label>
+      <span *ngIf="!editando" class="input-field w-full flex items-center text-gray-100">{{ nombre }}</span>
+      <input *ngIf="editando" type="text" [(ngModel)]="form.nombre"
+        class="input-field w-full" />
+    </div>
+
+    <!-- Apellido -->
+    <div class="flex flex-col gap-1">
+      <label class="text-xs text-zinc-400 font-medium uppercase tracking-wide">Apellido</label>
+      <span *ngIf="!editando" class="input-field w-full flex items-center text-gray-100">{{ apellido }}</span>
+      <input *ngIf="editando" type="text" [(ngModel)]="form.apellido"
+        class="input-field w-full" />
+    </div>
+
+    <!-- Teléfono -->
+    <div class="flex flex-col gap-1">
+      <label class="text-xs text-zinc-400 font-medium uppercase tracking-wide">Teléfono</label>
+      <span *ngIf="!editando" class="input-field w-full flex items-center text-gray-100">{{ telefono }}</span>
+      <input *ngIf="editando" type="text" [(ngModel)]="form.telefono"
+        class="input-field w-full" />
+    </div>
+
+    <!-- Email -->
+    <div class="flex flex-col gap-1">
+      <label class="text-xs text-zinc-400 font-medium uppercase tracking-wide">Email</label>
+      <span *ngIf="!editando" class="input-field w-full flex items-center text-gray-100 break-all">{{ email }}</span>
+      <input *ngIf="editando" type="email" [(ngModel)]="form.email"
+        class="input-field w-full" />
+    </div>
+
+
+  </div>
+
+</div>

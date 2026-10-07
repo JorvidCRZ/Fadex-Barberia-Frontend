@@ -1,0 +1,46 @@
+<div class="relative w-full overflow-x-auto">
+    <p-table [value]="movimientos" [loading]="!cargado" [lazy]="true" (onLazyLoad)="lazyLoad.emit($event)"
+        [paginator]="true" [rows]="rows" [totalRecords]="totalRecords" dataKey="id"
+        [tableStyle]="{ 'min-width': '900px' }" class="rounded-xl">
+
+        <ng-template #header>
+            <tr>
+                <th class="whitespace-nowrap text-center">Fecha</th>
+                <th class="whitespace-nowrap text-center">Cliente</th>
+                <th class="whitespace-nowrap text-center">Origen</th>
+                <th class="whitespace-nowrap text-center">Descripción</th>
+                <th class="whitespace-nowrap text-center">Puntos</th>
+                <th class="whitespace-nowrap text-center">Acciones</th>
+            </tr>
+        </ng-template>
+
+        <ng-template #body let-m>
+            <tr>
+                <td class="whitespace-nowrap text-center text-brand-white">{{ m.createdAt | date:'dd/MM/yy HH:mm' }}</td>
+                <td class="whitespace-nowrap text-center text-brand-white">{{ m.clienteNombre }}</td>
+                <td class="whitespace-nowrap text-center">
+                    <app-status-badge type="text" [value]="m.origen"/>
+                </td>
+                <td class="whitespace-nowrap text-center">{{ m.descripcion || '—' }}</td>
+                <td class="whitespace-nowrap text-center">
+                    <span [ngClass]="m.puntos >= 0 ? 'text-green-400' : 'text-red-400'" class="font-semibold"> {{ m.puntos >= 0 ? '+' : '' }}{{ m.puntos }}</span>
+                </td>
+                <td class="whitespace-nowrap text-center">
+                    @if (puedeEliminar(m)) {
+                        <p-button icon="pi pi-trash" class="boton-eliminar-tabla" (click)="pedirConfirmacion(m, $event)"></p-button>
+                    } @else {
+                        <app-status-badge type="text" value="AUTOMATICO"/>
+                    }
+                </td>
+            </tr>
+        </ng-template>
+
+        <ng-template #emptymessage>
+            <tr>
+                <td colspan="6" class="text-center py-6 text-text-tertiary">Aún no hay movimientos registrados.</td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>
+
+<app-confirm-popover [visible]="mostrarConfirmacion" [mensaje]="mensajeConfirmacion" [titulo]="'Eliminar Ajuste'" (confirm)="confirmarEliminar()" (cancel)="cancelarEliminar()" />

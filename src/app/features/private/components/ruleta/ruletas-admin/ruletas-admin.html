@@ -1,0 +1,87 @@
+<div class="flex flex-col gap-6 mt-5">
+    <aside
+        class="flex flex-col gap-4 rounded-xl border border-brand-gold-soft bg-brand-black px-6 py-4 md:flex-row md:items-center md:justify-between">
+        <h1 class="text-center text-lg font-semibold text-brand-gold md:text-start"><i class="pi" [class]="icono"></i>Ruletas</h1>
+        @if (ruletaSeleccionada) {
+        <span class="text-sm text-text-tertiary">Trabajando sobre: <strong class="text-brand-gold">{{ ruletaSeleccionada.nombre }}</strong></span>
+        }
+    </aside>
+
+    <div class="overflow-hidden rounded-2xl border border-ui-borderSoft bg-ui-card shadow-lg shadow-black/20">
+        <p-tabs [(value)]="activeTab" (valueChange)="onTabChange($event)">
+            <p-tablist class="flex flex-wrap gap-3 border-b border-ui-borderSoft bg-ui-surface px-3 py-3 md:px-4">
+                @for (tab of tabs; track tab.value) {
+                <p-tab [value]="tab.value" class="flex items-center gap-2 text-inherit">
+                    <div class="flex items-center gap-2 rounded-xl px-4 py-3 transition-colors" [ngClass]="{ 'border border-brand-gold/30 border-b-2 bg-brand-gold/10 shadow-sm text-brand-gold': activeTab === tab.value, 'hover:bg-ui-elevated text-text-secondary': activeTab !== tab.value}">
+                        <i [class]="tab.icon"></i>
+                        <span>{{ tab.label }}</span>
+                    </div>
+                </p-tab>
+                }
+            </p-tablist>
+
+            <p-tabpanels class="overflow-hidden bg-ui-card p-4 md:p-6">
+                <p-tabpanel value="ruletas">
+                    <div class="flex flex-col gap-4">
+                        <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                            <app-search-bar placeholder="Buscar ruleta" (search)="buscarRuletas($event)" />
+                            <button pButton label="Nueva ruleta" icon="pi pi-plus" class="p-button-sm boton-primary" (click)="abrirCrearRuleta()"></button>
+                            
+                        </div>
+                        <app-filtros [fields]="filtrosFields" [titulo]="texto" [text]="texto" [acordeon]="true" (buscar)="onBuscar($event)" (limpiar)="onLimpiar()"/>
+                        <app-ruleta-admin-table [ruletas]="ruletas" [cargado]="cargadoRuletas" [totalRecords]="totalRuletas" [rows]="rows" [seleccionadaId]="ruletaSeleccionada?.ruletaId ?? null" (lazyLoad)="onLazyLoadRuletas($event)" (estado)="onCambiarEstadoRuleta($event)" (editar)="abrirEditarRuleta($event)" (eliminar)="eliminarRuleta($event)" (seleccionar)="seleccionarRuletaParaPremios($event)" />
+                    </div>
+                </p-tabpanel>
+                <p-tabpanel value="configuracion">
+                    <div class="flex flex-col gap-4">
+                        <app-ruleta-configuraciones/>
+                    </div>
+                </p-tabpanel>
+
+                <p-tabpanel value="items">
+                    @if (!ruletaSeleccionada) {
+                    <div class="flex flex-col items-center gap-3 py-16 text-center text-text-tertiary">
+                        <i class="pi pi-info-circle text-3xl"></i>
+                        <p>Selecciona una ruleta en la pestaña <strong>General</strong> para administrar sus premios.</p>
+                    </div>
+                    } @else {
+                    <div class="flex flex-col gap-4">
+                        <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                            <h2 class="font-semibold text-brand-white">Premios de "{{ ruletaSeleccionada.nombre }}"</h2>
+                            <button pButton label="Nuevo premio" icon="pi pi-plus" class="p-button-sm boton-primary" (click)="abrirCrearItem()"></button>
+                        </div>
+                        <app-filtros [fields]="FILTROS_ITEM" [titulo]="texto" [text]="texto" [acordeon]="true" (buscar)="onBuscar($event)" (limpiar)="onLimpiar()"/>
+                        <app-ruleta-item-table [items]="items" [cargado]="cargadoItems" [icono]="icono" (editar)="abrirEditarItem($event)" (eliminar)="eliminarItem($event)" (estado)="onCambiarEstadoItem($event)"/> 
+                    </div>
+                    }
+                </p-tabpanel>
+                <p-tabpanel value="preview">
+                    @if (!ruletaSeleccionada) {
+                    <div class="flex flex-col items-center gap-3 py-16 text-center text-text-tertiary">
+                        <i class="pi pi-info-circle text-3xl"></i>
+                        <p>Selecciona una ruleta para previsualizarla tal como la verá el cliente.</p>
+                    </div>
+                    } @else {
+                    <app-ruleta-preview [items]="items" [activa]="activeTab === 'preview'" [ruleta]="ruletaSeleccionada" />
+                    }
+                </p-tabpanel>
+            </p-tabpanels>
+        </p-tabs>
+    </div>
+</div>
+
+<p-dialog [(visible)]="mostrarFormRuleta" [modal]="true" [dismissableMask]="true" [closable]="true" [style]="{ width: '90vw', maxWidth: '40rem' }">
+    <ng-template pTemplate="header">
+        <app-dialog-header [icono]="icono" [title]="ruletaEnEdicion ? 'Editar Ruleta' : 'Nueva Ruleta'" [mode]="ruletaEnEdicion ? 'editar' : 'crear'" />
+    </ng-template>
+    <app-ruleta-admin-form [ruleta]="ruletaEnEdicion" [resetTrigger]="resetRuletaFormTrigger" (guardar)="guardarRuleta($event)" (cancelarEvento)="cerrarFormRuleta()" />
+</p-dialog>
+
+<p-dialog [(visible)]="mostrarFormItem" [modal]="true" [dismissableMask]="true" [closable]="true" [style]="{ width: '90vw', maxWidth: '50rem' }">
+    <ng-template pTemplate="header">
+        <app-dialog-header [icono]="icono" [title]="itemEnEdicion ? 'Editar Premio' : 'Nuevo Premio'" [mode]="itemEnEdicion ? 'editar' : 'crear'" />
+    </ng-template>
+    @if (ruletaSeleccionada) {
+        <app-ruleta-item-form [item]="itemEnEdicion" [ruletaId]="ruletaSeleccionada.ruletaId" [resetTrigger]="resetItemFormTrigger" (guardar)="guardarItem($event)" (cancelarEvento)="cerrarFormItem()" />
+    }
+</p-dialog>

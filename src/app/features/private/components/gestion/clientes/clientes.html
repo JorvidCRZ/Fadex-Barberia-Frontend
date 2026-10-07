@@ -1,0 +1,23 @@
+<div class="mt-5">
+	<app-header-client [title]="'Clientes'" [icon]="icono" [description]="'Gestión y administración de clientes'" [buttonLabel]="'Nuevo'" [searchValue]="searchTerm" (create)="abrirCrear()" (search)="onSearch($event)"/>
+</div>
+
+<div class="mt-5">
+	<app-resumen-general-client/>
+
+<section class="mt-1 section-shell section-shell--main">
+	<div class="section-header">
+		<div>
+			<div class="section-badge">
+				<span>Gestión de clientes</span>
+			</div>
+			<p class="section-copy">Organiza y administra el listado de clientes.</p>
+		</div>
+		<div class="section-mark">✦</div>
+	</div>
+
+	<div class="section-content">
+		<app-filtrar-clients [activeFilter]="activeFilter" [selectedYear]="filterCriteria.year" [selectedMonth]="filterCriteria.month" [fromDate]="filterCriteria.fromDate" [toDate]="filterCriteria.toDate" (filterChange)="onFilterChange($event)" (customModeChange)="onCustomModeChange($event)"/>
+		<app-table-client [clients]="visibleClients" [totalElements]="totalElements" [currentPage]="currentPage" [totalPages]="totalPages" [rows]="pageSize" [activeFilter]="activeFilter" [isSearchMode]="isSearchActive" (pageChange)="onPageChange($event)" (delete)="onDisableCliente($event)" (reactivate)="onReactivateCliente($event)"/>
+	</div>
+</section>

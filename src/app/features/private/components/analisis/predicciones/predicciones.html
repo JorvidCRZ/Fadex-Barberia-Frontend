@@ -1,0 +1,103 @@
+<div class="predicciones">
+
+  <!-- Header -->
+  <div class="predicciones__header">
+    <div>
+      <h1 class="predicciones__title">
+        <i class="pi pi-chart-line mr-2"></i>
+        Predicciones IA
+      </h1>
+      <p class="predicciones__subtitle">Clientes con riesgo de no volver a la barbería</p>
+    </div>
+    <button class="boton-primary p-button" (click)="cargarAnalisis()" [disabled]="cargando">
+      <i class="pi pi-refresh mr-1" [class.spin]="cargando"></i>
+      
+    </button>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="predicciones__error">
+    <i class="pi pi-exclamation-triangle mr-2"></i>{{ error }}
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="cargando" class="predicciones__loading">
+    <i class="pi pi-spin pi-spinner mr-2"></i> Analizando clientes con IA...
+  </div>
+
+  <ng-container *ngIf="analisis && !cargando">
+
+    <!-- KPI Grid -->
+    <div class="pred-kpi-grid">
+      <div class="pred-kpi-card">
+        <div class="pred-kpi-card__icon"><i class="pi pi-times-circle"></i></div>
+        <div class="pred-kpi-card__label">Riesgo alto</div>
+        <div class="pred-kpi-card__value pred-kpi-card__value--red">{{ contarPorNivel('alto') }}</div>
+      </div>
+      <div class="pred-kpi-card">
+        <div class="pred-kpi-card__icon"><i class="pi pi-exclamation-triangle"></i></div>
+        <div class="pred-kpi-card__label">Riesgo medio</div>
+        <div class="pred-kpi-card__value pred-kpi-card__value--gold">{{ contarPorNivel('medio') }}</div>
+      </div>
+      <div class="pred-kpi-card">
+        <div class="pred-kpi-card__icon"><i class="pi pi-check-circle"></i></div>
+        <div class="pred-kpi-card__label">Riesgo bajo</div>
+        <div class="pred-kpi-card__value pred-kpi-card__value--green">{{ contarPorNivel('bajo') }}</div>
+      </div>
+    </div>
+
+    <!-- Resumen IA -->
+    <div class="pred-resumen">
+      <div class="pred-resumen__icon"><i class="pi pi-sparkles"></i></div>
+      <div>
+        <p class="pred-resumen__label">Resumen de la IA</p>
+        <p class="pred-resumen__text">{{ analisis.resumen }}</p>
+      </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="pred-table-section">
+      <div class="pred-table-section__header">
+        <h2 class="pred-table-section__title">Clientes en riesgo detectados</h2>
+        <span class="prediccion-badge">IA · gpt-4o-mini</span>
+      </div>
+
+      <div *ngIf="!analisis?.clientesEnRiesgo?.length" class="pred-empty">
+        <i class="pi pi-check-circle mr-2"></i> No se detectaron clientes en riesgo.
+      </div>
+
+      <div class="citas-table-wrapper" *ngIf="analisis?.clientesEnRiesgo?.length">
+        <table class="citas-table">
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Razón</th>
+              <th>Días sin visita</th>
+              <th>Total visitas</th>
+              <th>Nivel</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let c of analisis.clientesEnRiesgo">
+              <td>
+                <div class="cliente-nombre">{{ c.nombreCliente }}</div>
+              </td>
+              <td style="color: var(--color-text-muted); font-size: 0.8rem;">{{ c.razon }}</td>
+              <td class="hora">{{ c.diasSinVisita > 0 ? c.diasSinVisita + ' días' : 'N/A' }}</td>
+              <td class="hora">{{ c.totalVisitas }}</td>
+              <td>
+                <span class="badge-base" [ngClass]="{
+                  'pred-badge--alto':  c.nivelRiesgo === 'alto',
+                  'pred-badge--medio': c.nivelRiesgo === 'medio',
+                  'pred-badge--bajo':  c.nivelRiesgo === 'bajo'
+                }">{{ c.nivelRiesgo | titlecase }}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </ng-container>
+
+</div>

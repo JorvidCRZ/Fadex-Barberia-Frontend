@@ -1,0 +1,61 @@
+/* Role badges */
+.role-admin {
+  background-color: rgba(234, 179, 8, 0.12);
+  border-color: rgba(234, 179, 8, 0.25);
+  color: #fde68a;
+}
+
+.role-barbero {
+  background-color: rgba(99, 102, 241, 0.12);
+  border-color: rgba(99, 102, 241, 0.25);
+  color: #a5b4fc;
+}
+
+.role-recep {
+  background-color: rgba(20, 184, 166, 0.12);
+  border-color: rgba(20, 184, 166, 0.25);
+  color: #5eead4;
+}
+
+.role-default {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #9ca3af;
+}
+
+/* Paginación (mismo criterio visual que reserva-list) */
+.boton-paginacion-cliente.p-button {
+  background: transparent;
+  border-color: rgba(245, 200, 76, 0.28);
+  color: #f5c84c;
+  min-width: 3rem;
+  min-height: 2rem;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.86rem;
+  box-shadow: none;
+}
+
+.boton-paginacion-cliente.p-button:not(:disabled):hover {
+  background: rgba(245, 200, 76, 0.12);
+  border-color: rgba(245, 200, 76, 0.4);
+}
+
+.boton-paginacion-cliente.activo.p-button {
+  background: rgba(245, 200, 76, 0.18);
+  border-color: rgba(245, 200, 76, 0.6);
+  color: #f9dc7a;
+}
+
+.table-actions {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.status {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  justify-content: center;
+}

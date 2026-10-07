@@ -1,0 +1,30 @@
+
+<div class="flex flex-col gap-6 mt-5">
+    <aside class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between px-6 py-4 border-b border-brand-gold-soft bg-brand-black rounded-xl">
+        <h1 class="text-lg font-semibold text-brand-gold text-center md:text-start"><i class="pi" [class]="icono"></i> {{ texto }}</h1>
+        <button pButton label="Nueva tarjeta" icon="pi pi-plus" class="p-button-sm boton-primary" (click)="abrirCrear()"></button>
+    </aside>
+    <app-filtros [fields]="filtrosFields" [titulo]="texto" [text]="texto" [acordeon]="true" (buscar)="onBuscar($event)" (limpiar)="onLimpiar()"/>
+    <app-tarjeta-table [tarjetas]="tarjetas" [cargado]="cargado" [totalRecords]="totalRecords" [rows]="rows" (lazyLoad)="onLazyLoad($event)" (estado)="onCambiarEstado($event)" (eliminar)="eliminarTarjeta($event)" (verPreview)="verPreview($event)" />
+</div>
+
+<p-dialog [(visible)]="mostrarForm" [modal]="true" [dismissableMask]="true" [closable]="true" [style]="{ width: '100vw', maxWidth: '50rem'}">
+    @if (mostrarForm) {
+        <ng-template pTemplate="header">
+            <app-dialog-header icono="pi-id-card" title="Nueva tarjeta" mode="crear" />
+        </ng-template>
+        <app-tarjeta-form [categorias]="categorias"  [resetTrigger]="resetFormTrigger" (guardar)="guardarTarjeta($event)" (cancelarEvento)="cerrarForm()" />
+    }
+</p-dialog>
+
+<p-dialog [(visible)]="mostrarPreview" [modal]="true" [dismissableMask]="true" [closable]="true" [style]="{ width: '100vw', maxWidth: '80rem' }">
+    <ng-template pTemplate="header">
+        <div class="flex items-center justify-between w-full pr-2">
+            <app-dialog-header icono="pi-id-card" title="Vista previa de la tarjeta" mode="ver" />
+            <button pButton [label]="variantePreview === 'admin' ? 'Ver como cliente' : 'Ver como admin'" icon="pi pi-eye" class="boton-ver"(click)="cambiarVariantePreview()"></button>
+        </div>
+    </ng-template>
+    @if (tarjetaSeleccionada) {
+        <app-tarjeta-grafico [variante]="variantePreview" [clienteNombre]="clienteNombrePreview" [tarjetas]="tarjetasPreview" />
+    }
+</p-dialog>

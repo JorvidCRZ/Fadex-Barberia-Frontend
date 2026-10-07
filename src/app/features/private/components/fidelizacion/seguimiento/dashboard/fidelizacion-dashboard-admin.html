@@ -1,0 +1,149 @@
+<div class="flex flex-col gap-5">
+
+    <div *ngIf="cargando" class="flex flex-col items-center gap-3 py-12 text-text-tertiary text-sm">
+        <span class="w-9 h-9 rounded-full border-[3px] border-transparent border-t-brand-gold animate-spin inline-block"></span>
+        <p>Cargando dashboard...</p>
+    </div>
+
+    <ng-container *ngIf="!cargando && data">
+
+        <!-- KPIs -->
+        <div class="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3">
+            <div *ngFor="let kpi of kpis" class="relative bg-ui-card border border-ui-borderSoft rounded-2xl p-4">
+                <i class="pi pi-{{ kpi.icon }} absolute top-4 right-4 text-brand-gold opacity-55"></i>
+                <p class="text-xs text-text-secondary mb-1.5 pr-8">{{ kpi.label }}</p>
+                <p class="text-2xl font-bold text-brand-gold leading-none">{{ kpi.value }}</p>
+            </div>
+        </div>
+
+    </ng-container>
+
+    <!-- TABS DE GRÁFICAS -->
+    <p-tabs value="0" styleClass="!bg-transparent" (valueChange)="onTabChange($event)">
+        <p-tablist>
+            <p-tab value="0">Resumen</p-tab>
+            <p-tab value="1">Tendencias</p-tab>
+        </p-tablist>
+
+        <p-tabpanels>
+
+            <!-- TAB 1: Resumen -->
+            <p-tabpanel value="0" styleClass="!bg-transparent">
+                <ng-container *ngIf="!cargando && data">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-4">
+                        <div class="bg-ui-card border border-ui-borderSoft rounded-2xl p-5">
+                            <div class="flex items-center gap-2 text-sm font-semibold text-white mb-4">
+                                <span class="w-2 h-2 rounded-full bg-brand-gold"></span>
+                                Tarjetas por categoría
+                            </div>
+                            <div class="relative h-56">
+                                <canvas #categoriaChart></canvas>
+                            </div>
+                        </div>
+
+                        <div class="bg-ui-card border border-ui-borderSoft rounded-2xl p-5">
+                            <div class="flex items-center gap-2 text-sm font-semibold text-white mb-4">
+                                <span class="w-2 h-2 rounded-full bg-brand-gold"></span>
+                                Giros disponibles por categoría
+                            </div>
+                            <div class="relative h-56">
+                                <canvas #girosChart></canvas>
+                                <p *ngIf="!data.tarjetasPorCategoria.length || !kpis.length"
+                                    class="text-xs text-text-tertiary text-center py-4">Sin giros disponibles por ahora.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-4">
+                        <div class="bg-ui-card border border-ui-borderSoft rounded-2xl p-5">
+                            <div class="flex items-center gap-2 text-sm font-semibold text-white mb-4">
+                                <i class="pi pi-history text-brand-gold text-xs"></i>
+                                Últimos movimientos
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm">
+                                    <thead>
+                                        <tr class="text-text-tertiary text-[11px] uppercase border-b border-ui-border">
+                                            <th class="text-left font-medium py-2 pr-3">Fecha</th>
+                                            <th class="text-left font-medium py-2 pr-3">Cliente</th>
+                                            <th class="text-left font-medium py-2 pr-3">Origen</th>
+                                            <th class="text-left font-medium py-2 pr-3">Descripción</th>
+                                            <th class="text-right font-medium py-2">Puntos</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let m of data.movimientosRecientes" class="border-b border-ui-border/50 last:border-0">
+                                            <td class="py-2 pr-3 text-text-tertiary whitespace-nowrap">{{ m.createdAt | date:'dd/MM/yy HH:mm' }}</td>
+                                            <td class="py-2 pr-3 text-white truncate max-w-[140px]">{{ m.clienteNombre }}</td>
+                                            <td class="py-2 pr-3">
+                                                <span class="text-[11px] px-2 py-0.5 rounded-full bg-brand-gold/10 text-brand-gold whitespace-nowrap">{{ m.origen }}</span>
+                                            </td>
+                                            <td class="py-2 pr-3 text-text-secondary truncate max-w-[200px]">{{ m.descripcion || '-' }}</td>
+                                            <td class="py-2 text-right font-bold whitespace-nowrap"
+                                                [ngClass]="m.puntos >= 0 ? 'text-green-400' : 'text-red-400'">
+                                                {{ m.puntos >= 0 ? '+' : '' }}{{ m.puntos }}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <p *ngIf="!data.movimientosRecientes.length" class="text-xs text-text-tertiary text-center py-4">
+                                    Sin movimientos recientes.</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-ui-card border border-ui-borderSoft rounded-2xl p-5">
+                            <div class="flex items-center gap-2 text-sm font-semibold text-white mb-4">
+                                <span class="w-2 h-2 rounded-full bg-brand-gold"></span>
+                                Top premios (recientes)
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <div *ngFor="let p of topPremios; let i = index"
+                                    class="flex items-center gap-3 rounded-xl bg-black/20 border border-ui-border px-3 py-2">
+                                    <span class="w-6 h-6 flex items-center justify-center rounded-full bg-brand-gold/15 text-brand-gold text-xs font-bold shrink-0">
+                                        {{ i + 1 }}
+                                    </span>
+                                    <span class="text-sm text-white truncate flex-1">{{ p.nombre }}</span>
+                                    <span class="text-sm font-bold text-brand-gold">{{ p.cantidad }}</span>
+                                </div>
+                                <p *ngIf="!topPremios.length" class="text-xs text-text-tertiary text-center py-4">Sin recompensas recientes.</p>
+                            </div>
+                        </div>
+                    </div>
+                </ng-container>
+            </p-tabpanel>
+
+            <!-- TAB 2: Tendencias -->
+            <p-tabpanel value="1" styleClass="!bg-transparent">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-4">
+                    <div class="bg-ui-card border border-ui-borderSoft rounded-2xl p-5">
+                        <div class="flex items-center gap-2 text-sm font-semibold text-white mb-4">
+                            <span class="w-2 h-2 rounded-full bg-brand-gold"></span>
+                            Giros por semana
+                        </div>
+                        <div class="relative h-56">
+                            <div *ngIf="cargandoGirosPorSemana" class="flex items-center justify-center h-full text-text-tertiary text-xs">
+                                Cargando...
+                            </div>
+                            <canvas #girosPorSemanaChart [class.hidden]="cargandoGirosPorSemana"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-ui-card border border-ui-borderSoft rounded-2xl p-5">
+                        <div class="flex items-center gap-2 text-sm font-semibold text-white mb-4">
+                            <span class="w-2 h-2 rounded-full bg-brand-gold"></span>
+                            Movimientos por semana
+                        </div>
+                        <div class="relative h-56">
+                            <div *ngIf="cargandoMovimientosPorSemana" class="flex items-center justify-center h-full text-text-tertiary text-xs">
+                                Cargando...
+                            </div>
+                            <canvas #movimientosPorSemanaChart [class.hidden]="cargandoMovimientosPorSemana"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </p-tabpanel>
+
+        </p-tabpanels>
+    </p-tabs>
+
+</div>
