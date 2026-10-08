@@ -3,10 +3,11 @@ import { AvatarModule } from 'primeng/avatar';
 import { RouterOutlet } from '@angular/router';
 import { Component, ChangeDetectionStrategy, input } from '@angular/core';
 import { SidebarComponent } from '../../../shared/components/sidebar/sidebar.component';
+import { ButtonComponent } from '../../../shared/components/button/button.component';
 
 @Component({
   selector: 'app-private-shell',
-  imports: [SidebarComponent, RouterOutlet, AvatarModule, ButtonModule],
+  imports: [SidebarComponent, RouterOutlet, AvatarModule, ButtonModule, ButtonComponent,ButtonComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
   <div class="relative flex min-h-screen overflow-hidden bg-brand-black">
@@ -33,12 +34,17 @@ import { SidebarComponent } from '../../../shared/components/sidebar/sidebar.com
             <button pButton type="button" class="boton-sidebar-toggle"
               (click)="toggleSidebar()" aria-label="Abrir o cerrar menú" icon="pi pi-bars"></button>
           </span>
-          <span class="hidden md:inline-flex">
-            <button pButton type="button" class="boton-sidebar-toggle"
-              (click)="toggleSidebarCollapsed()"
-              [attr.aria-label]="sidebarCollapsed ? 'Expandir sidebar' : 'Contraer sidebar'"
-              [icon]="sidebarCollapsed ? 'pi pi-angle-double-right' : 'pi pi-angle-double-left'"></button>
-          </span>
+          <span class="inline-flex md:hidden">
+  <app-button variant="sidebar-toggle" icon="bars"
+    ariaLabel="Abrir o cerrar menú" (clicked)="toggleSidebar()" />
+</span>
+
+<span class="hidden md:inline-flex">
+  <app-button variant="sidebar-toggle"
+    [icon]="sidebarCollapsed ? 'angle-double-right' : 'angle-double-left'"
+    [ariaLabel]="sidebarCollapsed ? 'Expandir sidebar' : 'Contraer sidebar'"
+    (clicked)="toggleSidebarCollapsed()" />
+</span>
           <div class="flex items-center gap-3">
             <span [class]="'h-6 w-1 rounded-full ' + roleAccentClass()"></span>
             <div>

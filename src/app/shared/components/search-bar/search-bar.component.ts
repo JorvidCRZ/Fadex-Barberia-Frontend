@@ -1,11 +1,10 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-search-bar',
   standalone: true,
-  imports: [FormsModule, ButtonModule],
+  imports: [FormsModule],
   templateUrl: './search-bar.html'
 })
 export class SearchBarComponent implements OnChanges {

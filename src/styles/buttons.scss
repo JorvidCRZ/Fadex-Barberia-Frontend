@@ -548,3 +548,27 @@ button.boton-submit.p-button {
     height: 2.5rem;
     padding: 0;
 }
+
+// utilities.scss
+.filtros-badge {
+    @apply rounded-full border border-brand-gold/30 bg-brand-gold/10 px-3 py-1 text-xs font-medium;
+}
+
+// buttons.scss
+.boton-excel {
+    @include boton-base;
+    @apply border border-green-500/30 bg-green-500/10 text-green-500;
+
+    &:hover {
+        @apply border-green-500 bg-green-500 text-white;
+    }
+}
+
+.boton-pdf {
+    @include boton-base;
+    @apply border border-red-500/30 bg-red-500/10 text-red-500;
+
+    &:hover {
+        @apply border-red-500 bg-red-500 text-white;
+    }
+}

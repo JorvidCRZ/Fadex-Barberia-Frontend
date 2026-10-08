@@ -49,6 +49,10 @@ p-button .p-button {
     background: rgb(var(--color-ui-black)) !important;
     border-radius: 1rem 1rem 0 0;
 }
+.p-dialog-footer {
+    background: rgb(var(--color-ui-black)) !important;
+    border-radius: 0 0 1rem 1rem;
+}
 
 .p-dialog-header-actions .p-ripple {
     @apply rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-500;

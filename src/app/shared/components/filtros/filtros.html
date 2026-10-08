@@ -58,11 +58,15 @@
 
                 <div class="mt-6 flex justify-end gap-3">
                     @if (mostrarExportar) {
-                        <button pButton type="button" class="boton-excel" (click)="onExportar('excel')"> <i class="pi pi-file-excel text-sm"></i> Excel</button>
-                        <button pButton type="button" class="boton-pdf" (click)="onExportar('pdf')"><i class="pi pi-file-pdf text-sm"></i> PDF</button>
+                        <app-button variant="excel" icon="file-excel" label="Excel" (clicked)="onExportar('excel')" />
+                        <app-button variant="pdf" icon="file-pdf" label="PDF" (clicked)="onExportar('pdf')" />
+                        <!-- <button pButton type="button" class="boton-excel" (click)="onExportar('excel')"> <i class="pi pi-file-excel text-sm"></i> Excel</button> -->
+                        <!-- <button pButton type="button" class="boton-pdf" (click)="onExportar('pdf')"><i class="pi pi-file-pdf text-sm"></i> PDF</button> -->
                     }
-                    <button pButton type="button" (click)="onLimpiar()" class="boton-secondary"><i class="pi pi-eraser text-sm"></i> Limpiar filtros</button>
-                    <button pButton type="button" (click)="onBuscar()" class="boton-primary"><i class="pi pi-search text-sm"></i>Buscar {{ text }}</button>
+                    <app-button variant="secondary" icon="eraser" label="Limpiar filtros" (clicked)="onLimpiar()" />
+                    <app-button variant="primary" icon="search" [label]="'Buscar ' + text" (clicked)="onBuscar()" />
+                    <!-- <button pButton type="button" (click)="onLimpiar()" class="boton-secondary"><i class="pi pi-eraser text-sm"></i> Limpiar filtros</button> -->
+                    <!-- <button pButton type="button" (click)="onBuscar()" class="boton-primary"><i class="pi pi-search text-sm"></i>Buscar {{ text }}</button> -->
                 </div>
             </form>
         </div>

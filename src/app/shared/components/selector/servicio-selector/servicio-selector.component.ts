@@ -1,15 +1,14 @@
-import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-
-import { TableLazyLoadEvent, TableModule } from 'primeng/table';
-import { ButtonModule } from 'primeng/button';
-import { Servicio } from '@/app/core/models/catalogos/servicios.model';
-import { ServicioService } from '@/app/core/services/catalogos/servicio.service';
-import { SearchBarComponent } from '@/app/shared/components/search-bar/search-bar.component';
-import { SolesPipe } from '@/app/shared/pipes/moneda.pipe';
-import { SafeImageUrlPipe } from '@/app/shared/pipes/safe-image-url.pipe';
 import { ImageModule } from 'primeng/image';
+import { FormsModule } from '@angular/forms';
+import { ButtonModule } from 'primeng/button';
+import { CommonModule } from '@angular/common';
+import { SolesPipe } from '../../../pipes/moneda.pipe';
+import { TableLazyLoadEvent, TableModule } from 'primeng/table';
+import { SafeImageUrlPipe } from '../../../pipes/safe-image-url.pipe';
+import { SearchBarComponent } from '../../search-bar/search-bar.component';
+import { Servicio } from '../../../../core/models/catalogos/servicios.model';
+import { ServicioService } from '../../../../core/services/catalogos/servicio.service';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 
 @Component({
     standalone: true,
