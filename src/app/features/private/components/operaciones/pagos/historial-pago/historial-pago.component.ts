@@ -1,6 +1,5 @@
-import { Component, Input, OnInit, Output, EventEmitter, inject, signal } from '@angular/core';
+import { Component, Input, OnInit, Output, EventEmitter, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { PagoService } from '../../../../../../core/services/pagos/pago.service';
 import { HistorialPagoResponse, PagoResponse } from '../../../../../../core/models/pagos/pago.model';
 
 @Component({
@@ -10,23 +9,19 @@ import { HistorialPagoResponse, PagoResponse } from '../../../../../../core/mode
   templateUrl: './historial-pago.component.html'
 })
 export class HistorialPagoComponent implements OnInit {
-  private readonly pagoService = inject(PagoService);
-  @Input({ required: true }) pagoId!: number;
+  @Input({ required: true }) pago!: PagoResponse;
   @Output() onCerrar = new EventEmitter<void>();
 
   pagoInfo = signal<PagoResponse | null>(null);
   timelineEventos = signal<HistorialPagoResponse[]>([]);
   loadingData = signal<boolean>(false);
 
-  ngOnInit(): void { if (this.pagoId) this.cargarAuditoria(); }
-
-  cargarAuditoria(): void {
-    this.loadingData.set(true);
-    this.pagoService.getPagoById(this.pagoId).subscribe({ next: (res) => { if (res.success) this.pagoInfo.set(res.data!); } });
-    this.pagoService.getHistorialPorPago(this.pagoId).subscribe({
-      next: (res) => { if (res.success) this.timelineEventos.set(res.data!); this.loadingData.set(false); },
-      error: () => this.loadingData.set(false)
-    });
+  ngOnInit(): void {
+    this.pagoInfo.set(this.pago);
+    // Historial en memoria: un único evento de registro.
+    this.timelineEventos.set([
+      { id: 1, fecha: this.pago.fecha, clienteNombre: this.pago.clienteNombre },
+    ] as unknown as HistorialPagoResponse[]);
   }
 
   getIconData(descripcion: string): { icon: string, colorClass: string } {

@@ -23,8 +23,6 @@ import { ReservaService } from '../../../../core/services/operaciones/reserva.se
 import { BARBEROS_MOCK, RESERVAS_MOCK, SERVICIOS_MOCK } from '../../../../core/config/privado-mock.config';
 import { environment } from '../../../../../environments/environment';
 import { DialogHeaderComponent } from '../../../../shared/components/dialog-header/dialog-header.component';
-import { ButtonComponent } from '../../../../shared/components/button/button.component';
-import { MonedaPipe } from '../../../../shared/pipes/moneda.pipe';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -68,7 +66,7 @@ const HORARIOS = Array.from({ length: 20 }, (_, i) => {
   standalone: true,
   imports: [
     CommonModule, ReactiveFormsModule, DialogModule, SelectModule, DatePickerModule,
-    CheckboxModule, DialogHeaderComponent, ButtonComponent, MonedaPipe,
+    CheckboxModule, DialogHeaderComponent,
   ],
   templateUrl: './reservar.html',
 })

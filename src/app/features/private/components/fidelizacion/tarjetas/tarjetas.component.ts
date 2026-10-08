@@ -14,9 +14,10 @@ import { TarjetaFormComponent } from './tarjeta-form/tarjeta-form.component';
 import { FiltrosComponent } from '@/app/shared/components/filtros/filtros.component';
 import { FILTROS_TARJETA } from '@/app/core/config/filtros.config';
 import { CategoriaService } from '@/app/core/services/catalogos/categoria.service';
-import { Categoria } from '@/app/core/models/catalogos/categorias.model';
+import { Categoria, CategoriaTipo } from '@/app/core/models/catalogos/categorias.model';
 import { TarjetaGraficoComponent } from '@/app/shared/components/tarjeta/tarjeta-grafico.component';
 import { ClienteService } from '@/app/core/services/gestion/cliente.service';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'app-tarjetas',
@@ -32,6 +33,25 @@ export class TarjetasComponent implements OnInit {
   private tarjetaService = inject(FidelizacionTarjetaService);
   private categoriaService = inject(CategoriaService);
   private clienteService = inject(ClienteService);
+
+  // Mock Data
+  private mockTarjetas: FidelizacionTarjetaResponse[] = [
+    { id: 1, clienteId: 101, categoriaId: 1, clienteNombreCompleto: 'Juan Pérez', categoriaNombre: 'Platino', activo: true, cicloActivo: true, progreso: 500, meta: 1000, girosPorMeta: 5, girosDisponibles: 2, totalGiros: 10 },
+    { id: 2, clienteId: 102, categoriaId: 2, clienteNombreCompleto: 'María López', categoriaNombre: 'Oro', activo: true, cicloActivo: false, progreso: 300, meta: 1000, girosPorMeta: 5, girosDisponibles: 0, totalGiros: 10 },
+    { id: 3, clienteId: 103, categoriaId: 1, clienteNombreCompleto: 'Carlos Ruiz', categoriaNombre: 'Platino', activo: false, cicloActivo: false, progreso: 100, meta: 1000, girosPorMeta: 5, girosDisponibles: 0, totalGiros: 10 },
+  ];
+
+  private mockCategorias: Categoria[] = [
+    { id: 1, nombre: 'Platino', subcategorias: [], tipo: CategoriaTipo.SERVICIO, descripcion: 'Categoría Platino', estado: true, padreId: null, padreNombre: '' },
+    { id: 2, nombre: 'Oro', subcategorias: [], tipo: CategoriaTipo.SERVICIO, descripcion: 'Categoría Oro', estado: true, padreId: null, padreNombre: '' },
+    { id: 3, nombre: 'Plata', subcategorias: [], tipo: CategoriaTipo.SERVICIO, descripcion: 'Categoría Plata', estado: true, padreId: null, padreNombre: '' },
+  ];
+
+  private mockClientes: any[] = [
+    { clienteId: 101, persona: { nombre: 'Juan', apellido: 'Pérez' } },
+    { clienteId: 102, persona: { nombre: 'María', apellido: 'López' } },
+    { clienteId: 103, persona: { nombre: 'Carlos', apellido: 'Ruiz' } },
+  ];
 
   tarjetas: FidelizacionTarjetaResponse[] = [];
   cargado = false;
@@ -59,8 +79,21 @@ export class TarjetasComponent implements OnInit {
 
   cargarTarjetas(page: number, size: number): void {
     this.cargado = false;
-    const filtro = { ...this.filtro, page, size, sort: 'id,desc' };
-    this.tarjetaService.obtenerTarjetas(filtro).subscribe({
+
+    let filtered = [...this.mockTarjetas];
+    if (this.filtro.clienteId) {
+        filtered = filtered.filter(t => t.clienteId === this.filtro.clienteId);
+    }
+    if (this.filtro.categoriaId) {
+        filtered = filtered.filter(t => t.categoriaId === this.filtro.categoriaId);
+    }
+    if (this.filtro.activo !== undefined) {
+        filtered = filtered.filter(t => t.activo === this.filtro.activo);
+    }
+
+    const content = filtered.slice(page * size, (page + 1) * size);
+
+    of({ data: { content, totalElements: filtered.length } }).subscribe({
       next: (resp) => {
         this.tarjetas = resp.data.content;
         this.totalRecords = resp.data.totalElements;
@@ -90,7 +123,12 @@ export class TarjetasComponent implements OnInit {
     const anterior = tarjeta[campo];
     (tarjeta as any)[campo] = valor;
 
-    this.tarjetaService.actualizarTarjetaParcial(tarjeta.id, { campo, valor }).subscribe({
+    const mockTarjeta = this.mockTarjetas.find(t => t.id === tarjeta.id);
+    if (mockTarjeta) {
+        (mockTarjeta as any)[campo] = valor;
+    }
+
+    of({ message: 'Estado actualizado correctamente' }).subscribe({
       next: (resp) => this.notify.showSuccess(resp.message),
       error: (err) => {
         (tarjeta as any)[campo] = anterior;
@@ -108,7 +146,23 @@ export class TarjetasComponent implements OnInit {
   }
 
   guardarTarjeta(data: { clienteId: number; categoriaId: number }): void {
-    this.tarjetaService.crearTarjeta(data).subscribe({
+    const newTarjeta: FidelizacionTarjetaResponse = {
+        id: this.mockTarjetas.length + 1,
+        clienteId: data.clienteId,
+        categoriaId: data.categoriaId,
+        clienteNombreCompleto: 'Cliente Mock',
+        categoriaNombre: 'Categoria Mock',
+        activo: true,
+        cicloActivo: true,
+        progreso: 0,
+        meta: 1000,
+        girosPorMeta: 5,
+        girosDisponibles: 0,
+        totalGiros: 10,
+    };
+    this.mockTarjetas.push(newTarjeta);
+
+    of({ message: 'Tarjeta creada correctamente' }).subscribe({
       next: (resp) => {
         this.notify.showSuccess(resp.message);
         this.resetFormTrigger++;
@@ -120,7 +174,8 @@ export class TarjetasComponent implements OnInit {
   }
 
   eliminarTarjeta(tarjeta: FidelizacionTarjetaResponse): void {
-    this.tarjetaService.eliminarTarjeta(tarjeta.id).subscribe({
+    this.mockTarjetas = this.mockTarjetas.filter(t => t.id !== tarjeta.id);
+    of({ message: 'Tarjeta eliminada correctamente' }).subscribe({
       next: (resp) => {
         this.notify.showSuccess(resp.message);
         this.cargarTarjetas(0, this.rows);
@@ -130,7 +185,7 @@ export class TarjetasComponent implements OnInit {
   }
 
   private cargarCategorias(): void {
-    this.categoriaService.obtenerCategorias().subscribe({
+    of({ data: { content: this.mockCategorias } }).subscribe({
       next: (resp) => {
         this.categorias = resp.data.content;
         const tree = this.construirTree(this.categorias);
@@ -142,7 +197,7 @@ export class TarjetasComponent implements OnInit {
   }
 
   private cargarClientes(): void {
-    this.clienteService.listar(0, 1000).subscribe({
+    of({ data: { content: this.mockClientes } }).subscribe({
       next: (resp) => {
         const clientes = resp.data.content.map((c: any) => ({
           label: `${c.persona.nombre} ${c.persona.apellido}`,
@@ -155,9 +210,13 @@ export class TarjetasComponent implements OnInit {
     });
   }
 
-
   private construirTree(categorias: Categoria[]): any[] {
-    return categorias.map(c => ({ key: String(c.id), label: c.nombre, data: c.id, children: c.subcategorias?.length ? this.construirTree(c.subcategorias) : [] }));
+    return categorias.map(c => ({
+      key: String(c.id),
+      label: c.nombre,
+      data: c.id,
+      children: c.subcategorias?.length ? this.construirTree(c.subcategorias) : []
+    }));
   }
 
   onBuscar(filtros: Partial<FidelizacionTarjetaFiltro>) {
@@ -188,5 +247,4 @@ export class TarjetasComponent implements OnInit {
   get tarjetasPreview(): FidelizacionTarjetaResponse[] {
     return this.tarjetaSeleccionada ? [this.tarjetaSeleccionada] : [];
   }
-
 }

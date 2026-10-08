@@ -24,6 +24,7 @@ import { ServicioService } from '@/app/core/services/catalogos/servicio.service'
 import { ProductoService } from '@/app/core/services/catalogos/producto.service';
 import { NotificationService } from '@/app/core/services/common/notification.service';
 import { SafeImageUrlPipe } from '@/app/shared/pipes/safe-image-url.pipe';
+import { of } from 'rxjs';
 
 @Component({
     standalone: true,
@@ -205,7 +206,7 @@ export class RuletaItemFormComponent implements OnChanges, OnInit {
         this.servicioSeleccionado = null;
 
         if (this.item?.tipoPremio === TipoPremio.PRODUCTO && this.item.productoId) {
-            this.productoService.obtenerProductoId(this.item.productoId).subscribe({
+            of({ data: { id: this.item.productoId, nombre: 'Producto Mock', nombreCategoria: 'Cat Mock', descripcion: 'Desc Mock', urlsMultimedia: [''], precio: 100, stock: 10, estado: true, publicado: true, idCategoria: 1 } }).subscribe({
                 next: (respuesta) => {
                     this.productoSeleccionado = respuesta.data;
                     this.cd.detectChanges();
@@ -215,7 +216,7 @@ export class RuletaItemFormComponent implements OnChanges, OnInit {
         }
 
         if (this.item?.tipoPremio === TipoPremio.SERVICIO && this.item.servicioId) {
-            this.servicioService.obtenerServicioPorId(this.item.servicioId).subscribe({
+            of({ data: { servicioId: this.item.servicioId, nombre: 'Servicio Mock', categoriaNombre: 'Cat Mock', duracion: 30, urlsMultimedia: [''], precio: 50, categoriaId: 1, publicado: true, estado: true } }).subscribe({
                 next: (respuesta) => {
                     this.servicioSeleccionado = respuesta.data;
                     this.cd.detectChanges();
