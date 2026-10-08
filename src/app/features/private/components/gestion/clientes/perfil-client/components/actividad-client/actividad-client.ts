@@ -62,8 +62,8 @@ export class ActividadClient implements OnInit {
   ngOnInit(): void {
 
     if (this.clienteId) {
-
-      this.cargarActividad();
+      this.usarDatosDefault();
+      // this.cargarActividad();
 
     } else {
 

@@ -1,8 +1,9 @@
-<aside
-  class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between px-6 py-4 border-b border-brand-gold-soft bg-brand-black rounded-xl">
-  <h1 class="text-lg font-semibold text-brand-gold text-center md:text-start"> <i class="pi" [class]="icon"></i> {{
-    title }} </h1>
-  <app-search-bar placeholder="Buscar Usuarios" (search)="onSearch($event)"></app-search-bar>
+<aside class="flex flex-col gap-4 px-0 py-0 bg-transparent">
+  <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+    <div>
+      <h1 class="text-xl font-semibold text-brand-white">{{ title }}</h1>
+      <p class="mt-1 text-sm text-text-muted">{{ description }}</p>
+    </div>
   <button
     pButton
     type="button"
@@ -11,4 +12,6 @@
     class="p-button-sm boton-primary"
     (click)="onCreate()">
   </button>
+  </div>
+  <app-search-bar placeholder="Buscar usuario..." (search)="onSearch($event)"></app-search-bar>
 </aside>

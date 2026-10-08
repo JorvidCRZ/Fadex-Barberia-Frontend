@@ -35,7 +35,21 @@ export class ResumenPerfilClient implements OnInit {
       return;
     }
 
-    this.cargarResumen();
+    this.resumen = {
+      totalReservas: 18,
+      totalCortes: 14,
+      totalCompras: 6,
+      totalGastado: 420,
+      ultimaVisita: '07/10/2026',
+    };
+    this.metricas = [
+      { valor: this.resumen.totalReservas, etiqueta: 'Reservas' },
+      { valor: this.resumen.totalCortes, etiqueta: 'Cortes' },
+      { valor: this.resumen.totalCompras, etiqueta: 'Compras' },
+    ];
+    this.totalGastado = `S/ ${this.resumen.totalGastado.toFixed(2)}`;
+    this.ultimaVisita = this.resumen.ultimaVisita;
+    // this.cargarResumen();
 
   }
 

@@ -41,6 +41,13 @@ export class PerfilBarbero implements OnInit {
   contrasena   = 'No disponible';
   idUsuario    = 0;
 
+  readonly barberosMemoria: Barbero[] = [
+    { barberoId: 1, persona: { personaId: 11, nombre: 'Renzo', apellido: 'Castillo', telefono: '986 410 251', email: 'renzo.castillo@gmail.com', usuario: { idUsuario: 11, user: 'renzo.c', qrToken: '', password: 'renzo1234' } }, experiencia: 8, fechaIngreso: '2021-03-15', ocupado: false, sueldo: 4820, comision: 35, descripcion: 'Especialista en cortes clásicos y modernos.' },
+    { barberoId: 2, persona: { personaId: 12, nombre: 'Álvaro', apellido: 'Mendoza', telefono: '942 704 188', email: 'alvaro.mendoza@gmail.com', usuario: { idUsuario: 12, user: 'alvaro.m', qrToken: '', password: 'alvaro1234' } }, experiencia: 6, fechaIngreso: '2022-01-10', ocupado: false, sueldo: 4260, comision: 32, descripcion: 'Barbero especializado en fades.' },
+    { barberoId: 3, persona: { personaId: 13, nombre: 'José Luis', apellido: 'Ramos', telefono: '913 628 450', email: 'joseluis.ramos@gmail.com', usuario: { idUsuario: 13, user: 'joseluis.r', qrToken: '', password: 'jose1234' } }, experiencia: 5, fechaIngreso: '2022-08-22', ocupado: false, sueldo: 3790, comision: 30, descripcion: 'Experto en barba y afeitado premium.' },
+    { barberoId: 4, persona: { personaId: 14, nombre: 'Bruno', apellido: 'Espinoza', telefono: '978 440 126', email: 'bruno.espinoza@gmail.com', usuario: { idUsuario: 14, user: 'bruno.e', qrToken: '', password: 'bruno1234' } }, experiencia: 3, fechaIngreso: '2024-02-01', ocupado: false, sueldo: 3140, comision: 30, descripcion: 'Barbero en formación continua.' },
+  ];
+
   volver = (): void => { window.history.back(); };
 
   ngOnInit(): void {
@@ -57,6 +64,7 @@ export class PerfilBarbero implements OnInit {
   }
 
   private cargarBarbero(id: number): void {
+    /*
     this.loading = true;
     this.errorMessage = '';
 
@@ -75,6 +83,18 @@ export class PerfilBarbero implements OnInit {
         this.errorMessage = 'Error al cargar el perfil del barbero.';
       }
     });
+    */
+    this.loading = true;
+    this.errorMessage = '';
+    const barbero = this.barberosMemoria.find((item) => item.barberoId === id);
+    if (!barbero) {
+      this.loading = false;
+      this.errorMessage = 'No se pudo cargar el perfil del barbero.';
+      return;
+    }
+    this.loading = false;
+    this.barbero = barbero;
+    this.actualizarVista(barbero);
   }
 
   private actualizarVista(barbero: Barbero): void {

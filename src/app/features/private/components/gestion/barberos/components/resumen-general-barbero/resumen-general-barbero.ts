@@ -26,11 +26,20 @@ export class ResumenGeneralBarberoComponent implements OnInit {
   cargando = true;
   error = false;
 
+  readonly resumenMemoria: ResumenCard[] = [
+    { valor: 4, titulo: 'Barberos activos', delta: '+1 este trimestre', positivo: true, icono: 'pi-users' },
+    { valor: 319, titulo: 'Servicios del mes', delta: '+7.4% este mes', positivo: true, icono: 'pi-sparkles' },
+    { valor: '31.8%', titulo: 'Comisión promedio', delta: '+1.2% este mes', positivo: true, icono: 'pi-dollar' },
+  ];
+
   ngOnInit(): void {
-    this.cargarResumen();
+    // this.cargarResumen();
+    this.resumen = this.resumenMemoria;
+    this.cargando = false;
   }
 
   private cargarResumen(): void {
+    /*
     this.cargando = true;
     this.error = false;
 
@@ -44,6 +53,7 @@ export class ResumenGeneralBarberoComponent implements OnInit {
         this.cargando = false;
       }
     });
+    */
   }
 
   private mapearResumen(data: ResumenGeneralBarbero): ResumenCard[] {

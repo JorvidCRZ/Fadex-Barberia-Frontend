@@ -1,0 +1,50 @@
+<div class="flex flex-col gap-6 p-4 md:p-2">
+  @if (mostrarEstado) {
+    @if (balanceado) {
+      <div class="flex items-center justify-between gap-3 px-4 py-2 rounded-lg bg-green-500/10 border border-green-500/30">
+        <div class="flex items-center gap-2 text-green-400 text-sm">
+          <i class="pi pi-check-circle"></i>
+          <span>La ruleta está lista para girar.</span>
+        </div>
+
+        <button class="pi pi-times text-green-400 hover:text-white transition-colors cursor-pointer" (click)="cerrarEstado()"></button>
+      </div>
+      } @else {
+        <div class="flex items-center justify-between gap-3 px-4 py-2 rounded-lg bg-amber-500/10 border border-amber-500/30">
+        <div class="flex items-center gap-2 text-amber-400 text-sm">
+          <i class="pi pi-exclamation-triangle"></i>
+          <span> Total: <strong>{{ probabilidadTotal }}%</strong>
+            @if (diferencia > 0) { · Faltan {{ diferencia }}%}
+            @else {· Sobran {{ -diferencia }}%}
+          </span>
+        </div>
+        <button class="pi pi-times text-amber-400 hover:text-white transition-colors cursor-pointer"(click)="cerrarEstado()"></button>
+      </div>
+    }
+  }
+
+  @if (resumen.length === 0) {
+    <p class="text-text-tertiary text-center py-10">No hay premios activos para analizar. Ve a la pestaña "Premios" para
+      agregar alguno.</p>
+  } @else {
+    <div class="w-full h-8 rounded-full overflow-hidden flex border border-brand-gold-soft">
+      @for (grupo of resumen; track grupo.tipo) {
+        <div [style.width.%]="grupo.probabilidadTotal" [ngClass]="grupo.clases" class="h-full flex items-center justify-center text-xs font-semibold text-white transition-all" [title]="grupo.etiqueta + ': ' + grupo.probabilidadTotal + '%'">
+          @if (grupo.probabilidadTotal >= 8) { {{ grupo.probabilidadTotal }}% }
+        </div>
+      }
+    </div>
+  
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      @for (grupo of resumen; track grupo.tipo) {
+        <div class="rounded-xl border border-neutral-700 bg-[#171717] p-4 transition-all duration-200 hover:border-brand-gold-soft hover:shadow-lg">
+          <div class="flex items-center justify-between">
+            <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold" [ngClass]="grupo.clases">{{ grupo.etiqueta }}</span>
+            <span class="text-xl font-bold text-brand-gold">{{ grupo.probabilidadTotal }}%</span>
+          </div>
+          <div class="mt-3 text-sm text-neutral-400">{{ grupo.cantidad }}{{ grupo.cantidad === 1 ? 'premio activo' : 'premios activos' }}</div>
+        </div>
+      }
+    </div>
+  }
+</div>

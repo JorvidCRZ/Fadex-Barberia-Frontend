@@ -120,6 +120,7 @@ export class RegistrarClient {
       idRol: 3
     };
     console.log('Enviar payload registrarCliente:', payload);
+    /*
     this.usuarioService.registrarCliente(payload).subscribe({
       next: (res) => {
         console.log('registrarCliente response:', res);
@@ -135,6 +136,11 @@ export class RegistrarClient {
         this.notification.showHttpError(err, 'Crear cliente');
       }
     });
+    */
+    this.isSubmitting = false;
+    this.showConfirm = false;
+    this.notification.showSuccess('Cliente guardado en memoria.');
+    this.router.navigate(['../'], { relativeTo: this.route });
   }
 
   togglePassword(): void {

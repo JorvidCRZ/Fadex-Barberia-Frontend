@@ -88,8 +88,22 @@ export class RolesPermisosPerfilUsuario implements OnInit, OnChanges {
 
   cargarDatos(): void {
     if (!this.usuarioId) return;
-    this.cargando = true;
-
+    this.todosLosRoles = [
+      { idRol: 1, nombre: 'ADMIN' },
+      { idRol: 2, nombre: 'BARBERO' },
+      { idRol: 3, nombre: 'CLIENTE' },
+    ];
+    const rolUsuario = this.usuarioId === 1 ? this.todosLosRoles[0] : this.usuarioId < 4 ? this.todosLosRoles[1] : this.todosLosRoles[2];
+    this.rolesAsignados = [rolUsuario];
+    this.totalPermisos = 3;
+    this.totalPaginasPermisos = 1;
+    this.permisosActivos = [
+      { permiso: { idPermiso: 1, nombre: 'VER_PERFIL', descripcion: 'Consultar información del perfil' }, roles: [rolUsuario.nombre] },
+      { permiso: { idPermiso: 2, nombre: 'EDITAR_DATOS', descripcion: 'Actualizar datos básicos' }, roles: [rolUsuario.nombre] },
+      { permiso: { idPermiso: 3, nombre: 'CONSULTAR_HISTORIAL', descripcion: 'Consultar historial de actividad' }, roles: [rolUsuario.nombre] },
+    ];
+    this.recalcularDisponibles();
+    /*
     forkJoin({
       todos:     this.usuarioService.listarRoles(),
       asignados: this.usuarioService.obtenerRolesUsuario(this.usuarioId),
@@ -112,6 +126,7 @@ export class RolesPermisosPerfilUsuario implements OnInit, OnChanges {
         this.cargando = false;
       },
     });
+    */
   }
 
   quitarRol(idRol: number): void {

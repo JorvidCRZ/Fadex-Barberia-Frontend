@@ -34,6 +34,14 @@ export class PerfilUsuario implements OnInit {
   cargando = false;
   errorCarga = '';
 
+  readonly usuariosMemoria = [
+    { usuarioId: 1, nombre: 'María Fernanda', apellido: 'Torres', telefono: '987 000 001', email: 'maria.torres@gmail.com', username: 'admin1' },
+    { usuarioId: 2, nombre: 'Renzo', apellido: 'Castillo', telefono: '986 410 251', email: 'renzo.castillo@gmail.com', username: 'renzo.c' },
+    { usuarioId: 3, nombre: 'Álvaro', apellido: 'Mendoza', telefono: '942 704 188', email: 'alvaro.mendoza@gmail.com', username: 'alvaro.m' },
+    { usuarioId: 4, nombre: 'Valeria', apellido: 'Quispe', telefono: '987 245 613', email: 'valeria.quispe@gmail.com', username: 'valeria.q' },
+    { usuarioId: 5, nombre: 'Diego', apellido: 'Salazar', telefono: '946 318 722', email: 'diego.salazar@gmail.com', username: 'diego.s' },
+  ];
+
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
@@ -43,6 +51,7 @@ export class PerfilUsuario implements OnInit {
   }
 
   private cargarUsuario(id: number): void {
+    /*
     if (!id) {
         this.errorCarga = 'No se encontró el usuario solicitado.';
         return;
@@ -76,6 +85,23 @@ export class PerfilUsuario implements OnInit {
             this.notificationService.showError(this.errorCarga);
         },
     });
+    */
+    const data = this.usuariosMemoria.find((item) => item.usuarioId === id);
+    if (!data) {
+      this.errorCarga = 'No se pudo cargar el perfil del usuario.';
+      return;
+    }
+
+    this.usuarioId = data.usuarioId;
+    this.nombre = data.nombre;
+    this.apellido = data.apellido;
+    this.telefono = data.telefono;
+    this.email = data.email;
+    this.usuario = data.username;
+    this.usuarioNombre = `${data.nombre} ${data.apellido}`;
+    this.usuarioIniciales = this.getInitials(this.usuarioNombre);
+    this.usuarioDescripcion = `ID usuario: ${this.usuarioId}`;
+    this.cargando = false;
 }
 
   private getInitials(name: string): string {

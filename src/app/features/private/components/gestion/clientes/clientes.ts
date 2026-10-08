@@ -38,8 +38,18 @@ export class Clientes implements OnInit {
   currentPage: number = 0;
   totalPages: number = 0;
 
+  readonly clientesMemoria: Cliente[] = [
+    { clienteId: 1, fechaRegistro: '2026-09-01', persona: { personaId: 1, nombre: 'Valeria', apellido: 'Quispe', telefono: '987 245 613', email: 'valeria.quispe@gmail.com', usuario: { idUsuario: 1, user: 'valeria.q', qrToken: '' } } },
+    { clienteId: 2, fechaRegistro: '2026-09-03', persona: { personaId: 2, nombre: 'Diego', apellido: 'Salazar', telefono: '946 318 722', email: 'diego.salazar@gmail.com', usuario: { idUsuario: 2, user: 'diego.s', qrToken: '' } } },
+    { clienteId: 3, fechaRegistro: '2026-09-05', persona: { personaId: 3, nombre: 'Mateo', apellido: 'Huamán', telefono: '912 804 371', email: 'mateo.h@outlook.com', usuario: { idUsuario: 3, user: 'mateo.h', qrToken: '' } } },
+    { clienteId: 4, fechaRegistro: '2026-09-09', persona: { personaId: 4, nombre: 'Luciana', apellido: 'Paredes', telefono: '975 116 408', email: 'luciana.paredes@gmail.com', usuario: { idUsuario: 4, user: 'luciana.p', qrToken: '' } } },
+    { clienteId: 5, fechaRegistro: '2026-09-12', persona: { personaId: 5, nombre: 'Sebastián', apellido: 'Flores', telefono: '930 667 219', email: 'sebastian.flores@gmail.com', usuario: { idUsuario: 5, user: 'sebastian.f', qrToken: '' } } },
+    { clienteId: 6, fechaRegistro: '2026-09-18', persona: { personaId: 6, nombre: 'Camila', apellido: 'Rojas', telefono: '994 251 803', email: 'camila.rojas@gmail.com', usuario: { idUsuario: 6, user: 'camila.r', qrToken: '' } } },
+  ];
+
   ngOnInit(): void {
-    this.cargarClientes();
+    // this.cargarClientes();
+    this.aplicarRespuestaMemoria(0);
   }
 
   cargarClientes(page: number = 0): void {
@@ -47,10 +57,22 @@ export class Clientes implements OnInit {
   }
 
   private cargarClientesBase(page: number = 0): void {
+    /*
     this.clienteService.listar(page, this.pageSize).subscribe({
       next: (response) => this.aplicarRespuestaListado(response, page),
       error: (error) => console.error('Error al cargar clientes', error),
     });
+    */
+    this.aplicarRespuestaMemoria(page);
+  }
+
+  private aplicarRespuestaMemoria(page: number): void {
+    const start = page * this.pageSize;
+    this.clients = this.clientesMemoria.slice(start, start + this.pageSize);
+    this.visibleClients = this.clients;
+    this.totalElements = this.clientesMemoria.length;
+    this.currentPage = page;
+    this.totalPages = Math.ceil(this.totalElements / this.pageSize);
   }
 
   onPageChange(page: number): void {

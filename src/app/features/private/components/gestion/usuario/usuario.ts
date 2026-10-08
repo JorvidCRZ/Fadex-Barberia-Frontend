@@ -47,6 +47,14 @@ export class Usuario implements OnInit {
     multiplesRoles?: boolean;
   } = {};
 
+  readonly usuariosMemoria = [
+    { usuarioId: 1, username: 'admin1', persona: { nombre: 'María Fernanda', apellido: 'Torres' }, roles: ['Administrador'], tieneQr: true, tienePin: true },
+    { usuarioId: 2, username: 'renzo.c', persona: { nombre: 'Renzo', apellido: 'Castillo' }, roles: ['Barbero'], tieneQr: true, tienePin: true },
+    { usuarioId: 3, username: 'alvaro.m', persona: { nombre: 'Álvaro', apellido: 'Mendoza' }, roles: ['Barbero'], tieneQr: true, tienePin: true },
+    { usuarioId: 4, username: 'valeria.q', persona: { nombre: 'Valeria', apellido: 'Quispe' }, roles: ['Cliente'], tieneQr: true, tienePin: true },
+    { usuarioId: 5, username: 'diego.s', persona: { nombre: 'Diego', apellido: 'Salazar' }, roles: ['Cliente'], tieneQr: true, tienePin: true },
+  ];
+
   filtrosActuales: FiltroUsuario = {
     rol: '',
     tipo: '',
@@ -70,7 +78,8 @@ export class Usuario implements OnInit {
   }
 
   ngOnInit(): void {
-    this.cargarUsuarios(0);
+    // this.cargarUsuarios(0);
+    this.aplicarUsuariosMemoria(0);
   }
 
   onPageChange(event: { page: number; size: number }): void {
@@ -78,6 +87,7 @@ export class Usuario implements OnInit {
 }
 
   cargarUsuarios(page: number = 0): void {
+    /*
     this.cargando = true;
     this.errorCarga = '';
 
@@ -94,6 +104,16 @@ export class Usuario implements OnInit {
         this.errorCarga = 'No se pudo cargar la tabla de usuarios.';
       },
     });
+    */
+    this.aplicarUsuariosMemoria(page);
+  }
+
+  private aplicarUsuariosMemoria(page: number): void {
+    this.usuarios = this.usuariosMemoria as unknown as UsuarioTablaResponse[];
+    this.totalElements = this.usuariosMemoria.length;
+    this.totalPages = 1;
+    this.currentPage = page;
+    this.cargando = false;
   }
 
   onPrevPage(): void {

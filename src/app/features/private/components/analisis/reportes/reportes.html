@@ -1,199 +1,115 @@
-<div class="flex flex-col gap-4">
+<div class="min-h-screen bg-[#0a0a0a] text-white px-5 py-5 flex flex-col gap-5">
 
-<app-filtros
-  [fields]="filtrosFields"
-  [titulo]="'Reportes'"
-  [text]="'Reportes'"
-  [acordeon]="true"
-  (buscar)="onBuscar($event)"
-  (limpiar)="onLimpiar()">
-</app-filtros>
-
-  <div class="bg-ui-card border border-ui-borderSoft rounded-2xl px-6 py-5 flex flex-col gap-4">
+  <!-- HEADER -->
+  <div class="flex items-start justify-between gap-4">
     <div>
-      <h1 class="text-[1.4rem] font-bold text-(--color-brand-gold) m-0 leading-tight">Reportes</h1>
-      <p class="text-[0.8rem] text-text-secondary mt-0.5 mb-0">Genera y descarga reportes detallados por período</p>
+      <h1 class="m-0 text-[1.45rem] font-bold leading-tight text-white">Reportes</h1>
+      <p class="m-0 mt-1 text-[0.8rem] text-[#8a8a8a]">Genera y descarga información del negocio</p>
     </div>
 
-    <div *ngIf="error" class="bg-red-950/40 border border-red-600/30 text-brand-red px-4 py-3 rounded-xl text-[0.85rem]">
+    <div class="relative">
+      <select
+        class="reporte-select"
+        [ngModel]="periodo"
+        (ngModelChange)="onPeriodoChange($event)">
+        @for (p of periodos; track p.value) {
+          <option [value]="p.value">{{ p.label }}</option>
+        }
+      </select>
+      <i class="pi pi-chevron-down pointer-events-none absolute right-3 top-1/2 -translate-y-1/2
+                text-[0.65rem] text-[#8a8a8a]"></i>
+    </div>
+  </div>
+
+  <!-- ERROR -->
+  @if (error) {
+    <div class="bg-red-950/40 border border-red-600/30 text-[#e05252] px-4 py-3 rounded-xl text-[0.85rem]">
       <i class="pi pi-exclamation-triangle mr-2"></i>{{ error }}
     </div>
+  }
 
-    <!-- REPORTES DISPONIBLES, RESUMEN SEMANAL, etc. -->
-  </div>
+  <!-- REPORTES DISPONIBLES -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    @for (r of reportes; track r.tipo) {
+      <div class="reporte-card flex items-start gap-4 px-4 py-4">
 
-
-
-  <!-- ══════════════════════════════════════════════════════════════════
-       ERROR
-  ═══════════════════════════════════════════════════════════════════ -->
-  <div *ngIf="error"
-       class="bg-red-950/40 border border-red-600/30 text-brand-red
-              px-4 py-3 rounded-xl text-[0.85rem]">
-    <i class="pi pi-exclamation-triangle mr-2"></i>{{ error }}
-  </div>
-
-  <!-- ══════════════════════════════════════════════════════════════════
-       REPORTES DISPONIBLES
-  ═══════════════════════════════════════════════════════════════════ -->
-  <p class="text-[0.68rem] font-bold tracking-[0.12em] uppercase
-            text-text-muted pb-1.5 m-0
-            border-b border-ui-borderSoft">
-    REPORTES DISPONIBLES
-  </p>
-
-  <div class="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-3">
-    <div *ngFor="let r of reportes"
-         class="bg-ui-card border border-ui-borderSoft
-                rounded-2xl p-5 flex flex-col gap-4
-                transition-all duration-200
-                hover:-translate-y-0.5 hover:border-brand-gold-soft">
-
-      <!-- Info -->
-      <div class="flex items-center gap-3.5">
-        <div class="w-11.5 h-11.5 shrink-0
-                    bg-brand-dark border border-brand-gold-soft
-                    rounded-xl flex items-center justify-center
-                    text-[1.25rem] text-(--color-brand-gold)">
-          <i class="pi pi-{{ r.icon }}"></i>
+        <div class="reporte-icon">
+          @switch (r.tipo) {
+            @case ('servicios') {
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>
+                <path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/>
+              </svg>
+            }
+            @default {
+              <i class="pi {{ r.icon }} text-[1.15rem]"></i>
+            }
+          }
         </div>
-        <div>
-          <p class="text-[0.95rem] font-semibold text-(--color-text-primary) m-0">
-            {{ r.titulo }}
-          </p>
-          <p class="text-[0.78rem] text-text-secondary mt-0.5 m-0">
-            {{ r.descripcion }}
-          </p>
+
+        <div class="min-w-0">
+          <p class="m-0 text-[0.88rem] font-semibold text-white">{{ r.titulo }}</p>
+          <p class="m-0 mt-1 text-[0.76rem] text-[#8a8a8a]">{{ r.descripcion }}</p>
+
+          <div class="mt-3 flex items-center gap-2.5">
+            <button type="button" class="btn-pdf"
+                    [disabled]="exportando === r.tipo + '-pdf'"
+                    (click)="exportarPDF(r.tipo)">
+              @if (exportando === r.tipo + '-pdf') {
+                <span class="spinner"></span>
+              } @else {
+                <i class="pi pi-download"></i>
+              }
+              PDF
+            </button>
+
+            <button type="button" class="btn-excel"
+                    [disabled]="exportando === r.tipo + '-excel'"
+                    (click)="exportarExcel(r.tipo)">
+              @if (exportando === r.tipo + '-excel') {
+                <span class="spinner spinner--light"></span>
+              } @else {
+                <i class="pi pi-download"></i>
+              }
+              Excel
+            </button>
+          </div>
         </div>
       </div>
-
-      <!-- Botones exportar -->
-      <div class="flex gap-2.5">
-
-        <!-- PDF -->
-        <button (click)="exportarPDF(r.tipo)"
-                [disabled]="exportando === r.tipo + '-pdf'"
-                class="flex-1 flex items-center justify-center gap-1.5
-                       px-3 py-[0.45rem] min-h-8.5 rounded-xl
-                       text-[0.78rem] font-semibold cursor-pointer
-                       border border-brand-gold-soft
-                       bg-brand-dark text-(--color-brand-gold)
-                       transition-all duration-200
-                       hover:enabled:bg-(--color-brand-gold) hover:enabled:text-black
-                       disabled:opacity-45 disabled:cursor-not-allowed">
-          <ng-container *ngIf="exportando !== r.tipo + '-pdf'">
-            <i class="pi pi-file-pdf"></i> PDF
-          </ng-container>
-          <span *ngIf="exportando === r.tipo + '-pdf'"
-                class="w-3.5 h-3.5 rounded-full border-2 border-transparent border-t-black
-                       animate-spin inline-block"></span>
-        </button>
-
-        <!-- Excel -->
-        <button (click)="exportarExcel(r.tipo)"
-                [disabled]="exportando === r.tipo + '-excel'"
-                class="flex-1 flex items-center justify-center gap-1.5
-                       px-3 py-[0.45rem] min-h-8.5 rounded-xl
-                       text-[0.78rem] font-semibold cursor-pointer
-                       border border-brand-gold-soft
-                       bg-brand-dark text-(--color-brand-gold)
-                       transition-all duration-200
-                       hover:enabled:bg-(--color-brand-gold) hover:enabled:text-black
-                       disabled:opacity-45 disabled:cursor-not-allowed">
-          <ng-container *ngIf="exportando !== r.tipo + '-excel'">
-            <i class="pi pi-file-excel"></i> Excel
-          </ng-container>
-          <span *ngIf="exportando === r.tipo + '-excel'"
-                class="w-3.5 h-3.5 rounded-full border-2 border-transparent border-t-black
-                       animate-spin inline-block"></span>
-        </button>
-
-      </div>
-    </div>
+    }
   </div>
 
-  <!-- ══════════════════════════════════════════════════════════════════
-       RESUMEN SEMANAL
-  ═══════════════════════════════════════════════════════════════════ -->
-  <p class="text-[0.68rem] font-bold tracking-[0.12em] uppercase
-            text-text-muted pb-1.5 m-0
-            border-b border-ui-borderSoft">
-    RESUMEN SEMANAL
-  </p>
+  <!-- RESUMEN SEMANAL -->
+  <div class="reporte-card overflow-hidden">
+    <h3 class="m-0 px-4 py-4 text-[0.85rem] font-normal text-white border-b border-[rgba(201,168,76,0.16)]">
+      Resumen semanal
+    </h3>
 
-  <div class="rounded-xl overflow-hidden bg-ui-card border border-brand-gold-soft">
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 p-4">
+      @for (k of resumen; track k.label) {
+        <div class="kpi-mini">
+          <div class="flex items-start justify-between">
+            <span class="text-[0.66rem] uppercase tracking-[0.08em] text-[#9a9a9a]">{{ k.label }}</span>
 
-    <!-- Estado cargando -->
-    <div *ngIf="cargando"
-         class="flex flex-col items-center gap-3 py-10
-                text-text-muted text-[0.85rem]">
-      <span class="w-7 h-7 rounded-full border-[3px] border-transparent
-                   border-t-(--color-brand-gold) animate-spin inline-block"></span>
-      <span>Cargando datos...</span>
+            @if (k.label === 'Servicios') {
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#d4af37"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>
+                <path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/>
+              </svg>
+            } @else {
+              <i class="pi {{ k.icon }} text-[0.9rem] text-[#d4af37]"></i>
+            }
+          </div>
+
+          <p class="m-0 mt-3 text-[1.5rem] font-bold leading-none text-white">{{ k.value }}</p>
+          <p class="m-0 mt-2.5 flex items-center gap-1 text-[0.68rem] text-[#22c55e]">
+            <i class="pi pi-arrow-up-right text-[0.58rem]"></i>{{ k.delta }}
+          </p>
+        </div>
+      }
     </div>
-
-    <!-- Tabla -->
-    <table *ngIf="!cargando" class="w-full border-collapse text-[0.8rem]">
-
-      <thead>
-        <tr class="bg-brand-dark border-b-2 border-brand-gold-soft">
-          <th class="px-4 py-3 text-left text-[0.72rem] font-semibold uppercase
-                     tracking-[0.06em] text-(--color-text-table-sub)">Día</th>
-          <th class="px-4 py-3 text-left text-[0.72rem] font-semibold uppercase
-                     tracking-[0.06em] text-(--color-text-table-sub)">Reservas</th>
-          <th class="px-4 py-3 text-left text-[0.72rem] font-semibold uppercase
-                     tracking-[0.06em] text-(--color-text-table-sub)">Completadas</th>
-          <th class="px-4 py-3 text-left text-[0.72rem] font-semibold uppercase
-                     tracking-[0.06em] text-(--color-text-table-sub)">Canceladas</th>
-          <th class="px-4 py-3 text-left text-[0.72rem] font-semibold uppercase
-                     tracking-[0.06em] text-(--color-text-table-sub)">Ingresos</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <!-- Sin datos -->
-        <tr *ngIf="resumenSemanal.length === 0">
-          <td colspan="5" class="text-center px-4 py-6 text-text-muted">
-            <i class="pi pi-info-circle mr-2"></i>Sin datos para el período seleccionado
-          </td>
-        </tr>
-
-        <!-- Filas de datos -->
-        <tr *ngFor="let fila of resumenSemanal"
-            class="border-b border-ui-borderSoft last:border-b-0
-                   hover:bg-ui-elevated transition-colors duration-150">
-          <td class="px-4 py-3 font-semibold text-(--color-text-primary)">
-            {{ fila.dia }}
-          </td>
-          <td class="px-4 py-3 text-(--color-text-table-sub)">
-            {{ fila.reservas }}
-          </td>
-          <td class="px-4 py-3 font-semibold text-[#4caf50]">
-            {{ fila.completadas }}
-          </td>
-          <td class="px-4 py-3 font-semibold text-brand-red">
-            {{ fila.canceladas }}
-          </td>
-          <td class="px-4 py-3 font-semibold text-(--color-brand-gold)">
-            S/ {{ fila.ingresos | number:'1.2-2' }}
-          </td>
-        </tr>
-      </tbody>
-
-      <!-- Fila total -->
-      <tfoot *ngIf="resumenSemanal.length > 0">
-        <tr class="border-t border-brand-gold-soft bg-[rgba(201,168,76,0.05)]">
-          <td class="px-4 py-3 font-bold text-(--color-text-primary)">Total</td>
-          <td class="px-4 py-3 font-bold text-(--color-text-primary)">{{ totalReservas }}</td>
-          <td class="px-4 py-3 font-bold text-[#4caf50]">{{ totalCompletadas }}</td>
-          <td class="px-4 py-3 font-bold text-brand-red">{{ totalCanceladas }}</td>
-          <td class="px-4 py-3 font-bold text-(--color-brand-gold)">
-            S/ {{ totalIngresos | number:'1.2-2' }}
-          </td>
-        </tr>
-      </tfoot>
-
-    </table>
   </div>
 
 </div>

@@ -73,18 +73,11 @@ export const routes: Routes = [
            { path: 'usuarios/:id', component: PerfilUsuario },
         ]
        },
-    ]
-  },
        {
          path: 'fidelizacion', children: [
            { path: 'seguimiento', loadComponent: () => import('./features/private/components/fidelizacion/seguimiento/seguimiento.component').then(m => m.SeguimientoComponent) },
            { path: 'reglas', loadComponent: () => import('./features/private/components/fidelizacion/fidelizacion.component').then(m => m.FidelizacionAdminComponent) },
-           //{ path: 'ruletas', loadComponent: () => import('./features/private/components/ruleta/ruletas-admin/ruletas-admin.component').then(m => m.RuletasAdminComponent) }
-         ]
-       },
-       {
-         path: 'sistema', children: [
-           { path: 'configuracion', loadComponent: () => import('./features/private/components/sistema/configuracion').then(m => m.Configuracion) },
+           { path: 'ruletas', loadComponent: () => import('./features/private/components/ruleta/ruletas-admin/ruletas-admin.component').then(m => m.RuletasAdminComponent) }
          ]
        },
        {
@@ -95,7 +88,14 @@ export const routes: Routes = [
            { path: '', redirectTo: 'metricas', pathMatch: 'full' },
          ]
        },
-
+         { path: '**', loadComponent: () => import('./shared/components/error404/error404.component').then(m => m.Error404Component) },
+    ]
+  },
+       {
+         path: 'sistema', children: [
+           { path: 'configuracion', loadComponent: () => import('./features/private/components/sistema/configuracion').then(m => m.Configuracion) },
+         ]
+       },
   {
     path: 'dashboard/barbero', component: DashboardBarberoComponent,
     canActivate: [authGuard], data: { roles: ['barbero'] },

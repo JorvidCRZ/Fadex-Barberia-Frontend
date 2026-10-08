@@ -14,9 +14,17 @@ export class ResumenGeneralClient implements OnInit {
   private clienteService = inject(ClienteService);
   resumen: any[] = [];
 
+  readonly resumenMemoria = [
+    { valor: 840, titulo: 'Total clientes', delta: '+21 este mes', positivo: true, icono: 'pi-users' },
+    { valor: 612, titulo: 'Activos este mes', delta: '+8.4% este mes', positivo: true, icono: 'pi-chart-line' },
+    { valor: 28, titulo: 'Nuevos', delta: '+12.6% este mes', positivo: true, icono: 'pi-user-plus' },
+    { valor: '72.8%', titulo: 'Retención', delta: '+3.1% este mes', positivo: true, icono: 'pi-star' },
+  ];
+
 
   ngOnInit(): void {
-
+    this.resumen = this.resumenMemoria;
+    /*
     this.clienteService.obtenerResumen()
       .subscribe({
 
@@ -67,6 +75,7 @@ export class ResumenGeneralClient implements OnInit {
         }
 
       });
+    */
 
   }
 }

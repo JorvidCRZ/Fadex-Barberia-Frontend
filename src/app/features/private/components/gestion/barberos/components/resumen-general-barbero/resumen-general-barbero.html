@@ -1,7 +1,7 @@
 <div class="table-base p-4 md:p-6 lg:p-8">
 
   <!-- Estado: cargando -->
-  <div *ngIf="cargando" class="summary-grid-5">
+  <div *ngIf="cargando" class="summary-grid-5 summary-grid-3">
     <div class="summary-card skeleton" *ngFor="let i of [1,2,3,4,5]">
       <div class="summary-top">
         <div class="skeleton-icon"></div>
@@ -18,7 +18,7 @@
   </div>
 
   <!-- Estado: datos -->
-  <div *ngIf="!cargando && !error" class="summary-grid-5">
+  <div *ngIf="!cargando && !error" class="summary-grid-5 summary-grid-3">
     <div class="summary-card" *ngFor="let item of resumen">
       <div class="summary-top">
         <i class="pi" [ngClass]="item.icono"></i>
