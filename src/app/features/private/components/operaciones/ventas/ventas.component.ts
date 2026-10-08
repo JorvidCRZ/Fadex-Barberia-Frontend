@@ -1,198 +1,128 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ButtonModule } from 'primeng/button';
-import { DialogModule } from 'primeng/dialog';
-import { TableLazyLoadEvent } from 'primeng/table';
 import { Router, ActivatedRoute } from '@angular/router';
+import { SelectModule } from 'primeng/select';
 
 import { VentaTableComponent } from './venta-table/venta-table.component';
-import { VentaFormComponent } from './venta-form/venta-form.component';
 import { VentaResumenComponent } from './venta-resumen/venta-resumen.component';
-
-import { SearchBarComponent } from '@/app/shared/components/search-bar/search-bar.component';
-import { DialogHeaderComponent } from '@/app/shared/components/dialog-header/dialog-header.component';
-import { FiltrosComponent } from '@/app/shared/components/filtros/filtros.component';
-
 import { NotificationService } from '@/app/core/services/common/notification.service';
-import { VentaService } from '@/app/core/services/venta/venta.service';
-import { TokenService } from '@/app/core/services/auth/token.service'; 
 
-import { Venta } from '@/app/core/models/ventas/venta.model';
-import { VentaDetalle } from '@/app/core/models/ventas/detalle.model';
-import { VentaFiltro } from '@/app/core/models/ventas/venta.model';
-import { FILTROS_VENTA } from '@/app/core/config/filtros.config';
+// Valores base del resumen (como en el prototipo). Las ventas nuevas se suman a estos.
+const BASE_TOTAL_VENTAS = 245;
+const BASE_INGRESOS = 12480;
+// Las ventas creadas desde el POS tienen ventaId >= a este valor.
+const ID_INICIAL_NUEVAS = 246;
+
+// ── Estado en memoria a nivel de módulo: sobrevive a la navegación Ventas <-> POS
+//    (se pierde al recargar la página).
+let siguienteCorrelativo = 246;
+let ventasMemoria: any[] = [
+  {
+    ventaId: 245, numeroCorrelativo: 'V-00245', clienteNombre: 'Diego Salazar', tipoComprobante: 'Boleta',
+    metodoPago: 'Yape', fecha: '2026-06-18T10:42:00',
+    detalles: [
+      { servicioNombre: 'Corte Clásico', cantidad: 1, precioUnitario: 55 },
+      { productoNombre: 'Pomada Brillante', cantidad: 1, precioUnitario: 24.9 },
+    ],
+  },
+  {
+    ventaId: 244, numeroCorrelativo: 'V-00244', clienteNombre: 'Valeria Quispe', tipoComprobante: 'Factura',
+    metodoPago: 'Visa', fecha: '2026-06-18T09:18:00',
+    detalles: [
+      { servicioNombre: 'Corte + Barba', cantidad: 1, precioUnitario: 88 },
+      { productoNombre: 'Aceite de Barba Natural', cantidad: 1, precioUnitario: 32.5 },
+      { productoNombre: 'Cera Mate Premium', cantidad: 1, precioUnitario: 28 },
+    ],
+  },
+  {
+    ventaId: 243, numeroCorrelativo: 'V-00243', clienteNombre: 'Mateo Huamán', tipoComprobante: 'Boleta',
+    metodoPago: 'Efectivo', fecha: '2026-06-17T17:05:00',
+    detalles: [{ servicioNombre: 'Afeitado Tradicional', cantidad: 1, precioUnitario: 35 }],
+  },
+  {
+    ventaId: 242, numeroCorrelativo: 'V-00242', clienteNombre: 'Sebastián Flores', tipoComprobante: 'Boleta',
+    metodoPago: 'Yape', fecha: '2026-06-17T12:30:00',
+    detalles: [
+      { servicioNombre: 'Corte Clásico', cantidad: 1, precioUnitario: 55 },
+      { servicioNombre: 'Perfilado de Barba', cantidad: 1, precioUnitario: 40 },
+      { productoNombre: 'Cera Mate Premium', cantidad: 1, precioUnitario: 28 },
+      { servicioNombre: 'Tratamiento Capilar', cantidad: 1, precioUnitario: 89 },
+    ],
+  },
+];
 
 @Component({
   selector: 'app-ventas',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    ButtonModule,
-    DialogModule,
-    VentaTableComponent,
-    VentaFormComponent,
-    VentaResumenComponent,
-    SearchBarComponent,
-    DialogHeaderComponent,
-    FiltrosComponent
-  ],
+  imports: [CommonModule, FormsModule, SelectModule, VentaTableComponent, VentaResumenComponent],
   templateUrl: './ventas.html'
 })
 export class VentasComponent implements OnInit {
-
-  private ventaService = inject(VentaService);
   private notify = inject(NotificationService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
-  private tokenService = inject(TokenService); 
 
-  ventas: Venta[] = [];
-  ventaSeleccionada: Venta | null = null;
-  mostrarFormulario = false;
+  ventas = signal<any[]>(ventasMemoria);
 
-  rows = 25;
-  totalRecords = 0;
-  cargado = false;
+  texto = signal('');
+  comprobante = signal<string | null>(null);
+  metodo = signal<string | null>(null);
+  mostrarFiltros = signal(false);
 
-  totalVentas = 0;
-  ingresos = 0;
-  promedio = 0;
+  readonly comprobantes = ['Boleta', 'Factura'];
+  readonly metodos = ['Efectivo', 'Yape', 'Plin', 'Visa', 'Transferencia'];
 
-  filtro: VentaFiltro = {};
-  filtrosFields = FILTROS_VENTA;
+  ventasFiltradas = computed(() => {
+    const t = this.texto().trim().toLowerCase();
+    return this.ventas().filter(v =>
+      (!t || String(v.clienteNombre).toLowerCase().includes(t) || String(v.numeroCorrelativo ?? '').toLowerCase().includes(t)) &&
+      (!this.comprobante() || v.tipoComprobante === this.comprobante()) &&
+      (!this.metodo() || v.metodoPago === this.metodo())
+    );
+  });
 
-  esBarbero = false;
-  userId: number | null = null;
+  resumen = computed(() => {
+    const nuevas = this.ventas().filter(v => v.ventaId >= ID_INICIAL_NUEVAS);
+    const montoNuevas = nuevas.reduce(
+      (acc, v) => acc + (v.detalles ?? []).reduce((s: number, d: any) => s + d.cantidad * d.precioUnitario, 0), 0);
+    const totalVentas = BASE_TOTAL_VENTAS + nuevas.length;
+    const ingresos = BASE_INGRESOS + montoNuevas;
+    return { totalVentas, ingresos, promedio: ingresos / totalVentas };
+  });
 
   ngOnInit(): void {
-    this.esBarbero = this.router.url.includes('/barbero');
-    
-    const id = Number(this.tokenService.getUserId());
-    this.userId = isNaN(id) ? null : id;
-
-    this.cargarVentas(0, this.rows);
+    // El POS manda la venta nueva por el estado de navegación del router.
+    const nueva = history.state?.nuevaVenta;
+    if (nueva && !ventasMemoria.some(v => v.ventaId === nueva.ventaId)) {
+      const venta = {
+        ...nueva,
+        numeroCorrelativo: `V-${String(siguienteCorrelativo++).padStart(5, '0')}`,
+        fecha: new Date().toISOString(),
+      };
+      this.actualizar([venta, ...ventasMemoria]);
+      this.notify.showSuccess('¡Venta registrada con éxito!');
+    }
   }
 
-  cargarVentas(page: number, size: number): void {
-    this.cargado = false;
-
-    this.filtro.page = page;
-    this.filtro.size = size;
-
-    const peticion$ = (this.esBarbero && this.userId)
-      ? this.ventaService.obtenerMisVentas(this.userId) 
-      : this.ventaService.obtenerVentas(this.filtro);  
-
-    peticion$.subscribe({
-      next: (resp) => {
-        this.ventas = resp.data.map((venta: Venta) => {
-
-          const total = (venta.detalles ?? []).reduce(
-            (acc: number, det: VentaDetalle) => acc + (det.subtotal ?? 0),
-            0
-          );
-
-          return {
-            ...venta,
-            total
-          };
-
-        });
-        this.calcularResumen();
-        this.cargado = true;
-      },
-      error: () => {
-        console.warn('Backend no disponible, manteniendo datos actuales.');
-        this.cargado = true;
-      }
-    });
+  private actualizar(lista: any[]): void {
+    ventasMemoria = lista;
+    this.ventas.set(lista);
   }
 
-  crearVenta(data: any): void {
-    this.ventaService.crearVenta(data).subscribe({
-      next: (resp) => {
-        this.notify.showSuccess(resp.message);
-        this.cargarVentas(0, this.rows);
-        this.cerrarFormulario();
-      },
-      error: () => {
-        console.warn('Backend no conectado, simulando creación en UI...');
-        const idGenerado = Math.floor(Math.random() * 10000);
-        const ventaSimulada: Venta = {
-          ...data,
-          ventaId: idGenerado,
-          numeroCorrelativo: `VEN-SIM-${idGenerado}`,
-          fecha: new Date(),
-          clienteNombre: data.clienteNombre ?? '',
-          barberoNombre: 'Sin asignar',
-          total: (data.detalles ?? []).reduce(
-            (acc: number, det: any) => acc + (det.precioUnitario * det.cantidad), 0
-          )
-        } as unknown as Venta;
-
-        this.ventas = [ventaSimulada, ...this.ventas];
-        this.calcularResumen();
-        this.notify.showSuccess('Venta registrada (Modo Simulación)');
-        this.cerrarFormulario();
-      }
-    });
-  }
-
-  eliminarVenta(venta: Venta): void {
-    this.ventaService.eliminarVenta(venta.ventaId).subscribe({
-      next: (resp) => {
-        this.notify.showSuccess(resp.message);
-        this.cargarVentas(0, this.rows);
-      },
-      error: () => {
-        this.ventas = this.ventas.filter(v => v.ventaId !== venta.ventaId);
-        this.calcularResumen();
-      }
-    });
-  }
-
-  guardarVenta(data: any): void {
-    this.crearVenta(data);
-  }
-
-  buscarVentas(filtrosAplicados: VentaFiltro): void {
-    this.filtro = filtrosAplicados;
-    this.cargarVentas(0, this.rows);
-  }
-
-  buscarPorTexto(valor: string): void {
-    this.filtro = { cliente: valor };
-    this.cargarVentas(0, this.rows);
+  eliminarVenta(venta: any): void {
+    this.actualizar(this.ventas().filter(v => v.ventaId !== venta.ventaId));
+    this.notify.showSuccess('Venta eliminada correctamente');
   }
 
   limpiarFiltros(): void {
-    this.filtro = {};
-    this.cargarVentas(0, this.rows);
+    this.comprobante.set(null);
+    this.metodo.set(null);
   }
+
+  toggleFiltros(): void { this.mostrarFiltros.update(v => !v); }
 
   abrirCrearVenta(): void {
     this.router.navigate(['../pos'], { relativeTo: this.route });
-  }
-
-  cerrarFormulario(): void {
-    this.mostrarFormulario = false;
-  }
-
-  onLazyLoad(event: TableLazyLoadEvent): void {
-    const first = event.first ?? 0;
-    const rows = event.rows ?? 25;
-    this.cargarVentas(Math.floor(first / rows), rows);
-  }
-
-  calcularResumen(): void {
-    this.totalVentas = this.ventas.length;
-    this.ingresos = this.ventas.reduce((acc, venta) => {
-      return acc + (venta.detalles ?? []).reduce(
-        (sum, det) => sum + (Number(det.precioUnitario) * Number(det.cantidad)), 0
-      );
-    }, 0);
-    this.promedio = this.totalVentas > 0 ? this.ingresos / this.totalVentas : 0;
   }
 }

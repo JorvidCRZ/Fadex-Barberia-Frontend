@@ -1,329 +1,121 @@
-<form [formGroup]="ventaForm"
-    class="grid grid-cols-1 xl:grid-cols-3 gap-6 md:p-6 p-4 rounded-xl bg-neutral-primary-soft border border-default shadow-xs">
+<div class="flex flex-col gap-6 mt-5">
 
-    <div class="xl:col-span-2 flex flex-col gap-6">
-        <div class="flex items-center justify-between">
-            <h1 class="subtitle-form">Catálogo de Productos</h1>
+    <header class="flex items-start justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-white m-0">Crear Venta</h1>
+            <p class="text-xs text-gray-500 mt-1">Selecciona productos y procesa el cobro</p>
         </div>
+        <button type="button" (click)="regresarAlHistorial()"
+            class="border border-[#C9A84C] ring-1 ring-[#C9A84C]/40 text-white text-sm rounded-md px-4 py-2 flex items-center gap-2 hover:bg-[#C9A84C]/10 transition-colors">
+            <i class="pi pi-angle-left text-xs"></i> Regresar a ventas
+        </button>
+    </header>
 
-        <div class="bg-neutral-primary-lighter border border-default rounded-xl shadow-xs overflow-hidden p-5">
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-5 items-start">
 
-            <div class="mb-5 flex items-center gap-3">
-                <span class="p-input-icon-left w-full">
-                    <i class="pi pi-search text-text-tertiary"></i>
-                    <input pInputText type="text" [(ngModel)]="textoBusquedaProducto"
-                        [ngModelOptions]="{standalone: true}" placeholder="Buscar producto por nombre..."
-                        class="w-full pl-10" />
-                </span>
+        <!-- Catálogo -->
+        <section class="rounded-xl border border-[#C9A84C]/25 bg-[#0f0f0f] min-h-[460px]">
+            <div class="p-3 border-b border-white/10">
+                <div class="relative">
+                    <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
+                    <input type="text" [(ngModel)]="textoBusqueda" placeholder="Buscar en el catálogo..."
+                        class="w-full bg-[#1a1a1a] border border-white/10 text-white text-sm rounded-md py-2 pl-9 pr-3 outline-none focus:border-[#C9A84C] placeholder-gray-500 transition-colors">
+                </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[600px] overflow-y-auto pr-2 pb-2">
-                @for (producto of productosFiltrados; track producto.id) {
-                <div class="p-4 rounded-xl border flex flex-col justify-between h-full gap-3 transition-colors group"
-                    [ngClass]="producto.stock > 0 ? 'border-default bg-neutral-primary-soft hover:border-brand-gold cursor-pointer' : 'border-red-200 bg-red-50/30 opacity-70 cursor-not-allowed'"
-                    (click)="producto.stock > 0 ? agregarProducto(producto) : null">
-                    <div class="flex flex-col gap-1">
-                        <div class="flex justify-between items-start gap-2">
-                            <span
-                                class="font-bold text-text-primary text-sm group-hover:text-brand-gold transition-colors">{{
-                                producto.nombre }}</span>
-                            @if (producto.stock <= 5 && producto.stock> 0) {
-                                <span
-                                    class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700 whitespace-nowrap">¡Solo
-                                    {{ producto.stock }}!</span>
-                                }
-                        </div>
-                        <span class="text-xs text-text-tertiary line-clamp-1">{{ producto.nombreCategoria || 'Producto
-                            Físico' }}</span>
-                    </div>
-                    <div class="flex justify-between items-center mt-auto pt-2 border-t border-default/50">
-                        <span class="text-lg font-black text-text-primary">S/ {{ producto.precio | number:'1.2-2'
-                            }}</span>
-                        @if (producto.stock > 0) {
-                        <button pButton type="button" icon="pi pi-plus"
-                            class="p-button-rounded p-button-sm boton-submit h-8 w-8"></button>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 p-3">
+                @for (p of productosFiltrados; track p.id) {
+                <div class="flex items-start gap-3 rounded-lg border border-white/10 bg-[#0c0c0c] p-2.5">
+                    <div class="w-[52px] h-[52px] rounded-md bg-white/5 overflow-hidden flex items-center justify-center shrink-0">
+                        @if (p.imagen) {
+                        <img [src]="p.imagen" [alt]="p.nombre" class="w-full h-full object-cover">
                         } @else {
-                        <span class="text-xs font-bold text-red-500">Agotado</span>
+                        <i class="pi pi-image text-gray-600"></i>
                         }
                     </div>
+                    <div class="flex flex-col flex-1 min-w-0">
+                        <span class="text-sm text-white truncate">{{ p.nombre }}</span>
+                        <span class="text-[11px] text-gray-500">{{ p.categoria }}</span>
+                        <span class="text-sm font-bold text-[#C9A84C] mt-1">S/ {{ p.precio | number:'1.2-2' }}</span>
+                    </div>
+                    <button type="button" (click)="agregarProducto(p)" [attr.aria-label]="'Agregar ' + p.nombre"
+                        class="w-7 h-7 rounded bg-[#C9A84C] hover:bg-[#E2B95A] text-black flex items-center justify-center shrink-0 transition-colors">
+                        <i class="pi pi-plus text-xs"></i>
+                    </button>
                 </div>
                 }
-                @if (productosFiltrados.length === 0) {
-                <div
-                    class="col-span-full text-center p-8 text-text-tertiary text-sm italic border border-dashed border-default rounded-xl">
-                    No se encontraron productos.
-                </div>
+                @empty {
+                <p class="col-span-full text-center text-sm text-gray-500 py-8">No se encontraron productos.</p>
                 }
             </div>
-        </div>
-    </div>
+        </section>
 
-    <div class="flex flex-col gap-6">
-        <div
-            class="flex flex-col gap-5 p-6 rounded-xl bg-neutral-primary-lighter border border-default shadow-xs sticky top-4">
+        <!-- Detalle de cobro -->
+        <aside class="rounded-xl border border-[#C9A84C]/25 bg-[#0f0f0f]">
+            <h2 class="text-sm text-[#C9A84C] font-normal px-4 py-4 border-b border-white/10 m-0">Detalle de Cobro</h2>
 
-            <h1 class="subtitle-form border-b border-default pb-3 flex items-center gap-2">
-                <i class="pi pi-shopping-cart text-brand-gold"></i> Detalle de Cobro
-            </h1>
+            <div class="p-4 flex flex-col gap-4">
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-xs text-gray-400">Cliente</label>
+                    <p-select [options]="clientes" [(ngModel)]="cliente" styleClass="w-full" />
+                </div>
 
-            <div class="flex flex-col gap-4 part-form">
-
-                <div>
-                    <label class="flex items-center gap-2 mb-1 text-sm font-medium">Cliente *</label>
-
-                    @if (!reservaIdActiva ) {
-
-                    <p-select formControlName="clienteId" [options]="clientes" optionValue="clienteId" [filter]="true"
-                        filterBy="persona.nombre,persona.apellido" placeholder="Seleccione un cliente" class="w-full"
-                        [style]="{ width: '100%' }">
-                        <ng-template pTemplate="selectedItem" let-selectedOption>
-                            <div class="flex items-center gap-2" *ngIf="selectedOption">
-                                <span class="text-sm font-medium text-text-primary truncate">
-                                    {{ selectedOption.persona.nombre }} {{ selectedOption.persona.apellido }}
-                                </span>
-                            </div>
-                        </ng-template>
-                        <ng-template pTemplate="item" let-cliente>
-                            <div class="flex flex-col py-1">
-                                <span class="text-sm font-medium text-text-primary">
-                                    {{ cliente.persona.nombre }} {{ cliente.persona.apellido }}
-                                </span>
-                            </div>
-                        </ng-template>
-                    </p-select>
-
-                    } @else {
-                    <div
-                        class="w-full bg-neutral-primary border border-brand-gold/30 rounded-xl px-4 py-2.5 flex items-center justify-between shadow-inner">
-                        <div class="flex items-center gap-2">
-                            <i class="pi pi-user text-brand-gold text-sm"></i>
-                            <span class="text-sm font-bold text-white tracking-wide truncate">{{ nombreClienteReserva
-                                }}</span>
-                        </div>
-                        <span
-                            class="text-[9px] font-black text-brand-gold px-2 py-0.5 rounded bg-brand-gold/10 border border-brand-gold/20 uppercase tracking-wider">Reserva
-                            Vinculada</span>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs text-gray-400">Comprobante</label>
+                        <p-select [options]="comprobantes" [(ngModel)]="comprobante" styleClass="w-full" />
                     </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs text-gray-400">Método</label>
+                        <p-select [options]="metodos" [(ngModel)]="metodo" styleClass="w-full" />
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-2 border-t border-white/10 pt-4">
+                    @for (linea of carrito; track linea.producto.id) {
+                    <div class="flex items-center justify-between gap-2 text-sm">
+                        <span class="text-white truncate">{{ linea.producto.nombre }}</span>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <button type="button" (click)="cambiarCantidad(linea, linea.cantidad - 1)" aria-label="Quitar uno"
+                                class="w-6 h-6 rounded border border-white/10 bg-black text-white flex items-center justify-center hover:border-[#C9A84C]">
+                                <i class="pi pi-minus text-[9px]"></i>
+                            </button>
+                            <span class="w-4 text-center text-white text-xs">{{ linea.cantidad }}</span>
+                            <button type="button" (click)="cambiarCantidad(linea, linea.cantidad + 1)" aria-label="Agregar uno"
+                                class="w-6 h-6 rounded border border-white/10 bg-black text-white flex items-center justify-center hover:border-[#C9A84C]">
+                                <i class="pi pi-plus text-[9px]"></i>
+                            </button>
+                        </div>
+                    </div>
+                    }
+                    @empty {
+                    <p class="text-xs text-gray-500 italic m-0">Aún no hay ítems en el carrito.</p>
                     }
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="flex items-center gap-2 mb-1 text-sm font-medium">Comprobante *</label>
-                        <p-select formControlName="tipoComprobante" [options]="tiposComprobante" optionLabel="label"
-                            optionValue="value" class="w-full" [style]="{ width: '100%' }">
-                        </p-select>
+                <div class="flex flex-col gap-1.5 border-t border-white/10 pt-4 text-sm">
+                    <div class="flex justify-between text-gray-500">
+                        <span>Subtotal</span><span>S/ {{ subtotal | number:'1.2-2' }}</span>
                     </div>
-
-                    <div>
-                        <label class="flex items-center gap-2 mb-1 text-sm font-medium">Método Pago *</label>
-                        <p-select formControlName="metodoPago" [options]="metodosPago" optionLabel="label"
-                            optionValue="value" class="w-full" [style]="{ width: '100%' }">
-                            <ng-template pTemplate="selectedItem" let-selectedOption>
-                                <div class="flex items-center gap-2">
-                                    <i class="pi pi-wallet text-brand-gold"></i>
-                                    <span>{{ selectedOption?.label }}</span>
-                                </div>
-                            </ng-template>
-                            <ng-template pTemplate="item" let-metodo>
-                                <div class="flex items-center gap-2">
-                                    <i class="pi pi-wallet text-text-tertiary"></i>
-                                    <span>{{ metodo.label }}</span>
-                                </div>
-                            </ng-template>
-                        </p-select>
+                    <div class="flex justify-between text-gray-500">
+                        <span>IGV (18%)</span><span>S/ {{ igv | number:'1.2-2' }}</span>
                     </div>
                 </div>
-            </div>
 
-            <hr class="border-t border-default opacity-50">
-
-            <div class="flex flex-col gap-3 min-h-[150px] max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                @for (item of itemsCarrito; track item.idItem + '-' + item.tipo) {
-                <div class="flex flex-col gap-3 p-3 rounded-xl border"
-                    [ngClass]="item.tipo === 'SERVICIO' ? 'border-brand-gold/30 bg-brand-gold/5' : 'border-default bg-neutral-primary-soft'">
-
-                    <div class="flex justify-between items-start gap-2">
-                        <span class="text-sm font-semibold text-text-primary pr-2 leading-tight">{{ item.nombre
-                            }}</span>
-
-                        @if (item.tipo === 'PRODUCTO') {
-                        <button pButton type="button" icon="pi pi-times"
-                            class="p-button-rounded p-button-text p-button-danger p-0 w-6 h-6 shrink-0"
-                            (click)="removerItem(item)"></button>
-                        } @else {
-                        <span
-                            class="text-[9px] font-black text-brand-gold px-2 py-0.5 rounded bg-brand-gold/10 border border-brand-gold/20 shrink-0 uppercase tracking-widest">Servicio</span>
-                        }
-                    </div>
-
-                    <div class="flex justify-between items-center gap-3">
-
-                        @if (item.tipo === 'PRODUCTO') {
-                        <div
-                            class="flex items-center h-8 w-[100px] shrink-0 border border-default rounded-lg overflow-hidden bg-neutral-primary-lighter">
-                            <button type="button"
-                                class="w-8 h-full flex items-center justify-center bg-neutral-primary-soft hover:opacity-75 text-text-primary transition-opacity cursor-pointer border-none outline-none"
-                                (click)="actualizarCant(item, item.cantidad - 1)">
-                                <i class="pi pi-minus text-[11px]"></i>
-                            </button>
-
-                            <div
-                                class="flex-1 h-full flex items-center justify-center border-x border-default font-bold text-sm text-text-primary">
-                                {{ item.cantidad }}
-                            </div>
-
-                            <button type="button"
-                                class="w-8 h-full flex items-center justify-center bg-neutral-primary-soft text-text-primary transition-opacity border-none outline-none"
-                                [ngClass]="item.cantidad >= (item.stockDisponible! < 10 ? item.stockDisponible! : 10) ? 'opacity-40 cursor-not-allowed' : 'hover:opacity-75 cursor-pointer'"
-                                (click)="item.cantidad >= (item.stockDisponible! < 10 ? item.stockDisponible! : 10) ? null : actualizarCant(item, item.cantidad + 1)">
-                                <i class="pi pi-plus text-[11px]"></i>
-                            </button>
-                        </div>
-                        } @else {
-                        <div
-                            class="flex items-center justify-center h-8 w-[100px] shrink-0 border border-brand-gold/20 rounded-lg bg-neutral-primary-lighter cursor-not-allowed opacity-90">
-                            <span class="text-xs font-bold text-brand-gold">{{ item.cantidad }} unid.</span>
-                        </div>
-                        }
-
-                        <span class="text-[14px] font-black text-brand-gold text-right shrink-0 whitespace-nowrap">
-                            S/ {{ item.subtotal | number:'1.2-2' }}
-                        </span>
-
-                    </div>
-                </div>
-                }
-
-                @if (itemsCarrito.length === 0) {
-                <div class="flex flex-col items-center justify-center h-full text-center p-6 gap-2 opacity-60">
-                    <i class="pi pi-box text-3xl text-text-tertiary mb-2"></i>
-                    <span class="text-text-tertiary text-sm italic">Agregue productos<br>para iniciar la venta.</span>
-                </div>
-                }
-            </div>
-
-            <hr class="border-t border-default opacity-50">
-
-            <div class="flex flex-col gap-2">
-                <div class="flex justify-between items-center px-1">
-                    <span class="text-sm text-text-secondary">Subtotal</span>
-                    <span class="font-bold text-text-primary text-sm">S/ {{ subtotalGeneral | number:'1.2-2' }}</span>
-                </div>
-                <div class="flex justify-between items-center px-1">
-                    <span class="text-sm text-text-secondary">IGV (18%)</span>
-                    <span class="font-bold text-text-primary text-sm">S/ {{ igv | number:'1.2-2' }}</span>
+                <div class="flex justify-between items-center border-t border-white/10 pt-4">
+                    <span class="text-sm font-bold text-white uppercase">Total a cobrar</span>
+                    <span class="text-lg font-bold text-[#C9A84C]">S/ {{ totalVenta | number:'1.2-2' }}</span>
                 </div>
 
-                <div
-                    class="p-4 mt-2 rounded-xl border border-brand-gold/30 bg-brand-gold/10 flex justify-between items-center">
-                    <span class="text-sm uppercase tracking-wide font-bold text-text-primary">Total a cobrar</span>
-                    <span class="text-2xl font-black text-brand-gold whitespace-nowrap">S/ {{ totalVenta |
-                        number:'1.2-2' }}</span>
-                </div>
-            </div>
-
-            <div class="flex flex-col gap-3 mt-2">
-                <button pButton type="button" icon="pi pi-check-circle" label="Procesar Cobro"
-                    [disabled]="ventaForm.invalid || itemsCarrito.length === 0" class="boton-submit w-full h-12 text-lg cursor-pointer"
-                    (click)="abrirModalPago()">
+                <button type="button" (click)="procesarCobro()"
+                    class="w-full bg-[#C9A84C] hover:bg-[#E2B95A] text-black text-sm font-medium rounded-md py-2.5 flex items-center justify-center gap-2 transition-colors">
+                    <i class="pi pi-qrcode"></i> Procesar Cobro
                 </button>
-
-                <button pButton type="button" icon="pi pi-arrow-left" label="Regresar a Ventas" class="boton-cancel w-full h-10 p-button-secondary p-button-outlined text-sm" (click)="regresarAlHistorial()"> </button>
+                <button type="button" (click)="regresarAlHistorial()"
+                    class="w-full bg-black border border-white/10 hover:border-[#C9A84C] text-white text-sm rounded-md py-2.5 transition-colors">
+                    Regresar a ventas
+                </button>
             </div>
-
-        </div>
+        </aside>
     </div>
-</form>
-
-<p-dialog [(visible)]="mostrarModalPago" [modal]="true" [draggable]="false" [resizable]="false"
-    [style]="{ width: '450px', 'background-color': '#1E1E1E' }" header="Confirmar Pago"
-    styleClass="p-fluid rounded-xl border border-default" [closable]="true">
-
-    <div class="flex flex-col gap-5 pt-2">
-        <div
-            class="flex flex-col items-center justify-center p-4 bg-brand-gold/10 border border-brand-gold/30 rounded-xl">
-            <span class="text-sm font-medium text-brand-gold uppercase tracking-widest mb-1">Monto a cobrar</span>
-            <span class="text-4xl font-black text-white">S/ {{ totalVenta | number:'1.2-2' }}</span>
-        </div>
-
-        @switch (ventaForm.value.metodoPago) {
-        @case ('YAPE') {
-        <div class="flex flex-col items-center gap-3 p-5 bg-[#742284]/10 border border-[#742284]/30 rounded-xl">
-            <div class="w-12 h-12 rounded-full flex items-center justify-center bg-[#742284] text-white shadow-lg mb-2">
-                <i class="pi pi-qrcode text-2xl"></i>
-            </div>
-            <div class="bg-white p-2 rounded-xl shadow-md border-2 border-[#742284]">
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=YAPE-A-FADEX" alt="QR Yape"
-                    class="w-36 h-36 opacity-80">
-            </div>
-            <div class="text-center mt-2">
-                <p class="text-white font-bold text-lg">Yapear al: 987 654 321</p>
-                <p class="text-gray-400 text-sm">Titular: Barbería Fadex SAC</p>
-            </div>
-        </div>
-        }
-        @case ('PLIN') {
-        <div class="flex flex-col items-center gap-3 p-5 bg-[#00D9D9]/10 border border-[#00D9D9]/30 rounded-xl">
-            <div class="w-12 h-12 rounded-full flex items-center justify-center bg-[#00D9D9] text-black shadow-lg mb-2">
-                <i class="pi pi-qrcode text-2xl"></i>
-            </div>
-            <div class="bg-white p-2 rounded-xl shadow-md border-2 border-[#00D9D9]">
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=PLIN-A-FADEX" alt="QR Plin"
-                    class="w-36 h-36 opacity-80">
-            </div>
-            <div class="text-center mt-2">
-                <p class="text-white font-bold text-lg">Plin al: 987 654 321</p>
-                <p class="text-gray-400 text-sm">Titular: Barbería Fadex SAC</p>
-            </div>
-        </div>
-        }
-        @case ('TRANSFERENCIA') {
-        <div class="flex flex-col gap-4 p-5 bg-neutral-primary-soft border border-default rounded-xl">
-            <h3 class="text-white font-bold text-center border-b border-default pb-3 mb-1">
-                <i class="pi pi-building text-brand-gold mr-2"></i> Datos Bancarios (BCP)
-            </h3>
-            <div
-                class="flex justify-between items-center bg-neutral-primary-lighter p-3 rounded-lg border border-default">
-                <span class="text-gray-400 text-sm font-medium">N° Cuenta Soles:</span>
-                <span class="text-white font-mono font-bold tracking-wider">191-12345678-0-12</span>
-            </div>
-            <div
-                class="flex justify-between items-center bg-neutral-primary-lighter p-3 rounded-lg border border-default">
-                <span class="text-gray-400 text-sm font-medium">CCI:</span>
-                <span class="text-white font-mono font-bold tracking-wider">00219112345678012123</span>
-            </div>
-        </div>
-        }
-        @case ('TARJETA') {
-        <div
-            class="flex flex-col items-center justify-center py-6 px-4 text-center bg-neutral-primary-soft border border-default rounded-xl">
-            <i class="pi pi-credit-card text-5xl text-brand-gold mb-4 opacity-80"></i>
-            <h3 class="text-white font-bold text-lg mb-2">Pago con Tarjeta</h3>
-            <p class="text-gray-400 text-sm leading-relaxed">
-                Por favor, acércale el POS físico al cliente y asegúrate de que sea aprobada antes de continuar.
-            </p>
-        </div>
-        }
-        @case ('EFECTIVO') {
-        <div
-            class="flex flex-col items-center justify-center py-6 px-4 text-center bg-neutral-primary-soft border border-default rounded-xl">
-            <i class="pi pi-money-bill text-5xl text-green-500 mb-4 opacity-80"></i>
-            <h3 class="text-white font-bold text-lg mb-2">Pago en Efectivo</h3>
-            <p class="text-gray-400 text-sm leading-relaxed">
-                Recibe el efectivo del cliente y asegúrate de entregarle su vuelto correctamente.
-            </p>
-        </div>
-        }
-        }
-
-        <div class="flex gap-3 mt-4">
-            <button pButton type="button" label="Cancelar" icon="pi pi-times"
-                class="p-button-outlined p-button-secondary w-full" (click)="mostrarModalPago = false">
-            </button>
-            <button pButton type="button" label="Confirmar Pago" icon="pi pi-check"
-                class="boton-submit w-full shadow-lg shadow-brand-gold/20" (click)="confirmarYProcesarCobro()">
-            </button>
-        </div>
-    </div>
-</p-dialog>
+</div>

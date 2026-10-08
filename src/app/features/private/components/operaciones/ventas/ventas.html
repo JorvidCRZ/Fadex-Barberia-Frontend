@@ -1,58 +1,63 @@
-<div class="flex flex-col gap-6 mt-5">
-    
-    <aside class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between px-6 py-4 border-b border-brand-gold-soft bg-brand-black rounded-xl">
-        <h1 class="text-lg font-semibold text-brand-gold text-center md:text-start">
-            <i class="pi pi-shopping-cart"></i> Gestión de Ventas
-        </h1>
-        <app-search-bar placeholder="Buscar venta por cliente..." (search)="buscarPorTexto($event)" />
-        <button pButton label="Crear Venta" icon="pi pi-plus" class="p-button-sm boton-primary" (click)="abrirCrearVenta()"></button>
-    </aside>
+<div class="flex flex-col gap-5 mt-5">
 
-    <app-filtros 
-        [fields]="filtrosFields" 
-        titulo="Filtros Avanzados" 
-        text="Filtros" 
-        [acordeon]="true" 
-        (buscar)="buscarVentas($event)" 
-        (limpiar)="limpiarFiltros()">
-    </app-filtros>
+    <header class="flex items-start justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-white m-0">Gestión de Ventas</h1>
+            <p class="text-xs text-gray-500 mt-1">Control de ventas y comprobantes</p>
+        </div>
+        <button type="button" (click)="abrirCrearVenta()"
+            class="bg-[#C9A84C] hover:bg-[#E2B95A] text-black px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2">
+            <i class="pi pi-plus text-xs"></i> Crear Venta
+        </button>
+    </header>
+
+    <div class="flex items-center gap-3">
+        <div class="relative flex-1">
+            <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
+            <input type="text" [ngModel]="texto()" (ngModelChange)="texto.set($event)"
+                placeholder="Buscar venta o cliente..."
+                class="w-full bg-[#121212] border border-white/10 text-white text-sm rounded-lg py-2.5 pl-9 pr-3 outline-none focus:border-[#C9A84C] placeholder-gray-500 transition-colors">
+        </div>
+        <button type="button" (click)="toggleFiltros()"
+            class="border border-white/20 hover:border-[#C9A84C] text-white text-sm rounded-lg px-4 py-2.5 flex items-center gap-2 transition-colors">
+            <i class="pi pi-filter text-xs"></i> Filtros
+        </button>
+    </div>
+
+    <div class="rounded-lg border border-[#C9A84C]/40 bg-[#121212] overflow-hidden">
+        <button type="button" (click)="toggleFiltros()"
+            class="w-full flex items-center justify-between px-4 py-3 text-sm text-[#C9A84C]">
+            <span class="flex items-center gap-2"><i class="pi pi-filter text-xs"></i> Filtros avanzados</span>
+            <i class="pi" [ngClass]="mostrarFiltros() ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
+        </button>
+
+        @if (mostrarFiltros()) {
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 px-4 pb-4 pt-1 border-t border-[#C9A84C]/20 items-end">
+            <div class="flex flex-col gap-1.5">
+                <label class="text-xs text-gray-400">Comprobante</label>
+                <p-select [options]="comprobantes" [ngModel]="comprobante()" (ngModelChange)="comprobante.set($event)"
+                    placeholder="Todos" [showClear]="true" styleClass="w-full" />
+            </div>
+            <div class="flex flex-col gap-1.5">
+                <label class="text-xs text-gray-400">Método de pago</label>
+                <p-select [options]="metodos" [ngModel]="metodo()" (ngModelChange)="metodo.set($event)"
+                    placeholder="Todos" [showClear]="true" styleClass="w-full" />
+            </div>
+            <div>
+                <button type="button" (click)="limpiarFiltros()"
+                    class="border border-[#C9A84C] text-[#C9A84C] hover:bg-[#C9A84C]/10 px-4 py-2 text-sm rounded-md transition-colors">
+                    Limpiar
+                </button>
+            </div>
+        </div>
+        }
+    </div>
 
     <app-venta-resumen
-        [totalVentas]="totalVentas"
-        [ingresos]="ingresos"
-        [promedio]="promedio">
+        [totalVentas]="resumen().totalVentas"
+        [ingresos]="resumen().ingresos"
+        [promedio]="resumen().promedio">
     </app-venta-resumen>
 
-    <app-venta-table
-        [ventas]="ventas"
-        [cargado]="cargado"
-        [totalRecords]="totalRecords"
-        [rows]="rows"
-        (lazyLoad)="onLazyLoad($event)"
-        (eliminar)="eliminarVenta($event)">
-    </app-venta-table>
+    <app-venta-table [ventas]="ventasFiltradas()" (eliminar)="eliminarVenta($event)"></app-venta-table>
 </div>
-
-<p-dialog
-    [(visible)]="mostrarFormulario"
-    [modal]="true"
-    [dismissableMask]="true"
-    [closable]="true"
-    [style]="{ width: '90vw', maxWidth: '70rem' }">
-
-    <ng-template pTemplate="header">
-        <app-dialog-header
-            icono="pi pi-shopping-cart"
-            [title]="ventaSeleccionada ? 'Editar Venta' : 'Crear Venta'"
-            [mode]="ventaSeleccionada ? 'editar' : 'crear'">
-        </app-dialog-header>
-    </ng-template>
-
-    <app-venta-form
-        [venta]="ventaSeleccionada"
-        [isEditMode]="!!ventaSeleccionada"
-        (guardar)="guardarVenta($event)"
-        (cancelarEvento)="cerrarFormulario()">
-    </app-venta-form>
-
-</p-dialog>

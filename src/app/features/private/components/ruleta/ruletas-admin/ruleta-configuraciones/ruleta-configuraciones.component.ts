@@ -9,7 +9,7 @@ import { ConfiguracionTableComponent } from './configuracion-table/configuracion
 import { NotificationService } from '@/app/core/services/common/notification.service';
 import { CategoriaService } from '@/app/core/services/catalogos/categoria.service';
 import { SearchBarComponent } from '@/app/shared/components/search-bar/search-bar.component';
-import { DialogHeaderComponent } from '@/app/shared/components/dialog-header/dialog-header.component';  
+import { DialogHeaderComponent } from '@/app/shared/components/dialog-header/dialog-header.component';
 import { ConfiguracionResponse, ConfiguracionRequest, ConfiguracionFiltro, ConfiguracionPatchRequest } from '@/app/core/models/ruleta/ruleta-configuracion.model';
 import { Categoria, CategoriaTipo } from '@/app/core/models/catalogos/categorias.model';
 import { FILTROS_CONFIGURACION } from '@/app/core/config/filtros.config';
@@ -18,7 +18,9 @@ import { RuletaService } from '@/app/core/services/ruleta/ruleta.service';
 import { RuletaResponse } from '@/app/core/models/ruleta/ruleta.model';
 import { buildCategoryTree } from '@/app/shared/utils/buildCategoryTree.component';
 import { ConfiguracionService } from '@/app/core/services/fidelizacion/configuracion.service';
- 
+import { of } from 'rxjs';
+import { map } from 'rxjs/operators';
+
 @Component({
   selector: 'app-ruleta-configuraciones',
   imports: [ConfiguracionFormComponent, ConfiguracionTableComponent, DialogModule, ButtonModule,
@@ -32,15 +34,22 @@ export class RuletaConfiguracionesComponent implements OnInit {
   private notify = inject(NotificationService);
   private configuracionService = inject(ConfiguracionService);
   private categoriaService = inject(CategoriaService);
-  private ruletaService = inject(RuletaService); 
+  private ruletaService = inject(RuletaService);
+
+  // Mock Data
+  private mockConfiguraciones: ConfiguracionResponse[] = [
+    { configuracionId: 1, categoriaId: 1, categoriaNombre: 'Platino', ruletaId: 1, ruletaNombre: 'Ruleta Clásica', activa: true, mostrarSiempre: true, crearTarjetaAutomatica: true, meta: 1000, girosPorMeta: 5, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { configuracionId: 2, categoriaId: 2, categoriaNombre: 'Oro', ruletaId: 1, ruletaNombre: 'Ruleta Clásica', activa: true, mostrarSiempre: false, crearTarjetaAutomatica: true, meta: 1000, girosPorMeta: 3, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  ];
 
   configuracionSeleccionada: ConfiguracionResponse | null = null;
   filtro: Partial<ConfiguracionFiltro> = {};
+  private categoriaNombreFiltro?: string;
   categorias: Categoria[] = [];
   ruletas: RuletaResponse[] = [];
   configuraciones: ConfiguracionResponse[] = [];
 
-  filtrosFields = [...FILTROS_CONFIGURACION]; 
+  filtrosFields = [...FILTROS_CONFIGURACION];
   rows = 30;
   pageActual = 0;
   cargado = false;
@@ -61,7 +70,15 @@ export class RuletaConfiguracionesComponent implements OnInit {
   cargarConfiguraciones(page: number, size: number): void {
     this.pageActual = page;
     this.cargado = false;
-    this.configuracionService.obtenerConfiguraciones({ ...this.filtro, page, size, sort: 'configuracionId,desc' }).subscribe({
+
+    let filtered = [...this.mockConfiguraciones];
+    if (this.categoriaNombreFiltro) {
+        filtered = filtered.filter(c => c.categoriaNombre.toLowerCase().includes(this.categoriaNombreFiltro!.toLowerCase()));
+    }
+
+    const content = filtered.slice(page * size, (page + 1) * size);
+
+    of({ data: { content, totalElements: filtered.length } }).subscribe({
       next: (resp) => {
         this.configuraciones = resp.data.content;
         this.totalRecords = resp.data.totalElements;
@@ -87,7 +104,8 @@ export class RuletaConfiguracionesComponent implements OnInit {
   }
 
   eliminarConfiguracion(configuracion: ConfiguracionResponse) {
-    this.configuracionService.eliminarConfiguracion(configuracion.configuracionId).subscribe({
+    this.mockConfiguraciones = this.mockConfiguraciones.filter(c => c.configuracionId !== configuracion.configuracionId);
+    of({ message: 'Configuración eliminada correctamente' }).subscribe({
       next: (resp) => {
         this.notify.showSuccess(resp.message);
         this.cargarConfiguraciones(0, this.rows);
@@ -128,7 +146,17 @@ export class RuletaConfiguracionesComponent implements OnInit {
   }
 
   private crearConfiguracion(data: ConfiguracionRequest) {
-    this.configuracionService.crearConfiguracion(data).subscribe({
+    const nuevaConfig: ConfiguracionResponse = {
+      ...data,
+      configuracionId: this.mockConfiguraciones.length > 0 ? Math.max(...this.mockConfiguraciones.map(c => c.configuracionId)) + 1 : 1,
+      categoriaNombre: 'Categoría Mock',
+      ruletaNombre: 'Ruleta Mock',
+      ruletaId: data.ruletaId ?? undefined,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    this.mockConfiguraciones.push(nuevaConfig);
+    of({ message: 'Configuración creada correctamente' }).subscribe({
       next: (resp) => { this.postGuardar(resp.message); },
       error: (err) => { this.notify.showHttpError(err.message); },
     });
@@ -136,7 +164,16 @@ export class RuletaConfiguracionesComponent implements OnInit {
 
   private editarConfiguracion(data: ConfiguracionRequest) {
     if (!this.configuracionSeleccionada) return;
-    this.configuracionService.actualizarConfiguracion(this.configuracionSeleccionada.configuracionId, data).subscribe({
+    const index = this.mockConfiguraciones.findIndex(c => c.configuracionId === this.configuracionSeleccionada!.configuracionId);
+    if (index !== -1) {
+      this.mockConfiguraciones[index] = {
+        ...this.mockConfiguraciones[index],
+        ...data,
+        ruletaId: data.ruletaId ?? undefined,
+        updatedAt: new Date().toISOString()
+      };
+    }
+    of({ message: 'Configuración actualizada correctamente' }).subscribe({
       next: (resp) => { this.postGuardar(resp.message); },
       error: (err) => { this.notify.showHttpError(err.message); },
     });
@@ -145,7 +182,15 @@ export class RuletaConfiguracionesComponent implements OnInit {
   private actualizarConfiguracionParcial(configuracion: ConfiguracionResponse, cambios: ConfiguracionPatchRequest, mensaje: string) {
     if (this.cargandoEstado.has(configuracion.configuracionId)) return;
     this.cargandoEstado.add(configuracion.configuracionId);
-    this.configuracionService.actualizarConfiguracionParcial(configuracion.configuracionId, cambios).subscribe({
+
+    const index = this.mockConfiguraciones.findIndex(c => c.configuracionId === configuracion.configuracionId);
+    if (index !== -1) {
+        if (cambios.campo && cambios.valor !== undefined) {
+            (this.mockConfiguraciones[index] as any)[cambios.campo] = cambios.valor;
+        }
+    }
+
+    of({ message: mensaje, data: configuracion }).subscribe({
       next: (resp) => {
         Object.assign(configuracion, resp.data);
         this.notify.showSuccess(resp.message || mensaje);
@@ -214,6 +259,7 @@ export class RuletaConfiguracionesComponent implements OnInit {
       const nodo = filtros.categoriaId as any;
       filtros.categoriaId = nodo.key ?? nodo.data?.id ?? undefined;
     }
+    this.categoriaNombreFiltro = filtros.categoriaNombre;
     this.filtro = { ...this.filtro, ...filtros };
     this.cargarConfiguraciones(0, this.rows);
   }
