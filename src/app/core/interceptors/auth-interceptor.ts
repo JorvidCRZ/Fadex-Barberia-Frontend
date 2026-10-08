@@ -30,9 +30,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   return authService.refreshToken().pipe(
 
   switchMap((response: any) => {
-
-    console.log('RESPUESTA REFRESH TOKEN:', response);
-
     tokenService.saveAccessToken(response.data.accessToken);
 
     const retryReq = req.clone({
@@ -45,9 +42,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   }),
 
   catchError((refreshError: any) => {
-
-    console.error('ERROR REFRESH TOKEN:', refreshError);
-
     tokenService.clearTokens();
 
     return throwError(() => refreshError);

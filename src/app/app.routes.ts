@@ -88,14 +88,14 @@ export const routes: Routes = [
            { path: '', redirectTo: 'metricas', pathMatch: 'full' },
          ]
        },
-         { path: '**', loadComponent: () => import('./shared/components/error404/error404.component').then(m => m.Error404Component) },
-    ]
-  },
        {
          path: 'sistema', children: [
            { path: 'configuracion', loadComponent: () => import('./features/private/components/sistema/configuracion').then(m => m.Configuracion) },
          ]
        },
+         { path: '**', loadComponent: () => import('./shared/components/error404/error404.component').then(m => m.Error404Component) },
+    ]
+  },
   {
     path: 'dashboard/barbero', component: DashboardBarberoComponent,
     canActivate: [authGuard], data: { roles: ['barbero'] },

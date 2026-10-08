@@ -1,302 +1,367 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ButtonModule } from 'primeng/button';
-import { InputTextModule } from 'primeng/inputtext';
-import { DividerModule } from 'primeng/divider';
-import { TagModule } from 'primeng/tag';
-import { ToastModule } from 'primeng/toast';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { AbstractControl, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
+import { AuthService } from '../../../../core/services/auth/auth.service';
+import { TokenService } from '../../../../core/services/auth/token.service';
 
-// ─── DTOs / modelos mínimos que necesita este componente ──────────────────────
-// Ajusta las rutas de importación a la estructura real de tu proyecto
+type NotificationKey = 'email' | 'push' | 'appointmentReminders' | 'lowStockAlerts';
+type Theme = 'oscuro-premium' | 'claro' | 'automatico' | 'oscuro';
 
-export interface PerfilUsuarioDTO {
-  idUsuario: number;
-  usuario: string;
-  nombre: string;
-  apellido: string;
-  telefono: string;
+interface AdminSettings {
+  businessName: string;
+  phone: string;
   email: string;
-  roles: string[];
+  address: string;
+  notifications: Record<NotificationKey, boolean>;
+  theme: Theme;
+  accent: string;
+  automaticBackup: boolean;
 }
 
-export interface ActualizarPerfilDTO {
-  nombre: string;
-  apellido: string;
-  telefono: string;
-  email: string;
+const SETTINGS_STORAGE_KEY = 'fadex.admin.settings';
+const BACKUP_STORAGE_KEY = 'fadex.admin.settings.backup';
+
+const DEFAULT_SETTINGS: AdminSettings = {
+  businessName: 'FadeX',
+  phone: '+1 234 567 8900',
+  email: 'contacto@fadex.com',
+  address: 'Calle Principal 123',
+  notifications: {
+    email: true,
+    push: true,
+    appointmentReminders: true,
+    lowStockAlerts: true,
+  },
+  theme: 'oscuro-premium',
+  accent: '#d4af37',
+  automaticBackup: false,
+};
+
+const ACCENT_OPTIONS = [
+  { name: 'Dorado', value: '#d4af37' },
+  { name: 'Azul', value: '#3b82f6' },
+  { name: 'Verde', value: '#22c55e' },
+  { name: 'Morado', value: '#a855f7' },
+  { name: 'Rojo', value: '#ef4444' },
+] as const;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
 }
 
-export interface CambiarPasswordDTO {
-  passwordActual: string;
-  passwordNueva: string;
-  confirmarPassword: string;
-}
+function isAdminSettings(value: unknown): value is AdminSettings {
+  if (!isRecord(value) || !isRecord(value['notifications'])) {
+    return false;
+  }
 
-// ─── Componente ───────────────────────────────────────────────────────────────
+  const notifications = value['notifications'];
+  return typeof value['businessName'] === 'string'
+    && typeof value['phone'] === 'string'
+    && typeof value['email'] === 'string'
+    && typeof value['address'] === 'string'
+    && typeof notifications['email'] === 'boolean'
+    && typeof notifications['push'] === 'boolean'
+    && typeof notifications['appointmentReminders'] === 'boolean'
+    && typeof notifications['lowStockAlerts'] === 'boolean'
+    && (value['theme'] === 'claro'
+      || value['theme'] === 'oscuro-premium'
+      || value['theme'] === 'automatico'
+      || value['theme'] === 'oscuro')
+    && ACCENT_OPTIONS.some(option => option.value === value['accent'])
+    && typeof value['automaticBackup'] === 'boolean';
+}
 
 @Component({
   selector: 'app-configuracion',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    ButtonModule,
-    InputTextModule,
-    DividerModule,
-    TagModule,
-    ToastModule,
-  ],
-  providers: [MessageService],
+  imports: [ReactiveFormsModule, ToastModule],
   templateUrl: './configuracion.html',
   styleUrl: './configuracion.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [MessageService],
 })
-export class Configuracion implements OnInit {
-
-  private readonly fb = inject(FormBuilder);
+export class Configuracion {
+  private readonly formBuilder = inject(FormBuilder).nonNullable;
+  private readonly authService = inject(AuthService);
+  private readonly tokenService = inject(TokenService);
+  private readonly router = inject(Router);
   private readonly messageService = inject(MessageService);
 
-  // ── Estado ─────────────────────────────────────────────────────────────────
+  readonly settings = signal<AdminSettings>(DEFAULT_SETTINGS);
+  readonly accentOptions = ACCENT_OPTIONS;
+  readonly accentColor = computed(() =>
+    ACCENT_OPTIONS.find(option => option.value === this.settings().accent)?.value ?? DEFAULT_SETTINGS.accent
+  );
+  readonly savingPassword = signal(false);
+  readonly lastBackup = signal<string | null>(null);
 
-  cargando = signal(false);
-  guardandoPerfil = signal(false);
-  guardandoPassword = signal(false);
-  mostrarPasswordActual = signal(false);
-  mostrarPasswordNueva = signal(false);
-  mostrarConfirmar = signal(false);
+  readonly generalForm = this.formBuilder.group({
+    businessName: [DEFAULT_SETTINGS.businessName, [Validators.required, Validators.maxLength(100)]],
+    phone: [DEFAULT_SETTINGS.phone, [Validators.required, Validators.maxLength(30)]],
+    email: [DEFAULT_SETTINGS.email, [Validators.required, Validators.email, Validators.maxLength(150)]],
+    address: [DEFAULT_SETTINGS.address, [Validators.required, Validators.maxLength(200)]],
+  });
 
-  perfil: PerfilUsuarioDTO = {
-    idUsuario: 1,
-    usuario: 'admin1',
-    nombre: 'Admin',
-    apellido: 'Sistema',
-    telefono: '900000000',
-    email: 'admin@gmail.com',
-    roles: ['admin'],
-  };
+  readonly passwordForm = this.formBuilder.group({
+    currentPassword: ['', [Validators.required, Validators.minLength(6)]],
+    newPassword: ['', [Validators.required, Validators.minLength(8)]],
+    confirmPassword: ['', Validators.required],
+  }, {
+    validators: (control: AbstractControl) => {
+      const newPassword = control.get('newPassword')?.value;
+      const confirmPassword = control.get('confirmPassword')?.value;
+      return confirmPassword && newPassword !== confirmPassword ? { passwordMismatch: true } : null;
+    },
+  });
 
-  // ── Formularios ────────────────────────────────────────────────────────────
-
-  formPerfil!: FormGroup;
-  formPassword!: FormGroup;
-
-  // ── Ciclo de vida ──────────────────────────────────────────────────────────
-
-  ngOnInit(): void {
-    this.initForms();
-    this.cargarPerfil();
+  constructor() {
+    this.loadSettings();
   }
 
-  // ── Inicialización ─────────────────────────────────────────────────────────
+  saveGeneralSettings(): void {
+    if (this.generalForm.invalid) {
+      this.generalForm.markAllAsTouched();
+      return;
+    }
 
-  private initForms(): void {
-    this.formPerfil = this.fb.group({
-      nombre:   [this.perfil.nombre,   [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
-      apellido: [this.perfil.apellido, [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
-      usuario:  [{ value: this.perfil.usuario, disabled: true }],
-      telefono: [this.perfil.telefono, [Validators.pattern(/^\d{9,15}$/)]],
-      email:    [this.perfil.email,    [Validators.required, Validators.email]],
-    });
+    const formValue = this.generalForm.getRawValue();
+    this.saveSettings({
+      ...this.settings(),
+      businessName: formValue.businessName.trim(),
+      phone: formValue.phone.trim(),
+      email: formValue.email.trim(),
+      address: formValue.address.trim(),
+    }, 'La configuración general se guardó correctamente.');
+  }
 
-    this.formPassword = this.fb.group(
-      {
-        passwordActual:   ['', [Validators.required, Validators.minLength(6)]],
-        passwordNueva:    ['', [Validators.required, Validators.minLength(8)]],
-        confirmarPassword:['', [Validators.required]],
+  updateNotification(key: NotificationKey, event: Event): void {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement)) {
+      return;
+    }
+
+    this.saveSettings({
+      ...this.settings(),
+      notifications: { ...this.settings().notifications, [key]: target.checked },
+    }, 'Preferencia de notificación guardada.');
+  }
+
+  updateTheme(event: Event): void {
+    const target = event.target;
+    if (!(target instanceof HTMLSelectElement)
+      || (target.value !== 'claro' && target.value !== 'oscuro-premium' && target.value !== 'automatico')) {
+      return;
+    }
+
+    this.saveSettings({ ...this.settings(), theme: target.value });
+  }
+
+  updateAccent(accent: string): void {
+    if (!ACCENT_OPTIONS.some(option => option.value === accent)) {
+      return;
+    }
+
+    this.saveSettings({ ...this.settings(), accent });
+  }
+
+  updateAutomaticBackup(): void {
+    this.saveSettings({
+      ...this.settings(),
+      automaticBackup: !this.settings().automaticBackup,
+    }, this.settings().automaticBackup
+      ? 'El respaldo automático se desactivó.'
+      : 'El respaldo automático se activó.');
+  }
+
+  changePassword(): void {
+    if (this.passwordForm.invalid) {
+      this.passwordForm.markAllAsTouched();
+      return;
+    }
+
+    const { currentPassword, newPassword, confirmPassword } = this.passwordForm.getRawValue();
+    if (currentPassword === newPassword) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Contraseña no válida',
+        detail: 'La nueva contraseña debe ser diferente de la actual.',
+      });
+      return;
+    }
+
+    this.savingPassword.set(true);
+    this.authService.cambiarPassword(currentPassword, newPassword).subscribe({
+      next: (response) => {
+        this.savingPassword.set(false);
+        this.passwordForm.reset();
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Contraseña actualizada',
+          detail: response.message || 'La contraseña se cambió correctamente.',
+        });
       },
-      { validators: this.passwordsCoinciden }
-    );
+      error: (error: unknown) => {
+        this.savingPassword.set(false);
+        const message = isRecord(error) && isRecord(error['error']) && typeof error['error']['message'] === 'string'
+          ? error['error']['message']
+          : 'No se pudo actualizar la contraseña. Verifica la contraseña actual e inténtalo de nuevo.';
+        this.messageService.add({ severity: 'error', summary: 'Error al cambiar contraseña', detail: message });
+      },
+    });
   }
 
-  // ── Carga del perfil (reemplazar con llamada real al servicio) ─────────────
+  exportSettings(): void {
+    const backup = {
+      version: 1,
+      createdAt: new Date().toISOString(),
+      settings: this.settings(),
+    };
 
-  cargarPerfil(): void {
-    this.cargando.set(true);
-
-    // TODO: reemplazar con tu servicio real, ej:
-    // this.usuarioService.getMiPerfil().subscribe({ next: (data) => { ... } })
-
-    // Simulación: en tu proyecto real elimina este setTimeout
-    setTimeout(() => {
-      // El perfil ya está seteado como mock arriba; aquí parchearías el form:
-      this.formPerfil.patchValue({
-        nombre:   this.perfil.nombre,
-        apellido: this.perfil.apellido,
-        telefono: this.perfil.telefono,
-        email:    this.perfil.email,
+    try {
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'fadex-configuracion.json';
+      link.click();
+      URL.revokeObjectURL(url);
+      this.recordBackup(backup);
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Exportación completada',
+        detail: 'Se descargó una copia de la configuración guardada en este navegador.',
       });
-      this.cargando.set(false);
-    }, 400);
+    } catch {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error al exportar',
+        detail: 'No se pudo crear el archivo de configuración.',
+      });
+    }
   }
 
-  // ── Guardar perfil ─────────────────────────────────────────────────────────
-
-  guardarPerfil(): void {
-    if (this.formPerfil.invalid) {
-      this.formPerfil.markAllAsTouched();
+  async importSettings(event: Event): Promise<void> {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement) || !target.files?.length) {
       return;
     }
 
-    this.guardandoPerfil.set(true);
+    const file = target.files[0];
+    try {
+      const backup: unknown = JSON.parse(await file.text());
+      if (!isRecord(backup) || !isAdminSettings(backup['settings'])) {
+        throw new Error('El archivo no tiene un formato de configuración válido.');
+      }
 
-    const dto: ActualizarPerfilDTO = {
-      nombre:   this.formPerfil.value.nombre,
-      apellido: this.formPerfil.value.apellido,
-      telefono: this.formPerfil.value.telefono,
-      email:    this.formPerfil.value.email,
-    };
-
-    // TODO: reemplazar con tu servicio real, ej:
-    // this.usuarioService.actualizarPerfil(dto).subscribe({ ... })
-
-    setTimeout(() => {
-      this.perfil = { ...this.perfil, ...dto };
-      this.guardandoPerfil.set(false);
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Perfil actualizado',
-        detail: 'Los datos se guardaron correctamente.',
-        life: 3000,
+      const importedSettings = {
+        ...backup['settings'],
+        theme: this.normalizeTheme(backup['settings'].theme),
+      };
+      this.generalForm.patchValue({
+        businessName: importedSettings.businessName,
+        phone: importedSettings.phone,
+        email: importedSettings.email,
+        address: importedSettings.address,
       });
-    }, 600);
+      if (this.generalForm.invalid) {
+        this.generalForm.markAllAsTouched();
+        throw new Error('El archivo contiene datos generales que no son válidos.');
+      }
+      this.saveSettings(importedSettings, 'La configuración se importó correctamente.');
+    } catch (error: unknown) {
+      const detail = error instanceof Error ? error.message : 'No se pudo leer el archivo seleccionado.';
+      this.messageService.add({ severity: 'error', summary: 'Error al importar', detail });
+    } finally {
+      target.value = '';
+    }
   }
 
-  // ── Cambiar contraseña ─────────────────────────────────────────────────────
+  logout(): void {
+    this.tokenService.clearTokens();
+    void this.router.navigate(['/login']);
+  }
 
-  cambiarPassword(): void {
-    if (this.formPassword.invalid) {
-      this.formPassword.markAllAsTouched();
+  formatBackupDate(value: string | null): string {
+    if (!value) {
+      return 'Aún no hay respaldos';
+    }
+
+    return new Intl.DateTimeFormat('es-PE', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }).format(new Date(value));
+  }
+
+  private loadSettings(): void {
+    try {
+      const storedSettings = localStorage.getItem(SETTINGS_STORAGE_KEY);
+      if (storedSettings) {
+        const parsedSettings: unknown = JSON.parse(storedSettings);
+        if (!isAdminSettings(parsedSettings)) {
+          throw new Error('Los datos de configuración guardados tienen un formato no válido.');
+        }
+
+        const normalizedSettings = {
+          ...parsedSettings,
+          theme: this.normalizeTheme(parsedSettings.theme),
+        };
+        this.settings.set(normalizedSettings);
+        this.generalForm.patchValue({
+          businessName: normalizedSettings.businessName,
+          phone: normalizedSettings.phone,
+          email: normalizedSettings.email,
+          address: normalizedSettings.address,
+        });
+      }
+
+      const backupDate = localStorage.getItem(BACKUP_STORAGE_KEY);
+      if (backupDate && Number.isFinite(Date.parse(backupDate))) {
+        this.lastBackup.set(backupDate);
+      }
+    } catch (error: unknown) {
+      const detail = error instanceof Error ? error.message : 'No se pudieron cargar las preferencias guardadas.';
+      this.messageService.add({ severity: 'error', summary: 'Error de configuración', detail });
+    }
+  }
+
+  private saveSettings(settings: AdminSettings, successMessage?: string): void {
+    try {
+      localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
+    } catch {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error al guardar',
+        detail: 'No se pudieron guardar los cambios en este navegador.',
+      });
       return;
     }
 
-    this.guardandoPassword.set(true);
-
-    const dto: CambiarPasswordDTO = {
-      passwordActual:    this.formPassword.value.passwordActual,
-      passwordNueva:     this.formPassword.value.passwordNueva,
-      confirmarPassword: this.formPassword.value.confirmarPassword,
-    };
-
-    // TODO: reemplazar con tu servicio real, ej:
-    // this.usuarioService.cambiarPassword(dto).subscribe({ ... })
-
-    setTimeout(() => {
-      this.guardandoPassword.set(false);
-      this.formPassword.reset();
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Contraseña actualizada',
-        detail: 'Tu contraseña fue cambiada exitosamente.',
-        life: 3000,
-      });
-    }, 600);
+    this.settings.set(settings);
+    if (settings.automaticBackup) {
+      try {
+        this.recordBackup({ version: 1, createdAt: new Date().toISOString(), settings });
+      } catch {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error en el respaldo automático',
+          detail: 'Los cambios se guardaron, pero no se pudo actualizar el respaldo local.',
+        });
+        return;
+      }
+    }
+    if (successMessage) {
+      this.messageService.add({ severity: 'success', summary: 'Cambios guardados', detail: successMessage });
+    }
   }
 
-  // ── Validador personalizado ────────────────────────────────────────────────
-
-  private passwordsCoinciden(group: FormGroup) {
-    const nueva    = group.get('passwordNueva')?.value;
-    const confirmar = group.get('confirmarPassword')?.value;
-    return nueva === confirmar ? null : { noCoinciden: true };
+  private recordBackup(backup: { version?: number; createdAt: string; settings: AdminSettings }): void {
+    localStorage.setItem(BACKUP_STORAGE_KEY, backup.createdAt);
+    localStorage.setItem(`${BACKUP_STORAGE_KEY}.data`, JSON.stringify(backup));
+    this.lastBackup.set(backup.createdAt);
   }
 
-  // ── Helpers de UI ──────────────────────────────────────────────────────────
-
-  get inicialesAvatar(): string {
-    const n = this.perfil.nombre?.[0] ?? '';
-    const a = this.perfil.apellido?.[0] ?? '';
-    return (n + a).toUpperCase();
-  }
-
-  get labelRol(): string {
-    return this.perfil.roles?.[0]?.toUpperCase() ?? 'SIN ROL';
-  }
-
-  campoInvalido(form: FormGroup, campo: string): boolean {
-    const ctrl = form.get(campo);
-    return !!(ctrl?.invalid && ctrl?.touched);
-  }
-
-  toggleVisible(campo: 'actual' | 'nueva' | 'confirmar'): void {
-    if (campo === 'actual')    this.mostrarPasswordActual.update(v => !v);
-    if (campo === 'nueva')     this.mostrarPasswordNueva.update(v => !v);
-    if (campo === 'confirmar') this.mostrarConfirmar.update(v => !v);
-  }
-
-  // ── Indicador de seguridad de contraseña ───────────────────────────────────
-
-  get nivelSeguridad(): number {
-    const val: string = this.formPassword.get('passwordNueva')?.value ?? '';
-    let nivel = 0;
-    if (val.length >= 8)              nivel++;
-    if (/[A-Z]/.test(val))            nivel++;
-    if (/[0-9]/.test(val))            nivel++;
-    if (/[^A-Za-z0-9]/.test(val))     nivel++;
-    return nivel;
-  }
-
-  get colorSeguridad(): string {
-    const colores: Record<number, string> = {
-      1: 'bg-red-500',
-      2: 'bg-orange-400',
-      3: 'bg-yellow-400',
-      4: 'bg-green-500',
-    };
-    return colores[this.nivelSeguridad] ?? 'bg-zinc-700';
-  }
-
-  get textoSeguridad(): string {
-    const labels: Record<number, string> = {
-      1: 'Muy débil',
-      2: 'Débil',
-      3: 'Moderada',
-      4: 'Fuerte',
-    };
-    return labels[this.nivelSeguridad] ?? '';
-  }
-
-  get textoColorSeguridad(): string {
-    const colores: Record<number, string> = {
-      1: 'text-red-400',
-      2: 'text-orange-400',
-      3: 'text-yellow-400',
-      4: 'text-green-400',
-    };
-    return colores[this.nivelSeguridad] ?? 'text-zinc-400';
-  }
-
-  get permisosDelRol(): string[] {
-    const mapaPermisos: Record<string, string[]> = {
-      admin: [
-        'BARBERO_CREATE', 'BARBERO_VIEW', 'BARBERO_UPDATE', 'BARBERO_DELETE',
-        'CLIENTE_CREATE', 'CLIENTE_VIEW', 'CLIENTE_UPDATE', 'CLIENTE_DELETE',
-        'PRODUCTO_CREATE', 'PRODUCTO_READ', 'PRODUCTO_UPDATE', 'PRODUCTO_DELETE',
-        'CATEGORIA_CREATE', 'CATEGORIA_READ', 'CATEGORIA_UPDATE', 'CATEGORIA_DELETE',
-        'SERVICIO_CREATE', 'SERVICIO_READ', 'SERVICIO_UPDATE', 'SERVICIO_DELETE',
-        'RESERVA_CREATE', 'RESERVA_READ', 'RESERVA_UPDATE', 'RESERVA_DELETE', 'RESERVA_CONFIRM', 'RESERVA_CANCEL',
-        'VENTA_CREATE', 'VENTA_READ', 'VENTA_UPDATE', 'VENTA_DELETE', 'VENTA_ANULAR',
-        'CORTE_CREATE', 'CORTE_READ', 'CORTE_UPDATE', 'CORTE_DELETE', 'CORTE_FINALIZAR',
-        'USUARIO_CREATE', 'USUARIO_READ', 'USUARIO_UPDATE', 'USUARIO_DELETE',
-        'REPORTE_READ', 'ESTADISTICA_READ', 'DASHBOARD_READ',
-        'CONFIGURACION_READ', 'CONFIGURACION_UPDATE',
-      ],
-      barbero: [
-        'PRODUCTO_READ', 'CATEGORIA_READ', 'SERVICIO_READ',
-        'RESERVA_CREATE', 'RESERVA_READ', 'RESERVA_UPDATE', 'RESERVA_CONFIRM', 'RESERVA_CANCEL',
-        'VENTA_CREATE', 'VENTA_READ',
-        'CORTE_CREATE', 'CORTE_READ', 'CORTE_UPDATE', 'CORTE_FINALIZAR',
-        'DASHBOARD_READ',
-      ],
-      cliente: [
-        'PRODUCTO_READ', 'SERVICIO_READ',
-        'RESERVA_CREATE', 'RESERVA_READ', 'RESERVA_CANCEL',
-        'VENTA_READ',
-      ],
-    };
-
-    const rol = this.perfil.roles?.[0]?.toLowerCase() ?? '';
-    return mapaPermisos[rol] ?? [];
+  private normalizeTheme(theme: Theme): Exclude<Theme, 'oscuro'> {
+    return theme === 'oscuro' ? 'oscuro-premium' : theme;
   }
 }
