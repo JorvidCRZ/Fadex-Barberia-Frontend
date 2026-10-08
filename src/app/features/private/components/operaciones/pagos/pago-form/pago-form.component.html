@@ -1,0 +1,40 @@
+<form [formGroup]="pagoForm" (ngSubmit)="registrarPago()" class="flex flex-col gap-5">
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div class="flex flex-col gap-1.5">
+      <label for="cliente" class="text-xs text-gray-400">Cliente</label>
+      <p-select inputId="cliente" [options]="clientes" formControlName="cliente" placeholder="Seleccionar"
+        [filter]="true" styleClass="w-full" />
+    </div>
+
+    <div class="flex flex-col gap-1.5">
+      <label for="barbero" class="text-xs text-gray-400">Barbero</label>
+      <p-select inputId="barbero" [options]="barberos" formControlName="barbero" placeholder="Seleccionar"
+        styleClass="w-full" />
+    </div>
+
+    <div class="flex flex-col gap-1.5">
+      <label for="metodo" class="text-xs text-gray-400">Método</label>
+      <p-select inputId="metodo" [options]="metodos" formControlName="metodo" placeholder="Método"
+        styleClass="w-full" />
+    </div>
+
+    <div class="flex flex-col gap-1.5">
+      <label for="monto" class="text-xs text-gray-400">Monto</label>
+      <p-inputNumber inputId="monto" formControlName="monto" prefix="S/ " [minFractionDigits]="2"
+        [maxFractionDigits]="2" [min]="0" placeholder="S/ 0.00" styleClass="w-full" inputStyleClass="w-full" />
+    </div>
+  </div>
+
+  <div class="flex justify-end gap-3 pt-2">
+    <button type="button" (click)="cancelar()"
+      class="bg-[#0c0c0c] border border-white/10 text-white hover:border-[#C9A84C] px-5 py-2 text-sm rounded-md transition-colors">
+      Cancelar
+    </button>
+    <button type="submit"
+      class="bg-[#C9A84C] hover:bg-[#E2B95A] text-black px-5 py-2 text-sm font-medium rounded-md transition-colors disabled:opacity-60"
+      [disabled]="pagoForm.invalid">
+      Registrar Transacción
+    </button>
+  </div>
+</form>

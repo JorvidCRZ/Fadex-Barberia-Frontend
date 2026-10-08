@@ -1,0 +1,41 @@
+<div class="p-4 md:p-6 lg:p-8 bg-neutral-primary-lighter rounded-base shadow-sm">
+    <div class="relative w-full overflow-x-auto">
+        <p-table [value]="ruletas" [lazy]="true" (onLazyLoad)="lazyLoad.emit($event)" [paginator]="true" [rows]="rows"
+            [totalRecords]="totalRecords" [loading]="!cargado" dataKey="ruletaId" [showCurrentPageReport]="true"
+            currentPageReportTemplate="Viendo {first} a {last} de {totalRecords} entradas" [tableStyle]="{ 'min-width': '800px' }" class="rounded-xl">
+
+            <ng-template #header>
+                <tr>
+                    <th class="whitespace-nowrap text-center">Nombre</th>
+                    <th class="whitespace-nowrap text-center">Tipo</th>
+                    <th class="whitespace-nowrap text-center">Incremento/giro</th>
+                    <th class="whitespace-nowrap text-center">Estado</th>
+                    <th class="whitespace-nowrap text-center">Acciones</th>
+                </tr>
+            </ng-template>
+
+            <ng-template #body let-ruleta pTemplate="body">
+                <tr [class.row-seleccionada]="ruleta.ruletaId === seleccionadaId">
+                    <td class="whitespace-nowrap text-center font-medium">{{ ruleta.nombre }}</td>
+                    <td class="whitespace-nowrap text-center"><app-status-badge type="text" [value]="ruleta.tipo" customClass="badge-text estado-producto" /></td>
+                    <td class="whitespace-nowrap text-center">+{{ ruleta.incrementoPorGiro | number:'1.4-4' }}</td>
+                    <td class="whitespace-nowrap text-center">
+                        <div class="flex items-center justify-center gap-2">
+                            <app-status-badge type="boolean" [value]="ruleta.activa" trueLabel="Activa" falseLabel="Inactiva" />
+                            <p-toggleSwitch [ngModel]="ruleta.activa" (onChange)="cambiarEstadoRuleta(ruleta, $event)" class="scale-90" />
+                        </div>
+                    </td>
+                    <td class="whitespace-nowrap text-center">
+                        <div class="flex flex-row justify-center">
+                            <p-button icon="pi pi-check-circle" [class]="ruleta.ruletaId === seleccionadaId ? 'boton-ver-tabla' : 'boton-ver-tabla'" pTooltip="Trabajar con esta ruleta (Premios / Categorías / Preview)" tooltipPosition="top" (click)="seleccionar.emit(ruleta)"></p-button>
+                            <p-button icon="pi pi-pencil" class="boton-editar-tabla" (click)="editar.emit(ruleta)"></p-button>
+                            <p-button icon="pi pi-trash" class="boton-eliminar-tabla" (click)="pedirConfirmacion(ruleta, $event)"></p-button>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+</div>
+
+<app-confirm-popover [visible]="mostrarConfirmacion" [mensaje]="mensajeConfirmacion" icono="pi-refresh" [titulo]="'Eliminar Ruleta'" (confirm)="confirmarEliminar()" (cancel)="cancelarEliminar()" />

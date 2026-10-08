@@ -1,0 +1,133 @@
+<div class="relative w-full overflow-x-auto">
+    <p-table [value]="recompensas" [loading]="!cargado" [lazy]="true" (onLazyLoad)="lazyLoad.emit($event)" [paginator]="true" [rows]="rows"
+    [totalRecords]="totalRecords" dataKey="id" expandableRows [tableStyle]="{ 'min-width': '1050px' }" class="rounded-xl">
+
+        <ng-template #header>
+            <tr>
+                <th style="width: 3rem"></th>
+                <th class="whitespace-nowrap text-center">Premio</th>
+                <th class="whitespace-nowrap text-center">Cliente</th>
+                <th class="whitespace-nowrap text-center">Estado</th>
+                <th class="whitespace-nowrap text-center">Código</th>
+                <th class="whitespace-nowrap text-center">Obtenida</th>
+                <th class="whitespace-nowrap text-center">Acciones</th>
+            </tr>
+        </ng-template>
+
+        <ng-template #body let-r let-expanded="expanded">
+            <tr [ngClass]="{ 'fila-canjeada': recienCanjeadoId === r.id }">
+                <td class="text-center">
+                    <p-button type="button" [pRowToggler]="r" [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'" class="boton-expandir-tabla"></p-button>
+                </td>
+
+                <!-- Premio en card -->
+                <td class="py-2">
+                    <div class="flex items-center gap-3 rounded-lg border border-brand-gold-soft bg-brand-black px-3 py-2 min-w-[220px]">
+                        <div class="relative shrink-0">
+                            @if (r.itemImagen) {
+                                <img [src]="r.itemImagen" [alt]="r.itemNombre"
+                                    class="h-11 w-11 rounded-full object-cover border-2"
+                                    [style.borderColor]="r.colorHex || '#d4a574'" />
+                            } @else {
+                                <div class="h-11 w-11 rounded-full flex items-center justify-center border-2"
+                                    [style.borderColor]="r.colorHex || '#d4a574'" [style.backgroundColor]="(r.colorHex || '#d4a574') + '22'">
+                                    <i class="pi pi-gift" [style.color]="r.colorHex || '#d4a574'"></i>
+                                </div>
+                            }
+                            @if (r.premioMayor) {
+                                <span class="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-brand-gold flex items-center justify-center">
+                                    <i class="pi pi-star-fill text-[10px] text-brand-black"></i>
+                                </span>
+                            }
+                        </div>
+                        <div class="flex flex-col overflow-hidden">
+                            <span class="text-brand-white font-medium text-sm truncate">{{ r.itemNombre }}</span>
+                            <span class="text-text-tertiary text-xs">Giro #{{ r.giroId }}</span>
+                        </div>
+                    </div>
+                </td>
+
+                <td class="whitespace-nowrap text-center text-brand-white">{{ r.clienteNombre }}</td>
+                <td class="whitespace-nowrap text-center">
+                    <app-status-badge type="text" [value]="r.estado" />
+                </td>
+                <td class="whitespace-nowrap text-center">
+                    <span class="font-mono text-xs px-2 py-1 rounded bg-brand-black border border-brand-gold-soft text-brand-gold">{{ r.codigoCanje }}</span>
+                </td>
+                <td class="whitespace-nowrap text-center text-brand-white">{{ r.fechaObtencion | date:'dd/MM/yy HH:mm' }}</td>
+
+                <td class="whitespace-nowrap text-center">
+                    <div class="flex items-center justify-center gap-1">
+                        @if (puedeCanjear(r)) {
+                            <button pButton icon="pi pi-check" pTooltip="Canjear" tooltipPosition="top" class="boton-primary" size="small" (click)="onCanjear(r, $event)"></button>
+                            <button pButton icon="pi pi-clock" pTooltip="Marcar vencida" tooltipPosition="top" class="boton-anular" size="small" (click)="onVencer(r, $event)"></button>
+                            <button pButton icon="pi pi-ban" pTooltip="Anular" tooltipPosition="top" class="boton-danger" size="small" (click)="onAnular(r, $event)"></button>
+                        } @else if (r.estado === EstadoRecompensa.VENCIDO) {
+                            <button pButton icon="pi pi-refresh" pTooltip="Reactivar" tooltipPosition="top" [text]="true" severity="success" size="small" (click)="onReactivar(r, $event)"></button>
+                            <button pButton icon="pi pi-ban" pTooltip="Anular" tooltipPosition="top" [text]="true" severity="danger" size="small" (click)="onAnular(r, $event)" ></button>
+                        } @else if (r.estado === EstadoRecompensa.CANJEADO) {
+                            @if (recienCanjeadoId === r.id) {
+                                <span class="check-canje inline-flex">
+                                    <i class="pi pi-check-circle text-emerald-400 text-lg"></i>
+                                </span>
+                            }
+                            <app-status-badge type="text" [value]="r.estado" />
+                        } @else {
+                            <app-status-badge type="text" [value]="r.estado" />
+                        }
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+
+        <ng-template #expandedrow let-r>
+            <tr>
+                <td colspan="7" class="bg-brand-black/60 px-8 py-5">
+                    <div class="flex flex-col gap-4">
+                        <div class="flex items-center gap-0">
+                            @for (paso of pasos(r); track paso.label; let last = $last) {
+                                <div class="flex items-center gap-0 flex-1">
+                                    <div class="flex flex-col items-center gap-1 min-w-[90px]">
+                                        <div class="h-8 w-8 rounded-full flex items-center justify-center border-2"
+                                            [ngClass]="paso.activo ? 'border-brand-gold bg-brand-gold/10 text-brand-gold' : 'border-text-tertiary text-text-tertiary'">
+                                            <i class="pi" [class]="paso.icono"></i>
+                                        </div>
+                                        <span class="text-xs" [ngClass]="paso.activo ? 'text-brand-white' : 'text-text-tertiary'">{{ paso.label }}</span>
+                                        <span class="text-[10px] text-text-tertiary">{{ paso.fecha ? (paso.fecha | date:'dd/MM/yy') : '—' }}</span>
+                                    </div>
+                                    @if (!last) {
+                                        <div class="h-[2px] flex-1 -mt-5" [ngClass]="paso.activo ? 'bg-brand-gold' : 'bg-text-tertiary/30'"></div>
+                                    }
+                                </div>
+                            }
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                            <div>
+                                <span class="text-text-tertiary block">Observación</span>
+                                <span class="text-brand-white">{{ r.observacion || '—' }}</span>
+                            </div>
+                            <div>
+                                <span class="text-text-tertiary block">Giro asociado</span>
+                                <span class="text-brand-white">#{{ r.giroId }}</span>
+                            </div>
+                            <div>
+                                <span class="text-text-tertiary block">Vence</span>
+                                <span class="text-brand-white">{{ r.fechaVencimiento ? (r.fechaVencimiento | date:'dd/MM/yy HH:mm') : 'Sin vencimiento' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+
+        <ng-template #emptymessage>
+            <tr>
+                <td colspan="7" class="text-center py-6 text-text-tertiary">Aún no hay recompensas registradas.</td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>
+
+<app-confirm-popover [visible]="mostrarConfirmacion" [mensaje]="mensajeConfirmacion" [titulo]="'Cambiar estado'"
+    (confirm)="confirmarCambioEstado()" (cancel)="cancelarCambioEstado()" />

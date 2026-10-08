@@ -1,0 +1,100 @@
+<div class="p-4 md:p-6 lg:p-8">
+
+  <div class="relative w-full overflow-x-auto rounded-xl border border-ui-border bg-brand-black shadow-lg shadow-black/20">
+
+    <p-table [value]="usuarios" [lazy]="true" (onLazyLoad)="onLazyLoad($event)"
+      [paginator]="true" [rows]="pageSize" [totalRecords]="totalElements"
+      dataKey="usuarioId" [showCurrentPageReport]="true"
+      currentPageReportTemplate="Viendo {first} a {last} de {totalRecords} usuarios"
+      [tableStyle]="{ 'min-width': '900px' }" class="rounded-xl">
+
+      <ng-template #header>
+        <tr>
+          <th class="text-left">Usuario</th>
+          <th class="text-left">Nombre</th>
+          <th class="text-left">Roles</th>
+          <th class="text-center">QR</th>
+          <th class="text-center">PIN</th>
+          <th class="text-center">Acción</th>
+        </tr>
+      </ng-template>
+
+      <ng-template #body let-u>
+        <tr>
+          <td>
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full flex items-center justify-center bg-yellow-800/20 text-yellow-400 font-bold border border-yellow-600/20 shadow-inner">
+                {{ initials(u.username || u.usuario || '') }}
+              </div>
+              <div class="font-semibold text-gray-100 leading-tight truncate">
+                {{ u.username || u.usuario || '—' }}
+              </div>
+            </div>
+          </td>
+
+          <td>
+            <div class="font-semibold text-gray-100 leading-tight">
+              {{ u.persona?.nombre || u.nombre || '—' }}
+            </div>
+            <div class="text-xs text-gray-500 leading-tight">
+              {{ u.persona?.apellido || u.apellido || '' }}
+            </div>
+          </td>
+
+          <td>
+            <div class="flex flex-wrap gap-1 status">
+              <ng-container *ngIf="u.roles && u.roles.length > 0; else sinRoles">
+                <app-status-badge *ngFor="let rol of u.roles" type="text" [value]="rol.nombre || rol" [customClass]="getRoleBadgeClass(rol.nombre || rol)" />
+              </ng-container>
+              <ng-template #sinRoles>
+                <span class="text-gray-500 text-xs">—</span>
+              </ng-template>
+            </div>
+          </td>
+
+          <td class="text-center">
+            <span class="inline-flex items-center justify-center w-10 h-10 rounded-xl border"
+              [ngClass]="u.tieneQr ? 'bg-lime-400/10 border-lime-400/20 text-lime-400' : 'bg-white/5 border-gray-700 text-gray-600'"
+              [pTooltip]="u.tieneQr ? 'QR disponible' : 'Sin QR'" tooltipPosition="top">
+              <i class="pi pi-qrcode text-sm"></i>
+            </span>
+          </td>
+
+          <td class="text-center">
+            <span class="inline-flex items-center justify-center w-10 h-10 rounded-xl border"
+              [ngClass]="u.tienePin ? 'bg-purple-400/10 border-purple-400/20 text-purple-400' : 'bg-white/5 border-gray-700 text-gray-600'"
+              [pTooltip]="u.tienePin ? 'Tiene PIN' : 'Sin PIN'" tooltipPosition="top">
+              <i class="pi pi-lock text-sm"></i>
+            </span>
+          </td>
+
+          <td class="text-center">
+            <div class="table-actions">
+              <p-button icon="pi pi-eye" class="boton-ver-tabla" pTooltip="Ver detalle" tooltipPosition="top"
+                [routerLink]="['/dashboard/admin/gestion/usuarios', u.usuarioId || u.id]">
+              </p-button>
+
+              @if (inhabilitadosMode) {
+                <p-button icon="pi pi-user-plus" class="boton-editar-tabla" pTooltip="Reactivar" tooltipPosition="top"
+                  (onClick)="onReactivate(u.usuarioId || u.id)">
+                </p-button>
+              }
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template #emptymessage>
+        <tr>
+          <td colspan="6" class="text-center py-16">
+            <div class="flex flex-col items-center gap-3 text-neutral-primary-dark">
+              <i class="pi pi-users text-4xl"></i>
+              <p class="text-sm font-medium">No hay usuarios que coincidan</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+    </p-table>
+  </div>
+</div>

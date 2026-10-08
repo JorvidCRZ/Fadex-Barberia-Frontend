@@ -1,0 +1,120 @@
+<form [formGroup]="reglaForm" class="flex flex-col gap-6 p-2">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div class="part-form">
+            <span class="label-form">Categoría *</span>
+            <p-treeSelect [options]="categoriaTree" formControlName="categoriaId" placeholder="Seleccione una categoría" [filter]="true" filterBy="label" selectionMode="single" [metaKeySelection]="false" inputId="categoriaId"></p-treeSelect>
+            @if (campoInvalido('categoriaId')) {
+            <p-message severity="error" variant="simple" size="small">Seleccione una categoría</p-message>
+            }
+        </div>
+
+        <div class="part-form">
+            <span class="label-form">Tipo de alcance *</span>
+            <p-select [options]="tiposAlcance" formControlName="tipoAlcance" optionLabel="label" optionValue="value" inputId="tipoAlcance"></p-select>
+        </div>
+    </div>
+
+    @if (muestraServicio) {
+        <div class="part-form">
+            <label>Servicio *</label>
+            @if (servicioSeleccionado) {
+                <div class="group flex items-center justify-between rounded-xl border border-ui-border bg-gradient-to-r from-ui-card to-ui-cardHover px-4 py-3 transition-all duration-200 hover:border-brand-gold/40 hover:shadow-lg">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-500/15">
+                            <i class="pi pi-sparkles text-brand-gold text-lg"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <div class="font-semibold truncate">{{ servicioSeleccionado.nombre }}</div>
+                            <div class="text-xs text-text-secondary truncate">{{ servicioSeleccionado.categoriaNombre }}</div>
+                        </div>
+                    </div>
+                    <p-button icon="pi pi-pencil" class="boton-editar-tabla" (click)="mostrarSelectorServicio=true"></p-button>
+                </div>
+            } @else {
+                <div (click)="mostrarSelectorServicio=true" class="cursor-pointer rounded-xl border-2 border-dashed border-ui-borderSoft bg-ui-card p-5 transition-all hover:border-brand-gold hover:bg-ui-cardHover">
+                    <div class="flex items-center justify-center gap-3">
+                        <i class="pi pi-plus-circle text-brand-gold text-xl"></i>
+                        <div>
+                            <div class="font-semibold">Seleccionar servicio</div>
+                            <small class="text-text-secondary">Buscar un servicio para esta regla</small>
+                        </div>
+                    </div>
+                </div>
+            }
+            @if (campoInvalido('servicioId')) {
+                <p-message severity="error" variant="simple" size="small">Selecciona un servicio</p-message>
+            }
+        </div>
+    }
+    @if (muestraProducto) {
+        <div class="part-form">
+            <label>Producto *</label>
+            @if (productoSeleccionado) {
+                <div class="group flex items-center justify-between rounded-xl border border-ui-border bg-gradient-to-r from-ui-card to-ui-cardHover px-4 py-3 transition-all duration-200 hover:border-brand-gold/40 hover:shadow-lg">
+                    <div class="flex items-center gap-3 min-w-0">
+                    <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-sky-500/15">
+                        <i class="pi pi-box text-sky-400 text-lg"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <div class="font-semibold truncate">{{ productoSeleccionado.nombre }}</div>
+                        <div class="text-xs text-text-secondary truncate">{{ productoSeleccionado.nombreCategoria }}</div>
+                    </div>
+                </div>
+                <p-button icon="pi pi-pencil" class="boton-editar-tabla" (click)="mostrarSelectorProducto=true"></p-button>
+            </div>
+            } @else {
+                <div (click)="mostrarSelectorProducto=true" class="cursor-pointer rounded-xl border-2 border-dashed border-ui-borderSoft bg-ui-card p-5 transition-all hover:border-brand-gold hover:bg-ui-cardHover">
+                    <div class="flex items-center justify-center gap-3">
+                        <i class="pi pi-plus-circle text-brand-gold text-xl"></i>
+                        <div>
+                            <div class="font-semibold">Seleccionar producto</div>
+                            <small class="text-text-secondary">Buscar un producto para esta regla</small>
+                        </div>
+                    </div>
+                </div>
+            }
+    
+            @if (campoInvalido('productoId')) {
+                <p-message severity="error" variant="simple" size="small">Selecciona un producto</p-message>
+            }
+        </div>
+    }
+    
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div class="part-form">
+            <label for="puntos">Puntos otorgados *</label>
+            <p-inputNumber formControlName="puntos" inputId="puntos" [showButtons]="true" [min]="1" [step]="1" [max]="999" />
+            @if (campoInvalido('puntos')) {
+                <p-message severity="error" variant="simple" size="small">Ingresa una cantidad válida de puntos</p-message>
+            }
+        </div>
+        <div class="part-form items-center">
+            <label for="activo">Activo</label>
+            <p-checkbox binary="true" formControlName="activo" inputId="activo"></p-checkbox>
+        </div>
+    </div>
+
+    <div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
+        <button pButton label="Guardar" class="boton-submit w-full sm:w-auto" type="button" (click)="onGuardar()"></button>
+        <button pButton label="Cancelar" class="boton-cancel w-full sm:w-auto" type="button" (click)="onCancelar()"></button>
+    </div>
+
+</form>
+
+@if (mostrarSelectorServicio) {
+    <p-dialog [(visible)]="mostrarSelectorServicio" [modal]="true" [appendTo]="'body'" [draggable]="true" [resizable]="false" [maximizable]="true" [style]="{ width: '85rem' }">
+        <ng-template pTemplate="header">
+            <app-dialog-header icono="pi pi-sparkles" title="Seleccionar servicio" mode="ver" />
+        </ng-template>
+        <app-servicio-selector [servicioId]="reglaForm.value.servicioId" (seleccionar)="seleccionarServicio($event)" />
+    </p-dialog>
+}
+
+@if (mostrarSelectorProducto) {
+    <p-dialog [(visible)]="mostrarSelectorProducto" [modal]="true" [appendTo]="'body'" [draggable]="true" [resizable]="false" [maximizable]="true" [style]="{ width: '85rem' }">
+        <ng-template pTemplate="header">
+            <app-dialog-header icono="pi pi-box" title="Seleccionar producto" mode="ver" />
+        </ng-template>
+        <app-producto-selector [productoId]="reglaForm.value.productoId" (seleccionar)="seleccionarProducto($event)" />
+    </p-dialog>
+}

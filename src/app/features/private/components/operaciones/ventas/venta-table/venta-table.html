@@ -1,0 +1,88 @@
+<div class="rounded-xl border border-[#C9A84C]/25 bg-[#121212] overflow-hidden">
+    <div class="w-full overflow-x-auto">
+        <p-table [value]="ventas" [paginator]="ventas.length > rows" [rows]="rows" dataKey="ventaId" expandableRows
+            [tableStyle]="{ 'min-width': '900px' }">
+
+            <ng-template #header>
+                <tr class="text-sm text-[#C9A84C]">
+                    <th class="text-left font-normal px-4 py-3">N° Venta</th>
+                    <th class="text-left font-normal px-4 py-3">Cliente</th>
+                    <th class="text-left font-normal px-4 py-3">Comprobante</th>
+                    <th class="text-left font-normal px-4 py-3">Método de pago</th>
+                    <th class="text-left font-normal px-4 py-3">Cant. items</th>
+                    <th class="text-left font-normal px-4 py-3">Fecha</th>
+                    <th class="text-left font-normal px-4 py-3">Total</th>
+                    <th class="text-center font-normal px-4 py-3">Acciones</th>
+                </tr>
+            </ng-template>
+
+            <ng-template #body let-venta let-expanded="expanded">
+                <tr class="text-sm border-t border-[#C9A84C]/15">
+                    <td class="px-4 py-4 whitespace-nowrap">
+                        <div class="flex items-center gap-3">
+                            <button type="button" [pRowToggler]="venta" aria-label="Ver detalle"
+                                class="text-gray-300 hover:text-[#C9A84C] transition">
+                                <i class="pi text-xs" [ngClass]="expanded ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
+                            </button>
+                            <span class="text-white">{{ venta.numeroCorrelativo || ('#' + venta.ventaId) }}</span>
+                        </div>
+                    </td>
+                    <td class="px-4 py-4 whitespace-nowrap text-white">{{ venta.clienteNombre }}</td>
+                    <td class="px-4 py-4 whitespace-nowrap">
+                        <span class="inline-block px-2 py-1 rounded-md bg-white/10 text-xs text-gray-200">{{ venta.tipoComprobante }}</span>
+                    </td>
+                    <td class="px-4 py-4 whitespace-nowrap text-white">{{ venta.metodoPago || '-' }}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-white">{{ venta.detalles?.length || 0 }}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-gray-400">{{ venta.fecha | date:'dd/MM/yyyy' }}</td>
+                    <td class="px-4 py-4 whitespace-nowrap font-bold text-[#C9A84C]">S/ {{ calcularTotal(venta) | number:'1.2-2' }}</td>
+                    <td class="px-4 py-4 text-center">
+                        <button type="button" (click)="pedirConfirmacion(venta)" aria-label="Eliminar venta"
+                            class="text-red-500 hover:text-red-400 transition">
+                            <i class="pi pi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            </ng-template>
+
+            <ng-template #expandedrow let-venta>
+                <tr>
+                    <td colspan="8" class="p-0">
+                        <div class="m-3 p-4 rounded-lg border border-[#C9A84C]/20 bg-[#0c0c0c]">
+                            <h3 class="text-xs text-[#C9A84C] uppercase tracking-wider mb-3">Detalle de la venta</h3>
+                            <div class="flex flex-col gap-2">
+                                @for (d of venta.detalles; track $index) {
+                                <div class="flex items-center justify-between text-sm border-b border-white/5 pb-2">
+                                    <div class="flex flex-col">
+                                        <span class="text-white">{{ d.productoNombre || d.servicioNombre }}</span>
+                                        <span class="text-[11px] text-gray-500">
+                                            {{ d.cantidad }} x S/ {{ d.precioUnitario | number:'1.2-2' }} · {{ d.productoNombre ? 'Producto' : 'Servicio' }}
+                                        </span>
+                                    </div>
+                                    <span class="font-semibold text-[#C9A84C]">S/ {{ d.cantidad * d.precioUnitario | number:'1.2-2' }}</span>
+                                </div>
+                                }
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+
+            <ng-template #emptymessage>
+                <tr>
+                    <td colspan="8" class="px-4 py-10 text-center text-gray-500">
+                        <i class="pi pi-inbox text-3xl block mb-2 opacity-40"></i>
+                        Sin ventas registradas
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+</div>
+
+<app-confirm-popover
+    [visible]="mostrarConfirmacion"
+    [mensaje]="mensajeConfirmacion"
+    mode="eliminar"
+    (confirm)="confirmarEliminar()"
+    (cancel)="cancelarEliminar()">
+</app-confirm-popover>

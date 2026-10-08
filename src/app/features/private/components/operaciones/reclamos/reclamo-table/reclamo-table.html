@@ -1,0 +1,53 @@
+<div class="rounded-xl border border-brand-gold-soft bg-brand-black overflow-hidden">
+    <div class="w-full overflow-x-auto">
+        <p-table [value]="reclamos" [paginator]="reclamos.length > rows" [rows]="rows" dataKey="idReclamo"
+            [tableStyle]="{ 'min-width': '800px' }">
+
+            <ng-template #header>
+                <tr class="text-sm text-brand-gold">
+                    <th class="text-left font-normal px-4 py-3">Código</th>
+                    <th class="text-left font-normal px-4 py-3">Cliente</th>
+                    <th class="text-left font-normal px-4 py-3">Clasificación</th>
+                    <th class="text-left font-normal px-4 py-3">Descripción</th>
+                    <th class="text-left font-normal px-4 py-3">Fecha</th>
+                    <th class="text-left font-normal px-4 py-3">Estado</th>
+                    <th class="text-center font-normal px-4 py-3">Acciones</th>
+                </tr>
+            </ng-template>
+
+            <ng-template #body let-reclamo>
+                <tr class="text-sm border-t border-brand-gold-soft">
+                    <td class="px-4 py-4 whitespace-nowrap text-white">{{ reclamo.numeroReclamo }}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-white">{{ reclamo.nombreCliente }}</td>
+                    <td class="px-4 py-4 whitespace-nowrap">
+                        <span class="inline-block px-2 py-1 rounded-md bg-white/10 text-xs text-gray-200">
+                            {{ clasificacion(reclamo.tipoReclamacion) }}
+                        </span>
+                    </td>
+                    <td class="px-4 py-4 text-white max-w-[260px] truncate">{{ reclamo.descripcion }}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-gray-400">
+                        {{ reclamo.fechaReclamo | date:'dd/MM/yyyy' }}
+                    </td>
+                    <td class="px-4 py-4 whitespace-nowrap">
+                        <span class="inline-block px-2 py-0.5 rounded-md border text-xs"
+                            [class]="estado(reclamo.estadoReclamo).clase">
+                            {{ estado(reclamo.estadoReclamo).label }}
+                        </span>
+                    </td>
+                    <td class="px-4 py-4 text-center">
+                        <button type="button" (click)="verReclamo(reclamo)" aria-label="Ver reclamo"
+                            class="text-gray-300 hover:text-brand-gold transition">
+                            <i class="pi pi-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+            </ng-template>
+
+            <ng-template #emptymessage>
+                <tr>
+                    <td colspan="7" class="px-4 py-6 text-center text-gray-500 italic">No hay reclamos registrados.</td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+</div>

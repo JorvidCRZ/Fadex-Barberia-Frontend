@@ -1,0 +1,87 @@
+<div class="min-h-screen bg-[#0a0a0a] text-white px-5 py-5 flex flex-col gap-5">
+
+  <!-- HEADER -->
+  <div class="flex items-start justify-between gap-4">
+    <div>
+      <h1 class="m-0 text-[1.45rem] font-bold leading-tight text-white">Métricas del Negocio</h1>
+      <p class="m-0 mt-1 text-[0.8rem] text-[#8a8a8a]">Indicadores de rendimiento en tiempo real</p>
+    </div>
+
+    <div class="relative">
+      <select
+        class="metricas-select"
+        [ngModel]="periodo"
+        (ngModelChange)="onPeriodoChange($event)">
+        @for (p of periodos; track p.value) {
+          <option [value]="p.value">{{ p.label }}</option>
+        }
+      </select>
+      <i class="pi pi-chevron-down pointer-events-none absolute right-3 top-1/2 -translate-y-1/2
+                text-[0.65rem] text-[#8a8a8a]"></i>
+    </div>
+  </div>
+
+  <!-- KPI CARDS -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+    @for (kpi of kpis; track kpi.label) {
+      <div class="metricas-card px-4 py-4">
+        <div class="flex items-start justify-between">
+          <span class="text-[0.68rem] uppercase tracking-[0.08em] text-[#9a9a9a]">{{ kpi.label }}</span>
+          <i class="pi {{ kpi.icon }} text-[0.95rem] text-[#d4af37]"></i>
+        </div>
+        <p class="m-0 mt-3 text-[1.55rem] font-bold leading-none text-white">{{ kpi.value }}</p>
+        <p class="m-0 mt-2.5 flex items-center gap-1 text-[0.7rem] text-[#22c55e]">
+          <i class="pi pi-arrow-up-right text-[0.6rem]"></i>{{ kpi.delta }}
+        </p>
+      </div>
+    }
+  </div>
+
+  <!-- GRÁFICAS -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+    <div class="metricas-card px-4 py-4">
+      <h3 class="m-0 text-[0.85rem] font-normal text-white">Ingresos y servicios</h3>
+      <div class="relative mt-4 h-[230px]">
+        <canvas #lineChart></canvas>
+      </div>
+    </div>
+
+    <div class="metricas-card px-4 py-4">
+      <h3 class="m-0 text-[0.85rem] font-normal text-white">Servicios por día</h3>
+      <div class="relative mt-4 h-[230px]">
+        <canvas #barChart></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLA -->
+  <div class="metricas-card overflow-hidden">
+    <h3 class="m-0 px-4 py-5 text-[0.85rem] font-normal text-white">Rendimiento por barbero</h3>
+
+    <div class="overflow-x-auto">
+      <table class="metricas-table">
+        <thead>
+          <tr>
+            <th>Barbero</th>
+            <th>Servicios</th>
+            <th>Ingresos</th>
+            <th>Ocupación</th>
+            <th>Valoración</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (b of barberos; track b.nombre) {
+            <tr>
+              <td>{{ b.nombre }}</td>
+              <td>{{ b.servicios }}</td>
+              <td>S/ {{ b.ingresos | number:'1.2-2' }}</td>
+              <td>{{ b.ocupacion }}%</td>
+              <td class="text-[#d4af37]">★ {{ b.valoracion | number:'1.1-1' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

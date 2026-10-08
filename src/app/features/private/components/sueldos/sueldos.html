@@ -1,0 +1,39 @@
+<div class="page-wrap">
+
+  <!-- Encabezado -->
+  <header class="flex items-start justify-between gap-4">
+    <div>
+      <h1 class="text-xl font-bold text-text-primary leading-tight">Gestión de Sueldos</h1>
+      <p class="mt-1 text-[11px] text-text-muted">Comisiones y remuneraciones del equipo</p>
+    </div>
+
+    <div class="relative">
+      <select
+        [(ngModel)]="periodoSeleccionado"
+        (ngModelChange)="cargarResumen()"
+        class="appearance-none h-9 w-[167px] pl-3 pr-8 rounded-lg bg-ui-card border border-ui-border
+               text-[11px] text-text-secondary outline-none cursor-pointer
+               focus:border-brand-gold transition-colors">
+        @for (p of periodos; track p.value) {
+          <option [value]="p.value">{{ p.label }}</option>
+        }
+      </select>
+      <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-text-muted"
+           width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m6 9 6 6 6-6" />
+      </svg>
+    </div>
+  </header>
+
+  <app-resumen-periodo
+    [totalPlanilla]="resumen.totalPlanilla"
+    [totalComisiones]="resumen.totalComisiones"
+    [sueldoFinalTotal]="resumen.sueldoFinalTotal"
+    [ventasPeriodo]="resumen.ventasPeriodo"
+    [barberosActivos]="resumen.barberosActivos"
+    [totalBarberos]="resumen.barberosActivos" />
+
+  <app-grafico-sueldos />
+  <app-tabla-sueldos />
+</div>

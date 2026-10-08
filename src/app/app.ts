@@ -1,4 +1,3 @@
-import { Toast } from 'primeng/toast';
 import { Router, RouterOutlet, NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
 import { CommonModule, registerLocaleData } from '@angular/common';
 import localeEsPe from '@angular/common/locales/es-PE';
@@ -12,7 +11,7 @@ registerLocaleData(localeEsPe);
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, RouterOutlet, Toast, ProgressSpinnerModule],
+  imports: [CommonModule, RouterOutlet, ProgressSpinnerModule],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })

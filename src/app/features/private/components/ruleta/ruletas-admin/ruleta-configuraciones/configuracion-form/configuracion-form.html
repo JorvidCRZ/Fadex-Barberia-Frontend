@@ -1,0 +1,56 @@
+<form [formGroup]="configuracionForm" class="flex flex-col gap-6 p-2">
+    <div class="part-form">
+        <span class="label-form">Categoría *</span>
+        <p-treeSelect [options]="categoriaTree" formControlName="categoriaId" placeholder="Seleccione una categoría" [filter]="true" filterBy="label" selectionMode="single" [metaKeySelection]="false" inputId="categoriaId"></p-treeSelect>
+        @if (campoInvalido('categoriaId')) {
+            <p-message severity="error" variant="simple" size="small">Seleccione una categoría</p-message>
+        }
+        @if (configuracion) {
+            <span class="text-text-tertiary text-sm">La categoría no se puede cambiar una vez creada la configuración.</span>
+        }
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="part-form">
+            <label for="meta">Meta (puntos) *</label>
+            <p-inputNumber formControlName="meta" inputId="meta" [showButtons]="true" [min]="1" [step]="1" [max]="9999" />
+            @if (campoInvalido('meta')) {
+                <p-message severity="error" variant="simple" size="small">Ingrese una meta válida</p-message>
+            }
+        </div>
+        <div class="part-form">
+            <label for="girosPorMeta">Giros por meta *</label>
+            <p-inputNumber formControlName="girosPorMeta" inputId="girosPorMeta" [showButtons]="true" [min]="1" [step]="1" [max]="9999" />
+            @if (campoInvalido('girosPorMeta')) {
+                <p-message severity="error" variant="simple" size="small">Ingrese una cantidad válida de giros</p-message>
+            }
+        </div>
+    </div>
+
+    <div class="part-form">
+        <span class="label-form">Ruleta asignada</span>
+        <p-select [options]="ruletas" formControlName="ruletaId" optionLabel="nombre" optionValue="ruletaId" placeholder="Sin asignar" [showClear]="true" inputId="ruletaId" [filter]="true" filterBy="nombre"></p-select>
+    </div>
+
+    <div class="flex flex-col sm:flex-row justify-around gap-6">
+        <div class="part-form items-center">
+            <label for="activa">Activa</label>
+            <p-checkbox binary="true" formControlName="activa" inputId="activa"></p-checkbox>
+        </div>
+
+        <div class="part-form items-center">
+            <label for="mostrarSiempre">Mostrar siempre</label>
+            <p-checkbox binary="true" formControlName="mostrarSiempre" inputId="mostrarSiempre"></p-checkbox>
+        </div>
+
+        <div class="part-form items-center">
+            <label for="crearTarjetaAutomatica">Crear tarjeta automática</label>
+            <p-checkbox binary="true" formControlName="crearTarjetaAutomatica" inputId="crearTarjetaAutomatica"></p-checkbox>
+        </div>
+    </div>
+
+    <div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
+        <button pButton label="Guardar" class="boton-submit w-full sm:w-auto" type="button" (click)="onGuardar()"></button>
+        <button pButton label="Cancelar" class="boton-cancel w-full sm:w-auto" type="button"(click)="onCancelar()"></button>
+    </div>
+</form>

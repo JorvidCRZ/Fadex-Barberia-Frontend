@@ -1,0 +1,20 @@
+<div class="flex flex-col gap-6 mt-5">
+    <header class="flex items-start justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-white">Gestión de Reclamos</h1>
+            <p class="text-xs text-gray-500 mt-1">Seguimiento del libro de reclamaciones</p>
+        </div>
+        <button pButton label="Crear Reclamo" icon="pi pi-plus" class="p-button-sm boton-primary"
+            (click)="abrirCrear()"></button>
+    </header>
+
+    <app-reclamo-table [reclamos]="reclamos" (ver)="abrirVer($event)" />
+</div>
+
+<p-dialog [(visible)]="mostrarFormulario" [modal]="true" [dismissableMask]="true"
+    [style]="{ width: '90vw', maxWidth: '80rem' }" (onHide)="cerrarFormulario()">
+    <ng-template pTemplate="header">
+        <app-dialog-header icono="pi-exclamation-circle" title="Crear Reclamo" mode="crear" />
+    </ng-template>
+    <app-reclamo-form (guardar)="guardarReclamo($event)" (cancelarEvento)="cerrarFormulario()" />
+</p-dialog>

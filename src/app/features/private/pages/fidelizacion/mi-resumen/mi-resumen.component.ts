@@ -2,10 +2,9 @@ import { CommonModule } from '@angular/common';
 import { Chart, registerables } from 'chart.js';
 import { StatsCard } from '../../../../../core/models/common/card.model';
 import { StatsComponent } from '../../../../../shared/components/stats/stats.component';
-import { NotificationService } from '../../../../../core/services/common/notification.service';
 import { FidelizacionTarjetaResponse } from '../../../../../core/models/fidelizacion/tarjeta.model';
-import { FidelizacionDashboardService } from '../../../../../core/services/fidelizacion/dashboard.service';
 import { FidelizacionDashboardClienteResponse } from '../../../../../core/models/fidelizacion/dashboard.model';
+import { FIDELIZACION_DASHBOARD_MOCK } from '../../../../../core/config/fidelizacion-mock.config';
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef, inject, ChangeDetectorRef } from '@angular/core';
 Chart.register(...registerables);
 
@@ -18,9 +17,11 @@ type TarjetaConMeta = FidelizacionTarjetaResponse & { meta: number; girosPorMeta
   templateUrl: './mi-resumen.html',
 })
 export class MiResumenComponent implements OnInit, OnDestroy {
-  private dashboardService = inject(FidelizacionDashboardService);
-  private notify = inject(NotificationService);
   private cd = inject(ChangeDetectorRef);
+
+  // Backend: conservar para reactivar cuando exista conexión con la API.
+  // private dashboardService = inject(FidelizacionDashboardService);
+  // private notify = inject(NotificationService);
 
   @ViewChild('progresoChart') progresoRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('girosChart') girosRef!: ElementRef<HTMLCanvasElement>;
@@ -90,22 +91,14 @@ export class MiResumenComponent implements OnInit, OnDestroy {
 
   private cargar(): void {
     this.cargando = true;
-    this.dashboardService.obtenerDashboardCliente().subscribe({
-      next: (resp) => {
-        this.data = resp.data;
-        this.buildStatsCards(resp.data);
-        this.cargando = false;
-        this.cd.detectChanges();
-        if (this.secciones.categoria) {
-          setTimeout(() => this.renderTabActivo());
-        }
-      },
-      error: (err) => {
-        this.notify.showHttpError(err);
-        this.cargando = false;
-        this.cd.detectChanges();
-      },
-    });
+    this.data = FIDELIZACION_DASHBOARD_MOCK;
+    this.buildStatsCards(this.data);
+    this.cargando = false;
+    this.cd.detectChanges();
+    if (this.secciones.categoria) setTimeout(() => this.renderTabActivo());
+
+    // Backend:
+    // this.dashboardService.obtenerDashboardCliente().subscribe({ ... });
   }
 
   private buildStatsCards(d: FidelizacionDashboardClienteResponse): void {

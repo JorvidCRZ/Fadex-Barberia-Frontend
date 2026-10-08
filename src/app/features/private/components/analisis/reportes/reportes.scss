@@ -1,0 +1,120 @@
+$gold: #d4af37;
+$card-bg: #111111;
+$card-border: rgba(201, 168, 76, 0.16);
+
+select option {
+  background-color: var(--color-ui-elevated, #1e1e1e);
+  color: var(--color-text-primary, #ffffff);
+}
+
+.reporte-card {
+  background: $card-bg;
+  border: 1px solid $card-border;
+  border-radius: 12px;
+}
+
+.reporte-select {
+  appearance: none;
+  -webkit-appearance: none;
+  min-width: 174px;
+  padding: 0.55rem 2.2rem 0.55rem 0.75rem;
+  font-size: 0.8rem;
+  color: #cfcfcf;
+  background: #161616;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+
+  &:hover,
+  &:focus {
+    border-color: rgba($gold, 0.5);
+  }
+}
+
+.reporte-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  margin-top: 2px;
+  color: $gold;
+  background: rgba(201, 168, 76, 0.1);
+  border-radius: 10px;
+}
+
+%btn-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  height: 30px;
+  padding: 0 0.7rem;
+  font-size: 0.76rem;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  i {
+    font-size: 0.78rem;
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.btn-pdf {
+  @extend %btn-base;
+  color: #111111;
+  background: $gold;
+  border: 1px solid $gold;
+
+  &:hover:not(:disabled) {
+    background: #e2c074;
+    border-color: #e2c074;
+  }
+}
+
+.btn-excel {
+  @extend %btn-base;
+  color: #ffffff;
+  background: #0d0d0d;
+  border: 1px solid $card-border;
+
+  &:hover:not(:disabled) {
+    border-color: rgba($gold, 0.6);
+    color: $gold;
+  }
+}
+
+.spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid transparent;
+  border-top-color: #111111;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+
+  &--light {
+    border-top-color: #ffffff;
+  }
+}
+
+.kpi-mini {
+  padding: 0.9rem 0.9rem 1rem;
+  background: #161616;
+  border: 1px solid $card-border;
+  border-radius: 10px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

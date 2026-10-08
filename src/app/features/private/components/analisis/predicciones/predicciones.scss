@@ -1,0 +1,38 @@
+$gold: #d4af37;
+$card-bg: #111111;
+$card-border: rgba(201, 168, 76, 0.16);
+
+select option {
+  background-color: var(--color-ui-elevated, #1e1e1e);
+  color: var(--color-text-primary, #ffffff);
+}
+
+.pred-card {
+  background: $card-bg;
+  border: 1px solid $card-border;
+  border-radius: 12px;
+}
+
+.pred-badge-periodo {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: #111111;
+  background: $gold;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.pred-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.68rem;
+  color: $gold;
+  background: rgba(201, 168, 76, 0.06);
+  border: 1px solid rgba($gold, 0.35);
+  border-radius: 6px;
+  white-space: nowrap;
+}

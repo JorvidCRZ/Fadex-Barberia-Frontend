@@ -1,0 +1,36 @@
+<form [formGroup]="ajusteForm" class="flex flex-col gap-6 p-2">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div class="part-form">
+            <label for="clienteId">Cliente ID *</label>
+            <p-inputNumber formControlName="clienteId" inputId="clienteId" [min]="1" />
+            @if (campoInvalido('clienteId')) {
+                <p-message severity="error" variant="simple" size="small">Selecciona un cliente</p-message>
+            }
+        </div>
+        <div class="part-form">
+            <label for="tarjetaId">Tarjeta ID *</label>
+            <p-inputNumber formControlName="tarjetaId" inputId="tarjetaId" [min]="1" />
+            @if (campoInvalido('tarjetaId')) {
+                <p-message severity="error" variant="simple" size="small">Selecciona una tarjeta</p-message>
+            }
+        </div>
+    </div>
+
+    <div class="part-form">
+        <label for="puntos">Puntos (usa negativo para restar) *</label>
+        <p-inputNumber formControlName="puntos" inputId="puntos" [showButtons]="true" />
+    </div>
+
+    <div class="part-form">
+        <label for="descripcion">Motivo del ajuste *</label>
+        <textarea pInputTextarea formControlName="descripcion" id="descripcion" placeholder="Ej. Corrección por queja del cliente"></textarea>
+        @if (campoInvalido('descripcion')) {
+            <p-message severity="error" variant="simple" size="small">Describe el motivo</p-message>
+        }
+    </div>
+
+    <div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
+        <button pButton label="Guardar ajuste" class="boton-submit w-full sm:w-auto" type="button" (click)="onGuardar()"></button>
+        <button pButton label="Cancelar" class="boton-cancel w-full sm:w-auto" type="button" (click)="onCancelar()"></button>
+    </div>
+</form>

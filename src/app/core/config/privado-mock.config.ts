@@ -52,6 +52,11 @@ export const HISTORIAL_MOCK: HistorialClienteModel[] = RESERVAS_MOCK.map(reserva
   nombreServicio: reserva.servicio,
   total: reserva.total,
   observacion: 'Atención simulada para demostración frontend',
+  tipoComprobante: reserva.reservaId === 1 ? 'BOLETA' : 'FACTURA',
+  numeroComprobante: reserva.reservaId === 1 ? 'B001-0001048' : 'F001-0001031',
+  metodoPago: reserva.reservaId === 1 ? 'Yape' : 'Tarjeta',
+  razonSocial: reserva.reservaId === 2 ? 'Cliente Demo' : undefined,
+  ruc: reserva.reservaId === 2 ? '20601234567' : undefined,
 }));
 
 export const RESUMEN_CLIENTE_MOCK: ClienteDetalleResumenDTO = {

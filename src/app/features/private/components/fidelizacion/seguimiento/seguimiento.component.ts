@@ -1,0 +1,31 @@
+import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { TabsModule } from 'primeng/tabs';
+import { FIDELIZACION_SEGUIMIENTO_TABS } from '@/app/core/config/tabs.config';
+import { ActivatedRoute, Router } from '@angular/router';
+import { MovimientosAdminComponent } from './movimiento/movimientos.component';
+import { FidelizacionDashboardAdminComponent } from './dashboard/fidelizacion-dashboard-admin.component';
+import { GirosComponent } from './giros/giros.component';
+import { RecompensaComponent } from './recompensa/recompensa.component';
+@Component({
+    selector: 'app-fidelizacion-admin',
+    standalone: true,
+    imports: [CommonModule, TabsModule, MovimientosAdminComponent, FidelizacionDashboardAdminComponent,GirosComponent, RecompensaComponent],
+    templateUrl: './seguimiento.html', 
+})
+export class SeguimientoComponent {
+    private route = inject(ActivatedRoute);
+    private router = inject(Router);
+
+    activeTab = 'dashboard';
+    tabs = FIDELIZACION_SEGUIMIENTO_TABS;
+
+    constructor() {
+        this.route.queryParams.subscribe(params => { this.activeTab = params['tab'] || 'dashboard'; });
+    }
+
+    onTabChange(tab: string | number | undefined): void {
+        if (tab === undefined || tab === null) return;
+        this.router.navigate([], { relativeTo: this.route, queryParams: { tab: String(tab) }, queryParamsHandling: 'merge', replaceUrl: true, });
+    }
+}

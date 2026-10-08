@@ -1,0 +1,158 @@
+<div class="form-base mb-6">
+	<div class="flex flex-col gap-4 sm:gap-6 md:flex-row md:items-start">
+
+		<!-- IZQUIERDA: TÍTULO + DESCRIPCIÓN -->
+		<div class="md:flex-1">
+			<h3 class="text-xs sm:text-sm font-semibold tracking-[0.15em] text-brand-gold uppercase">Filtros</h3>
+			<p class="mt-1 text-xs sm:text-sm text-text-secondary">Organiza y administra el listado de clientes.</p>
+		</div>
+
+		<!-- DERECHA: CONTROLES -->
+		<div class="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4 md:ml-auto md:items-end">
+
+			<!-- SELECTOR ORDENAR (dropdown personalizado) -->
+			<div class="filter-group flex-1 sm:flex-none" (clickOutside)="closeDropdown()">
+				<label class="label-form">Ordenar</label>
+				<div class="custom-select-wrap">
+					<button
+						type="button"
+						class="custom-select-btn inputs-text w-full sm:w-auto"
+						[class.open]="dropdownOpen"
+						(click)="toggleDropdown()"
+					>
+						<span>{{ selectedOrderLabel }}</span>
+						<i class="pi pi-chevron-down select-arrow" [class.rotated]="dropdownOpen"></i>
+					</button>
+					<div class="custom-dropdown" [class.open]="dropdownOpen">
+						@for (opt of orderOptions; track opt.value) {
+							<button
+								type="button"
+								class="dropdown-opt"
+								[class.active]="activeFilter === opt.value"
+								(click)="selectOrder(opt)"
+							>
+								{{ opt.label }}
+							</button>
+						}
+					</div>
+				</div>
+			</div>
+
+			<!-- BOTONES DE ACCIÓN -->
+			<div class="flex flex-col sm:flex-row w-full sm:w-auto gap-2 actions">
+
+				<button
+					pButton
+					type="button"
+					class="p-button text-xs sm:text-sm"
+					[ngClass]="isCustomMode ? 'boton-secondary' : 'boton-ghost'"
+					(click)="selectFilter('personalizado')"
+				>
+					<i class="pi pi-sliders-h hidden sm:inline-block"></i>
+					<span class="inline sm:hidden">Personalizado</span>
+				</button>
+
+				<button
+					pButton
+					type="button"
+					class="p-button text-xs sm:text-sm"
+					[ngClass]="activeFilter === 'deshabilitados' ? 'boton-danger-active' : 'boton-danger'"
+					(click)="selectFilter('deshabilitados')"
+				>
+					<i class="pi pi-ban hidden sm:inline-block"></i>
+					<span class="inline sm:hidden">Deshabilitados</span>
+				</button>
+
+			</div>
+		</div>
+	</div>
+
+	<!-- PANEL PERSONALIZADO -->
+	@if (isCustomMode) {
+		<div class="custom-panel mt-4">
+
+			<div class="custom-panel-header">
+				<i class="pi pi-sliders-h"></i>
+				<span>Filtrado personalizado</span>
+			</div>
+
+			<div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+
+				<div class="filter-group">
+					<label for="filterYear" class="label-form">Año</label>
+					<select
+						id="filterYear"
+						class="inputs-text"
+						[value]="draftYear ?? ''"
+						(change)="onYearChange($any($event.target).value)"
+					>
+						<option value="">Todos</option>
+						@for (year of years; track trackYear($index, year)) {
+							<option [value]="year">{{ year }}</option>
+						}
+					</select>
+				</div>
+
+				<div class="filter-group">
+					<label for="filterMonth" class="label-form">Mes</label>
+					<select
+						id="filterMonth"
+						class="inputs-text"
+						[value]="draftMonth ?? ''"
+						(change)="onMonthChange($any($event.target).value)"
+					>
+						<option value="">Todos</option>
+						@for (month of months; track trackMonth($index, month)) {
+							<option [value]="month.value">{{ month.label }}</option>
+						}
+					</select>
+				</div>
+
+				<div class="filter-group">
+					<label for="fromDate" class="label-form">Desde</label>
+					<input
+						id="fromDate"
+						type="date"
+						class="inputs-text"
+						[value]="draftFromDate"
+						(change)="onFromDateChange($any($event.target).value)"
+					/>
+				</div>
+
+				<div class="filter-group">
+					<label for="toDate" class="label-form">Hasta</label>
+					<input
+						id="toDate"
+						type="date"
+						class="inputs-text"
+						[value]="draftToDate"
+						(change)="onToDateChange($any($event.target).value)"
+					/>
+				</div>
+
+			</div>
+
+			<div class="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
+				<button
+					pButton
+					type="button"
+					class="p-button boton-ghost text-xs sm:text-sm"
+					(click)="limpiarPersonalizado()"
+				>
+					<i class="pi pi-filter-slash"></i>
+					<span>Limpiar</span>
+				</button>
+				<button
+					pButton
+					type="button"
+					class="p-button boton-secondary text-xs sm:text-sm"
+					(click)="buscarPersonalizado()"
+				>
+					Buscar
+				</button>
+			</div>
+
+		</div>
+	}
+
+</div>

@@ -1,0 +1,23 @@
+<div class="mt-5">
+  <app-header-barbero (search)="onSearch($event)"/>
+</div>
+
+<div class="mt-5">
+  <app-resumen-general-barbero/>
+</div>
+
+<section class="mt-1 section-shell section-shell--main">
+  <div class="section-header">
+    <div>
+      <div class="section-badge">
+        <span>Gestion de barberos</span>
+      </div>
+    </div>
+    <div class="section-mark">✦</div>
+  </div>
+
+  <div class="section-content">
+    <app-filtrar-barbero (apply)="onApplyFilters($event)" (clear)="onClearFilters()" (inhabilitados)="onShowInhabilitados()"/>
+    <app-table-barbero [barberos]="barberos" [totalElements]="totalElements" [currentPage]="currentPage" [totalPages]="totalPages" [pageSize]="pageSize" [inhabilitadosMode]="inhabilitadosMode" [isSearchMode]="searchTerm.trim().length > 0" (pageChange)="onPageChange($event)" (delete)="onDisableBarbero($event)" (reactivate)="onReactivateBarbero($event)"/>
+  </div>
+</section>

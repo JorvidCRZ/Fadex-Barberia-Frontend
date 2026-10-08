@@ -1,0 +1,64 @@
+<div class="p-4 md:p-6 lg:p-8 lg:pt-4 bg-neutral-primary-lighter rounded-base shadow-sm">
+    <app-ruleta-categoria [items]="items"/>
+    <div class="relative w-full overflow-x-auto">
+        <p-table [value]="itemsOrdenados" [loading]="!cargado" dataKey="itemId" [tableStyle]="{ 'min-width': '900px' }" class="rounded-xl">
+            <ng-template #header>
+                <tr>
+                    <th class="whitespace-nowrap text-center">#</th>
+                    <th class="whitespace-nowrap text-center">Imagen</th>
+                    <th class="whitespace-nowrap text-center">Nombre</th>
+                    <th class="whitespace-nowrap text-center">Tipo</th>
+                    <th class="whitespace-nowrap text-center">Valor</th>
+                    <th class="whitespace-nowrap text-center">Probabilidad</th>
+                    <th class="whitespace-nowrap text-center">Premio mayor</th>
+                    <th class="whitespace-nowrap text-center">Estado</th>
+                    <th class="whitespace-nowrap text-center">Acciones</th>
+                </tr>
+            </ng-template>
+
+            <ng-template #body let-item let-i="rowIndex" pTemplate="body">
+                <tr>
+                    <td class="whitespace-nowrap text-center">{{ item.ordenDisplay ?? (i + 1) }}</td>
+                    <td class="whitespace-nowrap text-center">
+                        @if (item.imagenUrl) {
+                            <p-image [src]="item.imagenUrl | safeImageUrl" width="40" height="40" [preview]="false" class="flex justify-center" imageClass="rounded-lg object-cover flex justify-center" preview="true" />
+                        } @else {
+                            <div class="w-10 h-10 rounded-lg bg-gray-200 inline-flex items-center justify-center mx-auto"><i class="pi pi-image text-gray-500"></i></div>
+                        }
+                    </td>
+                    <td class="whitespace-nowrap text-center">{{ item.nombre }}</td>
+                    <td class="whitespace-nowrap text-center"><app-status-badge type="text" [value]="item.tipoPremio" customClass="badge-text estado-producto"/></td>
+                    <td class="whitespace-nowrap text-center">{{ item.valor ?? '—' }}</td>
+                    <td class="whitespace-nowrap text-center">{{ item.probabilidad }}%</td>
+                    <td class="whitespace-nowrap text-center">
+                        @if (item.esPremioMayor) {
+                            <i class="pi pi-star-fill text-brand-gold"></i>
+                        } @else {
+                            <span>—</span>
+                        }
+                    </td>
+                    <td class="whitespace-nowrap text-center">
+                        <div class="flex items-center justify-center gap-2">
+                            <app-status-badge type="boolean" [value]="item.activo" trueLabel="Activo" falseLabel="Inactivo" />
+                            <p-toggleSwitch [ngModel]="item.activo" (onChange)="cambiarEstadoItem(item, $event)" class="scale-90" />
+                        </div>
+                    </td>
+                    <td class="whitespace-nowrap text-center">
+                        <div class="flex flex-row justify-center">
+                            <p-button icon="pi pi-pencil" class="boton-editar-tabla" (click)="editar.emit(item)"></p-button>
+                            <p-button icon="pi pi-trash" class="boton-eliminar-tabla" (click)="pedirConfirmacion(item, $event)"></p-button>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+
+            <ng-template #emptymessage>
+                <tr>
+                    <td colspan="9" class="text-center py-6 text-text-tertiary">Aún no hay premios configurados para esta ruleta.</td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+</div>
+
+<app-confirm-popover [visible]="mostrarConfirmacion" [mensaje]="mensajeConfirmacion" [icono]="icono" [titulo]="'Eliminar Premio'" (confirm)="confirmarEliminar()" (cancel)="cancelarEliminar()"/>

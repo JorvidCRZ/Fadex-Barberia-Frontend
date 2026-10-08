@@ -1,0 +1,115 @@
+<div class="min-h-screen bg-[#0a0a0a] text-white px-5 py-5 flex flex-col gap-5">
+
+  <!-- HEADER -->
+  <div class="flex items-start justify-between gap-4">
+    <div>
+      <h1 class="m-0 text-[1.45rem] font-bold leading-tight text-white">Reportes</h1>
+      <p class="m-0 mt-1 text-[0.8rem] text-[#8a8a8a]">Genera y descarga información del negocio</p>
+    </div>
+
+    <div class="relative">
+      <select
+        class="reporte-select"
+        [ngModel]="periodo"
+        (ngModelChange)="onPeriodoChange($event)">
+        @for (p of periodos; track p.value) {
+          <option [value]="p.value">{{ p.label }}</option>
+        }
+      </select>
+      <i class="pi pi-chevron-down pointer-events-none absolute right-3 top-1/2 -translate-y-1/2
+                text-[0.65rem] text-[#8a8a8a]"></i>
+    </div>
+  </div>
+
+  <!-- ERROR -->
+  @if (error) {
+    <div class="bg-red-950/40 border border-red-600/30 text-[#e05252] px-4 py-3 rounded-xl text-[0.85rem]">
+      <i class="pi pi-exclamation-triangle mr-2"></i>{{ error }}
+    </div>
+  }
+
+  <!-- REPORTES DISPONIBLES -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    @for (r of reportes; track r.tipo) {
+      <div class="reporte-card flex items-start gap-4 px-4 py-4">
+
+        <div class="reporte-icon">
+          @switch (r.tipo) {
+            @case ('servicios') {
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>
+                <path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/>
+              </svg>
+            }
+            @default {
+              <i class="pi {{ r.icon }} text-[1.15rem]"></i>
+            }
+          }
+        </div>
+
+        <div class="min-w-0">
+          <p class="m-0 text-[0.88rem] font-semibold text-white">{{ r.titulo }}</p>
+          <p class="m-0 mt-1 text-[0.76rem] text-[#8a8a8a]">{{ r.descripcion }}</p>
+
+          <div class="mt-3 flex items-center gap-2.5">
+            <button type="button" class="btn-pdf"
+                    [disabled]="exportando === r.tipo + '-pdf'"
+                    (click)="exportarPDF(r.tipo)">
+              @if (exportando === r.tipo + '-pdf') {
+                <span class="spinner"></span>
+              } @else {
+                <i class="pi pi-download"></i>
+              }
+              PDF
+            </button>
+
+            <button type="button" class="btn-excel"
+                    [disabled]="exportando === r.tipo + '-excel'"
+                    (click)="exportarExcel(r.tipo)">
+              @if (exportando === r.tipo + '-excel') {
+                <span class="spinner spinner--light"></span>
+              } @else {
+                <i class="pi pi-download"></i>
+              }
+              Excel
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- RESUMEN SEMANAL -->
+  <div class="reporte-card overflow-hidden">
+    <h3 class="m-0 px-4 py-4 text-[0.85rem] font-normal text-white border-b border-[rgba(201,168,76,0.16)]">
+      Resumen semanal
+    </h3>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 p-4">
+      @for (k of resumen; track k.label) {
+        <div class="kpi-mini">
+          <div class="flex items-start justify-between">
+            <span class="text-[0.66rem] uppercase tracking-[0.08em] text-[#9a9a9a]">{{ k.label }}</span>
+
+            @if (k.label === 'Servicios') {
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#d4af37"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>
+                <path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/>
+              </svg>
+            } @else {
+              <i class="pi {{ k.icon }} text-[0.9rem] text-[#d4af37]"></i>
+            }
+          </div>
+
+          <p class="m-0 mt-3 text-[1.5rem] font-bold leading-none text-white">{{ k.value }}</p>
+          <p class="m-0 mt-2.5 flex items-center gap-1 text-[0.68rem] text-[#22c55e]">
+            <i class="pi pi-arrow-up-right text-[0.58rem]"></i>{{ k.delta }}
+          </p>
+        </div>
+      }
+    </div>
+  </div>
+
+</div>

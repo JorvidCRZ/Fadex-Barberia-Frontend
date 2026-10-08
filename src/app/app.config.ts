@@ -9,7 +9,7 @@ import localeEs from '@angular/common/locales/es';
 import { routes } from './app.routes';
 import Aura from '@primeuix/themes/aura';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-// import { authInterceptor } from './core/interceptors/auth-interceptor';
+import { authInterceptor } from './core/interceptors/auth-interceptor';
 import { LOCALE_ID } from '@angular/core';
 
 registerLocaleData(localeEs);
@@ -29,11 +29,8 @@ export const appConfig: ApplicationConfig = {
       }
     }),
     MessageService,
-    provideHttpClient(
-      // withInterceptors([authInterceptor])
-    ),
+    provideHttpClient(withInterceptors([authInterceptor])),
     { provide: LOCALE_ID, useValue: 'es-PE' },
   ]
 };
-
 

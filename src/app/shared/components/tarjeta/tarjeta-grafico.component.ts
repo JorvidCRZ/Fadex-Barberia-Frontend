@@ -2,10 +2,9 @@ import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { Chart, registerables } from 'chart.js';
 import { Movimiento, Origen } from '../../../core/models/fidelizacion/movimiento.model';
-import { NotificationService } from '../../../core/services/common/notification.service';
 import { FidelizacionTarjetaResponse } from '../../../core/models/fidelizacion/tarjeta.model';
-import { FidelizacionMovimientoService } from '../../../core/services/fidelizacion/movimiento.service';
-import { Component, EventEmitter, Input, OnInit, OnDestroy, Output, ViewChild, ElementRef, inject, signal } from '@angular/core';
+import { FIDELIZACION_MOVIMIENTOS_MOCK } from '../../../core/config/fidelizacion-mock.config';
+import { Component, EventEmitter, Input, OnInit, OnDestroy, Output, ViewChild, ElementRef, signal } from '@angular/core';
 Chart.register(...registerables);
 
 type TarjetaConMeta = FidelizacionTarjetaResponse & { meta: number };
@@ -31,8 +30,8 @@ export class TarjetaGraficoComponent implements OnInit, OnDestroy {
 
     @ViewChild('progresoChart') progresoRef?: ElementRef<HTMLCanvasElement>;
 
-    private movimientoService = inject(FidelizacionMovimientoService);
-    private notify = inject(NotificationService);
+    // Backend: private movimientoService = inject(FidelizacionMovimientoService);
+    // Backend: private notify = inject(NotificationService);
     private chart: Chart | null = null;
 
     readonly Origen = Origen;
@@ -139,16 +138,11 @@ export class TarjetaGraficoComponent implements OnInit, OnDestroy {
 
     private cargarMovimientosDashboard(): void {
         this.cargandoDashboard.set(true);
-        this.movimientoService.obtenerMisMovimientos().subscribe({
-            next: (resp) => {
-                this.movimientosDashboard.set(resp.data);
-                this.cargandoDashboard.set(false);
-            },
-            error: (err) => {
-                this.notify.showHttpError(err.message);
-                this.cargandoDashboard.set(false);
-            },
-        });
+        this.movimientosDashboard.set([...FIDELIZACION_MOVIMIENTOS_MOCK]);
+        this.cargandoDashboard.set(false);
+
+        // Backend:
+        // this.movimientoService.obtenerMisMovimientos().subscribe({ ... });
     }
 
     get girosTotales(): number {
@@ -207,16 +201,11 @@ export class TarjetaGraficoComponent implements OnInit, OnDestroy {
 
     private cargarMovimientos(tarjetaId: number): void {
         this.cargandoMovimientos.update((m) => ({ ...m, [tarjetaId]: true }));
-        this.movimientoService.obtenerMovimientos({ tarjetaId, size: 30, sort: 'createdAt,desc' }).subscribe({
-            next: (resp) => {
-                this.movimientosPorTarjeta.update((m) => ({ ...m, [tarjetaId]: resp.data.content }));
-                this.cargandoMovimientos.update((m) => ({ ...m, [tarjetaId]: false }));
-            },
-            error: (err) => {
-                this.notify.showHttpError(err.message);
-                this.cargandoMovimientos.update((m) => ({ ...m, [tarjetaId]: false }));
-            },
-        });
+        this.movimientosPorTarjeta.update((m) => ({ ...m, [tarjetaId]: FIDELIZACION_MOVIMIENTOS_MOCK.filter(item => item.tarjetaId === tarjetaId) }));
+        this.cargandoMovimientos.update((m) => ({ ...m, [tarjetaId]: false }));
+
+        // Backend:
+        // this.movimientoService.obtenerMovimientos({ tarjetaId, size: 30, sort: 'createdAt,desc' }).subscribe({ ... });
     }
 
     // 👇 ahora usa la meta propia de cada tarjeta

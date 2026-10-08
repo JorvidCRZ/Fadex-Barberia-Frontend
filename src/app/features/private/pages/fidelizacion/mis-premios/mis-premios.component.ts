@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { EstadoRecompensa, RecompensaObtenida } from '../../../../../core/models/ruleta/recompensa.model';
-import { RecompensaService } from '../../../../../core/services/ruleta/recompensa.service';
+import { FIDELIZACION_RECOMPENSAS_MOCK, FIDELIZACION_TARJETAS_MOCK } from '../../../../../core/config/fidelizacion-mock.config';
 
 type TabRecompensa = 'TODAS' | 'PENDIENTES' | 'USADAS';
 
@@ -12,7 +12,7 @@ type TabRecompensa = 'TODAS' | 'PENDIENTES' | 'USADAS';
   templateUrl: './mis-premios.html'
 })
 export class MisPremiosComponent implements OnInit {
-  private recompensaService = inject(RecompensaService);
+  // Backend: private recompensaService = inject(RecompensaService);
 
   readonly EstadoRecompensa = EstadoRecompensa;
 
@@ -41,17 +41,11 @@ export class MisPremiosComponent implements OnInit {
   cargarRecompensas(): void {
     this.cargando.set(true);
     this.error.set(null);
+    this.recompensas.set([...FIDELIZACION_RECOMPENSAS_MOCK]);
+    this.cargando.set(false);
 
-    this.recompensaService.obtenerMisRecompensas().subscribe({
-      next: (res) => {
-        this.recompensas.set(res.data ?? []);
-        this.cargando.set(false);
-      },
-      error: () => {
-        this.error.set('No se pudieron cargar tus recompensas.');
-        this.cargando.set(false);
-      }
-    });
+    // Backend:
+    // this.recompensaService.obtenerMisRecompensas().subscribe({ ... });
   }
 
   cambiarTab(tab: TabRecompensa): void {
@@ -97,6 +91,18 @@ export class MisPremiosComponent implements OnInit {
       return `Vence: ${this.formatearFecha(recompensa.fechaVencimiento)}`;
     }
     return '';
+  }
+
+  get tarjetaPrincipal() {
+    return FIDELIZACION_TARJETAS_MOCK[0];
+  }
+
+  get hitos() {
+    return Array.from({ length: this.tarjetaPrincipal.meta ?? 15 }, (_, index) => index + 1);
+  }
+
+  get progresoPorcentaje(): number {
+    return Math.round((this.tarjetaPrincipal.progreso / (this.tarjetaPrincipal.meta ?? 15)) * 100);
   }
 
   private formatearFecha(fechaIso: string): string {

@@ -1,0 +1,28 @@
+<div class="flex flex-col gap-6 p-2">
+    <div class="flex items-center gap-3 rounded-lg border border-brand-gold-soft bg-brand-black p-4">
+        @if (recompensa.itemImagen) {
+            <img [src]="recompensa.itemImagen" [alt]="recompensa.itemNombre" class="h-12 w-12 rounded-full object-cover border border-brand-gold-soft" />
+        } @else {
+            <span class="h-4 w-4 rounded-full inline-block" [style.background]="recompensa.colorHex"></span>
+        }
+        <div class="flex flex-col">
+            <span class="text-brand-white font-semibold">{{ recompensa.itemNombre }}</span>
+            <span class="text-text-tertiary text-sm">{{ recompensa.clienteNombre }}</span>
+        </div>
+        @if (recompensa.premioMayor) {
+            <i class="pi pi-star-fill text-brand-gold ml-auto" title="Premio mayor"></i>
+        }
+    </div>
+
+    <div class="part-form">
+        <label>Código de canje</label>
+        <span class="font-mono text-base px-3 py-2 rounded bg-brand-black border border-brand-gold-soft text-brand-gold text-center">{{ recompensa.codigoCanje }}</span>
+    </div>
+
+    <p class="text-sm text-text-tertiary">Confirma que el cliente presentó este código para marcar la recompensa como canjeada.</p>
+
+    <div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
+        <button pButton label="Confirmar canje" class="boton-submit w-full sm:w-auto" type="button" (click)="onConfirmar()"></button>
+        <button pButton label="Cancelar" class="boton-cancel w-full sm:w-auto" type="button" (click)="onCancelar()"></button>
+    </div>
+</div>

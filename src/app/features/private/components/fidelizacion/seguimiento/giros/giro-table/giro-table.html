@@ -1,0 +1,36 @@
+<div class="relative w-full overflow-x-auto">
+    <p-table [value]="giros" [loading]="!cargado" [lazy]="true" (onLazyLoad)="lazyLoad.emit($event)"
+        [paginator]="true" [rows]="rows" [totalRecords]="totalRecords" dataKey="id"
+        [tableStyle]="{ 'min-width': '1000px' }" class="rounded-xl">
+
+        <ng-template #header>
+            <tr>
+                <th class="whitespace-nowrap text-center">Fecha</th>
+                <th class="whitespace-nowrap text-center">Cliente</th>
+                <th class="whitespace-nowrap text-center">Ruleta</th>
+                <th class="whitespace-nowrap text-center">Premio</th>
+                <th class="whitespace-nowrap text-center">N° Giro</th>
+                <th class="whitespace-nowrap text-center">Prob. Final</th>
+                <th class="whitespace-nowrap text-center">Prob. Aplicada</th>
+            </tr>
+        </ng-template>
+
+        <ng-template #body let-g>
+            <tr>
+                <td class="whitespace-nowrap text-center text-brand-white">{{ g.fecha | date:'dd/MM/yy HH:mm' }}</td>
+                <td class="whitespace-nowrap text-center text-brand-white">{{ g.clienteNombre }}</td>
+                <td class="whitespace-nowrap text-center text-brand-white">{{ g.ruletaNombre }}</td>
+                <td class="whitespace-nowrap text-center text-brand-white">{{ g.premio }}</td>
+                <td class="whitespace-nowrap text-center text-brand-white">{{ g.numeroGiro }}</td>
+                <td class="whitespace-nowrap text-center text-brand-white">{{ g.probFinal | number:'1.2-2' }}</td>
+                <td class="whitespace-nowrap text-center text-brand-white">{{ g.probAplicada | number:'1.2-2' }}</td>
+            </tr>
+        </ng-template>
+
+        <ng-template #emptymessage>
+            <tr>
+                <td colspan="7" class="text-center py-6 text-text-tertiary">Aún no hay giros registrados.</td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>

@@ -1,0 +1,84 @@
+<div class="p-4 md:p-6 lg:p-8 bg-neutral-primary-lighter rounded-base shadow-sm">
+
+    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
+        <div>
+            <h1 class="text-xl font-semibold text-neutral-primary-darker">Detalle por barbero</h1>
+            <p class="text-sm text-neutral-primary-dark mt-0.5">Sueldos y comisiones del período</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+            <select class="tabla-filter" [(ngModel)]="mes">
+                <option *ngFor="let m of meses" [ngValue]="m.id">{{ m.nombre }}</option>
+            </select>
+
+            <select class="tabla-filter" [(ngModel)]="anio">
+                <option *ngFor="let a of aniosDisponibles" [ngValue]="a">{{ a }}</option>
+            </select>
+
+            <button pButton label="Aplicar" icon="pi pi-filter" class="boton-primary" (click)="aplicarFiltro()"></button>
+        </div>
+    </div>
+
+    <div class="relative w-full overflow-x-auto">
+        <p-table [value]="barberos" [lazy]="true" (onLazyLoad)="onLazyLoad($event)" [paginator]="true" [rows]="size"
+            [totalRecords]="totalElements" [loading]="!cargado" dataKey="barberoId" [showCurrentPageReport]="true"
+            currentPageReportTemplate="Viendo {first} a {last} de {totalRecords} entradas"
+            [tableStyle]="{ 'min-width': '760px' }" class="rounded-xl">
+
+            <ng-template #header>
+                <tr>
+                    <th class="whitespace-nowrap text-center">Barbero</th>
+                    <th class="whitespace-nowrap text-center">Sueldo base</th>
+                    <th class="whitespace-nowrap text-center">Ventas</th>
+                    <th class="whitespace-nowrap text-center">Comisión</th>
+                    <th class="whitespace-nowrap text-center">Sueldo final</th>
+                    <th class="whitespace-nowrap text-center">Acciones</th>
+                </tr>
+            </ng-template>
+
+            <ng-template #body let-b pTemplate="body">
+                <tr>
+                    <td class="whitespace-nowrap font-medium">
+                        <div class="flex items-center gap-2">
+                            <span class="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-500/10 text-[11px] font-medium text-yellow-400">
+                                {{ getIniciales(b.nombreBarbero) }}
+                            </span>
+                            <span class="inline-block align-middle text-gray-400">{{ b.nombreBarbero }}</span>
+                        </div>
+                    </td>
+                    <td class="whitespace-nowrap text-center">
+                        <span class="inline-block align-middle text-gray-400">S/ {{ b.sueldoBase | number:'1.2-2' }}</span>
+                    </td>
+                    <td class="whitespace-nowrap text-center">
+                        <span class="inline-block align-middle text-gray-400">{{ b.cantidadVentas }}</span>
+                    </td>
+                    <td class="whitespace-nowrap text-center">
+                        <app-status-badge type="text"
+                            [value]="(b.porcentajeComision | number:'1.0-2') + '% · S/ ' + (b.montoComision | number:'1.2-2')"
+                            customClass="badge-text estado-info" />
+                    </td>
+                    <td class="whitespace-nowrap text-center font-semibold text-emerald-500">
+                        S/ {{ b.sueldoFinal | number:'1.2-2' }}
+                    </td>
+                    <td class="whitespace-nowrap text-center">
+                        <div class="flex flex-row justify-center">
+                            <p-button icon="pi pi-eye" class="boton-ver-tabla" pTooltip="Ver detalle" tooltipPosition="top" (onClick)="verDetalle(b)" />
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+
+            <ng-template #emptymessage>
+                <tr>
+                    <td colspan="6" class="text-center py-16">
+                        <div class="flex flex-col items-center gap-3 text-neutral-primary-dark">
+                            <i class="pi pi-wallet text-4xl"></i>
+                            <p class="text-sm font-medium">No hay registros para el período seleccionado</p>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+
+        </p-table>
+    </div>
+</div>
