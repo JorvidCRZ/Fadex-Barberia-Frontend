@@ -1,15 +1,16 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { ResumenPeriodoComponent } from './components/resumen-periodo/resumen-periodo';
 import { GraficoSueldos } from './components/grafico-sueldos/grafico-sueldos';
 import { TablaSueldos } from './components/tabla-sueldos/tabla-sueldos';
 
-import { PlanillaService } from '@core/services/planilla/planilla.service';
+import { PlanillaResumen } from '@core/models/planilla/planilla.model';
 
-import {
-  PlanillaResumen
-} from '@core/models/planilla/planilla.model';
+const MESES = [
+  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+];
 
 @Component({
   selector: 'app-sueldos',
@@ -21,14 +22,23 @@ import {
     TablaSueldos
   ],
   templateUrl: './sueldos.html',
-  styleUrl: './sueldos.css'
+  styleUrl: './sueldos.scss'
 })
 export class Sueldos implements OnInit {
 
-  private readonly planillaService = inject(PlanillaService);
-
   mes = new Date().getMonth() + 1;
   anio = new Date().getFullYear();
+
+  // Últimos 12 meses, el actual primero
+  periodos = Array.from({ length: 12 }, (_, i) => {
+    const d = new Date(this.anio, this.mes - 1 - i, 1);
+    return {
+      value: `${d.getFullYear()}-${d.getMonth() + 1}`,
+      label: `${MESES[d.getMonth()]} ${d.getFullYear()}`
+    };
+  });
+
+  periodoSeleccionado = this.periodos[0].value;
 
   resumen: PlanillaResumen = {
     totalPlanilla: 0,
@@ -41,13 +51,20 @@ export class Sueldos implements OnInit {
   ngOnInit(): void {
     this.cargarResumen();
   }
-
+  
   cargarResumen(): void {
-    this.planillaService
-      .getResumen(this.mes, this.anio)
-      .subscribe({
-        next: (response) => { this.resumen = response.data; },
-        error: (err) => console.error('Error resumen', err)
-      });
+    const [anio, mes] = this.periodoSeleccionado.split('-').map(Number);
+    this.anio = anio;
+    this.mes = mes;
+
+    // Datos de memoria (Mock) - valores del prototipo
+    // Aquí luego va la llamada al servicio usando this.mes y this.anio
+    this.resumen = {
+      totalPlanilla: 9840,
+      totalComisiones: 4206,
+      sueldoFinalTotal: 14046,
+      ventasPeriodo: 16010,
+      barberosActivos: 4
+    };
   }
 }

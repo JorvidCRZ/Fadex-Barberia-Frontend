@@ -6,7 +6,7 @@ import { ResumenBarbero } from '@core/models/planilla/venta-barbero.model';
   selector: 'app-barbero-kpis',
   imports: [CommonModule],
   templateUrl: './barbero-kpis.html',
-  styleUrl: './barbero-kpis.css',
+  styleUrl: './barbero-kpis.scss',
 })
 export class BarberoKpis {
   @Input() resumen!: ResumenBarbero;

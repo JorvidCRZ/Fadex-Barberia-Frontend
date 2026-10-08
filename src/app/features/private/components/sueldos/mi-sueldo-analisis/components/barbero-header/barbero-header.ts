@@ -7,7 +7,7 @@ import { ResumenBarbero } from '@core/models/planilla/venta-barbero.model';
   selector: 'app-barbero-header',
   imports: [CommonModule],
   templateUrl: './barbero-header.html',
-  styleUrl: './barbero-header.css',
+  styleUrl: './barbero-header.scss',
 })
 export class BarberoHeader {
   @Input() resumen!: ResumenBarbero;
