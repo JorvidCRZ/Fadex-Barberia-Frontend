@@ -1,0 +1,47 @@
+<div class="min-h-screen bg-[#0a0a0a] text-white px-5 py-5 flex flex-col gap-5">
+
+  <!-- HEADER -->
+  <div>
+    <div class="flex items-center gap-3">
+      <h1 class="m-0 text-[1.45rem] font-bold leading-tight text-white">Predicciones</h1>
+      <span class="pred-badge-periodo">Próximos 7 días</span>
+    </div>
+    <p class="m-0 mt-1 text-[0.8rem] text-[#8a8a8a]">Proyecciones de demanda basadas en el historial</p>
+  </div>
+
+  <!-- KPI CARDS -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+    @for (kpi of kpis; track kpi.label) {
+      <div class="pred-card px-4 py-4">
+        <div class="flex items-start justify-between">
+          <span class="text-[0.68rem] uppercase tracking-[0.08em] text-[#9a9a9a]">{{ kpi.label }}</span>
+          <i class="pi {{ kpi.icon }} text-[0.95rem] text-[#d4af37]"></i>
+        </div>
+        <p class="m-0 mt-3 text-[1.55rem] font-bold leading-none text-white">{{ kpi.value }}</p>
+        <p class="m-0 mt-2.5 flex items-center gap-1 text-[0.7rem] text-[#22c55e]">
+          <i class="pi pi-arrow-up-right text-[0.6rem]"></i>{{ kpi.delta }}
+        </p>
+      </div>
+    }
+  </div>
+
+  <!-- GRÁFICA -->
+  <div class="pred-card px-4 py-4">
+    <h3 class="m-0 text-[0.85rem] font-normal text-white">Predicción de clientes e ingresos</h3>
+    <div class="relative mt-5 h-[250px]">
+      <canvas #prediccionChart></canvas>
+    </div>
+  </div>
+
+  <!-- INSIGHTS -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    @for (i of insights; track i.dia) {
+      <div class="pred-card px-4 py-4">
+        <span class="pred-tag">{{ i.etiqueta }}</span>
+        <p class="m-0 mt-4 text-[0.88rem] font-semibold text-white">{{ i.dia }}</p>
+        <p class="m-0 mt-3 text-[0.76rem] text-[#8a8a8a]">{{ i.detalle }}</p>
+      </div>
+    }
+  </div>
+
+</div>

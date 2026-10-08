@@ -1,0 +1,81 @@
+$card-bg: #111111;
+$card-border: rgba(201, 168, 76, 0.16);
+$gold: #d4af37;
+
+.metricas-card {
+  background: $card-bg;
+  border: 1px solid $card-border;
+  border-radius: 12px;
+}
+
+.metricas-select {
+  appearance: none;
+  -webkit-appearance: none;
+  min-width: 172px;
+  padding: 0.55rem 2.2rem 0.55rem 0.75rem;
+  font-size: 0.8rem;
+  color: #cfcfcf;
+  background: #111111;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+
+  &:hover,
+  &:focus {
+    border-color: rgba($gold, 0.5);
+  }
+
+  option {
+    background: #111111;
+    color: #fff;
+  }
+}
+
+.metricas-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+
+  thead tr {
+    border-top: 1px solid $card-border;
+    border-bottom: 1px solid $card-border;
+  }
+
+  th {
+    padding: 0.8rem 0.5rem 0.8rem 1.15rem;
+    text-align: left;
+    font-weight: 400;
+    color: $gold;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 0.75rem 0.5rem 0.75rem 1.15rem;
+    color: #fff;
+    white-space: nowrap;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    transition: background 0.15s;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+  }
+
+  th:nth-child(1),
+  td:nth-child(1) { width: 26%; }
+  th:nth-child(2),
+  td:nth-child(2) { width: 16%; }
+  th:nth-child(3),
+  td:nth-child(3) { width: 19%; }
+  th:nth-child(4),
+  td:nth-child(4) { width: 19%; }
+}

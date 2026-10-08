@@ -8,17 +8,17 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { AccordionModule } from 'primeng/accordion';
 import { TreeSelectModule } from 'primeng/treeselect';
-import { ButtonModule } from 'primeng/button';
 import { FilterField } from '../../../core/models/common/filtro.model';
 import { BOOLEAN_OPTIONS } from '../../../core/models/common/select.option.model';
+import { ButtonComponent } from '../button/button.component';
 
 @Component({
   selector: 'app-filtros',
   standalone: true,
   imports: [
-    CommonModule, ReactiveFormsModule, ButtonModule, AccordionModule,
+    CommonModule, ReactiveFormsModule, AccordionModule,
     InputTextModule, SelectModule, DatePickerModule,
-    InputNumberModule, MultiSelectModule, TreeSelectModule
+    InputNumberModule, MultiSelectModule, TreeSelectModule,ButtonComponent
   ],
   templateUrl: './filtros.html',
 })

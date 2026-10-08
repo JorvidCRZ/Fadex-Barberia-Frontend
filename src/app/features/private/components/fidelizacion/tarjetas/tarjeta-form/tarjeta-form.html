@@ -1,0 +1,24 @@
+@if (tarjetaForm) {
+<form [formGroup]="tarjetaForm" class="flex flex-col gap-6 p-2 m-10">
+    <div class="part-form">
+        <label for="clienteId">Cliente *</label>
+        <p-select [options]="clientes" formControlName="clienteId" optionLabel="nombreCompleto" optionValue="id" inputId="clienteId" placeholder="Selecciona un cliente" [filter]="true" filterBy="nombreCompleto" />
+        @if (campoInvalido('clienteId')) {
+            <p-message severity="error" variant="simple" size="small">El cliente es obligatorio</p-message>
+        }
+    </div>
+
+    <div class="part-form">
+        <label for="categoriaId">Categoría *</label>
+        <p-treeSelect [options]="categoriaTree" formControlName="categoriaId" placeholder="Seleccione una categoría" [filter]="true" filterBy="label" selectionMode="single" [metaKeySelection]="false" inputId="categoriaId"></p-treeSelect>
+        @if (campoInvalido('categoriaId')) {
+            <p-message severity="error" variant="simple" size="small">Seleccione una categoría</p-message>
+        }
+    </div>
+
+    <div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
+        <button pButton label="Guardar" class="boton-submit w-full sm:w-auto" type="button" (click)="onGuardar()"></button>
+        <button pButton label="Cancelar" class="boton-cancel w-full sm:w-auto" type="button" (click)="onCancelar()"></button>
+    </div>
+</form>
+}

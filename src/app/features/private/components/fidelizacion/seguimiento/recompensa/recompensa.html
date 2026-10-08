@@ -1,0 +1,18 @@
+<div class="flex flex-col gap-6 mt-5">
+    <aside
+        class="flex flex-col gap-4 rounded-xl border border-brand-gold-soft bg-brand-black px-6 py-4 md:flex-row md:items-center md:justify-between">
+        <h1 class="text-center text-lg font-semibold text-brand-gold md:text-start"><i class="pi" [class]="icono"></i>{{ texto }}</h1>
+    </aside>
+    <app-filtros  [fields]="filtrosFields" [titulo]="texto" [text]="texto" [acordeon]="true" (buscar)="onBuscar($event)" (limpiar)="onLimpiar()" />
+    <app-recompensa-table [recompensas]="recompensas" [cargado]="cargado" [totalRecords]="totalRecords" [rows]="rows" [recienCanjeadoId]="recienCanjeadoId" (lazyLoad)="onLazyLoad($event)" (canjear)="abrirCanjear($event)" (cambiarEstado)="onCambiarEstado($event)" />
+</div>
+
+<p-dialog [(visible)]="mostrarCanjear" [modal]="true" [dismissableMask]="true" [closable]="true"
+    [style]="{ width: '90vw', maxWidth: '30rem' }">
+    <ng-template pTemplate="header">
+        <app-dialog-header [icono]="'pi pi-check-circle'" title="Canjear recompensa" mode="crear" />
+    </ng-template>
+    @if (recompensaSeleccionada) {
+    <app-recompensa-canjear-form [recompensa]="recompensaSeleccionada" (confirmar)="confirmarCanje($event)" (cancelarEvento)="cerrarCanjear()" />
+    }
+</p-dialog>

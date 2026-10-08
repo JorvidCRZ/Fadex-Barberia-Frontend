@@ -1,0 +1,60 @@
+<div class="min-h-screen bg-[#0c0c0c] flex items-center justify-center p-6">
+    <div class="w-full max-w-3xl bg-ui-card rounded-2xl border border-white/10 p-8">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-white">Checkout</h1>
+
+            <p class="text-[#888] mt-2">Completa los datos para finalizar tu reserva.</p>
+        </div>
+
+        <form [formGroup]="form" class="space-y-6">
+            <!-- Titular -->
+            <div>
+                <label class="block text-sm text-[#888] mb-2"> Nombre del titular </label>
+
+                <input pInputText formControlName="titular" placeholder="Juan Pérez" class="w-full" />
+            </div>
+
+            <!-- Tarjeta -->
+            <div>
+                <label class="block text-sm text-[#888] mb-2"> Número de tarjeta </label>
+
+                <input pInputText formControlName="numeroTarjeta" placeholder="1234123412341234" class="w-full" />
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-4">
+                <!-- Expiración -->
+                <div>
+                    <label class="block text-sm text-[#888] mb-2"> Fecha de expiración </label>
+
+                    <input pInputText formControlName="expiracion" placeholder="MM/AA" class="w-full" />
+                </div>
+
+                <!-- CVV -->
+                <div>
+                    <label class="block text-sm text-[#888] mb-2"> CVV </label>
+
+                    <input pInputText type="password" formControlName="cvv" placeholder="123" class="w-full" />
+                </div>
+            </div>
+
+            <!-- Resumen -->
+            <div class="bg-white/5 border border-white/10 rounded-xl p-4">
+                <div class="flex justify-between">
+                    <span class="text-[#888]"> Reserva </span>
+
+                    <span class="text-white"> #{{ reservaId }} </span>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-4">
+                <button pButton type="button" severity="secondary" label="Volver" (click)="volver()"></button>
+
+                <button pButton type="button" label="Pagar Ahora" icon="pi pi-credit-card" [loading]="loading"
+                    (click)="confirmarPago()"></button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<p-confirmDialog></p-confirmDialog>
+<!-- <p-toast position="top-right"></p-toast> -->

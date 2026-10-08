@@ -1,0 +1,35 @@
+<div class="flex flex-col gap-6 mt-5">
+    <aside class="flex flex-col gap-4 rounded-xl border border-brand-gold-soft bg-brand-black px-6 py-4 md:flex-row md:items-center md:justify-between">
+        <h1 class="text-center text-lg font-semibold text-brand-gold md:text-start"><i class="pi  pi-star"></i> Fidelización</h1>
+    </aside>
+
+    <div class="overflow-hidden rounded-2xl border border-ui-borderSoft bg-ui-card shadow-lg shadow-black/20">
+        <p-tabs [(value)]="activeTab" (valueChange)="onTabChange($event)">
+            <p-tablist class="flex flex-wrap gap-3 border-b border-ui-borderSoft bg-ui-surface px-3 py-3 md:px-4">
+                @for (tab of tabs; track tab.value) {
+                <p-tab [value]="tab.value" class="flex items-center gap-2 text-inherit">
+                    <div class="flex items-center gap-2 rounded-xl px-4 py-3 transition-colors" [ngClass]="{ 'border border-brand-gold/30 border-b-2 bg-brand-gold/10 shadow-sm text-brand-gold': activeTab === tab.value, 'hover:bg-ui-elevated text-text-secondary': activeTab !== tab.value }">
+                        <i [class]="tab.icon"></i>
+                        <span>{{ tab.label }}</span>
+                    </div>
+                </p-tab>
+                }
+            </p-tablist>
+
+            <p-tabpanels class="overflow-hidden bg-ui-card p-4 md:p-6">
+                <p-tabpanel value="dashboard">
+                    <app-fidelizacion-dashboard-admin/>
+                </p-tabpanel>
+                <p-tabpanel value="movimientos">
+                    <app-movimientos-admin />
+                </p-tabpanel>
+                <p-tabpanel value="giros">
+                    <app-giros />
+                </p-tabpanel> 
+                <p-tabpanel value="recompensas">
+                    <app-recompensas />
+                </p-tabpanel> 
+            </p-tabpanels>
+        </p-tabs>
+    </div>
+</div>

@@ -1,17 +1,7 @@
 <section class="producto-page-hero">
-	<div class="absolute inset-0">
-		<img src="/assets/banners/banner-producto.webp" alt="Productos Barbería"
-			class="h-full w-full object-cover object-[center_60%] opacity-30" />
-		<div class="producto-page-overlay"></div>
-	</div>
-
-	<div class="producto-page-hero-inner">
-		<div class="max-w-3xl">
-			<p class="mb-3 text-sm font-semibold uppercase tracking-[0.35em] text-brand-gold-hover">Tienda</p>
-			<h1 class="text-4xl font-black uppercase tracking-wide sm:text-5xl">Nuestros Productos</h1>
-			<p class="mt-4 max-w-2xl text-base text-text-secondary sm:text-lg">Explora los productos disponibles para mantener tu estilo en casa con una búsqueda rápida y filtros claros.</p>
-		</div>
-	</div>
+	<section class="inicio-hero">
+		<app-banner [banners]="banners"></app-banner>
+	</section>
 </section>
 
 <section class="producto-page-section">

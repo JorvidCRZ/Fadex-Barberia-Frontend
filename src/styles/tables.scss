@@ -1,7 +1,7 @@
 /* ========================================
    DATATABLE
    ======================================== */
-
+p-table{
 .p-datatable {
     overflow: auto;
     border: 1px solid rgb(var(--color-brand-gold-soft)) !important;
@@ -93,4 +93,5 @@
 .boton-ver-tabla .p-button,
 .boton-agregar .p-button {
     box-shadow: none !important;
+}
 }

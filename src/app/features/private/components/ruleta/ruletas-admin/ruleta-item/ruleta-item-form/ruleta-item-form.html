@@ -1,0 +1,139 @@
+<form [formGroup]="itemForm" class="flex flex-col gap-6 p-2">
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+    <div class="part-form">
+      <label for="nombre">Nombre *</label>
+      <input pInputText formControlName="nombre" id="nombre" placeholder="Ej. 20% Descuento" />
+      @if (campoInvalido('nombre')) {
+        <p-message severity="error" variant="simple" size="small">El nombre es obligatorio</p-message>
+      }
+    </div>
+
+    <div class="part-form">
+      <span class="label-form">Tipo de premio *</span>
+      <p-select [options]="tiposPremio" formControlName="tipoPremio" optionLabel="label" optionValue="value" inputId="tipoPremio"></p-select>
+    </div>
+  </div>
+
+  <div class="part-form">
+    <label for="descripcion">Descripción</label>
+    <textarea pInputTextarea formControlName="descripcion" id="descripcion"></textarea>
+  </div>
+
+  <div class="grid grid-cols-1 gap-6">
+    @if (muestraValor) {
+      <div class="part-form">
+        <label for="valor">Valor {{ tipoSeleccionado === 'DESCUENTO' ? '(%)' : '' }}</label>
+        <p-inputNumber formControlName="valor" inputId="valor" [showButtons]="true" [min]="0" [step]="1" />
+      </div>
+    
+      <div class="part-form">
+        <label>Vista previa del premio</label>
+        <app-premio-card [premio]="premioDescuentoCupon!" [editable]="false" [mostrarPrecio]="true"/>
+      </div>
+    }
+
+    @if (muestraProducto) {
+      <div class="part-form">
+        <label>Producto *</label>
+          @if (productoSeleccionado || item) {
+              <app-premio-card [premio]="productoSeleccionado ? premioProducto! : premioSeleccionado!" [editable]="true" (editar)="mostrarSelectorProducto = true"/>
+          }
+          @else {
+              <p-button label="Seleccionar producto" icon="pi pi-plus" class="boton-agregar-texto" (click)="mostrarSelectorProducto = true"></p-button>
+          }
+      </div>
+    }
+
+  @if (muestraServicio) {
+      <div class="part-form">
+        <label>Servicio *</label>
+        @if (servicioSeleccionado || item) {
+            <app-premio-card [premio]="servicioSeleccionado ? premioServicio! : premioSeleccionado!" [editable]="true" (editar)="mostrarSelectorServicio = true"/>
+        }
+        @else {
+          <p-button label="Seleccionar servicio" icon="pi pi-plus" class="boton-agregar-texto" (click)="mostrarSelectorServicio=true"> </p-button>
+        }
+      </div>
+    }
+    
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+    <div class="part-form">
+      <label for="probabilidad">Probabilidad (%) *</label>
+      <p-inputNumber formControlName="probabilidad" inputId="probabilidad" [showButtons]="true" [min]="0" [max]="100" [step]="1" suffix="%" />
+      @if (campoInvalido('probabilidad')) { 
+        <p-message severity="error" variant="simple" size="small">Debe estar entre 0 y 100</p-message>
+      }
+    </div>
+
+    <div class="part-form">
+      <label for="stock">Stock (opcional)</label>
+      <p-inputNumber formControlName="stock" inputId="stock" [min]="0" placeholder="Ilimitado" />
+    </div>
+
+    <div class="part-form">
+      <label for="ordenDisplay">Orden en la ruleta</label>
+      <p-inputNumber formControlName="ordenDisplay" inputId="ordenDisplay" [min]="0" placeholder="Auto" />
+    </div>
+  </div>
+
+  <div class="part-form">
+    @if (muestraSubidaImagen) {
+      <div class="part-form">
+        <span class="label-form">Imagen del premio</span>
+        <p-fileUpload #fileUpload mode="basic" accept="image/*" [maxFileSize]="5000000" chooseLabel="Elegir imagen" (onSelect)="onSeleccionarImagen($event)" customUpload class="w-full inline-block break-all" [chooseButtonProps]="{ severity: 'secondary' }" />
+        
+        @if (imagenNuevaPreview) {
+          <div class="contenido-imagen mt-2">
+            <p-image [src]="imagenNuevaPreview" imageClass="rounded-lg object-cover" width="80" height="80" [preview]="true"></p-image>
+            <span class="text-orange-500 text-sm font-semibold">Nueva imagen</span>
+            <button type="button" class="boton-cierre" (click)="eliminarImagenSeleccionada()">✕</button>
+          </div>
+        } @else if (imagenActualUrl && !imagenEliminada) {
+          <div class="contenido-imagen mt-2">
+            <p-image [src]="imagenActualUrl | safeImageUrl" imageClass="rounded-lg object-cover" width="80" height="80" [preview]="true"></p-image>
+            <span class="text-green-600 text-sm font-semibold">Imagen actual</span>
+            <button type="button" class="boton-cierre" (click)="eliminarImagenSeleccionada()">✕</button>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="flex flex-col sm:flex-row justify-around gap-6">
+    <div class="part-form items-center">
+      <label for="esPremioMayor">Premio mayor</label>
+      <p-checkbox binary="true" formControlName="esPremioMayor" inputId="esPremioMayor"></p-checkbox>
+    </div>
+
+    <div class="part-form items-center">
+      <label for="activo">Activo</label>
+      <p-checkbox binary="true" formControlName="activo" inputId="activo"></p-checkbox>
+    </div>
+  </div>
+
+  <div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
+    <button pButton label="Guardar" class="boton-submit w-full sm:w-auto" type="button" (click)="onGuardar()"></button>
+    <button pButton label="Cancelar" class="boton-cancel w-full sm:w-auto" type="button" (click)="onCancelar()"></button>
+  </div>
+</form>
+
+@if(mostrarSelectorProducto){
+  <p-dialog [(visible)]="mostrarSelectorProducto" [modal]="true" [appendTo]="'body'" [draggable]="true" [resizable]="false" [maximizable]="true" [style]="{ width: '85rem' }">
+    <ng-template pTemplate="header">
+      <app-dialog-header icono="pi pi-box" title="Seleccionar producto" mode="ver"/>
+    </ng-template>
+    <app-producto-selector [productoId]="itemForm.value.productoId" (seleccionar)="seleccionarProducto($event)"/>
+  </p-dialog>
+}
+
+@if(mostrarSelectorServicio){
+  <p-dialog [(visible)]="mostrarSelectorServicio" [modal]="true" [appendTo]="'body'" [draggable]="true" [resizable]="false" [maximizable]="true" [style]="{ width: '85rem' }">
+      <ng-template pTemplate="header">
+          <app-dialog-header icono="pi pi-sparkles" title="Seleccionar servicio" mode="ver"/>
+      </ng-template>
+      <app-servicio-selector [servicioId]="itemForm.value.servicioId" (seleccionar)="seleccionarServicio($event)"/>
+  </p-dialog> 
+}

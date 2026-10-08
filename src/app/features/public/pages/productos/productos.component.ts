@@ -18,12 +18,14 @@ import { Categoria, CategoriaTipo } from '../../../../core/models/catalogos/cate
 import { FILTROS_PRODUCTO_PUBLICO } from '../../../../core/config/filtros.config';
 import { buildCategoryTree } from '../../../../shared/utils/buildCategoryTree.component';
 import { ProductoDetalleComponent } from './producto-detalle/producto-detalle.component';
+import { BannerComponent } from '../../../../shared/components/banner/banner.component';
+import { PRODUCTOS_BANNERS } from '../../../../core/config/banner.config';
 
 @Component({
   standalone: true,
   selector: 'app-producto',
   imports: [CommonModule, FormsModule, ProductoListaComponent, PaginatorModule, InputNumberModule, TreeSelectModule,
-    ButtonModule, FiltrosComponent, ProductoDetalleComponent
+    ButtonModule, FiltrosComponent, ProductoDetalleComponent,BannerComponent
   ],
   templateUrl: './productos.html'
 })
@@ -36,6 +38,7 @@ export class ProductComponent implements OnInit {
 
   readonly moneda = INVENTARIO_CONFIG.MONEDA;
 
+  banners = [...PRODUCTOS_BANNERS];
   filtrosFields = [...FILTROS_PRODUCTO_PUBLICO];
   filtros: ProductoFiltro = {};
   productos: Producto[] = [];

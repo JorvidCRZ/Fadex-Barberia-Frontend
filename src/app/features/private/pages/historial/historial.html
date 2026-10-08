@@ -1,0 +1,134 @@
+<div class="flex flex-col gap-6 mt-5">
+
+  <app-page-header titulo="Historial de Atenciones" icono="history" subtitulo="Revisa tus atenciones anteriores">
+    <app-button variant="secondary" size="sm" icon="refresh" label="Recargar" (clicked)="cargarHistorial()" />
+  </app-page-header>
+
+  <div>
+    <app-filtros [fields]="filtrosFields" [titulo]="'Historial'" [text]="'Historial de Atenciones'"
+      [acordeon]="true" (buscar)="onBuscar($event)" (limpiar)="onLimpiar()" />
+
+    <p-table [value]="historial" [lazy]="true" (onLazyLoad)="onLazyLoad($event)" [paginator]="true"
+      [rows]="pageSize" [totalRecords]="totalRecords" [loading]="loading"
+      [rowsPerPageOptions]="[10, 20, 50]" styleClass="tabla-estandar">
+
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Fecha</th>
+          <th>Barbero</th>
+          <th>Servicio</th>
+          <th>Estado</th>
+          <th>Total</th>
+          <th>Acciones</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-reserva>
+        <tr>
+          <td class="font-medium">{{ reserva.fecha | dateHelper }}</td>
+          <td>{{ reserva.nombreBarbero }}</td>
+          <td>
+            <span class="mx-auto block max-w-[200px] truncate" [title]="reserva.nombreServicio">
+              {{ reserva.nombreServicio }}
+            </span>
+          </td>
+          <td><app-status-badge type="text" [value]="reserva.estadoReserva"></app-status-badge></td>
+          <td><span class="font-bold text-brand-gold">{{ reserva.total | moneda }}</span></td>
+          <td>
+            <div class="flex items-center justify-center">
+              <app-button variant="ver-tabla" icon="eye" tooltip="Ver detalle" (clicked)="verDetalle(reserva)" />
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="6" class="celda-vacia">
+            <div class="flex flex-col items-center gap-3">
+              <i class="pi pi-calendar-times text-5xl text-text-muted opacity-30"></i>
+              <p class="m-0 text-lg text-text-muted">No se encontraron atenciones para los filtros aplicados</p>
+              @if (hayFiltrosActivos) {
+                <app-button variant="limpiar" size="sm" label="Limpiar filtros" (clicked)="onLimpiar()" />
+              }
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="loadingbody">
+        <tr>
+          <td colspan="6" class="celda-vacia">
+            <div class="flex flex-col items-center gap-3">
+              <div class="size-10 animate-spin rounded-full border-4 border-brand-gold border-t-transparent"></div>
+              <p class="m-0 text-text-muted">Cargando historial...</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>
+
+<!-- MODAL DETALLE (estilos de .p-dialog en primeng.scss) -->
+<p-dialog [(visible)]="displayModal" [modal]="true" [draggable]="false" [resizable]="false"
+  styleClass="w-11/12 md:w-5/12 shadow-dialog" header="Detalle de Atención" [baseZIndex]="10000">
+
+  <ng-template pTemplate="content">
+    @if (reservaSeleccionada) {
+      <div class="space-y-5 p-4">
+
+        <div class="flex items-center justify-between border-b border-ui-border-soft pb-4">
+          <div>
+            <p class="label-detalle mb-1">Fecha de reserva</p>
+            <p class="m-0 text-lg font-bold text-brand-gold">{{ reservaSeleccionada.fecha | dateHelper }}</p>
+          </div>
+          <app-status-badge type="text" [value]="reservaSeleccionada.estadoReserva"></app-status-badge>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="card-detalle">
+            <p class="label-detalle mb-1">Barbero</p>
+            <p class="m-0 font-medium">{{ reservaSeleccionada.nombreBarbero }}</p>
+          </div>
+          <div class="card-detalle">
+            <p class="label-detalle mb-1">Tipo</p>
+            <p class="m-0 font-medium">{{ reservaSeleccionada.tipoReserva }}</p>
+          </div>
+        </div>
+
+        <div>
+          <p class="label-detalle mb-2">Servicio realizado</p>
+          <div class="card-detalle !p-3 flex items-center">
+            <i class="pi pi-check-circle mr-3 text-brand-gold"></i>
+            <span>{{ reservaSeleccionada.nombreServicio }}</span>
+          </div>
+        </div>
+
+        <div class="card-detalle !border-brand-gold/20 mt-4 flex items-center justify-between">
+          <div>
+            <p class="label-detalle mb-1">Horario</p>
+            <p class="m-0 font-mono">{{ reservaSeleccionada.horaInicio }} - {{ reservaSeleccionada.horaFin }}</p>
+          </div>
+          <div class="text-right">
+            <p class="label-detalle mb-1">Total pagado</p>
+            <p class="m-0 text-2xl font-bold text-brand-gold">{{ reservaSeleccionada.total | moneda }}</p>
+          </div>
+        </div>
+
+        @if (reservaSeleccionada.observacion) {
+          <div class="mt-4">
+            <p class="label-detalle mb-2">Observaciones</p>
+            <p class="card-detalle m-0 text-sm italic text-text-secondary">
+              {{ reservaSeleccionada.observacion }}
+            </p>
+          </div>
+        }
+      </div>
+    }
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <app-button variant="primary" size="sm" label="Cerrar" (clicked)="displayModal = false" />
+  </ng-template>
+</p-dialog>

@@ -1,0 +1,87 @@
+.ruleta-preview-shell {
+    display: flex;
+    justify-content: center;
+    padding: 1rem;
+    background: radial-gradient(circle at top, rgba(212, 175, 55, 0.10), transparent 38%), linear-gradient(180deg, rgba(8, 8, 8, 0.98), rgba(14, 14, 14, 0.98));
+}
+
+.ruleta-preview-card {
+    width: 100%;
+    max-width: 70rem;
+    overflow: hidden;
+    border-radius: 1.5rem;
+    border: 1px solid rgba(212, 175, 55, .20);
+    background: var(--color-ui-card);
+    padding: 2rem;
+    box-shadow: 0 24px 50px rgba(0, 0, 0, .4);
+}
+
+.ruleta-preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.ruleta-preview-kicker {
+    margin: 0;
+    font-size: .72rem;
+    letter-spacing: .24em;
+    text-transform: uppercase;
+    color: rgba(212, 175, 55, .8);
+}
+
+.ruleta-preview-title {
+    margin: .3rem 0 0;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--color-brand-white);
+}
+
+.ruleta-preview-badge {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .5rem .9rem;
+    border-radius: 999px;
+    border: 1px solid rgba(212, 175, 55, .30);
+    background: rgba(212, 175, 55, .10);
+    color: var(--color-brand-gold);
+    font-size: .75rem;
+    font-weight: 700;
+}
+
+.ruleta-preview-empty {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 18rem;
+    gap: 1rem;
+    border-radius: 1.5rem;
+    border: 1px solid var(--color-ui-borderSoft);
+    background: var(--color-ui-surface);
+    text-align: center;
+    color: var(--color-text-secondary);
+}
+
+.ruleta-preview-result {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .4rem;
+    padding: 1rem;
+    border-radius: 1rem;
+    border: 1px solid var(--color-ui-borderSoft);
+    background: var(--color-ui-surface);
+}
+
+.ruleta-preview-note {
+    margin-top: 1.5rem;
+    text-align: center;
+    color: var(--color-text-secondary);
+    font-size: .8rem;
+    line-height: 1.5;
+}

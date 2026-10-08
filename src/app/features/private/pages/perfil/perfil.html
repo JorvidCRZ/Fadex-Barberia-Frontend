@@ -1,0 +1,44 @@
+<div class="min-h-screen bg-ui-black p-2 text-text-primary md:p-6" [class.opacity-60]="cargando()" [class.pointer-events-none]="cargando()">
+  <div class="mb-6 border-b border-ui-border px-2 pb-4">
+    <h1 class="m-0 text-sm font-semibold text-text-primary">Perfil</h1>
+  </div>
+
+  <div class="grid items-start gap-6 lg:grid-cols-[208px_minmax(0,1fr)]">
+    <aside class="rounded-xl border border-ui-border bg-ui-card p-6 text-center">
+      <p class="mb-5 text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-gold">Configuración de cuenta</p>
+      <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-ui-border bg-ui-elevated text-2xl text-text-secondary">
+        <i class="pi pi-user"></i>
+      </div>
+      <h2 class="m-0 text-sm font-semibold text-text-primary">{{ perfil().nombre }} {{ perfil().apellido }}</h2>
+      <p class="mt-1 truncate text-xs text-text-muted">{{ perfil().email }}</p>
+      <span class="mt-3 inline-flex rounded-full border border-ui-border px-3 py-1 text-[10px] lowercase text-text-secondary">{{ rolLabel }}</span>
+      <div class="mt-5 space-y-3 border-t border-ui-border pt-5 text-left text-xs text-text-muted">
+        <p class="m-0 flex items-center gap-2"><i class="pi pi-envelope text-brand-gold"></i>{{ perfil().email }}</p>
+        <p class="m-0 flex items-center gap-2"><i class="pi pi-phone text-brand-gold"></i>{{ perfil().telefono }}</p>
+      </div>
+    </aside>
+
+    <main class="grid gap-5">
+      <section class="rounded-xl border border-ui-border bg-ui-card p-6 md:p-7">
+        <h2 class="m-0 border-b border-ui-border pb-3 text-base font-semibold text-text-primary">Datos Personales</h2>
+        <form [formGroup]="formPerfil" class="mt-5 grid gap-4 md:grid-cols-2">
+          <div class="part-form !mb-0"><label>Nombre</label><input pInputText formControlName="nombre" placeholder="Nombre" />@if (campoInvalido(formPerfil, 'nombre')) { <span class="text-xs text-danger">Requerido.</span> }</div>
+          <div class="part-form !mb-0"><label>Apellido</label><input pInputText formControlName="apellido" placeholder="Apellido" />@if (campoInvalido(formPerfil, 'apellido')) { <span class="text-xs text-danger">Requerido.</span> }</div>
+          <div class="part-form !mb-0"><label>Teléfono</label><div class="relative"><i class="pi pi-phone absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"></i><input pInputText formControlName="telefono" class="pl-10" placeholder="9XXXXXXXX" /></div></div>
+          <div class="part-form !mb-0"><label>Correo electrónico</label><div class="relative"><i class="pi pi-envelope absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"></i><input pInputText formControlName="email" class="cursor-not-allowed pl-10 opacity-60" /></div></div>
+        </form>
+      </section>
+
+      <section class="rounded-xl border border-ui-border bg-ui-card p-6 md:p-7">
+        <h2 class="m-0 border-b border-ui-border pb-3 text-base font-semibold text-text-primary">Cambiar Contraseña</h2>
+        <form [formGroup]="formPassword" class="mt-5 grid gap-4 md:grid-cols-2">
+          @for (c of camposPassword; track c.control) {
+            <div class="part-form !mb-0"><label>{{ c.label }}</label><div class="relative"><i class="pi pi-key absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"></i><input pInputText [formControlName]="c.control" class="!pr-10 pl-10" [type]="visible()[c.key] ? 'text' : 'password'" [placeholder]="c.placeholder" /><button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-brand-gold" (click)="toggleVisible(c.key)"><i [class]="visible()[c.key] ? 'pi pi-eye-slash' : 'pi pi-eye'"></i></button></div>@if (campoInvalido(formPassword, c.control)) { <span class="text-xs text-danger">{{ c.error }}</span> }</div>
+          }
+          @if (noCoinciden) { <span class="text-xs text-danger md:col-span-2">Las contraseñas no coinciden.</span> }
+        </form>
+        <div class="mt-5 flex flex-col justify-end gap-3 sm:flex-row"><button type="button" class="boton-secondary gap-2" (click)="cambiarPassword()" [disabled]="guardandoPassword()"><i class="pi pi-key"></i>Cambiar contraseña</button><button type="button" class="boton-primary gap-2" (click)="guardarPerfil()" [disabled]="guardandoPerfil()"><i class="pi pi-save"></i>Guardar cambios</button></div>
+      </section>
+    </main>
+  </div>
+</div>

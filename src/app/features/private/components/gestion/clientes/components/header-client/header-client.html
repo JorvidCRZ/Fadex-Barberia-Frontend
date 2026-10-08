@@ -1,0 +1,10 @@
+<aside class="flex flex-col gap-4 px-0 py-0 bg-transparent">
+  <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+    <div>
+      <h1 class="text-xl font-semibold text-brand-white">{{ title }}</h1>
+      <p class="mt-1 text-sm text-text-muted">{{ description }}</p>
+    </div>
+    <button pButton [label]="buttonLabel + ' cliente'" icon="pi pi-user-plus" class="p-button-sm boton-primary" (click)="onCreate()"></button>
+  </div>
+  <app-search-bar placeholder="Buscar por nombre, número o correo..." [value]="searchValue" (search)="onSearch($event)"></app-search-bar>
+</aside>

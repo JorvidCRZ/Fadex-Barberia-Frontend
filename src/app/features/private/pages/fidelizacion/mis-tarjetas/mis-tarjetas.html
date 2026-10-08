@@ -1,0 +1,24 @@
+<div class="min-h-screen bg-[#0d0d0d] text-white p-6">
+    <p class="text-xs tracking-widest uppercase text-brand-gold mb-1">Programa de puntos</p>
+    <h2 class="text-2xl font-medium mb-6">Tus tarjetas de fidelización</h2>
+
+    <div *ngIf="cargando" class="text-white/40 text-sm py-10 text-center">
+        Cargando tarjetas...
+    </div>
+
+    <div *ngIf="error && !cargando" class="text-red-400 text-sm py-4 text-center">
+        {{ error }}
+    </div>
+
+    <app-tarjeta-grafico *ngIf="!cargando && !error" variante="cliente" [tarjetas]="misTarjetas" (canjear)="onCanjear($event)" (verRuleta)="verRuleta($event)" />
+</div>
+
+<!-- MODAL RULETA (se usa tanto para "Ver ruleta" como para "Canjear") -->
+<div *ngIf="showRuletaModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+    (click)="cerrarModalRuleta()">
+    <div (click)="$event.stopPropagation()">
+        <app-mi-ruleta *ngIf="tarjetaRuletaSeleccionada" [tarjeta]="tarjetaRuletaSeleccionada" [activa]="showRuletaModal" (girado)="onGiroRealizado($event)"/>
+    </div>
+</div>
+
+<!-- <p-toast position="top-right"></p-toast> -->

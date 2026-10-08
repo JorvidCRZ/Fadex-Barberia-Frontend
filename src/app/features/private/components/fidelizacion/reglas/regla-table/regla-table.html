@@ -1,0 +1,123 @@
+<div class="p-4 md:p-6 lg:p-8 bg-neutral-primary-lighter rounded-base shadow-sm">
+    <div class="relative w-full overflow-x-auto">
+        <p-table [value]="reglas" [lazy]="true" (onLazyLoad)="lazyLoad.emit($event)" [paginator]="true" [rows]="rows" [totalRecords]="totalRecords" 
+        [loading]="!cargado" dataKey="reglaId" expandableRows [showCurrentPageReport]="true"
+        currentPageReportTemplate="Viendo {first} a {last} de {totalRecords} entradas" [tableStyle]="{ 'min-width': '950px' }"class="rounded-xl">
+            <ng-template #header>
+                <tr>
+                    <th class="text-center whitespace-nowrap">Categoría</th>
+                    <th class="text-center whitespace-nowrap">Alcance</th>
+                    <th class="text-center whitespace-nowrap">Aplica a</th>
+                    <th class="text-center whitespace-nowrap">Puntos</th>
+                    <th class="text-center whitespace-nowrap">Estado</th>
+                    <th class="text-center whitespace-nowrap">Actualizado</th>
+                    <th class="text-center whitespace-nowrap">Acciones</th>
+                </tr>
+            </ng-template>
+
+            <ng-template #body let-regla let-expanded="expanded" pTemplate="body">
+                <tr>
+                    <td class="px-4 py-2">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <p-button type="button" [pRowToggler]="regla" [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'" class="boton-expandir-tabla"></p-button>
+                            <div class="inline-flex flex-col ml-2 text-left">
+                                <span class="font-medium text-brand-white text-sm max-w-15 truncate" [pTooltip]="regla.categoriaNombre" tooltipPosition="top">{{ regla.categoriaNombre }}</span>
+                                <small class="text-text-secondary">Regla #{{ regla.reglaId }}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="text-center whitespace-nowrap">
+                        <app-status-badge type="text" [value]="regla.tipoAlcance"/>
+                    </td>
+                    <td class="text-center">
+                        <div class="flex flex-col">
+                            <span class="font-medium">
+                                {{regla.tipoAlcance === 'SERVICIO'? regla.servicioNombre: regla.tipoAlcance === 'PRODUCTO'? regla.productoNombre: regla.tipoAlcance === 'COMBO'? (regla.servicioNombre + ' + ' + regla.productoNombre): 'Toda la categoría'}}
+                            </span>
+                            <small class="text-text-secondary">
+                                {{regla.tipoAlcance === 'SERVICIO' ? 'Servicio' : regla.tipoAlcance === 'PRODUCTO' ? 'Producto' : regla.tipoAlcance === 'COMBO' ? 'Combo' : 'Categoría'}}
+                            </small>
+                        </div>
+                    </td>
+                    <td class="text-center whitespace-nowrap">
+                        <app-status-badge type="text" [value]="regla.puntos + ' punto' + (regla.puntos > 1 ? 's' : '')" customClass="badge-text estado-producto"/>
+                    </td>
+                    <td class="text-center">
+                        <div class="flex justify-center items-center gap-2">
+                            <app-status-badge type="boolean" [value]="regla.activo" trueLabel="Activa" falseLabel="Inactiva"/>
+                            <p-toggleSwitch [ngModel]="regla.activo" (onChange)="estado.emit({ id: regla.reglaId, activo: $event.checked })" class="scale-90"></p-toggleSwitch>
+                        </div>
+                    </td>
+                    <td class="text-center whitespace-nowrap">
+                        {{ regla.updatedAt | date:'dd/MM/yyyy HH:mm' }}
+                    </td>
+                    <td class="text-center">
+                        <div class="flex justify-center">
+                            <p-button icon="pi pi-pencil" class="boton-editar-tabla" (click)="editar.emit(regla)"></p-button>
+                            <p-button icon="pi pi-trash" class="boton-eliminar-tabla" (click)="pedirConfirmacion(regla,$event)"></p-button>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+
+            <ng-template #expandedrow pTemplate="rowExpansion" let-regla>
+                <tr>
+                    <td colspan="7" class="p-0">
+                        <div class="p-4 bg-ui-surface rounded-lg shadow-sm border border-brand-gold-soft">
+                            <div class="flex items-center justify-between gap-3 mb-4 pb-3 border-b border-ui-borderSoft">
+                                <div>
+                                    <h3 class="text-sm font-semibold text-brand-white">Detalles de la regla</h3>
+                                    <p class="text-xs text-text-secondary">Información completa de la regla de fidelización.</p>
+                                </div>
+                                <app-status-badge type="boolean" [value]="regla.activo" trueLabel="Activa" falseLabel="Inactiva"/>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                                <div class="flex flex-col gap-1 rounded-lg bg-ui-card p-3 border border-ui-borderSoft">
+                                    <span class="text-xs uppercase tracking-wide text-text-muted">Categoría</span>
+                                    <span class="font-medium text-brand-white max-w-60 truncate" [pTooltip]="alcance(regla)"tooltipPosition="top">{{ regla.categoriaNombre }}</span>
+                                </div>
+                                <div class="flex flex-col gap-1 rounded-lg bg-ui-card p-3 border border-ui-borderSoft">
+                                    <span class="text-xs uppercase tracking-wide text-text-muted">Tipo de alcance</span>
+                                    <app-status-badge type="text" [value]="regla.tipoAlcance"/>
+                                </div>
+                                <div class="flex flex-col gap-1 rounded-lg bg-ui-card p-3 border border-ui-borderSoft">
+                                    <span class="text-xs uppercase tracking-wide text-text-muted">Servicio</span>
+                                    <span class="font-medium text-brand-white">{{ regla.servicioNombre || 'No aplica' }}</span>
+                                </div>
+                                <div class="flex flex-col gap-1 rounded-lg bg-ui-card p-3 border border-ui-borderSoft">
+                                    <span class="text-xs uppercase tracking-wide text-text-muted">Producto</span>
+                                    <span class="font-medium text-brand-white">{{ regla.productoNombre || 'No aplica' }}</span>
+                                </div>
+                                <div class="flex flex-col gap-1 rounded-lg bg-ui-card p-3 border border-ui-borderSoft">
+                                    <span class="text-xs uppercase tracking-wide text-text-muted">Puntos otorgados</span>
+                                    <span class="font-medium text-brand-white">{{ regla.puntos }}</span>
+                                </div>
+                                <div class="flex flex-col gap-1 rounded-lg bg-ui-card p-3 border border-ui-borderSoft">
+                                    <span class="text-xs uppercase tracking-wide text-text-muted">Estado</span>
+                                    <app-status-badge type="boolean" [value]="regla.activo" trueLabel="Activa" falseLabel="Inactiva"/>
+                                </div>
+                                <div class="flex flex-col gap-1 rounded-lg bg-ui-card p-3 border border-ui-borderSoft">
+                                    <span class="text-xs uppercase tracking-wide text-text-muted">Creado</span>
+                                    <span class="font-medium text-brand-white">{{ regla.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+                                </div>
+                                <div class="flex flex-col gap-1 rounded-lg bg-ui-card p-3 border border-ui-borderSoft">
+                                    <span class="text-xs uppercase tracking-wide text-text-muted">Última actualización</span>
+                                    <span class="font-medium text-brand-white">{{ regla.updatedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+            <ng-template #emptymessage>
+                <tr>
+                    <td colspan="7" class="text-center py-6 text-text-tertiary">
+                        Aún no existen reglas de fidelización configuradas.
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+</div>
+
+<app-confirm-popover [visible]="mostrarConfirmacion" [mensaje]="mensajeConfirmacion" [icono]="icono" [titulo]="'Eliminar Regla'" (confirm)="confirmarEliminar()" (cancel)="cancelarEliminar()"/>

@@ -12,7 +12,7 @@
 .banner-slide {
   position: relative;
   display: flex;
-  min-height: min(100vh, 50rem);
+  min-height: min(90vh, 45rem);
   width: 100%;
   align-items: center;
   overflow: hidden;
@@ -21,6 +21,7 @@
 
 .banner-image,
 .banner-overlay {
+  object-fit: cover;
   position: absolute;
   inset: 0;
   height: 100%;

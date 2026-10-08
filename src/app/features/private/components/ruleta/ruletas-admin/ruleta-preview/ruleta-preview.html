@@ -1,0 +1,32 @@
+<div class="ruleta-preview-shell">
+    <div class="ruleta-preview-card">
+        <div class="ruleta-preview-header">
+            <div>
+                <p class="ruleta-preview-kicker">Vista previa de administrador</p>
+                <h3 class="ruleta-preview-title">{{ ruleta?.nombre || 'Ruleta' }}</h3>
+            </div>
+
+            <div class="ruleta-preview-badge">
+                <i class="pi pi-eye"></i>Simulación
+            </div>
+        </div>
+
+        @if(segmentos.length === 0){
+            <div class="ruleta-preview-empty">
+                <i class="pi pi-info-circle text-4xl text-brand-gold"></i>
+                <p>Agrega premios activos para visualizar la ruleta.</p>
+            </div>
+        }
+
+        @else {
+            <app-ruleta-grafico [premios]="segmentos" [interactiva]="true" textoBoton="Probar ruleta" [reproducirMusica]="musicaActiva" (premioGanado)="onPremioGanado($event)"/>
+            @if(resultado){
+                <div class="ruleta-preview-result">
+                    <span class="text-sm text-text-secondary">Último resultado</span>
+                    <strong class="text-brand-gold text-lg">{{ resultado.nombre }}</strong>
+                </div>
+            }
+            <p class="ruleta-preview-note">Esta simulación únicamente representa el aspecto visual de laruleta. No consume giros ni realiza llamadas al backend.</p>
+        }
+    </div>
+</div>

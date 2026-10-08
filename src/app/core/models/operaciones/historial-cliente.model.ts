@@ -12,6 +12,11 @@ export interface HistorialClienteModel {
   nombreServicio: string;
   total: number;
   observacion: string;
+  tipoComprobante?: 'BOLETA' | 'FACTURA';
+  numeroComprobante?: string;
+  metodoPago?: string;
+  razonSocial?: string;
+  ruc?: string;
 }
 
 

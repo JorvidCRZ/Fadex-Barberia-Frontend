@@ -1,0 +1,163 @@
+<!-- <p-toast position="top-right" [baseZIndex]="9999"></p-toast> -->
+
+<form [formGroup]="reservaForm" (ngSubmit)="guardarReserva()">
+
+  <!-- Section Header -->
+  <div class="flex items-center gap-2 px-6 py-3 border-b border-[#333333] bg-[#C9A84C]/5">
+    <i class="pi pi-info-circle text-[#C9A84C] text-sm"></i>
+    <span class="text-white text-xs font-semibold uppercase tracking-widest">
+      Información de la reserva
+    </span>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-5 p-6">
+
+    <!-- Cliente -->
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[#888888] text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5">Cliente
+        <span class="text-[#C9A84C]">*</span>
+        <i *ngIf="buscandoCliente" class="pi pi-spin pi-spinner text-[#C9A84C] text-xs"></i>
+      </label>
+      <p-autoComplete [(ngModel)]="clienteSeleccionado" [ngModelOptions]="{ standalone: true }"
+        [suggestions]="clientesSugeridos" (completeMethod)="buscarCliente($event)"
+        (onSelect)="onSeleccionarCliente($event)" (onClear)="onLimpiarCliente()" optionLabel="nombreCompleto"
+        placeholder="Escribe para buscar un cliente..." [minLength]="1" [showClear]="true" [forceSelection]="true"
+        styleClass="w-full" [class.border-red-500]="clienteInvalido" [inputStyle]="{ width: '100%' }">
+        <ng-template let-cliente pTemplate="item">
+          <span class="block truncate">{{ cliente.nombreCompleto }}</span>
+        </ng-template>
+        <ng-template pTemplate="empty">
+          <span class="text-xs text-[#888888] px-2">No se encontraron clientes</span>
+        </ng-template>
+      </p-autoComplete>
+    </div>
+
+    <!-- Barbero -->
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[#888888] text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5">Barbero
+        <span class="text-[#C9A84C]">*</span>
+        <i *ngIf="buscandoBarbero" class="pi pi-spin pi-spinner text-[#C9A84C] text-xs"></i>
+      </label>
+      <p-autoComplete [(ngModel)]="barberoSeleccionado" [ngModelOptions]="{ standalone: true }"
+        [suggestions]="barberosSugeridos" (completeMethod)="buscarBarbero($event)"
+        (onSelect)="onSeleccionarBarbero($event)" (onClear)="onLimpiarBarbero()" optionLabel="nombreCompleto"
+        placeholder="Escribe para buscar un barbero..." [minLength]="1" [showClear]="true" [forceSelection]="true"
+        styleClass="w-full" [class.border-red-500]="barberoInvalido" [inputStyle]="{ width: '100%' }">
+        <ng-template let-barbero pTemplate="item">
+          <span class="block truncate">{{ barbero.nombreCompleto }}</span>
+        </ng-template>
+        <ng-template pTemplate="empty">
+          <span class="text-xs text-[#888888] px-2">No se encontraron barberos</span>
+        </ng-template>
+      </p-autoComplete>
+    </div>
+
+    <!-- Servicio -->
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[#888888] text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5">Servicio
+        <span class="text-[#C9A84C]">*</span>
+        <i *ngIf="buscandoServicio" class="pi pi-spin pi-spinner text-[#C9A84C] text-xs"></i>
+      </label>
+      <p-autoComplete [(ngModel)]="servicioSeleccionado" [ngModelOptions]="{ standalone: true }"
+        [suggestions]="serviciosSugeridos" (completeMethod)="buscarServicio($event)"
+        (onSelect)="onSeleccionarServicio($event)" (onClear)="onLimpiarServicio()" optionLabel="nombre"
+        placeholder="Escribe para buscar un servicio..." [minLength]="1" [showClear]="true" [forceSelection]="true"
+        styleClass="w-full" [class.border-red-500]="servicioInvalido" [inputStyle]="{ width: '100%' }">
+        <ng-template let-servicio pTemplate="item">
+          <span class="block truncate">{{ servicio.nombre }}</span>
+        </ng-template>
+        <ng-template pTemplate="empty">
+          <span class="text-xs text-[#888888] px-2">No se encontraron servicios</span>
+        </ng-template>
+      </p-autoComplete>
+    </div>
+
+    <!-- Fecha -->
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[#888888] text-xs font-semibold uppercase tracking-wider">
+        Fecha <span class="text-[#C9A84C]">*</span>
+      </label>
+      <p-datepicker formControlName="fecha" [showIcon]="true" [minDate]="today" dateFormat="dd/mm/yy"
+        styleClass="w-full" (onSelect)="onFechaChange()">
+      </p-datepicker>
+    </div>
+
+    <!-- Hora -->
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[#888888] text-xs font-semibold uppercase tracking-wider">
+        Hora <span class="text-[#C9A84C]">*</span>
+      </label>
+      <p-select formControlName="hora" [options]="horarios" optionLabel="label" optionValue="value"
+        placeholder="Selecciona una hora" styleClass="w-full">
+      </p-select>
+    </div>
+
+    <!-- Observaciones -->
+    <div class="flex flex-col gap-1.5 md:col-span-2">
+      <label class="text-[#888888] text-xs font-semibold uppercase tracking-wider">
+        Observaciones
+      </label>
+      <textarea pTextarea rows="3" formControlName="observacion" placeholder="Escribe alguna observación adicional..."
+        class="w-full bg-[#2a2a2a] border border-[#333333] rounded-md text-white text-sm px-3 py-2.5 resize-none placeholder-[#888888] focus:outline-none focus:border-[#C9A84C] focus:ring-1 focus:ring-[#C9A84C]/30 transition-colors">
+      </textarea>
+    </div>
+
+  </div>
+
+  <!-- Footer Buttons -->
+  <div class="flex justify-end gap-3 px-6 py-4 border-t border-[#333333] bg-black/20">
+
+    <button pButton type="button" (click)="cancelar()" class="boton-cancel">
+      <i class="pi pi-times text-xs"></i>Cancelar
+    </button>
+
+    <button pButton type="submit" [disabled]="isLoading"
+      class="boton-primary">
+      <i class="pi pi-calendar-plus text-xs"></i>
+      <span *ngIf="!isLoading">Guardar Reserva</span>
+      <span *ngIf="isLoading">Guardando...</span>
+    </button>
+
+  </div>
+</form>
+
+<p-dialog [(visible)]="showConfirmDialog" [modal]="true" [closable]="true" [draggable]="false"
+  header="Confirmar Reserva" styleClass="!bg-[#121212] !border !border-[#333333] w-full max-w-md"
+  [contentStyle]="{'background-color': '#121212', 'color': '#ffffff'}" [style]="{'border-radius': '12px'}">
+
+  <div class="flex flex-col gap-3 py-2 text-sm text-white">
+    <div class="flex justify-between border-b border-[#333333] pb-2">
+      <span class="text-[#888888]">Cliente</span>
+      <span class="font-semibold">{{ getClienteNombre() }}</span>
+    </div>
+    <div class="flex justify-between border-b border-[#333333] pb-2">
+      <span class="text-[#888888]">Barbero</span>
+      <span class="font-semibold">{{ getBarberoNombre() }}</span>
+    </div>
+    <div class="flex justify-between border-b border-[#333333] pb-2">
+      <span class="text-[#888888]">Servicio</span>
+      <span class="font-semibold">{{ getServicioNombre() }}</span>
+    </div>
+    <div class="flex justify-between border-b border-[#333333] pb-2">
+      <span class="text-[#888888]">Fecha</span>
+      <span class="font-semibold">{{ reservaPreview?.fechaFormateada }}</span>
+    </div>
+    <div class="flex justify-between">
+      <span class="text-[#888888]">Hora</span>
+      <span class="font-semibold text-[#C9A84C]">{{ reservaPreview?.hora }}</span>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-3 pt-2 border-t border-[#333333]">
+      <button pButton type="button" (click)="showConfirmDialog = false" class="boton-cancel"><i
+          class="pi pi-times text-xs"></i>Cancelar</button>
+      <button pButton type="button" (click)="confirmarGuardar()" [disabled]="isLoading" class="boton-submit"><i
+          class="pi pi-check text-xs"></i>
+        <span *ngIf="!isLoading">Confirmar</span>
+        <span *ngIf="isLoading">Guardando...</span>
+      </button>
+    </div>
+  </ng-template>
+
+</p-dialog>

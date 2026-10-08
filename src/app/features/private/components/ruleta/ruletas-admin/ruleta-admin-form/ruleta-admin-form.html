@@ -1,0 +1,38 @@
+<form [formGroup]="ruletaForm" class="flex flex-col gap-6 p-2">
+
+    <div class="part-form">
+        <label for="nombre">Nombre *</label>
+        <input pInputText formControlName="nombre" id="nombre" placeholder="Ej. Ruleta General" />
+        @if (campoInvalido('nombre')) {
+            <p-message severity="error" variant="simple" size="small">El nombre es obligatorio</p-message>
+        }
+    </div>
+
+    <div class="part-form">
+        <label for="descripcion">Descripción</label>
+        <textarea pInputTextarea formControlName="descripcion" id="descripcion"></textarea>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div class="part-form">
+            <span class="label-form">Tipo *</span>
+            <p-select [options]="tiposRuleta" formControlName="tipo" optionLabel="label" optionValue="value" inputId="tipo"></p-select>
+        </div>
+
+        <div class="part-form">
+            <label for="incrementoPorGiro">Incremento por giro *</label>
+            <p-inputNumber formControlName="incrementoPorGiro" inputId="incrementoPorGiro" [showButtons]="true" [min]="0" [step]="0.0001" [minFractionDigits]="4" [maxFractionDigits]="4" mode="decimal" />
+            <small class="text-text-tertiary">Ejemplo: 0.0200 = 2% de incremento por giro.</small>
+        </div>
+    </div>
+
+    <div class="part-form items-center">
+        <label for="activa">Activa</label>
+        <p-checkbox binary="true" formControlName="activa" inputId="activa"></p-checkbox>
+    </div>
+
+    <div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
+        <button pButton label="Guardar" class="boton-submit w-full sm:w-auto" type="button" (click)="onGuardar()"></button>
+        <button pButton label="Cancelar" class="boton-cancel w-full sm:w-auto" type="button" (click)="onCancelar()"></button>
+    </div>
+</form>

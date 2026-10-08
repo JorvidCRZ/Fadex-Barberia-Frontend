@@ -1,0 +1,175 @@
+<div class="flex flex-col gap-5 py-9 px-10">
+
+    <div *ngIf="cargando" class="flex flex-col items-center gap-3 py-12 text-text-tertiary text-sm">
+        <span class="w-9 h-9 rounded-full border-[3px] border-transparent border-t-brand-gold animate-spin inline-block"></span>
+        <p>Cargando tu fidelización...</p>
+    </div>
+
+    <ng-container *ngIf="!cargando && data">
+
+        <!-- KPIs -->
+        <app-stats [items]="statsCards" />
+
+        <!-- TARJETAS POR CATEGORÍA -->
+        <div class="grid grid-cols-[repeat(auto-fit,minmax(220px,280px))] gap-3">
+            <div *ngFor="let t of data.tarjetas" class="bg-ui-card border border-ui-borderSoft rounded-2xl p-4 flex flex-col gap-2">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-semibold text-white truncate">{{ t.categoriaNombre }}</span>
+                    <span *ngIf="t.girosDisponibles > 0"
+                        class="text-[11px] px-2 py-0.5 rounded-full bg-brand-gold/15 text-brand-gold whitespace-nowrap">
+                        {{ t.girosDisponibles }} giro(s)
+                    </span>
+                </div>
+
+                <ng-container *ngIf="t.meta; else sinMetaCard">
+                    <div class="w-full h-1.5 rounded-full bg-black/30 overflow-hidden">
+                        <div class="h-full bg-brand-gold rounded-full" [style.width.%]="(t.progreso / t.meta) * 100"></div>
+                    </div>
+                    <span class="text-[11px] text-text-tertiary">Progreso: {{ t.progreso }} / {{ t.meta }}</span>
+                </ng-container>
+                <ng-template #sinMetaCard>
+                    <span class="text-[11px] text-text-tertiary italic">Sin meta configurada</span>
+                </ng-template>
+            </div>
+            <p *ngIf="!data.tarjetas.length" class="text-xs text-text-tertiary col-span-full text-center py-4">
+                Aún no tienes tarjetas de fidelización.</p>
+        </div>
+
+        <!-- DETALLE POR CATEGORÍA (colapsable, con tabs Progreso / Giros) -->
+        <div class="bg-ui-card border border-ui-borderSoft rounded-2xl overflow-hidden">
+            <button type="button" (click)="toggleSeccion('categoria')"
+                class="w-full flex items-center justify-between px-5 py-4 text-sm font-semibold text-white">
+                <span class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-brand-gold"></span>
+                    Detalle por categoría
+                </span>
+                <i class="pi pi-chevron-down text-xs text-text-tertiary transition-transform duration-200"
+                    [class.rotate-180]="secciones.categoria"></i>
+            </button>
+
+            <div *ngIf="secciones.categoria" class="px-5 pb-5">
+
+                <!-- mini tabs -->
+                <div class="flex gap-1 mb-4 bg-black/20 rounded-lg p-1 w-fit">
+                    <button type="button" (click)="cambiarTabCategoria('progreso')"
+                        class="text-xs px-3 py-1.5 rounded-md transition-colors"
+                        [ngClass]="tabCategoria === 'progreso' ? 'bg-brand-gold text-black font-semibold' : 'text-text-tertiary'">
+                        Progreso
+                    </button>
+                    <button type="button" (click)="cambiarTabCategoria('giros')"
+                        class="text-xs px-3 py-1.5 rounded-md transition-colors"
+                        [ngClass]="tabCategoria === 'giros' ? 'bg-brand-gold text-black font-semibold' : 'text-text-tertiary'">
+                        Giros disponibles
+                    </button>
+                </div>
+
+                <!-- TAB: Progreso -->
+                <div [class.hidden]="tabCategoria !== 'progreso'">
+                    <div *ngIf="tarjetasConMeta.length; else sinTarjetasConMeta"
+                        class="relative" [style.height.px]="Math.max(120, tarjetasConMeta.length * 50)">
+                        <canvas #progresoChart></canvas>
+                    </div>
+                    <ng-template #sinTarjetasConMeta>
+                        <div class="flex flex-col items-center justify-center gap-2 py-8 text-text-tertiary">
+                            <i class="pi pi-id-card text-xl opacity-40"></i>
+                            <p class="text-xs">Ninguna de tus categorías tiene una meta configurada aún.</p>
+                        </div>
+                    </ng-template>
+
+                    <p *ngIf="tarjetasSinMeta.length" class="text-[11px] text-text-tertiary mt-3">
+                        Sin meta configurada: {{ tarjetasSinMeta.length }} categoría(s) —
+                        <span class="text-text-secondary">{{ nombresSinMeta }}</span>
+                    </p>
+                </div>
+
+                <!-- TAB: Giros -->
+                <div [class.hidden]="tabCategoria !== 'giros'">
+                    <div *ngIf="tarjetasConGirosDisponibles.length; else sinGiros" class="relative h-56">
+                        <canvas #girosChart></canvas>
+                    </div>
+                    <ng-template #sinGiros>
+                        <div class="flex flex-col items-center justify-center gap-2 py-8 text-text-tertiary">
+                            <i class="pi pi-ticket text-xl opacity-40"></i>
+                            <p class="text-xs">Sin giros disponibles por ahora.</p>
+                        </div>
+                    </ng-template>
+                </div>
+            </div>
+        </div>
+
+        <!-- ÚLTIMOS MOVIMIENTOS (colapsable) -->
+        <div class="bg-ui-card border border-ui-borderSoft rounded-2xl overflow-hidden">
+            <button type="button" (click)="toggleSeccion('movimientos')"
+                class="w-full flex items-center justify-between px-5 py-4 text-sm font-semibold text-white">
+                <span class="flex items-center gap-2">
+                    <i class="pi pi-history text-brand-gold text-xs"></i>
+                    Últimos movimientos
+                </span>
+                <i class="pi pi-chevron-down text-xs text-text-tertiary transition-transform duration-200"
+                    [class.rotate-180]="secciones.movimientos"></i>
+            </button>
+
+            <div *ngIf="secciones.movimientos" class="px-5 pb-5 overflow-x-auto">
+                <table class="w-full text-sm" *ngIf="data.movimientosRecientes.length; else sinMovimientos">
+                    <thead>
+                        <tr class="text-text-tertiary text-[11px] uppercase border-b border-ui-border">
+                            <th class="text-left font-medium py-2 pr-3">Fecha</th>
+                            <th class="text-left font-medium py-2 pr-3">Origen</th>
+                            <th class="text-left font-medium py-2 pr-3">Descripción</th>
+                            <th class="text-right font-medium py-2">Puntos</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let m of data.movimientosRecientes" class="border-b border-ui-border/50 last:border-0">
+                            <td class="py-2 pr-3 text-text-tertiary whitespace-nowrap">{{ m.createdAt | date:'dd/MM/yy HH:mm' }}</td>
+                            <td class="py-2 pr-3">
+                                <span class="text-[11px] px-2 py-0.5 rounded-full bg-brand-gold/10 text-brand-gold whitespace-nowrap">{{ m.origen }}</span>
+                            </td>
+                            <td class="py-2 pr-3 text-text-secondary truncate max-w-[200px]">{{ m.descripcion || '-' }}</td>
+                            <td class="py-2 text-right font-bold whitespace-nowrap"
+                                [ngClass]="m.puntos >= 0 ? 'text-green-400' : 'text-red-400'">
+                                {{ m.puntos >= 0 ? '+' : '' }}{{ m.puntos }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <ng-template #sinMovimientos>
+                    <div class="flex flex-col items-center justify-center gap-2 py-8 text-text-tertiary">
+                        <i class="pi pi-history text-xl opacity-40"></i>
+                        <p class="text-xs">Sin movimientos recientes.</p>
+                    </div>
+                </ng-template>
+            </div>
+        </div>
+
+        <!-- RECOMPENSAS (colapsable, cerrada por defecto) -->
+        <div class="bg-ui-card border border-ui-borderSoft rounded-2xl overflow-hidden">
+            <button type="button" (click)="toggleSeccion('recompensas')"
+                class="w-full flex items-center justify-between px-5 py-4 text-sm font-semibold text-white">
+                <span class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-brand-gold"></span>
+                    Recompensas
+                </span>
+                <i class="pi pi-chevron-down text-xs text-text-tertiary transition-transform duration-200"
+                    [class.rotate-180]="secciones.recompensas"></i>
+            </button>
+
+            <div *ngIf="secciones.recompensas" class="px-5 pb-5">
+                <div *ngIf="data.recompensas.length; else sinRecompensas" class="flex flex-col gap-2">
+                    <div *ngFor="let r of data.recompensas" class="flex items-center gap-3 rounded-xl bg-black/20 border border-ui-border px-3 py-2">
+                        <span class="w-3 h-3 rounded-full shrink-0" [style.background]="r.colorHex"></span>
+                        <span class="text-sm text-white truncate flex-1">{{ r.itemNombre }}</span>
+                        <span class="text-[11px] px-2 py-0.5 rounded-full bg-brand-gold/10 text-brand-gold whitespace-nowrap">{{ r.estado }}</span>
+                    </div>
+                </div>
+                <ng-template #sinRecompensas>
+                    <div class="flex flex-col items-center justify-center gap-2 py-8 text-text-tertiary">
+                        <i class="pi pi-gift text-xl opacity-40"></i>
+                        <p class="text-xs">Sin recompensas todavía.</p>
+                    </div>
+                </ng-template>
+            </div>
+        </div>
+
+    </ng-container>
+</div>
