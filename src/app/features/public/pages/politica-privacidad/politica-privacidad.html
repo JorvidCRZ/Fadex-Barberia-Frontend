@@ -9,16 +9,16 @@
     </header>
 
     <article class="form-base space-y-8 leading-relaxed">
-      @if (configuracion.politicaPrivacidad() !== null) {
-        <p class="whitespace-pre-line">{{ configuracion.politicaPrivacidad() }}</p>
+      @if (politicaPrivacidad()) {
+        <p class="whitespace-pre-line">{{ politicaPrivacidad() }}</p>
       } @else {
-        <section>
-          <h2 class="mb-3 text-xl font-semibold text-brand-gold">1. Responsable del tratamiento</h2>
-          <p>
-            Fadex Barber es responsable del tratamiento de los datos personales que proporcionas mediante esta
-            plataforma, formularios, reservas y canales de atención.
-          </p>
-        </section>
+      <section>
+        <h2 class="mb-3 text-xl font-semibold text-brand-gold">1. Responsable del tratamiento</h2>
+        <p>
+          Fadex Barber es responsable del tratamiento de los datos personales que proporcionas mediante esta
+          plataforma, formularios, reservas y canales de atención.
+        </p>
+      </section>
 
       <section>
         <h2 class="mb-3 text-xl font-semibold text-brand-gold">2. Datos que recopilamos</h2>

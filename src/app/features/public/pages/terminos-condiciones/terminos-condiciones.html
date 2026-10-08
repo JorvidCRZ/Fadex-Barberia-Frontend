@@ -9,16 +9,16 @@
     </header>
 
     <article class="form-base space-y-8 leading-relaxed">
-      @if (configuracion.terminosCondiciones() !== null) {
-        <p class="whitespace-pre-line">{{ configuracion.terminosCondiciones() }}</p>
+      @if (terminosCondiciones()) {
+        <p class="whitespace-pre-line">{{ terminosCondiciones() }}</p>
       } @else {
-        <section>
-          <h2 class="mb-3 text-xl font-semibold text-brand-gold">1. Aceptación de los términos</h2>
-          <p>
-            Al acceder o utilizar este sitio web, aceptas estos términos y condiciones. Si no estás de acuerdo con
-            alguna de sus disposiciones, debes abstenerte de utilizar la plataforma.
-          </p>
-        </section>
+      <section>
+        <h2 class="mb-3 text-xl font-semibold text-brand-gold">1. Aceptación de los términos</h2>
+        <p>
+          Al acceder o utilizar este sitio web, aceptas estos términos y condiciones. Si no estás de acuerdo con
+          alguna de sus disposiciones, debes abstenerte de utilizar la plataforma.
+        </p>
+      </section>
 
       <section>
         <h2 class="mb-3 text-xl font-semibold text-brand-gold">2. Uso de la plataforma</h2>

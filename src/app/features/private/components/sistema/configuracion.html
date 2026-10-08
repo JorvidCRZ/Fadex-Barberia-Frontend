@@ -8,93 +8,87 @@
     </div>
   </header>
 
-  <form [formGroup]="form" (ngSubmit)="guardar()" class="settings-form">
-    <section class="settings-card" aria-labelledby="company-heading">
-      <h2 id="company-heading"><i class="pi pi-building" aria-hidden="true"></i> Datos de la empresa</h2>
-
-      <div class="company-layout">
+  <form [formGroup]="settingsForm" (ngSubmit)="saveSettings()">
+    <section class="settings-card company-card" aria-labelledby="company-heading">
+      <h2 id="company-heading"><i class="pi pi-building" aria-hidden="true"></i>Datos de la empresa</h2>
+      <div class="company-grid">
         <div class="logo-field">
-          <span class="field-label">Logo de la empresa</span>
-          <div class="logo-picker">
-            @if (logoUrl) {
-              <img class="logo-preview" [src]="logoUrl" alt="Vista previa del logo de la empresa" />
+          <label for="company-logo">Logo de la empresa</label>
+          <div class="logo-preview">
+            @if (logoDataUrl(); as logo) {
+              <img [src]="logo" [alt]="logoName()" />
             } @else {
-              <div class="logo-placeholder" aria-label="Sin logo seleccionado">
-                <i class="pi pi-image" aria-hidden="true"></i>
-              </div>
+              <i class="pi pi-image" aria-hidden="true"></i>
             }
-            <div class="logo-actions">
-              <input #companyLogo class="visually-hidden" type="file" [disabled]="form.disabled"
-                accept="image/png,image/jpeg,image/webp"
-                aria-label="Seleccionar logo de la empresa" (change)="seleccionarLogo($event)" />
-              <app-button variant="secondary" icon="upload" label="Seleccionar logo" [fullWidth]="true"
-                [disabled]="form.disabled" (clicked)="companyLogo.click()" />
-              @if (logoUrl) {
-                <button type="button" class="text-button" (click)="eliminarLogo()">Quitar</button>
-              }
-            </div>
-            <small>PNG, JPG o WebP; máximo 1 MB.</small>
           </div>
+          <input
+            #logoInput
+            id="company-logo"
+            class="visually-hidden"
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            aria-describedby="logo-help"
+            (change)="onLogoSelected($event)"
+          />
+          <button type="button" class="button button-secondary logo-button" (click)="logoInput.click()">
+            <i class="pi pi-upload" aria-hidden="true"></i>
+            Seleccionar logo
+          </button>
+          <small id="logo-help">PNG, JPG o WebP, máximo 1 MB.</small>
         </div>
 
         <div class="company-fields">
           <div class="field">
-            <label for="companyName">Nombre de la empresa</label>
-            <input id="companyName" type="text" formControlName="nombre" autocomplete="organization" />
-            @if (form.controls.nombre.touched && form.controls.nombre.invalid) {
+            <label for="business-name">Nombre de la empresa</label>
+            <input id="business-name" formControlName="businessName" autocomplete="organization" />
+            @if (settingsForm.controls.businessName.invalid && settingsForm.controls.businessName.touched) {
               <span class="field-error">Ingresa el nombre de la empresa.</span>
             }
           </div>
-
           <div class="field">
-            <label for="companyEmail">Correo electrónico</label>
-            <input id="companyEmail" type="email" formControlName="correo" autocomplete="email" />
-            @if (form.controls.correo.touched && form.controls.correo.invalid) {
+            <label for="company-email">Correo electrónico</label>
+            <input id="company-email" type="email" formControlName="email" autocomplete="email" />
+            @if (settingsForm.controls.email.invalid && settingsForm.controls.email.touched) {
               <span class="field-error">Ingresa un correo electrónico válido.</span>
             }
           </div>
-
           <div class="field">
-            <label for="companyPhone">Teléfono</label>
-            <input id="companyPhone" type="tel" formControlName="telefono" autocomplete="tel" />
+            <label for="company-phone">Teléfono</label>
+            <input id="company-phone" type="tel" formControlName="phone" autocomplete="tel" />
           </div>
-
           <div class="field">
-            <label for="companyAddress">Dirección</label>
-            <input id="companyAddress" type="text" formControlName="direccion" autocomplete="street-address" />
+            <label for="company-address">Dirección</label>
+            <input id="company-address" formControlName="address" autocomplete="street-address" />
           </div>
         </div>
       </div>
     </section>
 
-    <section class="settings-card" aria-labelledby="legal-heading">
-      <h2 id="legal-heading"><i class="pi pi-file-edit" aria-hidden="true"></i> Páginas legales</h2>
+    <section class="settings-card legal-card" aria-labelledby="legal-heading">
+      <h2 id="legal-heading"><i class="pi pi-file-edit" aria-hidden="true"></i>Páginas legales</h2>
       <p class="section-description">El contenido guardado se muestra en las páginas legales públicas.</p>
-
-      <div class="legal-fields">
+      <div class="legal-grid">
         <div class="field">
           <label for="terms">Términos y condiciones</label>
-          <textarea id="terms" rows="8" formControlName="terminosCondiciones"
-            placeholder="Escribe los términos y condiciones de la empresa..."></textarea>
+          <textarea id="terms" formControlName="termsAndConditions" placeholder="Escribe los términos y condiciones de la empresa..."></textarea>
         </div>
-
         <div class="field">
           <label for="privacy">Política de privacidad</label>
-          <textarea id="privacy" rows="8" formControlName="politicaPrivacidad"
-            placeholder="Escribe la política de privacidad..."></textarea>
+          <textarea id="privacy" formControlName="privacyPolicy" placeholder="Escribe la política de privacidad..."></textarea>
         </div>
-
-        <div class="field">
+        <div class="field returns-field">
           <label for="returns">Política de devoluciones</label>
-          <textarea id="returns" rows="8" formControlName="politicaDevoluciones"
-            placeholder="Escribe la política de devoluciones..."></textarea>
+          <textarea id="returns" formControlName="returnsPolicy" placeholder="Escribe la política de devoluciones..."></textarea>
         </div>
       </div>
     </section>
 
-    <div class="form-actions">
+    <footer class="settings-footer">
       <p>Los cambios se guardan en este navegador y se aplican a las páginas públicas de este dispositivo.</p>
-      <app-button variant="primary" icon="save" label="Guardar cambios" type="submit" [disabled]="form.disabled" />
-    </div>
+      <button type="submit" class="button button-primary save-button">
+        <i class="pi pi-save" aria-hidden="true"></i>
+        Guardar cambios
+      </button>
+    </footer>
   </form>
 </main>

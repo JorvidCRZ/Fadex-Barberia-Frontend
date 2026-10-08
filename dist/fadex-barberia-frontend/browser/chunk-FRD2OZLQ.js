@@ -1,0 +1,1 @@
+function a(n){let r=e=>{let o=e.subcategorias?.length?e.subcategorias.map(d=>r(d)):[],t={label:e.nombre,key:String(e.id),data:e,children:o};return o.length&&(t.expanded=!0),t};return n.filter(e=>e.padreId==null).map(e=>r(e))}export{a};

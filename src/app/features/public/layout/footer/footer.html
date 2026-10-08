@@ -2,15 +2,8 @@
   <div class="container-main grid grid-cols-1 gap-10 text-center sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.3fr_1.3fr] lg:text-left xl:gap-12">
     <div class="flex flex-col items-center gap-4 lg:items-start">
       <a routerLink="/inicio" class="flex w-fit items-center gap-3">
-        @if (configuracionService.logoUrl()) {
-          <img [src]="configuracionService.logoUrl()" [alt]="'Logo de ' + (configuracionService.nombre() || 'la empresa')"
-            class="h-9 w-9 rounded-full object-contain" />
-        } @else {
-          <app-logo variant="icon" size="sm" />
-        }
-        <span class="text-xl font-bold text-brand-white sm:text-2xl">
-          {{ configuracionService.nombre() || 'Fadex Barber' }}
-        </span>
+        <app-logo variant="icon" size="sm" />
+        <span class="text-xl font-bold text-brand-white sm:text-2xl">{{ nombreEmpresa() || 'Fadex Barber' }}</span>
       </a>
       <p class="max-w-sm text-sm leading-relaxed text-text-secondary"> Estilo, precisión y actitud. Cortes modernos y clásicos para resaltar tu mejor versión.</p>
     </div>
@@ -40,27 +33,15 @@
         <li><a routerLink="/reclamos" class="text-text-secondary transition-colors hover:text-brand-gold">Libro de reclamaciones</a></li>
         <li><a routerLink="/terminos-condiciones" class="text-text-secondary transition-colors hover:text-brand-gold">Términos y condiciones</a></li>
         <li><a routerLink="/politica-privacidad" class="text-text-secondary transition-colors hover:text-brand-gold">Política de privacidad</a></li>
-        <li><a routerLink="/politica-devoluciones" class="text-text-secondary transition-colors hover:text-brand-gold">Política de devoluciones</a></li>
       </ul>
     </div>
 
     <div>
       <h3 class="mb-4 font-semibold text-brand-white"> Reserva tu cita </h3>
       <ul class="flex flex-col gap-3 text-sm text-text-secondary">
-        @if (configuracionService.telefono()) {
-          <li><a [href]="'tel:' + configuracionService.telefono()" class="transition-colors hover:text-brand-gold">
-            {{ configuracionService.telefono() }}
-          </a></li>
+        @for (item of contacto(); track item.texto) {
+          <li><a [routerLink]="item.ruta" class="transition-colors hover:text-brand-gold"> {{ item.texto }} </a></li>
         }
-        @if (configuracionService.correo()) {
-          <li><a [href]="'mailto:' + configuracionService.correo()" class="transition-colors hover:text-brand-gold">
-            {{ configuracionService.correo() }}
-          </a></li>
-        }
-        @if (configuracionService.direccion()) {
-          <li><span>{{ configuracionService.direccion() }}</span></li>
-        }
-        <li>Lun - Sáb: 10:00 - 21:00</li>
       </ul>
 
       <a routerLink="/reservas" class="boton-primary mt-4 w-full rounded-full">

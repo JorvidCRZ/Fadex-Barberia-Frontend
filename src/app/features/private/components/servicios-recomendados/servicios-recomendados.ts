@@ -7,7 +7,7 @@ import { ServicioResponseDTO } from '@/app/core/models/gestion/cliente/ClienteRe
   standalone: true,
   imports: [CommonModule],
   templateUrl: './servicios-recomendados.html',
-  styleUrl: './servicios-recomendados.css',
+  styleUrl: './servicios-recomendados.scss',
 })
 export class ServiciosRecomendados {
   @Input() servicios: ServicioResponseDTO[] = [];

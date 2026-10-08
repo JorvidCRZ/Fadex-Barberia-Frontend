@@ -8,8 +8,6 @@ export interface MockAuthUser {
   nombre: string;
   rol: MockUserRole;
   permisos: string[];
-  email?: string;
-  telefono?: string;
 }
 
 export const MOCK_AUTH_USERS: readonly MockAuthUser[] = [
@@ -37,8 +35,6 @@ export const MOCK_AUTH_USERS: readonly MockAuthUser[] = [
     password: 'admin123',
     nombre: 'Administrador Demo',
     rol: 'admin',
-    email: 'admin@fadex.com',
-    telefono: '900000000',
     permisos: [
       'DASHBOARD_READ_ADMIN',
       'RESERVA_READ_ALL',
@@ -70,8 +66,6 @@ export function createMockLoginResponse(user: MockAuthUser): LoginResponse {
     sub: user.username,
     username: user.username,
     fullName: user.nombre,
-    email: user.email,
-    telefono: user.telefono,
     roles: [`ROLE_${user.rol}`],
     permisos: user.permisos,
   };

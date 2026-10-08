@@ -7,7 +7,7 @@ import { ReservaDTO, EstadoReserva } from '@/app/core/models/gestion/cliente/Cli
   standalone: true,
   imports: [CommonModule],
   templateUrl: './proxima-cita.html',
-  styleUrl: './proxima-cita.css',
+  styleUrl: './proxima-cita.scss',
 })
 export class ProximaCita {
   @Input() reserva: ReservaDTO | null = null;

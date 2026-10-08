@@ -1,0 +1,1 @@
+var t=(e=>(e.DESCUENTO="DESCUENTO",e.SERVICIO="SERVICIO",e.PRODUCTO="PRODUCTO",e.CUPON="CUPON",e.SIN_PREMIO="SIN_PREMIO",e))(t||{});var i=(n=>(n.RESERVA="RESERVA",n.VENTA="VENTA",n.AJUSTE="AJUSTE",n))(i||{});var o=(r=>(r.PENDIENTE="PENDIENTE",r.CANJEADO="CANJEADO",r.VENCIDO="VENCIDO",r.ANULADO="ANULADO",r))(o||{});export{i as a,o as b,t as c};

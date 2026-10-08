@@ -187,21 +187,18 @@ export const ADMIN_MENU = [
   {
     label: "Sistema",
     icon: "pi pi-server",
-    items: [
-
+    items: [ {
+      label: "Perfil de administrador",
+        icon: " pi pi-user",
+        routerLink: ["sistema/perfil"],
+        permission: "CONFIGURACION_READ"
+      },
       {
         label: "Configuración",
         icon: "pi pi-cog",
         routerLink: ["sistema/configuracion"],
         permission: "CONFIGURACION_READ"
-      },
-      {
-        label: "Perfil",
-        icon: "pi pi-user",
-        routerLink: ["sistema/perfil"],
-        permission: "CONFIGURACION_READ"
       }
-
     ]
   }
 ];

@@ -4,8 +4,8 @@
 	<div class="flex flex-col gap-4 border-b border-brand-gold/10 px-5 py-5 md:flex-row md:items-center md:justify-between md:px-7">
 		<div>
 			<p class="mb-2 text-[0.72rem] uppercase tracking-[0.28em] text-brand-gold/80">Información básica</p>
-			<h2 class="text-2xl font-bold text-gray-100">Datos personales</h2>
-			<p class="mt-1 text-sm text-gray-400">Información personal y de contacto del usuario.</p>
+			<h2 class="text-2xl font-bold text-gray-100">Datos del usuario</h2>
+			<p class="mt-1 text-sm text-gray-400">Perfil profesional y datos generales del usuario.</p>
 		</div>
 
 		<div class="flex gap-2">
@@ -40,50 +40,34 @@
 
 		<!-- Nombre -->
 		<div class="group border-b border-r border-brand-gold/10 p-5 transition-all duration-300 hover:bg-brand-gold/[0.03]">
-			@if (editando) {
-				<label for="profileName" class="mb-2 block text-xs uppercase tracking-[0.18em] text-brand-gold/70">Nombre</label>
-				<input id="profileName" type="text" maxlength="100" [(ngModel)]="form.nombre"
-					class="w-full rounded-lg border border-brand-gold/20 bg-[#1a1a16] px-3 py-2 text-sm text-gray-100 outline-none focus:border-brand-gold/50" />
-			} @else {
-				<p class="mb-2 text-xs uppercase tracking-[0.18em] text-brand-gold/70">Nombre</p>
-				<h3 class="text-base font-semibold text-gray-100">{{ nombre }}</h3>
-			}
+			<p class="mb-2 text-xs uppercase tracking-[0.18em] text-brand-gold/70">Nombre</p>
+			<h3 *ngIf="!editando" class="text-base font-semibold text-gray-100">{{ nombre }}</h3>
+			<input *ngIf="editando" type="text" [(ngModel)]="form.nombre"
+				class="w-full rounded-lg border border-brand-gold/20 bg-[#1a1a16] px-3 py-2 text-sm text-gray-100 outline-none focus:border-brand-gold/50" />
 		</div>
 
 		<!-- Apellido -->
 		<div class="group border-b border-brand-gold/10 p-5 transition-all duration-300 hover:bg-brand-gold/[0.03]">
-			@if (editando) {
-				<label for="profileSurname" class="mb-2 block text-xs uppercase tracking-[0.18em] text-brand-gold/70">Apellido</label>
-				<input id="profileSurname" type="text" maxlength="100" [(ngModel)]="form.apellido"
-					class="w-full rounded-lg border border-brand-gold/20 bg-[#1a1a16] px-3 py-2 text-sm text-gray-100 outline-none focus:border-brand-gold/50" />
-			} @else {
-				<p class="mb-2 text-xs uppercase tracking-[0.18em] text-brand-gold/70">Apellido</p>
-				<h3 class="text-base font-semibold text-gray-100">{{ apellido }}</h3>
-			}
+			<p class="mb-2 text-xs uppercase tracking-[0.18em] text-brand-gold/70">Apellido</p>
+			<h3 *ngIf="!editando" class="text-base font-semibold text-gray-100">{{ apellido }}</h3>
+			<input *ngIf="editando" type="text" [(ngModel)]="form.apellido"
+				class="w-full rounded-lg border border-brand-gold/20 bg-[#1a1a16] px-3 py-2 text-sm text-gray-100 outline-none focus:border-brand-gold/50" />
 		</div>
 
 		<!-- Teléfono -->
 		<div class="group border-b border-r border-brand-gold/10 p-5 transition-all duration-300 hover:bg-brand-gold/[0.03]">
-			@if (editando) {
-				<label for="profilePhone" class="mb-2 block text-xs uppercase tracking-[0.18em] text-brand-gold/70">Teléfono</label>
-				<input id="profilePhone" type="tel" inputmode="numeric" maxlength="9" [(ngModel)]="form.telefono"
-					class="w-full rounded-lg border border-brand-gold/20 bg-[#1a1a16] px-3 py-2 text-sm text-gray-100 outline-none focus:border-brand-gold/50" />
-			} @else {
-				<p class="mb-2 text-xs uppercase tracking-[0.18em] text-brand-gold/70">Teléfono</p>
-				<h3 class="text-base font-semibold text-gray-100">{{ telefono }}</h3>
-			}
+			<p class="mb-2 text-xs uppercase tracking-[0.18em] text-brand-gold/70">Teléfono</p>
+			<h3 *ngIf="!editando" class="text-base font-semibold text-gray-100">{{ telefono }}</h3>
+			<input *ngIf="editando" type="text" [(ngModel)]="form.telefono"
+				class="w-full rounded-lg border border-brand-gold/20 bg-[#1a1a16] px-3 py-2 text-sm text-gray-100 outline-none focus:border-brand-gold/50" />
 		</div>
 
 		<!-- Email -->
 		<div class="group border-b border-brand-gold/10 p-5 transition-all duration-300 hover:bg-brand-gold/[0.03]">
-			@if (editando) {
-				<label for="profileEmail" class="mb-2 block text-xs uppercase tracking-[0.18em] text-brand-gold/70">Correo electrónico</label>
-				<input id="profileEmail" type="email" [(ngModel)]="form.email"
-					class="w-full rounded-lg border border-brand-gold/20 bg-[#1a1a16] px-3 py-2 text-sm text-gray-100 outline-none focus:border-brand-gold/50" />
-			} @else {
-				<p class="mb-2 text-xs uppercase tracking-[0.18em] text-brand-gold/70">Correo electrónico</p>
-				<h3 class="break-all text-base font-semibold text-gray-100">{{ email }}</h3>
-			}
+			<p class="mb-2 text-xs uppercase tracking-[0.18em] text-brand-gold/70">Email</p>
+			<h3 *ngIf="!editando" class="text-base font-semibold text-gray-100 break-all">{{ email }}</h3>
+			<input *ngIf="editando" type="email" [(ngModel)]="form.email"
+				class="w-full rounded-lg border border-brand-gold/20 bg-[#1a1a16] px-3 py-2 text-sm text-gray-100 outline-none focus:border-brand-gold/50" />
 		</div>
 
 		<!-- Solo campos básicos: Nombre, Apellido, Teléfono, Email -->
@@ -91,3 +75,4 @@
 
 	</div>
 </div>
+

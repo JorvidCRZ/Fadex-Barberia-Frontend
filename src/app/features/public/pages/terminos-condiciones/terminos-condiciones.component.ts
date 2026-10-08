@@ -9,9 +9,6 @@ import { ConfiguracionService } from '../../../../core/services/common/configura
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TerminosCondicionesComponent {
-  readonly configuracion = inject(ConfiguracionService);
-
-  constructor() {
-    this.configuracion.cargarConfiguracion();
-  }
+  private readonly configuracionService = inject(ConfiguracionService);
+  readonly terminosCondiciones = this.configuracionService.terminosCondiciones;
 }

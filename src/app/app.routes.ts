@@ -90,8 +90,8 @@ export const routes: Routes = [
        },
        {
          path: 'sistema', children: [
-           { path: 'configuracion', loadComponent: () => import('./features/private/components/sistema/configuracion').then(m => m.Configuracion) },
            { path: 'perfil', loadComponent: () => import('./features/private/pages/perfil/perfil.component').then(m => m.PerfilComponent) },
+           { path: 'configuracion', loadComponent: () => import('./features/private/components/sistema/configuracion').then(m => m.Configuracion) },
          ]
        },
          { path: '**', loadComponent: () => import('./shared/components/error404/error404.component').then(m => m.Error404Component) },
@@ -134,7 +134,6 @@ export const routes: Routes = [
       { path: 'nosotros', component: NosotrosComponent },
       { path: 'terminos-condiciones', loadComponent: () => import('./features/public/pages/terminos-condiciones/terminos-condiciones.component').then(m => m.TerminosCondicionesComponent) },
       { path: 'politica-privacidad', loadComponent: () => import('./features/public/pages/politica-privacidad/politica-privacidad.component').then(m => m.PoliticaPrivacidadComponent) },
-      { path: 'politica-devoluciones', loadComponent: () => import('./features/public/pages/politica-devoluciones/politica-devoluciones.component').then(m => m.PoliticaDevolucionesComponent) },
       { path: 'preguntas-frecuentes', loadComponent: () => import('./features/public/pages/preguntas-frecuentes/preguntas-frecuentes.component').then(m => m.PreguntasFrecuentesComponent) },
       { path: 'productos', loadComponent: () => import('./features/public/pages/productos/productos.component').then(m => m.ProductComponent) },
       { path: 'forgot-password', component: ForgotPasswordComponent },
