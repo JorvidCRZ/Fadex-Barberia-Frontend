@@ -2,7 +2,6 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 
-import { PlanillaService } from '@core/services/planilla/planilla.service';
 import { ResumenBarbero, VentaBarbero } from '@core/models/planilla/venta-barbero.model';
 import { BarberoHeader } from './components/barbero-header/barbero-header';
 import { BarberoKpis } from './components/barbero-kpis/barbero-kpis';
@@ -12,12 +11,11 @@ import { BarberoVentasTabla } from './components/barbero-ventas-tabla/barbero-ve
   selector: 'app-mi-sueldo-analisis',
   imports: [CommonModule, BarberoHeader, BarberoKpis, BarberoVentasTabla],
   templateUrl: './mi-sueldo-analisis.html',
-  styleUrl: './mi-sueldo-analisis.css',
+  styleUrl: './mi-sueldo-analisis.scss',
 })
 export class MiSueldoAnalisis implements OnInit {
 
   private readonly route    = inject(ActivatedRoute);
-  private readonly service  = inject(PlanillaService);
 
   barberoId!: number;
 
@@ -25,7 +23,7 @@ export class MiSueldoAnalisis implements OnInit {
   ventas: VentaBarbero[] = [];
 
   page          = 0;
-  size          = 20;
+  size          = 10;
   totalElements = 0;
   totalPages    = 0;
 
@@ -47,29 +45,38 @@ export class MiSueldoAnalisis implements OnInit {
 
   cargarResumen(): void {
     this.cargando = true;
-    this.service.getResumenBarbero(this.barberoId, this.mesActual, this.anioActual)
-      .subscribe({
-        next: res => {
-          this.resumen  = res.data;
-          this.cargando = false;
-        },
-        error: () => { this.cargando = false; }
-      });
+    // Datos de memoria (Mock)
+    this.resumen = {
+      barberoId: this.barberoId,
+      nombreBarbero: 'Barbero Ejemplo',
+      sueldoBase: 500000,
+      porcentajeComision: 10,
+      cantidadVentas: 30,
+      totalVentas: 1200,
+      montoComision: 150000,
+      sueldoFinal: 650000,
+    };
+    this.cargando = false;
   }
 
   cargarVentas(page = 0): void {
     this.cargandoVentas = true;
-    this.service.getVentasBarbero(this.barberoId, this.mesActual, this.anioActual, page, this.size)
-      .subscribe({
-        next: res => {
-          this.ventas        = res.data.content;
-          this.page          = res.data.number;
-          this.totalElements = res.data.totalElements;
-          this.totalPages    = res.data.totalPages;
-          this.cargandoVentas = false;
-        },
-        error: () => { this.cargandoVentas = false; }
-      });
+    // Datos de memoria (Mock)
+    const allMockVentas: VentaBarbero[] = Array.from({ length: 45 }, (_, i) => ({
+      ventaId: i + 1,
+      fecha: new Date().toISOString(),
+      nombreCliente: `Cliente ${i + 1}`,
+      total: 20 + Math.floor(Math.random() * 30),
+    }));
+
+    const start = page * this.size;
+    const end = start + this.size;
+
+    this.ventas        = allMockVentas.slice(start, end);
+    this.page          = page;
+    this.totalElements = allMockVentas.length;
+    this.totalPages    = Math.ceil(allMockVentas.length / this.size);
+    this.cargandoVentas = false;
   }
 
   cambiarPagina(nuevaPagina: number): void {

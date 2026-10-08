@@ -14,7 +14,7 @@ interface ResumenCard {
   standalone: true,
   imports: [CommonModule],
   templateUrl: './resumen-periodo.html',
-  styleUrls: ['./resumen-periodo.css']
+  styleUrls: ['./resumen-periodo.scss']
 })
 export class ResumenPeriodoComponent {
   @Input() totalPlanilla: number = 0;
