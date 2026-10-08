@@ -3,12 +3,12 @@ import { RouterLink } from '@angular/router';
 import { ConfiguracionService } from '../../../../core/services/common/configuracion.service';
 
 @Component({
-  selector: 'app-politica-privacidad',
+  selector: 'app-politica-devoluciones',
   imports: [RouterLink],
-  templateUrl: './politica-privacidad.html',
+  templateUrl: './politica-devoluciones.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PoliticaPrivacidadComponent {
+export class PoliticaDevolucionesComponent {
   readonly configuracion = inject(ConfiguracionService);
 
   constructor() {

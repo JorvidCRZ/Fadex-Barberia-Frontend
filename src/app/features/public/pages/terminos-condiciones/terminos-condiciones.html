@@ -9,13 +9,16 @@
     </header>
 
     <article class="form-base space-y-8 leading-relaxed">
-      <section>
-        <h2 class="mb-3 text-xl font-semibold text-brand-gold">1. Aceptación de los términos</h2>
-        <p>
-          Al acceder o utilizar este sitio web, aceptas estos términos y condiciones. Si no estás de acuerdo con
-          alguna de sus disposiciones, debes abstenerte de utilizar la plataforma.
-        </p>
-      </section>
+      @if (configuracion.terminosCondiciones() !== null) {
+        <p class="whitespace-pre-line">{{ configuracion.terminosCondiciones() }}</p>
+      } @else {
+        <section>
+          <h2 class="mb-3 text-xl font-semibold text-brand-gold">1. Aceptación de los términos</h2>
+          <p>
+            Al acceder o utilizar este sitio web, aceptas estos términos y condiciones. Si no estás de acuerdo con
+            alguna de sus disposiciones, debes abstenerte de utilizar la plataforma.
+          </p>
+        </section>
 
       <section>
         <h2 class="mb-3 text-xl font-semibold text-brand-gold">2. Uso de la plataforma</h2>
@@ -67,6 +70,7 @@
           consultas, utiliza nuestros canales oficiales de atención.
         </p>
       </section>
+      }
 
       <footer class="border-t border-ui-border pt-6 text-sm text-text-muted">
         Última actualización: octubre de 2026.

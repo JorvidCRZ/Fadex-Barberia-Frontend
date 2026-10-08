@@ -98,7 +98,7 @@ export class DatosBasicosPerfilUsuario implements OnInit {
   }
 onGuardar(): void {
 
-    if (!this.usuarioId) {
+  if (!this.usuarioId) {
         this.notificationService.showWarn(
           'No se pudo identificar el usuario.'
         );
@@ -111,26 +111,21 @@ onGuardar(): void {
 
     this.guardando = true;
 
-    this.personaService.actualizarPersonaPorUsuarioId(
-      this.usuarioId,
-      {
-        nombre: this.form.nombre.trim(),
-        apellido: this.form.apellido.trim(),
-        telefono: this.form.telefono.trim(),
-        email: this.form.email.trim(),
-      }
-    ).subscribe({
+    const profile = {
+      nombre: this.form.nombre.trim(),
+      apellido: this.form.apellido.trim(),
+      telefono: this.form.telefono.trim(),
+      email: this.form.email.trim(),
+    };
+
+    this.personaService.actualizarPersonaPorUsuarioId(this.usuarioId, profile).subscribe({
         next: (res) => {
-
             this.guardando = false;
-
-            this.nombre = this.form.nombre || '—';
-            this.apellido = this.form.apellido || '—';
-            this.telefono = this.form.telefono || '—';
-            this.email = this.form.email || '—';
-
+            this.nombre = profile.nombre || '—';
+            this.apellido = profile.apellido || '—';
+            this.telefono = profile.telefono || '—';
+            this.email = profile.email || '—';
             this.editando = false;
-
             this.notificationService.showSuccess(
               res?.message || 'Datos actualizados correctamente.'
             );

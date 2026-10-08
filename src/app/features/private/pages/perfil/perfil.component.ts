@@ -1,17 +1,13 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-// import { ActivatedRoute } from '@angular/router';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
-// import { Observable, map, of, switchMap } from 'rxjs';
 import { InputTextModule } from 'primeng/inputtext';
-// import { ToastModule } from 'primeng/toast';
-// import { MessageService } from 'primeng/api';
-// import { Persona } from '../../../../core/models/gestion/persona/persona.model';
-// import { PersonaUpdateRequest } from '../../../../core/models/gestion/persona/persona-update.model';
-// import { AuthService } from '../../../../core/services/auth/auth.service';
-// import { ClienteService } from '../../../../core/services/gestion/cliente.service';
-// import { BarberoService } from '../../../../core/services/gestion/barbero.service';
-// import { PersonaService } from '../../../../core/services/gestion/persona.service';
+import { ToastModule } from 'primeng/toast';
+import { AuthService } from '../../../../core/services/auth/auth.service';
 import { TokenService } from '../../../../core/services/auth/token.service';
+import { UsuarioService } from '../../../../core/services/auth/usuario.service';
+import { PersonaService } from '../../../../core/services/gestion/persona.service';
+import { NotificationService } from '../../../../core/services/common/notification.service';
+import { environment } from '../../../../../environments/environment';
 
 // ─── Modelo ───────────────────────────────────────────────────────────────────
 
@@ -48,27 +44,32 @@ const NIVELES = [
   { label: 'Fuerte', bar: 'bg-success', text: 'text-success' },
 ];
 
-// Pega aquí tu lista de permisos del admin
-const PERMISOS_ADMIN: string[] = [
-  'BARBERO_CREATE', 'BARBERO_VIEW', 'BARBERO_UPDATE', 'BARBERO_DELETE',
-];
+const ADMIN_PROFILE_STORAGE_KEY = 'fadex.admin.profile';
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function firstString(value: Record<string, unknown>, ...keys: string[]): string | undefined {
+  for (const key of keys) {
+    const candidate = value[key];
+    if (typeof candidate === 'string' && candidate.trim()) return candidate;
+  }
+  return undefined;
+}
+
+function isAdminProfile(value: Record<string, unknown>): value is Record<'nombre' | 'apellido' | 'telefono' | 'email', string> {
+  return typeof value['nombre'] === 'string'
+    && typeof value['apellido'] === 'string'
+    && typeof value['telefono'] === 'string'
+    && typeof value['email'] === 'string';
+}
 
 const passwordsCoinciden = (g: AbstractControl): ValidationErrors | null =>
   g.get('passwordNueva')?.value === g.get('confirmarPassword')?.value ? null : { noCoinciden: true };
 
-// Backend: transformar la respuesta de Persona cuando se reactive la API.
-// const desdePersona = (p: Persona): PerfilCuenta => ({
-//   personaId: p.personaId,
-//   usuarioId: p.usuario?.idUsuario,
-//   nombre: p.nombre,
-//   apellido: p.apellido,
-//   telefono: p.telefono ?? '',
-//   email: p.email,
-//   usuario: p.usuario?.user,
-// });
-
 const PERFILES_MEMORIA: Record<RolPerfil, PerfilCuenta> = {
-  ADMIN: { personaId: 1, usuarioId: 1, nombre: 'Administrador', apellido: 'Demo', telefono: '900000000', email: 'admin@gmail.com', usuario: 'admin', permisos: PERMISOS_ADMIN },
+  ADMIN: { personaId: 1, usuarioId: 1, nombre: 'Administrador', apellido: 'Demo', telefono: '', email: '', usuario: 'admin' },
   BARBERO: { personaId: 2, usuarioId: 2, nombre: 'Carlos', apellido: 'Ramírez', telefono: '982321324', email: 'barbero@fadex.com', usuario: 'barbero', descripcion: 'Barbero especializado en cortes clásicos y degradados.' },
   CLIENTE: { personaId: 3, usuarioId: 3, nombre: 'Juan', apellido: 'Pérez', telefono: '982321324', email: 'jdcruzp11@gmail.com', usuario: 'cliente', fechaRegistro: '2026-01-15' },
 };
@@ -78,19 +79,16 @@ const PERFILES_MEMORIA: Record<RolPerfil, PerfilCuenta> = {
 @Component({
   selector: 'app-perfil',
   standalone: true,
-  imports: [ReactiveFormsModule, InputTextModule],
+  imports: [ReactiveFormsModule, InputTextModule, ToastModule],
   templateUrl: './perfil.html',
 })
 export class PerfilComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly tokenService = inject(TokenService);
-
-  // Backend: dependencias conservadas para cuando se habilite la API.
-  // private readonly toast = inject(MessageService);
-  // private readonly personaService = inject(PersonaService);
-  // private readonly authService = inject(AuthService);
-  // private readonly clienteService = inject(ClienteService);
-  // private readonly barberoService = inject(BarberoService);
+  private readonly authService = inject(AuthService);
+  private readonly personaService = inject(PersonaService);
+  private readonly usuarioService = inject(UsuarioService);
+  private readonly notificationService = inject(NotificationService);
 
   // El rol viene de la ruta: data: { rol: 'CLIENTE' | 'BARBERO' | 'ADMIN' }
   readonly rol: RolPerfil = this.obtenerRol();
@@ -158,28 +156,110 @@ export class PerfilComponent implements OnInit {
 
   cargar(): void {
     this.cargando.set(true);
-    const p = { ...PERFILES_MEMORIA[this.rol] };
-    this.perfil.set(p);
-    this.formPerfil.patchValue({ nombre: p.nombre, apellido: p.apellido, telefono: p.telefono, email: p.email });
-    this.cargando.set(false);
+    if (this.rol === 'ADMIN') {
+      this.cargarPerfilAdmin();
+      return;
+    }
+
+    this.establecerPerfil({ ...PERFILES_MEMORIA[this.rol] });
   }
 
-  // Backend: carga original por rol, desactivada mientras el perfil trabaja en memoria.
-  // private obtenerPerfil(): Observable<PerfilCuenta> {
-  //   switch (this.rol) {
-  //     case 'CLIENTE':
-  //       return this.clienteService.obtenerPerfilPropio().pipe(
-  //         map(({ data }) => ({ ...desdePersona(data.persona), fechaRegistro: data.fechaRegistro })),
-  //       );
-  //     case 'BARBERO':
-  //       return this.barberoService.obtenerMiBarberoId().pipe(
-  //         switchMap((r) => this.barberoService.obtenerPorId(r.data)),
-  //         map(({ data }) => ({ ...desdePersona(data.persona), descripcion: data.descripcion || 'Sin descripción disponible' })),
-  //       );
-  //     case 'ADMIN':
-  //       return of({ personaId: 1, usuarioId: 1, nombre: 'Admin', apellido: 'Sistema', telefono: '900000000', email: 'admin@gmail.com', usuario: 'admin1', permisos: PERMISOS_ADMIN });
-  //   }
-  // }
+  private cargarPerfilAdmin(): void {
+    const tokenValue: unknown = this.tokenService.getDecodedToken();
+    if (!isRecord(tokenValue)) {
+      this.cargando.set(false);
+      this.notificationService.showError('No se pudo cargar la información del administrador.');
+      return;
+    }
+
+    let userId: number | undefined;
+    const tokenUserId = this.tokenService.getUserId();
+    if (typeof tokenUserId === 'number' && Number.isSafeInteger(tokenUserId)) {
+      userId = tokenUserId;
+    } else if (typeof tokenUserId === 'string' && /^\d+$/.test(tokenUserId)) {
+      const parsedId = Number(tokenUserId);
+      if (Number.isSafeInteger(parsedId)) userId = parsedId;
+    }
+
+    if (!environment.useMockData && userId) {
+      this.cargarAdminDesdeApi(userId, tokenValue);
+      return;
+    }
+
+    try {
+      const savedProfile = localStorage.getItem(ADMIN_PROFILE_STORAGE_KEY);
+      if (savedProfile) {
+        const parsedProfile: unknown = JSON.parse(savedProfile);
+        if (isRecord(parsedProfile) && isAdminProfile(parsedProfile)) {
+          this.establecerPerfil({ ...PERFILES_MEMORIA.ADMIN, ...parsedProfile, usuarioId: userId });
+          return;
+        }
+      }
+    } catch {
+      this.notificationService.showError('No se pudieron leer los datos guardados del perfil.');
+    }
+
+    const fullName = firstString(tokenValue, 'fullName', 'nombreCompleto', 'name');
+    const [nombre = 'Administrador', ...surname] = fullName?.trim().split(/\s+/).filter(Boolean) ?? [];
+    this.establecerPerfil({
+      ...PERFILES_MEMORIA.ADMIN,
+      usuarioId: userId,
+      nombre,
+      apellido: surname.join(' ') || 'Demo',
+      email: firstString(tokenValue, 'email', 'emailAddress') ?? '',
+      telefono: firstString(tokenValue, 'telefono', 'phone_number') ?? '',
+    });
+  }
+
+  private cargarAdminDesdeApi(userId: number, tokenValue: Record<string, unknown>): void {
+    this.usuarioService.obtenerPorId(userId).subscribe({
+      next: response => {
+        const data: unknown = response.data;
+        if (!isRecord(data)
+          || typeof data['nombre'] !== 'string'
+          || typeof data['apellido'] !== 'string'
+          || typeof data['email'] !== 'string') {
+          this.cargando.set(false);
+          this.notificationService.showError('Los datos recibidos del perfil no tienen un formato válido.');
+          return;
+        }
+
+        this.establecerPerfil({
+          ...PERFILES_MEMORIA.ADMIN,
+          usuarioId: userId,
+          nombre: data['nombre'],
+          apellido: data['apellido'],
+          email: data['email'],
+          telefono: typeof data['telefono'] === 'string' ? data['telefono'] : '',
+        });
+      },
+      error: error => {
+        this.cargando.set(false);
+        this.notificationService.showHttpError(error, 'Cargar perfil');
+        const fullName = firstString(tokenValue, 'fullName', 'nombreCompleto', 'name');
+        const [nombre = 'Administrador', ...surname] = fullName?.trim().split(/\s+/).filter(Boolean) ?? [];
+        this.establecerPerfil({
+          ...PERFILES_MEMORIA.ADMIN,
+          usuarioId: userId,
+          nombre,
+          apellido: surname.join(' ') || '',
+          email: firstString(tokenValue, 'email', 'emailAddress') ?? '',
+          telefono: firstString(tokenValue, 'telefono', 'phone_number') ?? '',
+        });
+      },
+    });
+  }
+
+  private establecerPerfil(perfil: PerfilCuenta): void {
+    this.perfil.set(perfil);
+    this.formPerfil.patchValue({
+      nombre: perfil.nombre,
+      apellido: perfil.apellido,
+      telefono: perfil.telefono,
+      email: perfil.email,
+    });
+    this.cargando.set(false);
+  }
 
   // ── Acciones ──
   guardarPerfil(): void {
@@ -188,23 +268,50 @@ export class PerfilComponent implements OnInit {
       return;
     }
 
-    const p = this.perfil();
-    this.guardandoPerfil.set(true);
-
     const { nombre, apellido, telefono } = this.formPerfil.getRawValue();
-    this.perfil.update((actual) => ({ ...actual, nombre: nombre!, apellido: apellido!, telefono: telefono ?? '' }));
-    this.guardandoPerfil.set(false);
-  }
+    const updatedProfile = {
+      nombre: nombre?.trim() ?? '',
+      apellido: apellido?.trim() ?? '',
+      telefono: telefono?.trim() ?? '',
+      email: this.perfil().email,
+    };
 
-  // Backend: guardado original conservado para reactivar con PersonaService.
-  // const dto: PersonaUpdateRequest = { nombre: nombre!, apellido: apellido!, telefono: telefono ?? '', email: p.email };
-  // const request$: Observable<unknown> = p.personaId
-  //   ? this.personaService.actualizarPersona(p.personaId, dto)
-  //   : this.personaService.actualizarPersonaPorUsuarioId(p.usuarioId!, dto);
-  // request$.subscribe({
-  //   next: () => this.perfil.update((actual) => ({ ...actual, ...dto })),
-  //   error: () => undefined,
-  // });
+    if (this.rol !== 'ADMIN') {
+      this.perfil.update(actual => ({ ...actual, ...updatedProfile }));
+      this.notificationService.showSuccess('Datos actualizados correctamente.');
+      return;
+    }
+
+    if (environment.useMockData) {
+      try {
+        localStorage.setItem(ADMIN_PROFILE_STORAGE_KEY, JSON.stringify(updatedProfile));
+        this.perfil.update(actual => ({ ...actual, ...updatedProfile }));
+        this.notificationService.showSuccess('Datos actualizados correctamente.');
+      } catch {
+        this.notificationService.showError('No se pudieron guardar los datos del perfil en este navegador.');
+      }
+      return;
+    }
+
+    const userId = this.perfil().usuarioId;
+    if (!userId) {
+      this.notificationService.showError('No se pudo identificar el usuario para guardar los datos.');
+      return;
+    }
+
+    this.guardandoPerfil.set(true);
+    this.personaService.actualizarPersonaPorUsuarioId(userId, updatedProfile).subscribe({
+      next: response => {
+        this.perfil.update(actual => ({ ...actual, ...updatedProfile }));
+        this.guardandoPerfil.set(false);
+        this.notificationService.showSuccess(response.message || 'Datos actualizados correctamente.');
+      },
+      error: error => {
+        this.guardandoPerfil.set(false);
+        this.notificationService.showHttpError(error, 'Actualizar datos del perfil');
+      },
+    });
+  }
 
   cambiarPassword(): void {
     if (this.formPassword.invalid) {
@@ -215,18 +322,30 @@ export class PerfilComponent implements OnInit {
     this.guardandoPassword.set(true);
 
     const { passwordActual, passwordNueva } = this.formPassword.getRawValue();
+    if (!passwordActual || !passwordNueva) {
+      this.guardandoPassword.set(false);
+      this.notificationService.showWarn('Completa la contraseña actual y la nueva contraseña.');
+      return;
+    }
 
-    void passwordActual;
-    void passwordNueva;
-    this.guardandoPassword.set(false);
-    this.formPassword.reset();
+    if (passwordActual === passwordNueva) {
+      this.guardandoPassword.set(false);
+      this.notificationService.showWarn('La nueva contraseña debe ser diferente de la actual.');
+      return;
+    }
+
+    this.authService.cambiarPassword(passwordActual, passwordNueva).subscribe({
+      next: response => {
+        this.guardandoPassword.set(false);
+        this.formPassword.reset();
+        this.notificationService.showSuccess(response.message || 'La contraseña se cambió correctamente.');
+      },
+      error: error => {
+        this.guardandoPassword.set(false);
+        this.notificationService.showHttpError(error, 'Cambiar contraseña');
+      },
+    });
   }
-
-  // Backend: cambio original conservado para reactivar con AuthService.
-  // this.authService.cambiarPassword(passwordActual!, passwordNueva!).subscribe({
-  //   next: () => this.formPassword.reset(),
-  //   error: (err) => console.error(err.error?.message ?? 'La contraseña actual es incorrecta.'),
-  // });
 
   toggleVisible(campo: CampoPassword): void {
     this.visible.update((v) => ({ ...v, [campo]: !v[campo] }));
@@ -241,10 +360,5 @@ export class PerfilComponent implements OnInit {
     const role = this.tokenService.getPrimaryRole();
     return role === 'admin' ? 'ADMIN' : role === 'barbero' ? 'BARBERO' : 'CLIENTE';
   }
-
-  // Notificaciones desactivadas temporalmente; se conserva el contrato anterior.
-  // private notificar(severity: 'success' | 'error', summary: string, detail: string): void {
-  //   this.toast.add({ severity, summary, detail, life: 3000 });
-  // }
 
 }

@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { PUBLIC_PAGES } from '../../../../core/config/sites.config';
+import { ConfiguracionService } from '../../../../core/services/common/configuracion.service';
 import { LogoComponent } from '../../../../shared/components/logo/logo.component';
 
 @Component({
@@ -11,15 +12,14 @@ import { LogoComponent } from '../../../../shared/components/logo/logo.component
   templateUrl: './footer.html',
 })
 export class FooterComponent {
+  readonly configuracionService = inject(ConfiguracionService);
   publicNav = PUBLIC_PAGES;
 
   servicios = ['Corte clásico', 'Fade / degradado', 'Arreglo de barba', 'Afeitado premium'];
 
-  contacto = [
-    { texto: '+51 969 329 494', ruta: '/reclamos' },
-    { texto: 'Lima, Perú', ruta: '/nosotros' },
-    { texto: 'Lun - Sáb: 10:00 - 21:00', ruta: '/servicios' },
-  ];
+  constructor() {
+    this.configuracionService.cargarConfiguracion();
+  }
 
   redesSociales = [
     { icono: 'pi pi-instagram', url: '#', label: 'Instagram' },

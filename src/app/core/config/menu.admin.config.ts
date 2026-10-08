@@ -194,6 +194,12 @@ export const ADMIN_MENU = [
         icon: "pi pi-cog",
         routerLink: ["sistema/configuracion"],
         permission: "CONFIGURACION_READ"
+      },
+      {
+        label: "Perfil",
+        icon: "pi pi-user",
+        routerLink: ["sistema/perfil"],
+        permission: "CONFIGURACION_READ"
       }
 
     ]

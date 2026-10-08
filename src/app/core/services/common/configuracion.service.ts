@@ -5,6 +5,8 @@ import { ApiResponse } from '../../models/common/index.model';
 import { ConfiguracionPublica } from '../../models/common/empresa.model';
 import { REDES_SOCIALES, WHATSAPP_TEMPORAL_URL } from '../../config/redes.config';
 
+const LOCAL_CONFIG_KEY = 'fadex.public.configuration';
+
 @Injectable({
     providedIn: 'root',
 })
@@ -21,10 +23,11 @@ export class ConfiguracionService {
     readonly logoUrl = computed(() => this._config()?.logoUrl ?? null);
     readonly telefono = computed(() => this._config()?.telefono ?? '');
     readonly correo = computed(() => this._config()?.correo ?? '');
+    readonly direccion = computed(() => this._config()?.direccion ?? '');
     readonly sitioWeb = computed(() => this._config()?.sitioWeb ?? '');
     readonly politicaPrivacidad = computed(() => this._config()?.politicaPrivacidad ?? null);
     readonly terminosCondiciones = computed(() => this._config()?.terminosCondiciones ?? null);
-    readonly condiciones_uso = computed(() => this._config()?.politicaDevoluciones ?? null);
+    readonly politicaDevoluciones = computed(() => this._config()?.politicaDevoluciones ?? null);
     readonly whatsapp = computed(() => WHATSAPP_TEMPORAL_URL);
     readonly redes = computed(() => {
         const c = this._config();
@@ -58,20 +61,23 @@ export class ConfiguracionService {
         if (this._config()) return;
 
         if (environment.useMockData) {
-            this._config.set(this.configuracionMock);
-            this.guardarValoresBase(this.configuracionMock);
+            const configuracion = this.aplicarConfiguracionLocal(this.configuracionMock);
+            this._config.set(configuracion);
+            this.guardarValoresBase(configuracion);
             return;
         }
 
         this.http.get<ApiResponse<ConfiguracionPublica>>(`${this.apiUrl}/publica`).subscribe({
             next: (res) => {
                 if (!res.data) return;
-                this._config.set(res.data);
-                this.guardarValoresBase(res.data);
+                const configuracion = this.aplicarConfiguracionLocal(res.data);
+                this._config.set(configuracion);
+                this.guardarValoresBase(configuracion);
             },
             error: () => {
-                this._config.set(null);
-                this.guardarValoresBase(this.configuracionMock);
+                const configuracion = this.aplicarConfiguracionLocal(this.configuracionMock);
+                this._config.set(configuracion);
+                this.guardarValoresBase(configuracion);
             }
         });
     }
@@ -83,6 +89,57 @@ export class ConfiguracionService {
 
     obtenerConfiguracionPublica() {
         return this.http.get<ApiResponse<ConfiguracionPublica>>(`${this.apiUrl}/publica`);
+    }
+
+    obtenerConfiguracionActual(): ConfiguracionPublica {
+        return this._config() ?? this.aplicarConfiguracionLocal(this.configuracionMock);
+    }
+
+    guardarConfiguracionLocal(configuracion: ConfiguracionPublica): boolean {
+        try {
+            localStorage.setItem(LOCAL_CONFIG_KEY, JSON.stringify(configuracion));
+        } catch (error: unknown) {
+            console.error('No se pudo guardar la configuración de la empresa en este navegador.', error);
+            return false;
+        }
+
+        this._config.set(configuracion);
+        this.guardarValoresBase(configuracion);
+        return true;
+    }
+
+    private aplicarConfiguracionLocal(base: ConfiguracionPublica): ConfiguracionPublica {
+        try {
+            const stored = localStorage.getItem(LOCAL_CONFIG_KEY);
+            if (!stored) return base;
+
+            const parsed: unknown = JSON.parse(stored);
+            if (typeof parsed !== 'object' || parsed === null) {
+                throw new Error('El archivo local de configuración tiene un formato inválido.');
+            }
+
+            const value = parsed as Partial<ConfiguracionPublica>;
+            return {
+                ...base,
+                nombre: typeof value.nombre === 'string' ? value.nombre : base.nombre,
+                direccion: typeof value.direccion === 'string' ? value.direccion : base.direccion,
+                correo: typeof value.correo === 'string' ? value.correo : base.correo,
+                telefono: typeof value.telefono === 'string' ? value.telefono : base.telefono,
+                logoUrl: typeof value.logoUrl === 'string' || value.logoUrl === null ? value.logoUrl : base.logoUrl,
+                politicaPrivacidad: typeof value.politicaPrivacidad === 'string' || value.politicaPrivacidad === null
+                    ? value.politicaPrivacidad
+                    : base.politicaPrivacidad,
+                terminosCondiciones: typeof value.terminosCondiciones === 'string' || value.terminosCondiciones === null
+                    ? value.terminosCondiciones
+                    : base.terminosCondiciones,
+                politicaDevoluciones: typeof value.politicaDevoluciones === 'string' || value.politicaDevoluciones === null
+                    ? value.politicaDevoluciones
+                    : base.politicaDevoluciones,
+            };
+        } catch (error: unknown) {
+            console.error('No se pudieron cargar las preferencias locales de la empresa.', error);
+            return base;
+        }
     }
 
     private guardarValoresBase(configuracion: ConfiguracionPublica): void {

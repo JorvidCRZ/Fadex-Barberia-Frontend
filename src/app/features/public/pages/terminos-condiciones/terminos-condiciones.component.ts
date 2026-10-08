@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { ConfiguracionService } from '../../../../core/services/common/configuracion.service';
 
 @Component({
   selector: 'app-terminos-condiciones',
@@ -7,4 +8,10 @@ import { RouterLink } from '@angular/router';
   templateUrl: './terminos-condiciones.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TerminosCondicionesComponent {}
+export class TerminosCondicionesComponent {
+  readonly configuracion = inject(ConfiguracionService);
+
+  constructor() {
+    this.configuracion.cargarConfiguracion();
+  }
+}

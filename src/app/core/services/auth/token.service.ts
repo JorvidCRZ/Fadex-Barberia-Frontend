@@ -62,7 +62,7 @@ export class TokenService {
   getUserId(): number | string | null {
     const decoded = this.getDecodedToken();
     if (!decoded) return null;
-    return decoded.clienteId ?? decoded.userId ?? decoded.id ?? decoded.sub ?? null;
+    return decoded.clienteId ?? decoded.usuarioId ?? decoded.idUsuario ?? decoded.userId ?? decoded.id ?? decoded.sub ?? null;
   }
 
   getRoles(): string[] {
