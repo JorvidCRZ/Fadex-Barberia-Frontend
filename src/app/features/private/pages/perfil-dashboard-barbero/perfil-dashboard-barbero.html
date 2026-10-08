@@ -1,0 +1,53 @@
+<p-toast position="top-right" />
+
+<div class="flex flex-col gap-6 mt-5">
+
+  <aside class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between px-6 py-4 border-b border-brand-gold-soft bg-brand-black rounded-xl">
+    <h1 class="text-lg font-semibold text-brand-gold text-center md:text-start">
+      <i class="pi pi-user"></i> Perfil del Barbero
+    </h1>
+    <span class="text-sm text-zinc-400 text-center md:text-end">
+      Información personal y credenciales de acceso
+    </span>
+  </aside>
+
+  <div *ngIf="loading"
+    class="rounded-xl border border-brand-gold/15 bg-brand-black px-6 py-4 text-sm text-gray-400">
+    Cargando perfil del barbero...
+  </div>
+
+  <div *ngIf="errorMessage"
+    class="rounded-xl border border-red-500/20 bg-red-500/10 px-6 py-4 text-sm text-red-300">
+    {{ errorMessage }}
+  </div>
+
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+
+    <app-header-perfil-barbero
+      [barberoNombre]="barberoNombre"
+      [barberoIniciales]="barberoIniciales"
+      [barberoDescripcion]="barberoDescripcion"
+      [volver]="volver">
+    </app-header-perfil-barbero>
+
+    <div class="xl:col-span-2 flex flex-col gap-6">
+
+      <app-datos-basicos-perfil-barbero
+        [personaId]="personaId"
+        [nombre]="nombre"
+        [apellido]="apellido"
+        [telefono]="telefono"
+        [email]="email">
+      </app-datos-basicos-perfil-barbero>
+
+      <app-credenciales-perfil-barbero
+        [usuario]="usuario"
+        [contrasena]="contrasena"
+        [idUsuario]="idUsuario"
+        (passwordReset)="onPasswordReset()"
+        (usernameUpdate)="onUsernameUpdate()">
+      </app-credenciales-perfil-barbero>
+
+    </div>
+  </div>
+</div>

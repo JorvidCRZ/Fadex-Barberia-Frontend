@@ -23,7 +23,12 @@ export const MOCK_AUTH_USERS: readonly MockAuthUser[] = [
     password: 'barbero123',
     nombre: 'Barbero Demo',
     rol: 'barbero',
-    permisos: ['VER_RESERVAS', 'GESTIONAR_RESERVAS'],
+    permisos: [
+      'DASHBOARD_READ_BARBERO',
+      'CORTE_READ_ASSIGNED',
+      'RESERVA_READ_ASSIGNED',
+      'VENTA_READ_ASSIGNED',
+    ],
   },
   {
     username: 'admin',

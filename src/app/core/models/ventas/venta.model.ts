@@ -7,6 +7,7 @@ export interface Venta {
   numeroCorrelativo?: string;
   clienteId?: number;
   clienteNombre?: string;
+  barberoNombre?: string;
   fecha?: string;
   tipoComprobante?: 'BOLETA' | 'FACTURA';
   metodoPago?: string;

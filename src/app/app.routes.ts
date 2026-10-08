@@ -17,6 +17,7 @@ import { PagoComponent } from './features/auth/pago/pago.component';
 import { DashboardBarberoComponent } from './features/private/layout/dashboard-barbero.component';
 import { DashboardClienteComponent } from './features/private/layout/dashboard-cliente.component';
 import { DashboardAdministrativoComponent } from './features/private/layout/dashboard-administrativo.component';
+import { PerfilDashboardBarbero } from './features/private/pages/perfil-dashboard-barbero/perfil-dashboard-barbero';
 import { CheckoutComponent as CheckoutReservaComponent } from './features/private/pages/checkout/checkout.component';
 // import { BarberoLayoutComponent } from './features/private/layout/barbero-layout.component';
 // import { DashboardAdministrativoComponent } from './features/private/dashboard/dashboard-administrativo/dashboard-administrativo.component';
@@ -105,27 +106,16 @@ export const routes: Routes = [
     canActivate: [authGuard], data: { roles: ['barbero'] },
     children: [
       { path: '', redirectTo: 'resumen', pathMatch: 'full' },
-      // { path: 'resumen', loadComponent: () => import('./features/private/components/resumen/resumen-barbero').then(m => m.ResumenBarbero) },
-      // { path: 'reservas', loadComponent: () => import('./features/private/components/reserva/reserva').then(m => m.ReservaComponent) },
-      // { path: 'cortes', loadComponent: () => import('./features/private/components/cortes/cortes').then(m => m.CortesComponent) },
-      // {
-        // path: 'operaciones', children: [
-          // { path: 'pos', loadComponent: () => import('./features/private/components/operaciones/ventas/pos/pos.component').then(m => m.PosComponent) }, 
-          // { path: 'ventas', loadComponent: () => import('./features/private/components/operaciones/ventas/ventas.component').then(m => m.VentasComponent) },
-          // { path: 'reservas', loadComponent: () => import('./features/private/components/operaciones/reservas/reserva-list/reserva-list').then(m => m.ReservaList) },
-          // { path: 'pagos', loadComponent: () => import('./features/private/components/operaciones/pagos/pagos.component').then(m => m.PagosComponent) },
-        // ]
-      // },
-
-      // {
-        // path: 'gestion', children: [
-          // { path: 'clientes', loadComponent: () => import('./features/private/components/gestion/clientes/clientes').then(m => m.Clientes) },
-          // { path: 'clientes/registrar-client', component: RegistrarClient },
-          // { path: 'clientes/:id', component: PerfilClient },
-          // { path: 'barberos', loadComponent: () => import('./features/private/components/gestion/barberos/barberos').then(m => m.Barberos) },
-        // ]
-      // },
-      // { path: 'perfil', component: PerfilDashboardBarbero },
+      { path: 'resumen', loadComponent: () => import('./features/private/pages/resumen-dashboard-barbero/resumen-dashboard-barbero').then(m => m.ResumenDashboardBarbero) },
+      { path: 'reservas', loadComponent: () => import('./features/private/pages/reservas-dashboard-barbero/reservas-dashboard-barbero').then(m => m.ReservasDashboardBarbero) },
+{ path: 'cortes', loadComponent: () => import('./features/private/pages/cortes-dashboard-barbero/cortes-dashboard-barbero').then(m => m.CortesDashboardBarbero) },      
+      {
+  path: 'operaciones', children: [
+    { path: 'ventas', loadComponent: () => import('./features/private/pages/ventas/ventas.component').then(m => m.VentasComponent) },
+    { path: 'pos', loadComponent: () => import('./features/private/pages/ventas/pos/pos.component').then(m => m.PosComponent) },
+  ]
+},
+      { path: 'perfil', component: PerfilDashboardBarbero, data: { roles: ['barbero'] } },
       { path: '**', loadComponent: () => import('./shared/components/error404/error404.component').then(m => m.Error404Component) }
      ]
    },
