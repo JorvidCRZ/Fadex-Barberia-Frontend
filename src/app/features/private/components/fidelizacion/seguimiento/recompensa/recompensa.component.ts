@@ -12,6 +12,7 @@ import { RecompensaTableComponent } from './recompensa-table/recompensa-table.co
 import { RecompensaCanjearFormComponent } from './recompensa-form/recompensa-form.component';
 import { RuletaItemService } from '@/app/core/services/ruleta/ruleta-item.service';
 import { FILTROS_RECOMPENSA } from '@/app/core/config/filtros.config';
+import { of } from 'rxjs';
 
 @Component({
     selector: 'app-recompensas',
@@ -25,6 +26,24 @@ export class RecompensaComponent implements OnInit {
     private clienteService = inject(ClienteService);
     private itemService = inject(RuletaItemService);
     private recompensaService = inject(RecompensaService);
+
+    // Mock Data
+    private mockRecompensas: RecompensaObtenida[] = [
+        { id: 1, giroId: 100, clienteId: 101, clienteNombre: 'Juan Pérez', itemId: 10, itemNombre: 'Corte Gratis', itemImagen: '', colorHex: '#fff', premioMayor: false, estado: EstadoRecompensa.PENDIENTE, observacion: '', fechaObtencion: new Date().toISOString(), codigoCanje: 'C1', createdAt: new Date().toISOString() },
+        { id: 2, giroId: 101, clienteId: 102, clienteNombre: 'María López', itemId: 11, itemNombre: 'Pomada Modeladora', itemImagen: '', colorHex: '#fff', premioMayor: false, estado: EstadoRecompensa.CANJEADO, observacion: '', fechaObtencion: new Date().toISOString(), codigoCanje: 'C2', createdAt: new Date().toISOString() },
+        { id: 3, giroId: 102, clienteId: 101, clienteNombre: 'Juan Pérez', itemId: 12, itemNombre: 'Mascarilla Facial', itemImagen: '', colorHex: '#fff', premioMayor: false, estado: EstadoRecompensa.VENCIDO, observacion: '', fechaObtencion: new Date().toISOString(), codigoCanje: 'C3', createdAt: new Date().toISOString() },
+    ];
+
+    private mockClientes = [
+        { clienteId: 101, persona: { nombre: 'Juan', apellido: 'Pérez' } },
+        { clienteId: 102, persona: { nombre: 'María', apellido: 'López' } },
+    ];
+
+    private mockItems = [
+        { itemId: 10, nombre: 'Corte Gratis' },
+        { itemId: 11, nombre: 'Pomada Modeladora' },
+        { itemId: 12, nombre: 'Mascarilla Facial' },
+    ];
 
     recompensas: RecompensaObtenida[] = [];
     cargado = false;
@@ -46,8 +65,21 @@ export class RecompensaComponent implements OnInit {
 
     cargarRecompensas(page: number, size: number): void {
         this.cargado = false;
-        const filtro = { ...this.filtro, page, size, sort: 'fechaObtencion,desc' };
-        this.recompensaService.obtenerRecompensas(filtro).subscribe({
+
+        let filtered = [...this.mockRecompensas];
+        if (this.filtro.clienteId) {
+            filtered = filtered.filter(r => r.clienteId === this.filtro.clienteId);
+        }
+        if (this.filtro.itemId) {
+            filtered = filtered.filter(r => r.itemId === this.filtro.itemId);
+        }
+        if (this.filtro.estado !== undefined) {
+            filtered = filtered.filter(r => r.estado === this.filtro.estado);
+        }
+
+        const content = filtered.slice(page * size, (page + 1) * size);
+
+        of({ data: { content, totalElements: filtered.length } }).subscribe({
             next: (resp) => {
                 this.recompensas = resp.data.content;
                 this.totalRecords = resp.data.totalElements;
@@ -92,15 +124,21 @@ export class RecompensaComponent implements OnInit {
 
     confirmarCanje(codigoCanje: string): void {
         const idActual = this.recompensaSeleccionada?.id ?? null;
-        this.recompensaService.canjearRecompensa(codigoCanje).subscribe({
+
+        of({ message: 'Recompensa canjeada correctamente' }).subscribe({
             next: (resp) => {
                 this.notify.showSuccess(resp.message);
                 this.cerrarCanjear();
                 this.recienCanjeadoId = idActual;
                 this.cd.detectChanges();
 
+                if (idActual !== null) {
+                    const rec = this.mockRecompensas.find(r => r.id === idActual);
+                    if (rec) rec.estado = EstadoRecompensa.CANJEADO;
+                }
+
                 setTimeout(() => {
-                    this.cargarRecompensas(0, this.rows); 
+                    this.cargarRecompensas(0, this.rows);
                 }, 1500);
 
                 setTimeout(() => (this.recienCanjeadoId = null), 1500);
@@ -110,7 +148,10 @@ export class RecompensaComponent implements OnInit {
     }
 
     onCambiarEstado({ recompensa, nuevoEstado }: { recompensa: RecompensaObtenida; nuevoEstado: EstadoRecompensa }): void {
-        this.recompensaService.cambiarEstado(recompensa.id, nuevoEstado).subscribe({
+        const rec = this.mockRecompensas.find(r => r.id === recompensa.id);
+        if (rec) rec.estado = nuevoEstado;
+
+        of({ message: 'Estado actualizado correctamente' }).subscribe({
             next: (resp) => {
                 this.notify.showSuccess(resp.message);
                 this.cargarRecompensas(0, this.rows);
@@ -120,12 +161,12 @@ export class RecompensaComponent implements OnInit {
     }
 
     cargarFiltros() {
-        this.clienteService.listar().subscribe(resp => {
+        of({ data: { content: this.mockClientes } }).subscribe(resp => {
             const opciones = resp.data.content.map(c => ({ label: c.persona.nombre + ' ' + c.persona.apellido, value: c.clienteId }));
             this.filtrosFields = this.filtrosFields.map(f => f.key === 'clienteId' ? { ...f, options: opciones } : f);
         });
 
-        this.itemService.obtenerItems().subscribe(resp => {
+        of({ data: { content: this.mockItems } }).subscribe(resp => {
             const opciones = resp.data.content.map(i => ({ label: i.nombre, value: i.itemId }));
             this.filtrosFields = this.filtrosFields.map(f => f.key === 'itemId' ? { ...f, options: opciones } : f);
         });

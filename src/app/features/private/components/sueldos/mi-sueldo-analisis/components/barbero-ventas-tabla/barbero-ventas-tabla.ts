@@ -7,7 +7,7 @@ import { VentaBarbero, ResumenBarbero } from '@core/models/planilla/venta-barber
   selector: 'app-barbero-ventas-tabla',
   imports: [CommonModule, FormsModule],
   templateUrl: './barbero-ventas-tabla.html',
-  styleUrl: './barbero-ventas-tabla.css',
+  styleUrl: './barbero-ventas-tabla.scss',
 })
 export class BarberoVentasTabla implements OnChanges, OnInit {
   @Input() ventas: VentaBarbero[] = [];

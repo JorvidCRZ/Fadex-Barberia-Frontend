@@ -1,11 +1,13 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Chart, registerables } from 'chart.js';
-import { FidelizacionDashboardService } from '@/app/core/services/fidelizacion/dashboard.service';
 import { FidelizacionDashboardAdminResponse } from '@/app/core/models/fidelizacion/dashboard.model';
 import { NotificationService } from '@/app/core/services/common/notification.service';
 import { GiroPorSemana, MovimientoPorSemana } from '@/app/core/models/ruleta/giro.model';
 import { TabsModule } from 'primeng/tabs';
+import { of } from 'rxjs';
+import { EstadoRecompensa } from '@/app/core/models/ruleta/recompensa.model';
+
 Chart.register(...registerables);
 
 interface Kpi {
@@ -26,9 +28,41 @@ interface TopPremio {
     templateUrl: './fidelizacion-dashboard-admin.html',
 })
 export class FidelizacionDashboardAdminComponent implements OnInit, OnDestroy {
-    private dashboardService = inject(FidelizacionDashboardService);
     private notify = inject(NotificationService);
     private cd = inject(ChangeDetectorRef);
+
+    // Mock Data
+    private mockDashboardData: FidelizacionDashboardAdminResponse = {
+        totalTarjetas: 150,
+        totalGiros: 1200,
+        totalRecompensas: 450,
+        totalConfiguraciones: 12,
+        movimientosRecientes: [],
+        tarjetasPorCategoria: [
+            { categoriaId: 1, categoriaNombre: 'Platino', totalTarjetas: 50, tarjetasConGiroDisponible: 20, girosDisponibles: 200 },
+            { categoriaId: 2, categoriaNombre: 'Oro', totalTarjetas: 60, tarjetasConGiroDisponible: 30, girosDisponibles: 150 },
+            { categoriaId: 3, categoriaNombre: 'Plata', totalTarjetas: 40, tarjetasConGiroDisponible: 15, girosDisponibles: 100 },
+        ],
+        ultimasRecompensas: [
+            { id: 1, giroId: 1, clienteId: 1, clienteNombre: 'Juan Pérez', itemId: 1, itemNombre: 'Corte Gratis', itemImagen: '', colorHex: '#fff', premioMayor: false, estado: EstadoRecompensa.PENDIENTE, observacion: '', fechaObtencion: new Date().toISOString(), codigoCanje: 'C1', createdAt: new Date().toISOString() },
+            { id: 2, giroId: 2, clienteId: 2, clienteNombre: 'María López', itemId: 2, itemNombre: 'Pomada Modeladora', itemImagen: '', colorHex: '#fff', premioMayor: false, estado: EstadoRecompensa.PENDIENTE, observacion: '', fechaObtencion: new Date().toISOString(), codigoCanje: 'C2', createdAt: new Date().toISOString() },
+            { id: 3, giroId: 3, clienteId: 3, clienteNombre: 'Carlos Ruiz', itemId: 1, itemNombre: 'Corte Gratis', itemImagen: '', colorHex: '#fff', premioMayor: false, estado: EstadoRecompensa.PENDIENTE, observacion: '', fechaObtencion: new Date().toISOString(), codigoCanje: 'C3', createdAt: new Date().toISOString() },
+        ],
+    };
+
+    private mockGirosSemana: GiroPorSemana[] = [
+        { semanaInicio: '2026-09-01', total: 45 },
+        { semanaInicio: '2026-09-08', total: 60 },
+        { semanaInicio: '2026-09-15', total: 30 },
+        { semanaInicio: '2026-09-22', total: 80 },
+    ];
+
+    private mockMovimientosSemana: MovimientoPorSemana[] = [
+        { semanaInicio: '2026-09-01', positivos: 100, negativos: 20 },
+        { semanaInicio: '2026-09-08', positivos: 150, negativos: 40 },
+        { semanaInicio: '2026-09-15', positivos: 80, negativos: 30 },
+        { semanaInicio: '2026-09-22', positivos: 200, negativos: 60 },
+    ];
 
     @ViewChild('categoriaChart') categoriaRef!: ElementRef<HTMLCanvasElement>;
     @ViewChild('girosChart') girosRef!: ElementRef<HTMLCanvasElement>;
@@ -73,7 +107,7 @@ export class FidelizacionDashboardAdminComponent implements OnInit, OnDestroy {
 
     private cargar(): void {
         this.cargando = true;
-        this.dashboardService.obtenerDashboardAdmin().subscribe({
+        of({ data: this.mockDashboardData }).subscribe({
             next: (resp) => {
                 this.data = resp.data;
                 this.buildKpis(resp.data);
@@ -103,9 +137,9 @@ export class FidelizacionDashboardAdminComponent implements OnInit, OnDestroy {
 
     private cargarGirosPorSemana(): void {
         this.cargandoGirosPorSemana = true;
-        const { fechaInicio, fechaFin } = this.rangoUltimos30Dias();
+        this.rangoUltimos30Dias();
 
-        this.dashboardService.obtenerGirosPorSemana(fechaInicio, fechaFin).subscribe({
+        of({ data: this.mockGirosSemana }).subscribe({
             next: (resp) => {
                 this.cargandoGirosPorSemana = false;
                 this.cd.detectChanges();
@@ -121,9 +155,9 @@ export class FidelizacionDashboardAdminComponent implements OnInit, OnDestroy {
 
     private cargarMovimientosPorSemana(): void {
         this.cargandoMovimientosPorSemana = true;
-        const { fechaInicio, fechaFin } = this.rangoUltimos30Dias();
+        this.rangoUltimos30Dias();
 
-        this.dashboardService.obtenerMovimientosPorSemana(fechaInicio, fechaFin).subscribe({
+        of({ data: this.mockMovimientosSemana }).subscribe({
             next: (resp) => {
                 this.cargandoMovimientosPorSemana = false;
                 this.cd.detectChanges();

@@ -3,18 +3,15 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { PlanillaBarbero } from '@/app/core/models/planilla/planilla.model';
-import { PlanillaService } from '@core/services/planilla/planilla.service';
 
 @Component({
   selector: 'app-grafico-sueldos',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './grafico-sueldos.html',
-  styleUrl: './grafico-sueldos.css',
+  styleUrl: './grafico-sueldos.scss',
 })
 export class GraficoSueldos implements OnInit {
-
-  private readonly planillaService = inject(PlanillaService);
 
   tipoGrafico: 'completo' | 'comision' = 'comision';
   mes = new Date().getMonth() + 1;
@@ -43,19 +40,63 @@ export class GraficoSueldos implements OnInit {
   }
 
   cargarAnios(): void {
-    this.planillaService.obtenerAnios().subscribe({
-      next: (r) => { this.aniosDisponibles = r.data; },
-      error: (err) => console.error('Error al cargar años', err)
-    });
+    this.aniosDisponibles = [2023, 2024, 2025, 2026];
   }
 
   cargarDatos(): void {
-    this.planillaService
-      .getDetalle(this.mes, this.anio, 0, 20)
-      .subscribe({
-        next: (r) => { this.barberos = r.data.content; },
-        error: (err) => console.error('Error al cargar gráfico', err)
-      });
+    // Datos de memoria (Mock)
+    this.barberos = [
+      {
+        barberoId: 1,
+        nombreBarbero: 'Juan Pérez',
+        sueldoBase: 500000,
+        cantidadVentas: 25,
+        totalVentas: 1200,
+        porcentajeComision: 10,
+        montoComision: 120000,
+        sueldoFinal: 620000,
+      },
+      {
+        barberoId: 2,
+        nombreBarbero: 'María López',
+        sueldoBase: 500000,
+        cantidadVentas: 30,
+        totalVentas: 1500,
+        porcentajeComision: 10,
+        montoComision: 150000,
+        sueldoFinal: 650000,
+      },
+      {
+        barberoId: 3,
+        nombreBarbero: 'Carlos Ruiz',
+        sueldoBase: 500000,
+        cantidadVentas: 15,
+        totalVentas: 800,
+        porcentajeComision: 10,
+        montoComision: 80000,
+        sueldoFinal: 580000,
+      },
+      {
+        barberoId: 4,
+        nombreBarbero: 'Ana García',
+        sueldoBase: 500000,
+        cantidadVentas: 40,
+        totalVentas: 2000,
+        porcentajeComision: 10,
+        montoComision: 200000,
+        sueldoFinal: 700000,
+      },
+      {
+        barberoId: 5,
+        nombreBarbero: 'Luis Torres',
+        sueldoBase: 500000,
+        cantidadVentas: 20,
+        totalVentas: 1000,
+        porcentajeComision: 10,
+        montoComision: 100000,
+        sueldoFinal: 600000,
+      }
+    ];
   }
 
   aplicarFiltro(): void {

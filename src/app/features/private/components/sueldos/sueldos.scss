@@ -1,8 +1,8 @@
 .page-wrap {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 24px;
-  background: #000000;
+  gap: 20px;
+  padding: 20px;
+  background: rgb(var(--color-ui-black));
   min-height: 100vh;
 }

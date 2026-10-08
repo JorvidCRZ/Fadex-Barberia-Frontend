@@ -6,7 +6,6 @@ import { Barbero } from '@/app/core/models/gestion/barbero/barbero.model';
 import { HeaderPerfilBarbero } from '../perfil-dashboard-barbero/components/header-perfil-barbero/header-perfil-barbero';
 import { DatosBasicosPerfilBarbero } from '../perfil-dashboard-barbero/components/datos-basicos-perfil-barbero/datos-basicos-perfil-barbero';
 import { CredencialesPerfilBarbero } from '../perfil-dashboard-barbero/components/credenciales-perfil-barbero/credenciales-perfil-barbero';
-import { Toast } from "primeng/toast";
 
 @Component({
   selector: 'app-perfil-dashboard-barbero',
@@ -16,8 +15,7 @@ import { Toast } from "primeng/toast";
     DatosBasicosPerfilBarbero,
     CredencialesPerfilBarbero,
     CommonModule,
-    Toast
-],
+  ],
   templateUrl: './perfil-dashboard-barbero.html',
   styleUrl: './perfil-dashboard-barbero.css',
 })

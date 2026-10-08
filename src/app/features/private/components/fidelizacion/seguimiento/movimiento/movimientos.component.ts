@@ -5,7 +5,7 @@ import { DialogModule } from 'primeng/dialog';
 import { TableLazyLoadEvent } from 'primeng/table';
 import { NotificationService } from '@/app/core/services/common/notification.service';
 import { FidelizacionMovimientoService } from '@/app/core/services/fidelizacion/movimiento.service';
-import { Movimiento, MovimientoFiltro, MovimientoRequest } from '@/app/core/models/fidelizacion/movimiento.model';
+import { Movimiento, MovimientoFiltro, MovimientoRequest, Origen } from '@/app/core/models/fidelizacion/movimiento.model';
 import { DialogHeaderComponent } from '@/app/shared/components/dialog-header/dialog-header.component';
 import { FiltrosComponent } from '@/app/shared/components/filtros/filtros.component';
 import { FILTROS_MOVIMIENTO } from '@/app/core/config/filtros.config';
@@ -13,6 +13,7 @@ import { MovimientoTableComponent } from './movimiento-table/movimiento-table.co
 import { MovimientoFormComponent } from './movimiento-form/movimiento-form.component';
 import { ClienteService } from '@/app/core/services/gestion/cliente.service';
 import { FidelizacionTarjetaService } from '@/app/core/services/fidelizacion/tarjeta.service';
+import { of } from 'rxjs';
 
 @Component({
     selector: 'app-movimientos-admin',
@@ -26,6 +27,23 @@ export class MovimientosAdminComponent implements OnInit {
     private clienteService = inject(ClienteService);
     private tarjetaService = inject(FidelizacionTarjetaService);
     private movimientoService = inject(FidelizacionMovimientoService);
+
+    // Mock Data
+    private mockMovimientos: Movimiento[] = [
+        { id: 1, clienteId: 101, tarjetaId: 1, puntos: 100, origen: Origen.VENTA, idOrigen: 10, descripcion: 'Bonificación bienvenida', clienteNombre: 'Juan Pérez', createdAt: new Date().toISOString() },
+        { id: 2, clienteId: 101, tarjetaId: 1, puntos: -50, origen: Origen.AJUSTE, idOrigen: 11, descripcion: 'Canje de premio', clienteNombre: 'Juan Pérez', createdAt: new Date().toISOString() },
+        { id: 3, clienteId: 102, tarjetaId: 2, puntos: 200, origen: Origen.VENTA, idOrigen: 12, descripcion: 'Compra de producto', clienteNombre: 'María López', createdAt: new Date().toISOString() },
+    ];
+
+    private mockClientes = [
+        { clienteId: 101, persona: { nombre: 'Juan', apellido: 'Pérez' } },
+        { clienteId: 102, persona: { nombre: 'María', apellido: 'López' } },
+    ];
+
+    private mockTarjetas = [
+        { id: 1, categoriaNombre: 'Platino' },
+        { id: 2, categoriaNombre: 'Oro' },
+    ];
 
     movimientos: Movimiento[] = [];
     cargado = false;
@@ -45,8 +63,18 @@ export class MovimientosAdminComponent implements OnInit {
 
     cargarMovimientos(page: number, size: number): void {
         this.cargado = false;
-        const filtro = { ...this.filtro, page, size, sort: 'createdAt,desc' };
-        this.movimientoService.obtenerMovimientos(filtro).subscribe({
+
+        let filtered = [...this.mockMovimientos];
+        if (this.filtro.clienteId) {
+            filtered = filtered.filter(m => m.clienteId === this.filtro.clienteId);
+        }
+        if (this.filtro.tarjetaId) {
+            filtered = filtered.filter(m => m.tarjetaId === this.filtro.tarjetaId);
+        }
+
+        const content = filtered.slice(page * size, (page + 1) * size);
+
+        of({ data: { content, totalElements: filtered.length } }).subscribe({
             next: (resp) => {
                 this.movimientos = resp.data.content;
                 this.totalRecords = resp.data.totalElements;
@@ -86,7 +114,15 @@ export class MovimientosAdminComponent implements OnInit {
     }
 
     guardarAjuste(data: MovimientoRequest): void {
-        this.movimientoService.crearMovimiento(data).subscribe({
+        const nuevoMovimiento = {
+            id: this.mockMovimientos.length + 1,
+            ...data,
+            fecha: new Date().toISOString(),
+            usuarioId: 1,
+        } as any;
+        this.mockMovimientos.push(nuevoMovimiento);
+
+        of({ message: 'Movimiento creado correctamente' }).subscribe({
             next: (resp) => {
                 this.notify.showSuccess(resp.message);
                 this.cerrarForm();
@@ -97,7 +133,8 @@ export class MovimientosAdminComponent implements OnInit {
     }
 
     eliminarMovimiento(movimiento: Movimiento): void {
-        this.movimientoService.eliminarMovimiento(movimiento.id).subscribe({
+        this.mockMovimientos = this.mockMovimientos.filter(m => m.id !== movimiento.id);
+        of({ message: 'Movimiento eliminado correctamente' }).subscribe({
             next: (resp) => {
                 this.notify.showSuccess(resp.message);
                 this.cargarMovimientos(0, this.rows);
@@ -108,12 +145,12 @@ export class MovimientosAdminComponent implements OnInit {
 
 
     cargarFiltros() {
-        this.clienteService.listar().subscribe(resp => {
+        of({ data: { content: this.mockClientes } }).subscribe(resp => {
             const opciones = resp.data.content.map(c => ({label: c.persona.nombre + ' ' + c.persona.apellido,value: c.clienteId}));
             this.filtrosFields = this.filtrosFields.map(f =>f.key === 'clienteId'? { ...f, options: opciones }: f);
         });
 
-        this.tarjetaService.obtenerTarjetas().subscribe(resp => {
+        of({ data: { content: this.mockTarjetas } }).subscribe(resp => {
             const opciones = resp.data.content.map(t => ({label: t.categoriaNombre, value: t.id}));
             this.filtrosFields = this.filtrosFields.map(f =>f.key === 'tarjetaId'? { ...f, options: opciones }: f);
         });

@@ -5,7 +5,6 @@ import { ButtonModule } from 'primeng/button';
 import { TableLazyLoadEvent, TableModule } from 'primeng/table';
 import { TooltipModule } from 'primeng/tooltip';
 import { StatusBadgeComponent } from '@/app/shared/components/status-badge/status-badge.component';
-import { PlanillaService } from '@core/services/planilla/planilla.service';
 import { PlanillaBarbero } from '@/app/core/models/planilla/planilla.model';
 import { Router } from '@angular/router';
 
@@ -16,11 +15,10 @@ import { Router } from '@angular/router';
     CommonModule, FormsModule, ButtonModule, TableModule, TooltipModule, StatusBadgeComponent
   ],
   templateUrl: './tabla-sueldos.html',
-  styleUrl: './tabla-sueldos.css',
+  styleUrl: './tabla-sueldos.scss',
 })
 export class TablaSueldos implements OnInit {
 
-  private readonly planillaService = inject(PlanillaService);
   private readonly router = inject(Router);
 
   barberos: PlanillaBarbero[] = [];
@@ -55,10 +53,7 @@ export class TablaSueldos implements OnInit {
   }
 
   cargarAnios(): void {
-    this.planillaService.obtenerAnios().subscribe({
-      next: (r) => { this.aniosDisponibles = r.data; },
-      error: (err) => console.error('Error al cargar años', err)
-    });
+    this.aniosDisponibles = [2023, 2024, 2025, 2026];
   }
 
   cargarDatos(page: number, size: number): void {
@@ -66,19 +61,63 @@ export class TablaSueldos implements OnInit {
     this.page = page;
     this.size = size;
 
-    this.planillaService
-      .getDetalle(this.mes, this.anio, page, size)
-      .subscribe({
-        next: (response) => {
-          this.barberos = response.data.content;
-          this.totalElements = response.data.totalElements;
-          this.cargado = true;
-        },
-        error: (err) => {
-          console.error(err);
-          this.cargado = true;
-        }
-      });
+    // Datos de memoria (Mock)
+    const mockBarberos: PlanillaBarbero[] = [
+      {
+        barberoId: 1,
+        nombreBarbero: 'Juan Pérez',
+        sueldoBase: 500000,
+        cantidadVentas: 25,
+        totalVentas: 1200,
+        porcentajeComision: 10,
+        montoComision: 120000,
+        sueldoFinal: 620000,
+      },
+      {
+        barberoId: 2,
+        nombreBarbero: 'María López',
+        sueldoBase: 500000,
+        cantidadVentas: 30,
+        totalVentas: 1500,
+        porcentajeComision: 10,
+        montoComision: 150000,
+        sueldoFinal: 650000,
+      },
+      {
+        barberoId: 3,
+        nombreBarbero: 'Carlos Ruiz',
+        sueldoBase: 500000,
+        cantidadVentas: 15,
+        totalVentas: 800,
+        porcentajeComision: 10,
+        montoComision: 80000,
+        sueldoFinal: 580000,
+      },
+      {
+        barberoId: 4,
+        nombreBarbero: 'Ana García',
+        sueldoBase: 500000,
+        cantidadVentas: 40,
+        totalVentas: 2000,
+        porcentajeComision: 10,
+        montoComision: 200000,
+        sueldoFinal: 700000,
+      },
+      {
+        barberoId: 5,
+        nombreBarbero: 'Luis Torres',
+        sueldoBase: 500000,
+        cantidadVentas: 20,
+        totalVentas: 1000,
+        porcentajeComision: 10,
+        montoComision: 100000,
+        sueldoFinal: 600000,
+      }
+    ];
+
+    this.barberos = mockBarberos;
+    this.totalElements = mockBarberos.length;
+    this.cargado = true;
   }
 
   onLazyLoad(event: TableLazyLoadEvent): void {

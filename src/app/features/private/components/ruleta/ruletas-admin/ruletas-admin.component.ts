@@ -6,8 +6,8 @@ import { DialogModule } from 'primeng/dialog';
 import { NotificationService } from '@/app/core/services/common/notification.service';
 import { RuletaService } from '@/app/core/services/ruleta/ruleta.service';
 import { RuletaItemService } from '@/app/core/services/ruleta/ruleta-item.service';
-import { RuletaResponse, RuletaRequest, RuletaFiltro } from '@/app/core/models/ruleta/ruleta.model';
-import { RuletaItemResponse, RuletaItemRequest, RuletaItemFiltro } from '@/app/core/models/ruleta/ruleta-item.model';
+import { RuletaResponse, RuletaRequest, RuletaFiltro, TipoRuleta } from '@/app/core/models/ruleta/ruleta.model';
+import { RuletaItemResponse, RuletaItemRequest, RuletaItemFiltro, TipoPremio } from '@/app/core/models/ruleta/ruleta-item.model';
 import { DialogHeaderComponent } from '@/app/shared/components/dialog-header/dialog-header.component';
 import { SearchBarComponent } from '@/app/shared/components/search-bar/search-bar.component';
 import { TableLazyLoadEvent } from 'primeng/table';
@@ -22,7 +22,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { RuletaConfiguracionesComponent } from './ruleta-configuraciones/ruleta-configuraciones.component';
 import { FILTROS_ITEM, FILTROS_RULETA } from '@/app/core/config/filtros.config';
 import { FiltrosComponent } from '@/app/shared/components/filtros/filtros.component';
-
+import { of } from 'rxjs';
 
 @Component({
   selector: 'app-ruletas-admin',
@@ -40,6 +40,18 @@ export class RuletasAdminComponent implements OnInit {
   private ruletaItemService = inject(RuletaItemService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+
+  // Mock Data
+  private mockRuletas: RuletaResponse[] = [
+    { ruletaId: 1, nombre: 'Ruleta Clásica', descripcion: 'Ruleta básica de premios', tipo: TipoRuleta.GENERAL, activa: true, incrementoPorGiro: 0.02, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { ruletaId: 2, nombre: 'Ruleta VIP', descripcion: 'Premios exclusivos para VIP', tipo: TipoRuleta.FIDELIZACION, activa: true, incrementoPorGiro: 0.05, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  ];
+
+  private mockItems: RuletaItemResponse[] = [
+    { itemId: 1, ruletaId: 1, nombre: 'Corte Gratis', tipoPremio: TipoPremio.SERVICIO, esPremioMayor: false, imagenUrl: '', ordenDisplay: 1, activo: true, probabilidad: 0.1, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { itemId: 2, ruletaId: 1, nombre: 'Pomada', tipoPremio: TipoPremio.PRODUCTO, esPremioMayor: false, imagenUrl: '', ordenDisplay: 2, activo: true, probabilidad: 0.2, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { itemId: 3, ruletaId: 2, nombre: 'Súper Premio', tipoPremio: TipoPremio.SERVICIO, esPremioMayor: true, imagenUrl: '', ordenDisplay: 1, activo: true, probabilidad: 0.05, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  ];
 
   icono = 'pi-refresh';
   activeTab = 'ruletas';
@@ -88,7 +100,15 @@ export class RuletasAdminComponent implements OnInit {
 
   cargarRuletas(page: number, size: number): void {
     this.cargadoRuletas = false;
-    this.ruletaService.obtenerRuletas({ ...this.filtroRuleta, page, size, sort: 'ruletaId,desc' }).subscribe({
+
+    let filtered = [...this.mockRuletas];
+    if (this.filtroRuleta.nombre) {
+        filtered = filtered.filter(r => r.nombre.toLowerCase().includes(this.filtroRuleta.nombre!.toLowerCase()));
+    }
+
+    const content = filtered.slice(page * size, (page + 1) * size);
+
+    of({ data: { content, totalElements: filtered.length } }).subscribe({
       next: (resp) => {
         this.ruletas = resp.data.content;
         this.totalRuletas = resp.data.totalElements;
@@ -168,11 +188,23 @@ export class RuletasAdminComponent implements OnInit {
   }
 
   guardarRuleta(data: RuletaRequest) {
-    const obs = this.ruletaEnEdicion
-      ? this.ruletaService.actualizarRuleta(this.ruletaEnEdicion.ruletaId, data)
-      : this.ruletaService.crearRuleta(data);
+    const nuevaRuleta: RuletaResponse = {
+      ...data,
+      ruletaId: this.mockRuletas.length > 0 ? Math.max(...this.mockRuletas.map(r => r.ruletaId)) + 1 : 1,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
 
-    obs.subscribe({
+    if (this.ruletaEnEdicion) {
+      const index = this.mockRuletas.findIndex(r => r.ruletaId === this.ruletaEnEdicion!.ruletaId);
+      if (index !== -1) {
+        this.mockRuletas[index] = { ...this.mockRuletas[index], ...data, updatedAt: new Date().toISOString() };
+      }
+    } else {
+      this.mockRuletas.push(nuevaRuleta);
+    }
+
+    of({ message: 'Ruleta guardada correctamente', data: nuevaRuleta }).subscribe({
       next: (resp) => {
         this.notify.showSuccess(resp.message);
         this.cargarRuletas(0, this.rows);
@@ -187,7 +219,8 @@ export class RuletasAdminComponent implements OnInit {
   }
 
   eliminarRuleta(ruleta: RuletaResponse) {
-    this.ruletaService.eliminarRuleta(ruleta.ruletaId).subscribe({
+    this.mockRuletas = this.mockRuletas.filter(r => r.ruletaId !== ruleta.ruletaId);
+    of({ message: 'Ruleta eliminada correctamente' }).subscribe({
       next: (resp) => {
         this.notify.showSuccess(resp.message);
         if (this.ruletaSeleccionada?.ruletaId === ruleta.ruletaId) {
@@ -208,7 +241,10 @@ export class RuletasAdminComponent implements OnInit {
   cargarItems(): void {
     if (!this.ruletaSeleccionada) return;
     this.cargadoItems = false;
-    this.ruletaItemService.obtenerItems({ ruletaId: this.ruletaSeleccionada.ruletaId, page: 0, size: 100, sort: 'ordenDisplay,asc' }).subscribe({
+
+    let filtered = this.mockItems.filter(item => item.ruletaId === this.ruletaSeleccionada!.ruletaId);
+
+    of({ data: { content: filtered, totalElements: filtered.length } }).subscribe({
       next: (resp) => {
         this.items = resp.data.content;
         this.cargadoItems = true;
@@ -238,8 +274,25 @@ export class RuletasAdminComponent implements OnInit {
   }
 
   guardarItem(event: { data: RuletaItemRequest, imagen?: File | null }) {
-    const obs = this.itemEnEdicion ? this.ruletaItemService.actualizarItem(this.itemEnEdicion.itemId, event.data, event.imagen || undefined) : this.ruletaItemService.crearItem(event.data, event.imagen || undefined);
-    obs.subscribe({
+    const { data } = event;
+    const nuevoItem: RuletaItemResponse = {
+      ...data,
+      itemId: this.mockItems.length > 0 ? Math.max(...this.mockItems.map(i => i.itemId)) + 1 : 1,
+      imagenUrl: '',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    if (this.itemEnEdicion) {
+      const index = this.mockItems.findIndex(i => i.itemId === this.itemEnEdicion!.itemId);
+      if (index !== -1) {
+        this.mockItems[index] = { ...this.mockItems[index], ...data, updatedAt: new Date().toISOString() };
+      }
+    } else {
+      this.mockItems.push(nuevoItem);
+    }
+
+    of({ message: 'Ítem guardado correctamente' }).subscribe({
       next: (resp) => {
         this.notify.showSuccess(resp.message);
         this.cargarItems();
@@ -251,7 +304,8 @@ export class RuletasAdminComponent implements OnInit {
   }
 
   eliminarItem(item: RuletaItemResponse) {
-    this.ruletaItemService.eliminarItem(item.itemId).subscribe({
+    this.mockItems = this.mockItems.filter(i => i.itemId !== item.itemId);
+    of({ message: 'Ítem eliminado correctamente' }).subscribe({
       next: (resp) => {
         this.notify.showSuccess(resp.message);
         this.cargarItems();

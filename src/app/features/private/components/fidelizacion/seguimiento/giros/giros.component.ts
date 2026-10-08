@@ -10,6 +10,7 @@ import { FidelizacionTarjetaService } from '@/app/core/services/fidelizacion/tar
 import { RuletaService } from '@/app/core/services/ruleta/ruleta.service';
 import { TableLazyLoadEvent } from 'primeng/table';
 import { GiroTableComponent } from './giro-table/giro-table.component';
+import { of } from 'rxjs';
 
 @Component({
     selector: 'app-giros',
@@ -24,6 +25,28 @@ export class GirosComponent implements OnInit {
     private tarjetaService = inject(FidelizacionTarjetaService);
     private ruletaService = inject(RuletaService);
     private giroService = inject(GiroService);
+
+    // Mock Data
+    private mockGiros: GiroResponse[] = [
+        { id: 1, tarjetaId: 1, clienteId: 101, clienteNombre: 'Juan Pérez', ruletaId: 1, ruletaNombre: 'Ruleta Clásica', itemId: 10, premio: 'Corte Gratis', numeroGiro: 1, probFinal: 0.5, probAplicada: 0.5, fecha: new Date().toISOString() },
+        { id: 2, tarjetaId: 2, clienteId: 102, clienteNombre: 'María López', ruletaId: 1, ruletaNombre: 'Ruleta Clásica', itemId: 11, premio: 'Ninguno', numeroGiro: 2, probFinal: 0.1, probAplicada: 0.1, fecha: new Date().toISOString() },
+        { id: 3, tarjetaId: 1, clienteId: 101, clienteNombre: 'Juan Pérez', ruletaId: 2, ruletaNombre: 'Ruleta VIP', itemId: 12, premio: 'Pomada', numeroGiro: 3, probFinal: 0.8, probAplicada: 0.8, fecha: new Date().toISOString() },
+    ];
+
+    private mockClientes = [
+        { clienteId: 101, persona: { nombre: 'Juan', apellido: 'Pérez' } },
+        { clienteId: 102, persona: { nombre: 'María', apellido: 'López' } },
+    ];
+
+    private mockTarjetas = [
+        { id: 1, categoriaNombre: 'Platino' },
+        { id: 2, categoriaNombre: 'Oro' },
+    ];
+
+    private mockRuletas = [
+        { ruletaId: 1, nombre: 'Ruleta Clásica' },
+        { ruletaId: 2, nombre: 'Ruleta VIP' },
+    ];
 
     giros: GiroResponse[] = [];
     cargado = false;
@@ -42,8 +65,21 @@ export class GirosComponent implements OnInit {
 
     cargarGiros(page: number, size: number): void {
         this.cargado = false;
-        const filtro = { ...this.filtro, page, size, sort: 'createdAt,desc' };
-        this.giroService.obtenerGiros(filtro).subscribe({
+
+        let filtered = [...this.mockGiros];
+        if (this.filtro.clienteId) {
+            filtered = filtered.filter(g => g.clienteId === this.filtro.clienteId);
+        }
+        if (this.filtro.tarjetaId) {
+            filtered = filtered.filter(g => g.tarjetaId === this.filtro.tarjetaId);
+        }
+        if (this.filtro.ruletaId) {
+            filtered = filtered.filter(g => g.ruletaId === this.filtro.ruletaId);
+        }
+
+        const content = filtered.slice(page * size, (page + 1) * size);
+
+        of({ data: { content, totalElements: filtered.length } }).subscribe({
             next: (resp) => {
                 this.giros = resp.data.content;
                 this.totalRecords = resp.data.totalElements;
@@ -75,17 +111,17 @@ export class GirosComponent implements OnInit {
     }
 
     cargarFiltros() {
-        this.clienteService.listar().subscribe(resp => {
+        of({ data: { content: this.mockClientes } }).subscribe(resp => {
             const opciones = resp.data.content.map(c => ({ label: c.persona.nombre + ' ' + c.persona.apellido, value: c.clienteId }));
             this.filtrosFields = this.filtrosFields.map(f => f.key === 'clienteId' ? { ...f, options: opciones } : f);
         });
 
-        this.tarjetaService.obtenerTarjetas().subscribe(resp => {
+        of({ data: { content: this.mockTarjetas } }).subscribe(resp => {
             const opciones = resp.data.content.map(t => ({ label: t.categoriaNombre, value: t.id }));
             this.filtrosFields = this.filtrosFields.map(f => f.key === 'tarjetaId' ? { ...f, options: opciones } : f);
         });
 
-        this.ruletaService.obtenerRuletas().subscribe(resp => {
+        of({ data: { content: this.mockRuletas } }).subscribe(resp => {
             const opciones = resp.data.content.map(r => ({ label: r.nombre, value: r.ruletaId }));
             this.filtrosFields = this.filtrosFields.map(f => f.key === 'ruletaId' ? { ...f, options: opciones } : f);
         });
