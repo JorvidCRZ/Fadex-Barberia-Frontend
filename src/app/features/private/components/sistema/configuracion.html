@@ -1,280 +1,173 @@
-<!-- <p-toast position="top-right" /> -->
+<p-toast position="top-right" />
 
-<div class="flex flex-col gap-6 mt-5">
-
-  <aside
-    class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between px-6 py-4 border-b border-brand-gold-soft bg-brand-black rounded-xl">
-
-    <h1 class="text-lg font-semibold text-brand-gold text-center md:text-start">
-      <i class="pi pi-cog"></i> Configuración de Cuenta
-    </h1>
-
-    <span class="text-sm text-zinc-400 text-center md:text-end">
-      Administra tu información personal y seguridad
-    </span>
-
-  </aside>
-
-  <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-
-    <!-- Columna izquierda -->
-    <div class="table-base p-6 flex flex-col items-center gap-5">
-
-      <div class="w-24 h-24 rounded-full bg-brand-gold flex items-center justify-center text-brand-black text-3xl font-bold shadow-lg select-none">
-        {{ inicialesAvatar }}
-      </div>
-
-      <div class="text-center">
-        <p class="text-white font-semibold text-lg leading-tight">
-          {{ perfil.nombre }} {{ perfil.apellido }}
-        </p>
-        <p class="text-zinc-400 text-sm mt-1">
-          &#64;{{ perfil.usuario }}
-        </p>
-      </div>
-
-      <span class="px-4 py-1 rounded-full text-xs font-bold tracking-widest uppercase bg-brand-gold/10 text-brand-gold border border-brand-gold/30">
-        {{ labelRol }}
-      </span>
-
-      <p-divider styleClass="w-full border-zinc-700" />
-
-      <ul class="w-full flex flex-col gap-3">
-
-        <li class="flex items-center gap-3 text-sm">
-          <i class="pi pi-envelope text-brand-gold w-5 shrink-0"></i>
-          <span class="text-zinc-300 truncate">{{ perfil.email }}</span>
-        </li>
-
-        <li class="flex items-center gap-3 text-sm">
-          <i class="pi pi-phone text-brand-gold w-5 shrink-0"></i>
-          <span class="text-zinc-300">{{ perfil.telefono || '—' }}</span>
-        </li>
-
-        <li class="flex items-center gap-3 text-sm">
-          <i class="pi pi-id-card text-brand-gold w-5 shrink-0"></i>
-          <span class="text-zinc-300">ID: {{ perfil.idUsuario }}</span>
-        </li>
-
-      </ul>
-
+<main
+  class="settings-page"
+  [class.light-theme]="settings().theme === 'claro'"
+  [class.auto-theme]="settings().theme === 'automatico'"
+  [style.--accent-color]="accentColor()"
+>
+  <header class="page-header">
+    <div>
+      <h1>Configuración</h1>
+      <p>Ajustes generales del sistema</p>
     </div>
+    <button type="button" class="button button-danger logout-button" (click)="logout()">
+      <i class="pi pi-sign-out" aria-hidden="true"></i>
+      Cerrar Sesión
+    </button>
+  </header>
 
-    <!-- Columna derecha -->
-    <div class="xl:col-span-2 flex flex-col gap-6">
-
-      <!-- Datos personales -->
-      <div class="table-base p-6 flex flex-col gap-5">
-
-        <h2 class="text-base font-semibold text-brand-gold flex items-center gap-2">
-          <i class="pi pi-user"></i> Datos Personales
-        </h2>
-
-        <p-divider styleClass="border-zinc-700 mt-0" />
-
-        <form [formGroup]="formPerfil" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-          <div class="flex flex-col gap-1">
-            <label class="text-xs text-zinc-400 font-medium uppercase tracking-wide">Nombre</label>
-            <input pInputText formControlName="nombre" placeholder="Nombre"
-              class="input-field w-full" [class.border-red-500]="campoInvalido(formPerfil, 'nombre')" />
-            @if (campoInvalido(formPerfil, 'nombre')) {
-              <span class="text-xs text-red-400">El nombre es requerido (mín. 2 caracteres).</span>
-            }
-          </div>
-
-          <div class="flex flex-col gap-1">
-            <label class="text-xs text-zinc-400 font-medium uppercase tracking-wide">Apellido</label>
-            <input pInputText formControlName="apellido" placeholder="Apellido"
-              class="input-field w-full" [class.border-red-500]="campoInvalido(formPerfil, 'apellido')" />
-            @if (campoInvalido(formPerfil, 'apellido')) {
-              <span class="text-xs text-red-400">El apellido es requerido (mín. 2 caracteres).</span>
-            }
-          </div>
-
-          <div class="flex flex-col gap-1">
-            <label class="text-xs text-zinc-400 font-medium uppercase tracking-wide">
-              Usuario <span class="ml-1 text-zinc-600 normal-case">(no editable)</span>
-            </label>
-            <input pInputText formControlName="usuario"
-              class="input-field w-full opacity-50 cursor-not-allowed" />
-          </div>
-
-          <div class="flex flex-col gap-1">
-            <label class="text-xs text-zinc-400 font-medium uppercase tracking-wide">Correo</label>
-            <input pInputText formControlName="email" type="email" placeholder="correo@ejemplo.com"
-              class="input-field w-full" [class.border-red-500]="campoInvalido(formPerfil, 'email')" />
-            @if (campoInvalido(formPerfil, 'email')) {
-              <span class="text-xs text-red-400">Ingresa un correo válido.</span>
-            }
-          </div>
-
-          <div class="flex flex-col gap-1 md:col-span-2">
-            <label class="text-xs text-zinc-400 font-medium uppercase tracking-wide">Teléfono</label>
-            <input pInputText formControlName="telefono" placeholder="9XXXXXXXX"
-              class="input-field w-full md:w-1/2" [class.border-red-500]="campoInvalido(formPerfil, 'telefono')" />
-            @if (campoInvalido(formPerfil, 'telefono')) {
-              <span class="text-xs text-red-400">Ingresa un teléfono válido (9-15 dígitos).</span>
-            }
-          </div>
-
-        </form>
-
-        <div class="flex justify-end pt-2">
-          <button
-            type="button"
-            (click)="guardarPerfil()"
-            [disabled]="formPerfil.invalid || guardandoPerfil()"
-            style="background-color: transparent; border: 1.5px solid #C9A84C; color: #C9A84C; cursor: pointer;"
-            class="inline-flex items-center justify-center gap-2 w-full rounded-lg py-3 text-sm font-semibold tracking-wide transition-all duration-200 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
-            onmouseover="if(!this.disabled) this.style.backgroundColor='#C9A84C'; if(!this.disabled) this.style.color='#0a0a0a';"
-            onmouseout="this.style.backgroundColor='transparent'; this.style.color='#C9A84C';">
-            @if (guardandoPerfil()) {
-              <i class="pi pi-spin pi-spinner"></i>
-              <span>Guardando...</span>
-            } @else {
-              <i class="pi pi-save"></i>
-              <span>Guardar cambios</span>
-            }
-          </button>
-        </div>
-
-      </div>
-
-      <!-- Cambiar contraseña -->
-      <div class="table-base p-6 flex flex-col gap-5">
-
-        <h2 class="text-base font-semibold text-brand-gold flex items-center gap-2">
-          <i class="pi pi-lock"></i> Cambiar Contraseña
-        </h2>
-
-        <p-divider styleClass="border-zinc-700 mt-0" />
-
-        <form [formGroup]="formPassword" class="flex flex-col gap-4">
-
-          <div class="flex flex-col gap-1">
-            <label class="text-xs text-zinc-400 font-medium uppercase tracking-wide">Contraseña actual</label>
-            <div class="relative">
-              <input pInputText formControlName="passwordActual"
-                [type]="mostrarPasswordActual() ? 'text' : 'password'"
-                placeholder="••••••••"
-                class="input-field w-full pr-10"
-                [class.border-red-500]="campoInvalido(formPassword, 'passwordActual')" />
-              <button type="button"
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-brand-gold transition-colors"
-                (click)="toggleVisible('actual')">
-                <i [class]="mostrarPasswordActual() ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
-              </button>
-            </div>
-            @if (campoInvalido(formPassword, 'passwordActual')) {
-              <span class="text-xs text-red-400">La contraseña actual es requerida.</span>
-            }
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-            <div class="flex flex-col gap-1">
-              <label class="text-xs text-zinc-400 font-medium uppercase tracking-wide">Nueva contraseña</label>
-              <div class="relative">
-                <input pInputText formControlName="passwordNueva"
-                  [type]="mostrarPasswordNueva() ? 'text' : 'password'"
-                  placeholder="Mín. 8 caracteres"
-                  class="input-field w-full pr-10"
-                  [class.border-red-500]="campoInvalido(formPassword, 'passwordNueva')" />
-                <button type="button"
-                  class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-brand-gold transition-colors"
-                  (click)="toggleVisible('nueva')">
-                  <i [class]="mostrarPasswordNueva() ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
-                </button>
-              </div>
-              @if (campoInvalido(formPassword, 'passwordNueva')) {
-                <span class="text-xs text-red-400">Mínimo 8 caracteres.</span>
-              }
-            </div>
-
-            <div class="flex flex-col gap-1">
-              <label class="text-xs text-zinc-400 font-medium uppercase tracking-wide">Confirmar contraseña</label>
-              <div class="relative">
-                <input pInputText formControlName="confirmarPassword"
-                  [type]="mostrarConfirmar() ? 'text' : 'password'"
-                  placeholder="Repite la nueva contraseña"
-                  class="input-field w-full pr-10"
-                  [class.border-red-500]="campoInvalido(formPassword, 'confirmarPassword') || formPassword.errors?.['noCoinciden']" />
-                <button type="button"
-                  class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-brand-gold transition-colors"
-                  (click)="toggleVisible('confirmar')">
-                  <i [class]="mostrarConfirmar() ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
-                </button>
-              </div>
-              @if (formPassword.errors?.['noCoinciden'] && formPassword.get('confirmarPassword')?.touched) {
-                <span class="text-xs text-red-400">Las contraseñas no coinciden.</span>
-              }
-            </div>
-
-          </div>
-
-          @if (formPassword.get('passwordNueva')?.value) {
-            <div class="flex flex-col gap-1">
-              <span class="text-xs text-zinc-500">Seguridad de la contraseña</span>
-              <div class="flex gap-1">
-                @for (i of [1,2,3,4]; track i) {
-                  <div class="h-1 flex-1 rounded-full transition-all duration-300"
-                    [class]="nivelSeguridad >= i ? colorSeguridad : 'bg-zinc-700'">
-                  </div>
-                }
-              </div>
-              <span class="text-xs" [class]="textoColorSeguridad">{{ textoSeguridad }}</span>
-            </div>
+  <div class="settings-grid">
+    <section class="settings-card" aria-labelledby="general-heading">
+      <h2 id="general-heading"><i class="pi pi-cog" aria-hidden="true"></i> Configuración General</h2>
+      <form [formGroup]="generalForm" (ngSubmit)="saveGeneralSettings()">
+        <div class="field">
+          <label for="businessName">Nombre de la Barbería</label>
+          <input id="businessName" type="text" formControlName="businessName" autocomplete="organization" />
+          @if (generalForm.controls.businessName.touched && generalForm.controls.businessName.invalid) {
+            <span class="field-error">Ingresa un nombre de barbería.</span>
           }
+        </div>
+        <div class="field">
+          <label for="businessPhone">Teléfono</label>
+          <input id="businessPhone" type="tel" formControlName="phone" autocomplete="tel" />
+          @if (generalForm.controls.phone.touched && generalForm.controls.phone.invalid) {
+            <span class="field-error">Ingresa un teléfono.</span>
+          }
+        </div>
+        <div class="field">
+          <label for="businessEmail">Email</label>
+          <input id="businessEmail" type="email" formControlName="email" autocomplete="email" />
+          @if (generalForm.controls.email.touched && generalForm.controls.email.invalid) {
+            <span class="field-error">Ingresa un correo electrónico válido.</span>
+          }
+        </div>
+        <div class="field">
+          <label for="businessAddress">Dirección</label>
+          <input id="businessAddress" type="text" formControlName="address" autocomplete="street-address" />
+          @if (generalForm.controls.address.touched && generalForm.controls.address.invalid) {
+            <span class="field-error">Ingresa una dirección.</span>
+          }
+        </div>
+        <button class="button button-primary full-width" type="submit">
+          Guardar Cambios
+        </button>
+      </form>
+    </section>
 
-          <div class="flex justify-end pt-2">
-            <button
-              type="button"
-              (click)="cambiarPassword()"
-              [disabled]="formPassword.invalid || guardandoPassword()"
-              style="background-color: transparent; border: 1.5px solid #C9A84C; color: #C9A84C; cursor: pointer;"
-              class="inline-flex items-center justify-center gap-2 w-full rounded-lg py-3 text-sm font-semibold tracking-wide transition-all duration-200 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
-              onmouseover="if(!this.disabled) this.style.backgroundColor='#C9A84C'; if(!this.disabled) this.style.color='#0a0a0a';"
-              onmouseout="this.style.backgroundColor='transparent'; this.style.color='#C9A84C';">
-              @if (guardandoPassword()) {
-                <i class="pi pi-spin pi-spinner"></i>
-                <span>Actualizando...</span>
-              } @else {
-                <i class="pi pi-key"></i>
-                <span>Cambiar contraseña</span>
-              }
+    <section class="settings-card" aria-labelledby="notifications-heading">
+      <h2 id="notifications-heading">Notificaciones</h2>
+      <p class="section-description">Selecciona las alertas que deseas recibir. Los cambios se guardan al instante.</p>
+      <div class="notification-list">
+        <label class="notification-option" for="notifyEmail">
+          <span>Notificaciones por Email</span>
+          <input id="notifyEmail" type="checkbox" [checked]="settings().notifications.email"
+            (change)="updateNotification('email', $event)" />
+        </label>
+        <label class="notification-option" for="notifyPush">
+          <span>Notificaciones Push</span>
+          <input id="notifyPush" type="checkbox" [checked]="settings().notifications.push"
+            (change)="updateNotification('push', $event)" />
+        </label>
+        <label class="notification-option" for="notifyAppointments">
+          <span>Recordatorios de Citas</span>
+          <input id="notifyAppointments" type="checkbox" [checked]="settings().notifications.appointmentReminders"
+            (change)="updateNotification('appointmentReminders', $event)" />
+        </label>
+        <label class="notification-option" for="notifyLowStock">
+          <span>Alertas de Stock Bajo</span>
+          <input id="notifyLowStock" type="checkbox" [checked]="settings().notifications.lowStockAlerts"
+            (change)="updateNotification('lowStockAlerts', $event)" />
+        </label>
+      </div>
+    </section>
+
+    <section class="settings-card" aria-labelledby="security-heading">
+      <h2 id="security-heading"><i class="pi pi-lock" aria-hidden="true"></i> Seguridad</h2>
+      <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
+        <div class="field">
+          <label for="currentPassword">Contraseña Actual</label>
+          <input id="currentPassword" type="password" formControlName="currentPassword"
+            autocomplete="current-password" />
+          @if (passwordForm.controls.currentPassword.touched && passwordForm.controls.currentPassword.invalid) {
+            <span class="field-error">Ingresa tu contraseña actual (mínimo 6 caracteres).</span>
+          }
+        </div>
+        <div class="field">
+          <label for="newPassword">Nueva Contraseña</label>
+          <input id="newPassword" type="password" formControlName="newPassword"
+            autocomplete="new-password" />
+          @if (passwordForm.controls.newPassword.touched && passwordForm.controls.newPassword.invalid) {
+            <span class="field-error">La nueva contraseña debe tener al menos 8 caracteres.</span>
+          }
+        </div>
+        <div class="field">
+          <label for="confirmPassword">Confirmar Contraseña</label>
+          <input id="confirmPassword" type="password" formControlName="confirmPassword"
+            autocomplete="new-password" />
+          @if (passwordForm.controls.confirmPassword.touched && passwordForm.controls.confirmPassword.invalid) {
+            <span class="field-error">Confirma la nueva contraseña.</span>
+          }
+          @if (passwordForm.hasError('passwordMismatch') && passwordForm.controls.confirmPassword.touched) {
+            <span class="field-error">Las contraseñas no coinciden.</span>
+          }
+        </div>
+        <button class="button button-primary full-width" type="submit"
+          [disabled]="savingPassword()">
+          @if (savingPassword()) {
+            <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
+            Actualizando...
+          } @else {
+            Actualizar Contraseña
+          }
+        </button>
+      </form>
+    </section>
+
+    <section class="settings-card" aria-labelledby="appearance-heading">
+      <h2 id="appearance-heading"><i class="pi pi-palette" aria-hidden="true"></i> Apariencia</h2>
+      <div class="field">
+        <label for="themeSelect">Tema</label>
+        <select id="themeSelect" [value]="settings().theme" (change)="updateTheme($event)">
+          <option value="oscuro-premium">Oscuro (Premium)</option>
+          <option value="claro">Claro</option>
+          <option value="automatico">Automático</option>
+        </select>
+      </div>
+      <fieldset class="accent-field">
+        <legend>Color de Acento</legend>
+        <div class="accent-options">
+          @for (option of accentOptions; track option.value) {
+            <button type="button" class="accent-swatch"
+              [style.background-color]="option.value"
+              [class.selected]="settings().accent === option.value"
+              [attr.aria-label]="'Usar color de acento ' + option.name"
+              [attr.aria-pressed]="settings().accent === option.value"
+              (click)="updateAccent(option.value)">
             </button>
-          </div>
-
-        </form>
-
-      </div>
-
-      <!-- Permisos -->
-      <div class="table-base p-6 flex flex-col gap-5">
-
-        <h2 class="text-base font-semibold text-brand-gold flex items-center gap-2">
-          <i class="pi pi-shield"></i> Permisos Asignados
-        </h2>
-
-        <p-divider styleClass="border-zinc-700 mt-0" />
-
-        <p class="text-sm text-zinc-400">
-          Los permisos son asignados automáticamente según tu rol
-          <span class="text-brand-gold font-semibold">"{{ labelRol }}"</span>.
-          Contacta al administrador del sistema si necesitas cambiarlos.
-        </p>
-
-        <div class="flex flex-wrap gap-2">
-          @for (permiso of permisosDelRol; track permiso) {
-            <span class="px-3 py-1 rounded-full text-xs font-mono font-medium bg-zinc-800 text-zinc-300 border border-zinc-700">
-              {{ permiso }}
-            </span>
           }
         </div>
+      </fieldset>
+    </section>
 
+    <section class="settings-card database-card" aria-labelledby="database-heading">
+      <h2 id="database-heading"><i class="pi pi-database" aria-hidden="true"></i> Base de Datos</h2>
+      <p class="section-description">
+        Exporta o restaura las preferencias guardadas en este navegador. Esta acción no modifica los datos del servidor.
+      </p>
+      <div class="database-actions">
+        <button type="button" class="button button-secondary" (click)="exportSettings()">Exportar Datos</button>
+        <input id="settingsImport" class="visually-hidden" type="file" accept="application/json,.json"
+          aria-label="Seleccionar archivo de configuración para importar" (change)="importSettings($event)" />
+        <label class="button button-secondary import-button" for="settingsImport">Importar Datos</label>
+        <button type="button" class="button button-secondary"
+          [attr.aria-pressed]="settings().automaticBackup" (click)="updateAutomaticBackup()">
+          Respaldo Automático: {{ settings().automaticBackup ? 'Activado' : 'Desactivado' }}
+        </button>
       </div>
-
-    </div>
+      <p class="backup-status" aria-live="polite">
+        Último respaldo: <strong>{{ formatBackupDate(lastBackup()) }}</strong>
+      </p>
+    </section>
   </div>
-</div>
+</main>
