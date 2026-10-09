@@ -96,16 +96,7 @@ export const routes: Routes = [
   {
     path: 'dashboard/barbero', component: DashboardBarberoComponent, canActivate: [authGuard], data: { roles: ['barbero'] }, children: [
       { path: '', redirectTo: 'resumen', pathMatch: 'full' },
-      { path: 'resumen', loadComponent: () => import('./features/private/components/resumen/resumen-barbero.component').then(m => m.ResumenBarbero) },
-   { path: 'reservas', loadComponent: () => import('./features/private/components/operaciones/reservas/reserva-list/reserva-list.component').then(m => m.ReservaList) },
-       { path: 'cortes', loadComponent: () => import('./features/private/components/cortes/cortes.component').then(m => m.CortesComponent) },
-       {
-         path: 'operaciones', children: [
-           { path: 'pos', loadComponent: () => import('./features/private/components/operaciones/ventas/pos/pos.component').then(m => m.PosComponent) }, 
-           { path: 'ventas', loadComponent: () => import('./features/private/components/operaciones/ventas/ventas.component').then(m => m.VentasComponent) },
-          { path: 'reservas', loadComponent: () => import('./features/private/components/operaciones/reservas/reserva-list/reserva-list.component').then(m => m.ReservaList) },
-      { path: 'resumen', loadComponent: () => import('./features/private/components/resumen/resumen-barbero.component').then(m => m.ResumenBarbero) },
-      { path: 'reservas', loadComponent: () => import('./features/private/components/reserva/reserva.component').then(m => m.ReservaComponent) },
+{ path: 'resumen', loadComponent: () => import('./features/private/components/resumen/resumen').then(m => m.Resumen) },      { path: 'reservas', loadComponent: () => import('./features/private/components/reserva/reserva.component').then(m => m.ReservaComponent) },
       { path: 'cortes', loadComponent: () => import('./features/private/components/cortes/cortes.component').then(m => m.CortesComponent) },
       {
         path: 'operaciones', children: [
@@ -120,16 +111,11 @@ export const routes: Routes = [
         path: 'gestion', children: [
           { path: 'clientes', loadComponent: () => import('./features/private/components/gestion/clientes/clientes.component').then(m => m.Clientes) },
           { path: 'clientes/registrar-client', component: RegistrarClient },
-           { path: 'clientes/:id', component: PerfilClient },
-           { path: 'barberos', loadComponent: () => import('./features/private/components/gestion/barberos/barberos.component').then(m => m.Barberos) },
-         ]
-       },
-       { path: 'perfil', loadComponent: () => import('./features/private/pages/perfil/perfil.component').then(m => m.PerfilComponent) },
           { path: 'clientes/:id', component: PerfilClient },
           { path: 'barberos', loadComponent: () => import('./features/private/components/gestion/barberos/barberos.component').then(m => m.Barberos) },
         ]
       },
-      { path: 'perfil', component: PerfilBarbero },
+      { path: 'perfil', loadComponent: () => import('./features/private/pages/perfil/perfil.component').then(m => m.PerfilComponent) },
       { path: '**', loadComponent: () => import('./shared/components/error404/error404.component').then(m => m.Error404Component) }
     ]
   },
