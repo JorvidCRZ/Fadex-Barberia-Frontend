@@ -25,7 +25,6 @@ import { PerfilBarbero } from './features/private/components/gestion/barberos/pe
 import { Usuario } from './features/private/components/gestion/usuario/usuario';
 import { PerfilUsuario } from './features/private/components/gestion/usuario/perfil-usuario/perfil-usuario';
 import { CheckoutComponent } from './features/auth/checkout/checkout.component';
-import { PerfilDashboardBarbero } from './features/private/components/perfil-dashboard-barbero/perfil-dashboard-barbero';
 
 export const routes: Routes = [
    {
@@ -101,8 +100,8 @@ export const routes: Routes = [
     canActivate: [authGuard], data: { roles: ['barbero'] },
     children: [
       { path: '', redirectTo: 'resumen', pathMatch: 'full' },
-       { path: 'resumen', loadComponent: () => import('./features/private/components/resumen/resumen-barbero').then(m => m.ResumenBarbero) },
-       { path: 'reservas', loadComponent: () => import('./features/private/components/reserva/reserva').then(m => m.ReservaComponent) },
+      { path: 'resumen', loadComponent: () => import('./features/private/components/resumen/resumen').then(m => m.Resumen) },
+   { path: 'reservas', loadComponent: () => import('./features/private/components/reserva/reserva').then(m => m.ReservaComponent) },
        { path: 'cortes', loadComponent: () => import('./features/private/components/cortes/cortes').then(m => m.CortesComponent) },
        {
          path: 'operaciones', children: [
@@ -121,7 +120,7 @@ export const routes: Routes = [
            { path: 'barberos', loadComponent: () => import('./features/private/components/gestion/barberos/barberos').then(m => m.Barberos) },
          ]
        },
-      { path: 'perfil', component: PerfilDashboardBarbero },
+       { path: 'perfil', loadComponent: () => import('./features/private/pages/perfil/perfil.component').then(m => m.PerfilComponent) },
       { path: '**', loadComponent: () => import('./shared/components/error404/error404.component').then(m => m.Error404Component) }
      ]
    },
@@ -153,7 +152,6 @@ export const routes: Routes = [
           { path: 'dashboard', loadComponent: () => import('./features/private/pages/resumen/resumen.component').then(m => m.ResumenComponent) },
           { path: 'reservar/agendar', loadComponent: () => import('./features/private/pages/reservar/reservar.component').then(m => m.ReservarComponent), canActivate: [authGuard] },
           { path: 'reservas/mis-reservas', loadComponent: () => import('./features/private/pages/mis-reservas/mis-reservas.component').then(m => m.MisReservasComponent) },
-          { path: 'checkout/:reservaId', component: CheckoutReservaComponent, canActivate: [authGuard], data: { roles: ['cliente'] } },
           { path: 'ia/analisis-facial', loadComponent: () => import('./features/private/pages/reconocimiento-facial/reconocimiento-facial.component').then(m => m.ReconocimientoFacialComponent) },
           { path: 'historial', loadComponent: () => import('./features/private/pages/historial/historial.component').then(m => m.ClienteHistorialComponent) },
 

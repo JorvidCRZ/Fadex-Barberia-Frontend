@@ -6,7 +6,6 @@
             <p class="text-sm text-neutral-primary-dark mt-0.5">Gestiona todas las citas del sistema</p>
         </div>
         <button pButton label="Nueva reserva" icon="pi pi-plus" class="boton-primary" (click)="abrirCrear()"></button>
-
     </div>
 
     <div class="flex flex-col gap-4 mb-4">
@@ -15,71 +14,100 @@
             (buscar)="onBuscar($event)" (limpiar)="onLimpiar()" />
     </div>
 
-    <div class="relative w-full overflow-x-auto">
-        <p-table [value]="reservas" [lazy]="true" (onLazyLoad)="onLazyLoad($event)" [paginator]="true" [rows]="rows"
-            [totalRecords]="totalRecords" [loading]="!cargado" dataKey="reservaId" [showCurrentPageReport]="true"
-            currentPageReportTemplate="Viendo {first} a {last} de {totalRecords} entradas"
-            [tableStyle]="{ 'min-width': '900px' }" class="rounded-xl">
+    <div class="rounded-xl border border-[#C9A84C]/25 bg-[#121212] overflow-hidden">
+        <div class="w-full overflow-x-auto">
+            <p-table [value]="reservas" [loading]="!cargado" [paginator]="true" [rows]="10" [totalRecords]="totalRecords"
+                [showCurrentPageReport]="true" currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} reservas"
+                [tableStyle]="{ 'min-width': '900px' }" dataKey="reservaId" class="rounded-xl">
 
-            <ng-template #header>
-                <tr>
-                    <th class="whitespace-nowrap text-center">Cliente</th>
-                    <th class="whitespace-nowrap text-center">Barbero</th>
-                    <th class="whitespace-nowrap text-center">Servicio</th>
-                    <th class="whitespace-nowrap text-center">Fecha / Hora</th>
-                    <th class="whitespace-nowrap text-center">Tipo</th>
-                    <th class="whitespace-nowrap text-center">Estado</th>
-                    <th class="whitespace-nowrap text-center">Acciones</th>
-                </tr>
-            </ng-template>
+                <ng-template #header>
+                    <tr class="text-sm text-[#C9A84C]">
+                        <th class="text-left font-normal px-4 py-3">Servicio</th>
+                        <th class="text-left font-normal px-4 py-3">Barbero</th>
+                        <th class="text-left font-normal px-4 py-3">Fecha y Hora</th>
+                        <th class="text-left font-normal px-4 py-3">Total</th>
+                        <th class="text-left font-normal px-4 py-3">Estado</th>
+                        <th class="text-center font-normal px-4 py-3">Acciones</th>
+                    </tr>
+                </ng-template>
 
-            <ng-template #body let-reserva pTemplate="body">
-                <tr>
-                    <td class="whitespace-nowrap text-center font-medium"><span class="inline-block align-middle text-gray-400">{{ reserva.clienteNombre || 'N/A' }}</span></td>
-                    <td class="whitespace-nowrap text-center"><span class="inline-block align-middle text-gray-400">{{ reserva.barberoNombre || 'N/A' }}</span></td>
-                    <td class="whitespace-nowrap text-center"><span class="inline-block align-middle text-gray-500">{{ reserva.servicio || 'N/A' }}</span></td>
-                    <td class="whitespace-nowrap text-center">
-                        <div class="flex flex-col items-center">
-                            <span class="inline-block align-middle text-white">{{ reserva.fecha | dateHelper  }}</span>
-                        </div>
-                    </td>
+                <ng-template #body let-reserva>
+                    <tr class="text-sm border-t border-[#C9A84C]/15 hover:bg-white/5 transition-colors">
+                        <td class="px-4 py-4 whitespace-nowrap">
+                            <div class="flex flex-col">
+                                <span class="text-white font-semibold">{{ reserva.servicio || 'N/A' }}</span>
+                                <span class="text-[11px] text-gray-400 flex items-center gap-1">
+                                    <i class="pi pi-map-marker text-[10px]"></i>
+                                    {{ reserva.tipoReserva === 'RESERVA_VIRTUAL' ? 'Virtual' : 'Presencial' }}
+                                </span>
+                            </div>
+                        </td>
 
-                    <td class="whitespace-nowrap text-center">
-                        <app-status-badge type="text" [value]="reserva.tipoReserva === 'RESERVA_VIRTUAL' ? 'Virtual' : 'Gratis'" customClass="badge-text estado-info" />
-                    </td>
+                        <td class="px-4 py-4 whitespace-nowrap">
+                            <div class="flex items-center gap-3">
+                                <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#C9A84C]/15 text-[#C9A84C] text-xs font-semibold">
+                                    {{ getIniciales(reserva.barberoNombre || 'Barbero') }}
+                                </span>
+                                <span class="text-white">{{ reserva.barberoNombre || 'N/A' }}</span>
+                            </div>
+                        </td>
 
-                    <td class="whitespace-nowrap text-center">
-                        <div class="flex flex-col items-center gap-1">
-                            <app-status-badge type="text" [value]="reserva.estadoReserva || 'Sin estado'" [customClass]="'badge-text ' + getEstadoClass(reserva.estadoReserva)" />
-                            <span *ngIf="reserva.recordatorioEnviado" class="flex items-center gap-1 text-[10px] text-emerald-600"><i class="pi pi-whatsapp"></i> Avisado</span>
-                        </div>
-                    </td>
+                        <td class="px-4 py-4 whitespace-nowrap text-gray-300">
+                            {{ reserva.fecha | date:'dd/MM/yyyy' }} {{ reserva.horaInicio | date:'HH:mm' }}
+                        </td>
 
-                    <td class="whitespace-nowrap text-center">
-                        <div class="flex flex-row justify-center">
-                            <p-button  *ngIf="reserva.estadoReserva !== 'FINALIZADA' && reserva.estadoReserva !== 'CANCELADA'"  icon="pi pi-wallet" class="boton-agregar" pTooltip="Cobrar y generar venta"  tooltipPosition="top" (onClick)="cobrarReserva(reserva)" />
-                            <p-button icon="pi pi-eye" class="boton-ver-tabla" pTooltip="Ver detalle" tooltipPosition="top" (onClick)="verDetalle(reserva)" />
-                            <!-- <p-button icon="pi pi-pencil" class="boton-editar-tabla" pTooltip="Editar" tooltipPosition="top" (onClick)="editarReserva(reserva)" /> -->
-                        </div>
-                    </td>
-                </tr>
-            </ng-template>
+                        <td class="px-4 py-4 whitespace-nowrap font-bold text-[#C9A84C]">S/ {{ reserva.total | number:'1.2-2' }}</td>
 
-            <ng-template #emptymessage>
-                <tr>
-                    <td colspan="7" class="text-center py-16">
-                        <div class="flex flex-col items-center gap-3 text-neutral-primary-dark">
-                            <i class="pi pi-calendar-times text-4xl"></i>
-                            <p class="text-sm font-medium">No hay reservas que coincidan</p>
-                            <p-button label="Limpiar filtros" [text]="true" size="small" (onClick)="onLimpiar()" />
-                        </div>
-                    </td>
-                </tr>
-            </ng-template>
+                        <td class="px-4 py-4 whitespace-nowrap">
+                            <app-status-badge type="text" [value]="reserva.estadoReserva || 'Sin estado'" [customClass]="getEstadoClase(reserva.estadoReserva)" />
+                        </td>
 
-        </p-table>
+                        <td class="px-4 py-4 text-center">
+                            @if (getAccionesDisponibles(reserva.estadoReserva).length) {
+                                <button pButton type="button" (click)="abrirAcciones(reserva)" class="p-button-sm boton-primary">
+                                    Acciones
+                                </button>
+                            } @else {
+                                <span class="text-gray-500">—</span>
+                            }
+                        </td>
+                    </tr>
+                </ng-template>
+
+                <ng-template #emptymessage>
+                    <tr>
+                        <td colspan="6" class="px-4 py-10 text-center text-gray-500">
+                            <i class="pi pi-inbox text-3xl block mb-2 opacity-40"></i>
+                            No hay reservas que coincidan
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
     </div>
 </div>
+
+<p-dialog [(visible)]="showAcciones" [modal]="true" [dismissableMask]="true" [closable]="true" [draggable]="false"
+    [style]="{ width: '100%', maxWidth: '28rem' }" header="Cambiar estado de la cita">
+    <div class="flex flex-col gap-4 py-2">
+        <div class="rounded-xl border border-[#C9A84C]/20 bg-[#0f0f0f] p-3">
+            <p class="text-[11px] uppercase tracking-widest text-[#C9A84C] mb-1">Cliente</p>
+            <p class="text-base font-semibold text-white">{{ reservaAccion?.clienteNombre || 'Cliente' }}</p>
+        </div>
+
+        <div class="rounded-xl border border-[#C9A84C]/20 bg-[#0f0f0f] p-3">
+            <p class="text-[11px] uppercase tracking-widest text-[#C9A84C] mb-1">Servicio</p>
+            <p class="text-base font-semibold text-white">{{ reservaAccion?.servicio || 'Servicio' }}</p>
+        </div>
+
+        <div class="flex flex-col gap-2">
+            @for (accion of reservaAccion ? getAccionesDisponibles(reservaAccion.estadoReserva) : []; track accion) {
+                <button pButton type="button" [label]="accion === 'CONFIRMADA' ? 'Confirmar' : accion === 'EN_PROCESO' ? 'Iniciar' : accion === 'FINALIZADA' ? 'Finalizar' : 'Marcar no asistió'"
+                    class="p-button-sm boton-primary" (click)="confirmarCambioEstado(accion)"></button>
+            }
+        </div>
+    </div>
+</p-dialog>
 
 <p-dialog [(visible)]="showDetalle" [modal]="true" [closable]="true" [draggable]="false" header="Detalle de Reserva" styleClass="w-full max-w-md">
     <div *ngIf="reservaSeleccionada" class="flex flex-col gap-4 py-2">
@@ -94,7 +122,6 @@
         </div>
 
         <div class="grid grid-cols-2 gap-4">
-
             <div class="rounded-xl border border-purple-500/20 bg-neutral-primary-lighter p-4">
                 <div class="mb-2 flex items-center gap-2">
                     <i class="pi pi-user text-purple-400"></i>
@@ -124,7 +151,7 @@
                     <i class="pi pi-clock text-orange-400"></i>
                     <span class="text-[11px] font-semibold uppercase tracking-widest text-orange-400">Hora</span>
                 </div>
-                <p class="text-base font-semibold text-white">{{ reservaSeleccionada.horaInicio | dateHelper  }} - {{ reservaSeleccionada.horaFin | dateHelper  }}</p>
+                <p class="text-base font-semibold text-white">{{ reservaSeleccionada.horaInicio | date:'HH:mm' }} - {{ reservaSeleccionada.horaFin | date:'HH:mm' }}</p>
             </div>
 
             <div class="rounded-xl border border-violet-500/20 bg-neutral-primary-lighter p-4">
@@ -132,9 +159,7 @@
                     <i class="pi pi-tag text-violet-400"></i>
                     <span class="text-[11px] font-semibold uppercase tracking-widest text-violet-400">Tipo</span>
                 </div>
-                <p class="text-base font-semibold text-white">
-                    {{ reservaSeleccionada.tipoReserva === 'RESERVA_VIRTUAL' ? 'Virtual' : 'Gratis' }}
-                </p>
+                <p class="text-base font-semibold text-white">{{ reservaSeleccionada.tipoReserva === 'RESERVA_VIRTUAL' ? 'Virtual' : 'Gratis' }}</p>
             </div>
 
             <div class="rounded-xl border border-yellow-500/30 bg-gradient-to-r from-yellow-500/10 to-transparent p-4">
@@ -144,21 +169,18 @@
                 </div>
                 <p class="text-2xl font-extrabold text-yellow-300">S/. {{ reservaSeleccionada.total }}</p>
             </div>
-
         </div>
 
-        <!-- Estado -->
         <div class="flex items-center justify-between rounded-xl border border-emerald-500/20 bg-neutral-primary-lighter p-4">
             <div>
                 <p class="text-[11px] font-semibold uppercase tracking-widest text-emerald-400">Estado</p>
                 <p class="text-xs text-neutral-400">Estado actual de la reserva</p>
             </div>
 
-            <app-status-badge type="text" [value]="reservaSeleccionada.estadoReserva || 'Sin estado'" [customClass]="'badge-text ' + getEstadoClass(reservaSeleccionada.estadoReserva)"/>
+            <app-status-badge type="text" [value]="reservaSeleccionada.estadoReserva || 'Sin estado'" [customClass]="'badge-text ' + getEstadoClass(reservaSeleccionada.estadoReserva)" />
         </div>
     </div>
 </p-dialog>
-
 
 <p-dialog [(visible)]="mostrarFormulario" [modal]="true" [dismissableMask]="true" [closable]="true" [style]="{ width: '100vw', maxWidth: '50rem' }" (onHide)="cerrarFormulario()">
     <ng-template pTemplate="header">

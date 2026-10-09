@@ -1,0 +1,60 @@
+.ventas-barbero {
+  color: #f3f4f6;
+}
+
+.ventas-barbero .p-datepicker,
+.ventas-barbero .p-datepicker-panel,
+.ventas-barbero .p-datepicker .p-datepicker-header,
+.ventas-barbero .p-datepicker .p-datepicker-calendar,
+.ventas-barbero .p-datepicker .p-datepicker-buttonbar,
+.ventas-barbero .p-datepicker .p-datepicker-footer {
+  background: #121212 !important;
+  border-color: rgba(201, 168, 76, 0.35) !important;
+  color: #f5f5f4 !important;
+}
+
+.ventas-barbero .p-datepicker .p-datepicker-header,
+.ventas-barbero .p-datepicker .p-datepicker-calendar th,
+.ventas-barbero .p-datepicker .p-datepicker-calendar td,
+.ventas-barbero .p-datepicker .p-datepicker-calendar td > span {
+  color: #f5f5f4 !important;
+}
+
+.ventas-barbero .p-datepicker .p-highlight,
+.ventas-barbero .p-datepicker .p-highlight > span,
+.ventas-barbero .p-datepicker .p-datepicker-calendar .p-datepicker-today > span {
+  background: rgba(201, 168, 76, 0.16) !important;
+  border-color: #c9a84c !important;
+  color: #f5d77d !important;
+}
+
+.ventas-barbero .p-datepicker .p-datepicker-header .p-datepicker-title,
+.ventas-barbero .p-datepicker .p-datepicker-header .p-datepicker-next,
+.ventas-barbero .p-datepicker .p-datepicker-header .p-datepicker-prev,
+.ventas-barbero .p-datepicker .p-datepicker-header button {
+  color: #f5f5f4 !important;
+}
+
+.ventas-barbero .p-inputtext,
+.ventas-barbero .p-select-label,
+.ventas-barbero .p-multiselect-label,
+.ventas-barbero .p-datepicker-input,
+.ventas-barbero .p-select-overlay,
+.ventas-barbero .p-select .p-select-trigger,
+.ventas-barbero .p-multiselect .p-multiselect-trigger {
+  background: #121212 !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #fff !important;
+}
+
+.ventas-barbero .p-select-item,
+.ventas-barbero .p-datepicker-calendar td span,
+.ventas-barbero .p-datepicker-calendar th {
+  color: #f5f5f4 !important;
+}
+
+.ventas-barbero .p-select-item:hover,
+.ventas-barbero .p-select-item.p-highlight {
+  background: rgba(201, 168, 76, 0.15) !important;
+  color: #f5d77d !important;
+}

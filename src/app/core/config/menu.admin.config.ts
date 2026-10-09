@@ -48,12 +48,6 @@ export const ADMIN_MENU = [
         routerLink: ["operaciones/ventas"],
         permission: "VENTA_READ_ALL"
       },
-
-      {
-        label: "Pagos",
-        icon: "pi pi-credit-card",
-        routerLink: ["operaciones/pagos"],
-      },
       {
         label: "Reclamos",
         icon: "pi pi-exclamation-circle",

@@ -20,6 +20,7 @@ export class DatosBasicosPerfilUsuario implements OnInit {
   @Input() apellido = '—';
   @Input() telefono = '—';
   @Input() email    = '—';
+  @Input() editandoAlCargar = false;
 
   private personaService      = inject(PersonaService);
   private notificationService = inject(NotificationService);
@@ -35,6 +36,7 @@ export class DatosBasicosPerfilUsuario implements OnInit {
   };
 
   ngOnInit(): void {
+    this.editando = this.editandoAlCargar;
     this.resetForm();
   }
 
