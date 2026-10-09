@@ -29,7 +29,7 @@ export const CLIENTE_MENU = [
     },
 
     {
-        label: "Fidelización",
+        label: "Recompensas",
         icon: "pi pi-star",
         routerLink: ["fidelizacion"],
         permission: "FIDELIZACION_READ"
