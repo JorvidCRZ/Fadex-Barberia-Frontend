@@ -10,7 +10,6 @@ import { StatsComponent } from '../../../../../shared/components/stats/stats.com
 import { StatusBadgeComponent } from '../../../../../shared/components/status-badge/status-badge.component';
 import { DateFormatPipe } from '@/app/shared/pipes/dat.pipe';
 
-
 type TabRecompensa = 'TODAS' | 'PENDIENTES' | 'USADAS';
 
 @Component({
@@ -100,7 +99,7 @@ export class MisPremiosComponent implements OnInit {
   iconoPremio(itemNombre: string): string {
     const nombre = itemNombre.toLowerCase();
     if (nombre.includes('descuento') || nombre.includes('%')) return 'pi pi-tag';
-    if (nombre.includes('corte')) return 'pi pi-scissors';
+    if (nombre.includes('corte')) return 'pi pi-ticket';
     if (nombre.includes('producto')) return 'pi pi-shopping-bag';
     if (nombre.includes('cupón') || nombre.includes('cupon')) return 'pi pi-gift';
     if (nombre.includes('servicio')) return 'pi pi-verified';

@@ -58,7 +58,7 @@ export class PillTabsComponent<T extends string = string> {
 
   get contenedor(): string {
     return this.variant === 'pill'
-      ? 'inline-flex rounded-full border border-ui-border bg-ui-card p-1'
+      ? 'inline-flex rounded-full border border-white/10 bg-ui-card p-1'
       : 'inline-flex w-fit gap-1 rounded-lg bg-black/20 p-1';
   }
 

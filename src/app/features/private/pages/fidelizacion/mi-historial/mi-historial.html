@@ -4,7 +4,7 @@
     <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
 
         <!-- ===================== MIS GIROS ===================== -->
-        <section class="overflow-hidden rounded-2xl border border-ui-borderSoft bg-ui-card">
+        <section class="overflow-hidden rounded-2xl border border-white/[0.06] bg-ui-card">
             <div class="flex items-center justify-between px-5 pb-0 pt-4">
                 <span class="flex items-center gap-2 font-semibold text-text-primary">
                     <i class="pi pi-history text-brand-gold"></i> Mis giros
@@ -28,7 +28,7 @@
                 } @else {
                 <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     @for (giro of giros(); track giro.numeroGiro) {
-                    <div class="rounded-xl border border-ui-borderSoft bg-ui-surface p-4 transition-colors hover:border-brand-gold">
+                    <div class="rounded-xl border border-white/[0.06] bg-ui-surface p-4 transition-colors hover:border-brand-gold">
                         <div class="flex items-start justify-between gap-2">
                             <div>
                                 <div class="text-[11px] uppercase tracking-wide text-text-muted">{{ giro.ruletaNombre }}</div>
@@ -50,7 +50,7 @@
         </section>
 
         <!-- ===================== MOVIMIENTOS ===================== -->
-        <section class="overflow-hidden rounded-2xl border border-ui-borderSoft bg-ui-card">
+        <section class="overflow-hidden rounded-2xl border border-white/[0.06] bg-ui-card">
             <div class="flex items-center justify-between px-5 pt-4">
                 <span class="flex items-center gap-2 font-semibold text-text-primary">
                     <i class="pi pi-clock text-brand-gold"></i>

@@ -13,7 +13,7 @@ import { Component, Input, model } from '@angular/core';
   selector: 'app-collapsible-section',
   standalone: true,
   template: `
-    <section class="overflow-hidden rounded-2xl border border-ui-borderSoft bg-ui-card">
+    <section class="overflow-hidden rounded-2xl border border-white/[0.06] bg-ui-card">
       <button
         type="button"
         class="flex w-full cursor-pointer items-center justify-between px-5 py-4 text-sm font-semibold text-text-primary"

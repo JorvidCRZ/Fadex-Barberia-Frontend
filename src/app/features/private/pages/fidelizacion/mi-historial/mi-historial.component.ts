@@ -8,6 +8,7 @@ import { EmptyStateComponent } from '../../../../../shared/components/empty-stat
 import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
 import { StatusBadgeComponent } from '../../../../../shared/components/status-badge/status-badge.component';
 import { DateFormatPipe } from '@/app/shared/pipes/dat.pipe';
+
 /** Color del marcador del timeline según el tono del origen */
 const MARCADOR_POR_TONO: Partial<Record<BadgeTone, string>> = {
   warning: 'text-brand-gold',

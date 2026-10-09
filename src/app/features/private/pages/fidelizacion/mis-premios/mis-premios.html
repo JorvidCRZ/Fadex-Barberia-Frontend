@@ -21,7 +21,7 @@
 
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         @for (recompensa of recompensasFiltradas(); track recompensa.id) {
-        <article class="group relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-ui-border bg-ui-card p-4 transition-all duration-300 hover:-translate-y-1 hover:border-brand-gold/40 hover:shadow-lg hover:shadow-black/30"
+        <article class="group relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-white/10 bg-ui-card p-4 transition-all duration-300 hover:-translate-y-1 hover:border-brand-gold/40 hover:shadow-lg hover:shadow-black/30"
             [class.opacity-60]="recompensa.estado === EstadoRecompensa.VENCIDO || recompensa.estado === EstadoRecompensa.ANULADO">
 
             <!-- Barra dorada al hover -->
@@ -41,7 +41,7 @@
                 <span class="font-semibold text-text-secondary">{{ recompensa.codigoCanje }}</span>
             </p>
 
-            <div class="mt-1 flex items-center justify-between border-t border-ui-borderSoft pt-3">
+            <div class="mt-1 flex items-center justify-between border-t border-white/[0.06] pt-3">
                 @if (fechaInfo(recompensa); as info) {
                 <span class="flex items-center gap-1.5 text-xs text-text-muted">
                     <i class="pi pi-calendar text-[10px]"></i>

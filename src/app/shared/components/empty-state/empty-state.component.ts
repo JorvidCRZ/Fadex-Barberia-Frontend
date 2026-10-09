@@ -54,7 +54,7 @@ export class EmptyStateComponent {
 
   get contenedor(): string {
     if (!this.boxed) return 'py-8';
-    const borde = this.tipo === 'error' ? 'border-brand-red/40' : 'border-ui-border';
+    const borde = this.tipo === 'error' ? 'border-brand-red/40' : 'border-white/10';
     return `rounded-2xl border border-dashed bg-ui-card px-5 py-16 ${borde}`;
   }
 }

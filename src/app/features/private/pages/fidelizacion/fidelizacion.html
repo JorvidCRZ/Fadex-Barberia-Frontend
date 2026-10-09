@@ -1,9 +1,9 @@
 <div class="mt-5 flex flex-col gap-6">
     <app-page-header titulo="Fidelización" icono="star" subtitulo="Tus tarjetas, giros y premios" />
 
-    <div class="overflow-hidden rounded-2xl border border-ui-borderSoft bg-ui-card shadow-lg shadow-black/20">
+    <div class="overflow-hidden rounded-2xl border border-white/[0.06] bg-ui-card shadow-lg shadow-black/20">
         <p-tabs [(value)]="activeTab" (valueChange)="onTabChange($event)">
-            <p-tablist class="flex flex-wrap gap-3 border-b border-ui-borderSoft bg-ui-surface px-3 py-3 md:px-4">
+            <p-tablist class="flex flex-wrap gap-3 border-b border-white/[0.06] bg-ui-surface px-3 py-3 md:px-4">
                 @for (tab of tabs; track tab.value) {
                 <p-tab [value]="tab.value" class="flex items-center gap-2 text-inherit">
                     <div class="flex items-center gap-2 rounded-xl px-4 py-3 transition-colors"
