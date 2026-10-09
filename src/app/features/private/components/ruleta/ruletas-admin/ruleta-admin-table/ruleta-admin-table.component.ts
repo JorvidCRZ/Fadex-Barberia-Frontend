@@ -15,7 +15,7 @@ import { RuletaFiltro, RuletaResponse } from '@/app/core/models/ruleta/ruleta.mo
   imports: [ButtonModule, CommonModule, TableModule, ConfirmPopoverComponent, TooltipModule, ToggleSwitchModule, FormsModule, StatusBadgeComponent],
 
   templateUrl: './ruleta-admin-table.html',
-  styleUrl: './ruleta-admin-table.css',
+  styleUrl: './ruleta-admin-table.scss',
 })
 export class RuletaAdminTableComponent {
   @Output() lazyLoad = new EventEmitter<TableLazyLoadEvent>();

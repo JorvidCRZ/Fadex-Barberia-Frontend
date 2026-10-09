@@ -26,7 +26,7 @@ import { map } from 'rxjs/operators';
   imports: [ConfiguracionFormComponent, ConfiguracionTableComponent, DialogModule, ButtonModule,
     CommonModule, FormsModule, SearchBarComponent, DialogHeaderComponent, FiltrosComponent],
   templateUrl: './ruleta-configuraciones.html',
-  styleUrl: './ruleta-configuraciones.css',
+  styleUrl: './ruleta-configuraciones.scss',
 })
 export class RuletaConfiguracionesComponent implements OnInit {
 

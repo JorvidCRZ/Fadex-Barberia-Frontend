@@ -23,7 +23,6 @@ import { SolesPipe } from '@/app/shared/pipes/moneda.pipe';
     InputIconModule, IconFieldModule, ConfirmPopoverComponent, StatusBadgeComponent, SafeImageUrlPipe, SolesPipe
   ],
   templateUrl: './servicio-table.html',
-  styleUrl: './servicio-table.css',
 })
 export class ServicioTableComponent {
   @Output() lazyLoad = new EventEmitter<TableLazyLoadEvent>();

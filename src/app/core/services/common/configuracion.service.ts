@@ -2,8 +2,27 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { environment } from '../../../../environments/environment';
 import { ApiResponse } from '../../models/common/index.model';
-import { ConfiguracionPublica } from '../../models/common/empresa.model';
+import { ConfiguracionEmpresaLocal, ConfiguracionPublica } from '../../models/common/empresa.model';
 import { REDES_SOCIALES, WHATSAPP_TEMPORAL_URL } from '../../config/redes.config';
+
+export const LOCAL_CONFIGURACION_EMPRESA_KEY = 'fadex.admin.company-settings';
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null;
+}
+
+function isConfiguracionEmpresaLocal(value: unknown): value is ConfiguracionEmpresaLocal {
+    if (!isRecord(value)) return false;
+    const settings = value;
+    return typeof settings['businessName'] === 'string'
+        && typeof settings['email'] === 'string'
+        && typeof settings['phone'] === 'string'
+        && typeof settings['address'] === 'string'
+        && (typeof settings['logoDataUrl'] === 'string' || settings['logoDataUrl'] === null)
+        && typeof settings['termsAndConditions'] === 'string'
+        && typeof settings['privacyPolicy'] === 'string'
+        && typeof settings['returnsPolicy'] === 'string';
+}
 
 @Injectable({
     providedIn: 'root',
@@ -18,6 +37,7 @@ export class ConfiguracionService {
     readonly monedaBase = computed(() => this._config()?.monedaBase ?? 'PEN');
     readonly tipoCambioDolar = computed(() => this._config()?.tipoCambioDolar ?? 1);
     readonly nombre = computed(() => this._config()?.nombre ?? '');
+    readonly direccion = computed(() => this._config()?.direccion ?? '');
     readonly logoUrl = computed(() => this._config()?.logoUrl ?? null);
     readonly telefono = computed(() => this._config()?.telefono ?? '');
     readonly correo = computed(() => this._config()?.correo ?? '');
@@ -57,6 +77,23 @@ export class ConfiguracionService {
     cargarConfiguracion() {
         if (this._config()) return;
 
+        try {
+            const localSettings = localStorage.getItem(LOCAL_CONFIGURACION_EMPRESA_KEY);
+            if (localSettings) {
+                const parsedSettings: unknown = JSON.parse(localSettings);
+                if (!isConfiguracionEmpresaLocal(parsedSettings)) {
+                    throw new Error('La configuración local de empresa tiene un formato no válido.');
+                }
+
+                this.aplicarConfiguracionLocal(parsedSettings);
+                const config = this._config();
+                if (config) this.guardarValoresBase(config);
+                return;
+            }
+        } catch (error: unknown) {
+            console.error('No se pudo cargar la configuración local de empresa.', error);
+        }
+
         if (environment.useMockData) {
             this._config.set(this.configuracionMock);
             this.guardarValoresBase(this.configuracionMock);
@@ -79,6 +116,21 @@ export class ConfiguracionService {
     recargarConfiguracion() {
         this._config.set(null);
         this.cargarConfiguracion();
+    }
+
+    aplicarConfiguracionLocal(settings: ConfiguracionEmpresaLocal): void {
+        const config = this._config() ?? this.configuracionMock;
+        this._config.set({
+            ...config,
+            nombre: settings.businessName,
+            direccion: settings.address,
+            correo: settings.email,
+            telefono: settings.phone,
+            logoUrl: settings.logoDataUrl,
+            terminosCondiciones: settings.termsAndConditions || null,
+            politicaPrivacidad: settings.privacyPolicy || null,
+            politicaDevoluciones: settings.returnsPolicy || null,
+        });
     }
 
     obtenerConfiguracionPublica() {

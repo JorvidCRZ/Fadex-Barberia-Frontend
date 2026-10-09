@@ -1,72 +1,81 @@
 <main class="bg-ui-black px-4 py-12 text-text-primary sm:py-16">
   <div class="mx-auto max-w-4xl">
     <header class="mb-10 text-center">
-      <p class="mb-3 text-sm font-semibold uppercase tracking-widest text-brand-gold">Información legal</p>
+      <p class="mb-3 text-sm font-semibold uppercase tracking-widest text-brand-gold">
+        Información legal
+      </p>
       <h1 class="text-3xl font-bold uppercase tracking-wide sm:text-4xl">Términos y condiciones</h1>
       <p class="mx-auto mt-4 max-w-2xl text-text-secondary">
-        Estas condiciones regulan el uso de la plataforma y la contratación de servicios de Fadex Barber.
+        Estas condiciones regulan el uso de la plataforma y la contratación de servicios de Fadex
+        Barber.
       </p>
     </header>
 
     <article class="form-base space-y-8 leading-relaxed">
+      @if (terminosCondiciones()) {
+      <p class="whitespace-pre-line">{{ terminosCondiciones() }}</p>
+      } @else {
       <section>
         <h2 class="mb-3 text-xl font-semibold text-brand-gold">1. Aceptación de los términos</h2>
         <p>
-          Al acceder o utilizar este sitio web, aceptas estos términos y condiciones. Si no estás de acuerdo con
-          alguna de sus disposiciones, debes abstenerte de utilizar la plataforma.
+          Al acceder o utilizar este sitio web, aceptas estos términos y condiciones. Si no estás
+          de acuerdo con alguna de sus disposiciones, debes abstenerte de utilizar la plataforma.
         </p>
       </section>
 
       <section>
         <h2 class="mb-3 text-xl font-semibold text-brand-gold">2. Uso de la plataforma</h2>
         <p>
-          La plataforma permite consultar nuestros servicios, realizar reservas y adquirir productos. Te comprometes
-          a proporcionar información verdadera, completa y actualizada, y a utilizar el sitio de forma legal y
-          responsable.
+          La plataforma permite consultar nuestros servicios, realizar reservas y adquirir
+          productos. Te comprometes a proporcionar información verdadera, completa y actualizada,
+          y a utilizar el sitio de forma legal y responsable.
         </p>
       </section>
 
       <section>
         <h2 class="mb-3 text-xl font-semibold text-brand-gold">3. Reservas y cancelaciones</h2>
         <p>
-          Las reservas están sujetas a disponibilidad y quedan confirmadas cuando recibes la notificación
-          correspondiente. Si necesitas cancelar o reprogramar una cita, hazlo con la mayor anticipación posible para
-          permitir que otro cliente utilice ese horario.
+          Las reservas están sujetas a disponibilidad y quedan confirmadas cuando recibes la
+          notificación correspondiente. Si necesitas cancelar o reprogramar una cita, hazlo con la
+          mayor anticipación posible para permitir que otro cliente utilice ese horario.
         </p>
       </section>
 
       <section>
         <h2 class="mb-3 text-xl font-semibold text-brand-gold">4. Productos y pagos</h2>
         <p>
-          Los precios y la disponibilidad pueden cambiar sin previo aviso, sin afectar las compras ya confirmadas.
-          Toda compra está sujeta a la validación del pago y a las condiciones de entrega informadas durante el
-          proceso.
+          Los precios y la disponibilidad pueden cambiar sin previo aviso, sin afectar las compras
+          ya confirmadas. Toda compra está sujeta a la validación del pago y a las condiciones de
+          entrega informadas durante el proceso.
         </p>
       </section>
 
       <section>
         <h2 class="mb-3 text-xl font-semibold text-brand-gold">5. Cuenta del usuario</h2>
         <p>
-          Eres responsable de mantener la confidencialidad de tus credenciales y de toda actividad realizada desde tu
-          cuenta. Si detectas un acceso no autorizado, debes informarnos inmediatamente.
+          Eres responsable de mantener la confidencialidad de tus credenciales y de toda actividad
+          realizada desde tu cuenta. Si detectas un acceso no autorizado, debes informarnos
+          inmediatamente.
         </p>
       </section>
 
       <section>
         <h2 class="mb-3 text-xl font-semibold text-brand-gold">6. Propiedad intelectual</h2>
         <p>
-          El contenido, la identidad visual, las marcas, los textos y los recursos de este sitio pertenecen a Fadex
-          Barber o se utilizan con autorización. No está permitido copiarlos, modificarlos o distribuirlos sin permiso.
+          El contenido, la identidad visual, las marcas, los textos y los recursos de este sitio
+          pertenecen a Fadex Barber o se utilizan con autorización. No está permitido copiarlos,
+          modificarlos o distribuirlos sin permiso.
         </p>
       </section>
 
       <section>
         <h2 class="mb-3 text-xl font-semibold text-brand-gold">7. Cambios y contacto</h2>
         <p>
-          Podemos actualizar estos términos cuando sea necesario. Publicaremos la versión vigente en esta página. Para
-          consultas, utiliza nuestros canales oficiales de atención.
+          Podemos actualizar estos términos cuando sea necesario. Publicaremos la versión vigente
+          en esta página. Para consultas, utiliza nuestros canales oficiales de atención.
         </p>
       </section>
+      }
 
       <footer class="border-t border-ui-border pt-6 text-sm text-text-muted">
         Última actualización: octubre de 2026.

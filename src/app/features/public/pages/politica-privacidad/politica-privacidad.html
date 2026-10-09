@@ -9,6 +9,9 @@
     </header>
 
     <article class="form-base space-y-8 leading-relaxed">
+      @if (politicaPrivacidad()) {
+      <p class="whitespace-pre-line">{{ politicaPrivacidad() }}</p>
+      } @else {
       <section>
         <h2 class="mb-3 text-xl font-semibold text-brand-gold">1. Responsable del tratamiento</h2>
         <p>
@@ -61,6 +64,7 @@
           nuestros canales oficiales.
         </p>
       </section>
+      }
 
       <footer class="border-t border-ui-border pt-6 text-sm text-text-muted">
         Última actualización: octubre de 2026.

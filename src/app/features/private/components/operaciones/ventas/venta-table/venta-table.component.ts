@@ -9,7 +9,7 @@ import { ConfirmPopoverComponent } from '@/app/shared/components/confirm-popover
   standalone: true,
   imports: [CommonModule, TableModule, ConfirmPopoverComponent],
   templateUrl: './venta-table.html',
-  styleUrls: ['./venta-table.css']
+  styleUrls: ['./venta-table.scss']
 })
 export class VentaTableComponent {
 

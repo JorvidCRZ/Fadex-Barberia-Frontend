@@ -12,7 +12,7 @@ import { RuletaGraficoComponent } from '@/app/shared/components/ruleta/ruleta-gr
     standalone: true,
     imports: [CommonModule, RuletaGraficoComponent],
     templateUrl: './ruleta-preview.html',
-    styleUrl: './ruleta-preview.css'
+    styleUrl: './ruleta-preview.scss'
 })
 export class RuletaPreviewComponent implements OnChanges {
     @Input({ required: true }) items: RuletaItemResponse[] = [];
