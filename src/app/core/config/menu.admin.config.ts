@@ -14,32 +14,8 @@ export const ADMIN_MENU = [
       {
         label: "Reservas",
         icon: "pi pi-calendar",
-        permission: "RESERVA_READ_ALL",
-        items: [
-
-          {
-            label: "Todas las Reservas",
-            icon: "pi pi-globe",
-            routerLink: ["operaciones/reservas"],
-            permission: "RESERVA_READ_ALL"
-          },
-
-          {
-            label: "Calendario",
-            icon: "pi pi-calendar",
-            routerLink: ["operaciones/reservas/calendario"],
-            permission: "RESERVA_READ_ALL"
-          },
-
-          {
-            label: "Nueva Reserva",
-            icon: "pi pi-plus",
-            routerLink: ["operaciones/reservas/nueva"],
-            permission: "RESERVA_CREATE"
-          }
-
-        ]
-
+        routerLink: ["operaciones/reservas"],
+        permission: "RESERVA_READ_ALL"
       },
 
       {
@@ -57,11 +33,7 @@ export const ADMIN_MENU = [
     ]
   },
 
-  {
-    label: "Sueldos",
-    icon: "pi pi-wallet",
-    routerLink: ["sueldos"],
-  },
+  
 
   {
     label: "Gestión",
@@ -87,6 +59,13 @@ export const ADMIN_MENU = [
         icon: "pi pi-users",
         routerLink: ["gestion/usuarios"],
         permission: "USUARIO_READ_ALL"
+      }
+
+      ,
+      {
+        label: "Sueldos",
+        icon: "pi pi-wallet",
+        routerLink: ["sueldos"],
       }
 
     ]

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, Input } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ToastModule } from 'primeng/toast';
 import { DialogModule } from 'primeng/dialog';
@@ -15,6 +15,8 @@ import { finalize } from 'rxjs';
   templateUrl: './reserva-calendar.html',
 })
 export class CalendarReservas implements OnInit {
+
+  @Input() showHeader = true;
 
   private reservaService = inject(ReservaService);
   private messageService = inject(MessageService);
@@ -36,6 +38,19 @@ export class CalendarReservas implements OnInit {
     '18:00', '18:30', '19:00', '19:30'
   ];
 
+  // Mock en memoria para mostrar en el calendario cuando no haya backend
+  // TODO: quitar mock cuando el backend esté listo
+  private readonly mockReservas: Reserva[] = [
+    { id: 1, reservaId: 1, clienteNombre: 'Diego Salazar', barberoNombre: 'Renzo Castillo', servicio: 'Fade clásico', fecha: new Date('2026-10-08'), horaInicio: new Date('2026-10-08T10:00:00'), horaFin: new Date('2026-10-08T10:30:00'), tipoReserva:  'RESERVA_PRESENCIAL_INSTANTANEO' as any, total: 35, estadoReserva: 'CONFIRMADA' as any },
+    { id: 2, reservaId: 2, clienteNombre: 'Mateo Huamán', barberoNombre: 'Álvaro Mendoza', servicio: 'Corte clásico', fecha: new Date('2026-10-08'), horaInicio: new Date('2026-10-08T11:30:00'), horaFin: new Date('2026-10-08T12:00:00'), tipoReserva: 'RESERVA_VIRTUAL' as any, total: 42, estadoReserva: 'PENDIENTE_PAGO' as any },
+    { id: 3, reservaId: 3, clienteNombre: 'Sebastián Flores', barberoNombre: 'José Luis Ramos', servicio: 'Perfilado de barba', fecha: new Date('2026-10-08'), horaInicio: new Date('2026-10-08T14:00:00'), horaFin: new Date('2026-10-08T14:30:00'), tipoReserva: 'RESERVA_VIRTUAL' as any, total: 30, estadoReserva: 'FINALIZADA' as any },
+    { id: 4, reservaId: 4, clienteNombre: 'Valeria Quispe', barberoNombre: 'Renzo Castillo', servicio: 'Corte premium', fecha: new Date('2026-10-09'), horaInicio: new Date('2026-10-09T09:30:00'), horaFin: new Date('2026-10-09T10:00:00'), tipoReserva: 'RESERVA_PRESENCIAL_INSTANTANEO' as any, total: 50, estadoReserva: 'CANCELADA' as any },
+    { id: 5, reservaId: 5, clienteNombre: 'Andrés Chávez', barberoNombre: 'Bruno Espinoza', servicio: 'Fade clásico', fecha: new Date('2026-10-09'), horaInicio: new Date('2026-10-09T16:00:00'), horaFin: new Date('2026-10-09T16:30:00'), tipoReserva: 'RESERVA_PRESENCIAL_INSTANTANEO' as any, total: 38, estadoReserva: 'CONFIRMADA' as any },
+    { id: 6, reservaId: 6, clienteNombre: 'Laura Rojas', barberoNombre: 'Álvaro Mendoza', servicio: 'Corte mujer', fecha: new Date('2026-10-08'), horaInicio: new Date('2026-10-08T15:00:00'), horaFin: new Date('2026-10-08T15:30:00'), tipoReserva: 'RESERVA_VIRTUAL' as any, total: 45, estadoReserva: 'CONFIRMADA' as any },
+    { id: 7, reservaId: 7, clienteNombre: 'Marcos Peña', barberoNombre: 'José Luis Ramos', servicio: 'Recorte', fecha: new Date('2026-10-09'), horaInicio: new Date('2026-10-09T10:00:00'), horaFin: new Date('2026-10-09T10:30:00'), tipoReserva: 'RESERVA_PRESENCIAL_INSTANTANEO' as any, total: 28, estadoReserva: 'PENDIENTE_PAGO' as any },
+    { id: 8, reservaId: 8, clienteNombre: 'Camila Ortiz', barberoNombre: 'Bruno Espinoza', servicio: 'Barba', fecha: new Date('2026-10-08'), horaInicio: new Date('2026-10-08T12:00:00'), horaFin: new Date('2026-10-08T12:30:00'), tipoReserva: 'RESERVA_VIRTUAL' as any, total: 22, estadoReserva: 'FINALIZADA' as any },
+  ];
+
   ngOnInit(): void {
     this.cargarReservas();
   }
@@ -46,26 +61,37 @@ export class CalendarReservas implements OnInit {
       .pipe(finalize(() => this.isLoading = false))
       .subscribe({
         next: (response) => {
-          this.todasLasReservas = response?.data?.content ?? [];
-          this.filtrarPorFecha();
+            this.todasLasReservas = response?.data?.content ?? [];
+            this.filtrarPorFecha();
         },
         error: () => {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'No se pudieron cargar las reservas'
-          });
+            // Si falla el backend, usar mock en memoria para mostrar el calendario
+            this.todasLasReservas = this.mockReservas;
+            this.filtrarPorFecha();
+            this.messageService.add({
+              severity: 'warn',
+              summary: 'Datos de ejemplo',
+              detail: 'No se pudieron cargar las reservas desde el servidor. Mostrando datos de ejemplo.'
+            });
         }
       });
   }
 
   filtrarPorFecha(): void {
     const fechaStr = this.fechaActual.toISOString().split('T')[0];
-    this.reservasDelDia = this.todasLasReservas.filter(r => 
-      typeof r.fecha === 'string' && r.fecha === fechaStr
-    );
+    this.reservasDelDia = this.todasLasReservas.filter(r => {
+      if (!r || r.fecha == null) return false;
+      // fecha puede venir como string o Date; usar coerción segura a string
+      const fechaVal = typeof (r as any).fecha === 'string'
+        ? (r as any).fecha
+        : (r.fecha instanceof Date ? (r.fecha as Date).toISOString() : String((r as any).fecha));
+      return String(fechaVal).split('T')[0] === fechaStr;
+    });
     // Extraer barberos únicos del día
     this.barberos = [...new Set(this.reservasDelDia.map(r => r.barberoNombre))];
+    // Asegurar los 4 barberos del admin aunque no tengan reservas
+    const adminBarberos = ['Renzo Castillo', 'Álvaro Mendoza', 'José Luis Ramos', 'Bruno Espinoza'];
+    for (const b of adminBarberos) if (!this.barberos.includes(b)) this.barberos.push(b);
   }
 
   cambiarDia(dias: number): void {
@@ -87,10 +113,22 @@ export class CalendarReservas implements OnInit {
 
   // Busca reserva para un barbero en una hora específica
   getReserva(barbero: string, hora: string): Reserva | null {
-    return this.reservasDelDia.find(r =>
-      r.barberoNombre === barbero &&
-        String(r.horaInicio).substring(0, 5) === hora
-    ) ?? null;
+    return this.reservasDelDia.find(r => {
+      if (!r || !r.horaInicio) return false;
+      const hi = r.horaInicio instanceof Date ? r.horaInicio : new Date(r.horaInicio as any);
+      const hh = String(hi.getHours()).padStart(2, '0');
+      const mm = String(hi.getMinutes()).padStart(2, '0');
+      return r.barberoNombre === barbero && `${hh}:${mm}` === hora;
+    }) ?? null;
+  }
+
+  // Formatea un Date o string a 'HH:mm'
+  formatTime(value: Date | string | null): string {
+    if (!value) return '';
+    const d = value instanceof Date ? value : new Date(value as any);
+    const hh = String(d.getHours()).padStart(2, '0');
+    const mm = String(d.getMinutes()).padStart(2, '0');
+    return `${hh}:${mm}`;
   }
 
   getColorEstado(estado: string | null): string {

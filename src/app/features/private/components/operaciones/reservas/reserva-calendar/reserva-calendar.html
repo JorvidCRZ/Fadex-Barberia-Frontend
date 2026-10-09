@@ -3,7 +3,7 @@
 <div class="min-h-screen bg-[#0c0c0c] p-6">
 
   <!-- Header -->
-  <div class="max-w-7xl mx-auto mb-6">
+  <div *ngIf="showHeader" class="max-w-7xl mx-auto mb-6">
     <div class="flex items-center justify-between flex-wrap gap-4">
       <div class="flex items-center gap-3">
         <i class="pi pi-calendar text-2xl text-[#C9A84C]"></i>
@@ -46,16 +46,8 @@
     <i class="pi pi-spin pi-spinner text-[#C9A84C] text-3xl"></i>
   </div>
 
-  <!-- Sin reservas -->
-  <div *ngIf="!isLoading && reservasDelDia.length === 0"
-    class="max-w-7xl mx-auto flex flex-col items-center justify-center py-20 text-center">
-    <i class="pi pi-calendar-times text-5xl text-[#333333] mb-4"></i>
-    <p class="text-[#888888] text-lg font-semibold">Sin reservas para este día</p>
-    <p class="text-[#555555] text-sm">No hay reservas programadas para {{ fechaActual | date:'d \'de\' MMMM' : '' : 'es' }}</p>
-  </div>
-
-  <!-- Grilla calendario -->
-  <div *ngIf="!isLoading && reservasDelDia.length > 0"
+  <!-- Grilla calendario (siempre visible cuando no está cargando) -->
+  <div *ngIf="!isLoading"
     class="max-w-7xl mx-auto bg-[#121212] border border-[#333333] rounded-xl overflow-hidden">
 
     <!-- Tabla con scroll horizontal -->
@@ -91,14 +83,14 @@
 
               <ng-container *ngIf="getReserva(barbero, hora) as reserva">
                 <div
-                  class="rounded-md px-2 py-1.5 h-11 flex flex-col justify-center cursor-pointer transition-all hover:brightness-110"
+                  class="rounded-md px-3 py-2 h-12 flex flex-col justify-center cursor-pointer transition-all hover:brightness-110 border border-[#C9A84C]/20 bg-[#181716]/40"
                   [ngClass]="getColorEstado(reserva.estadoReserva)"
                   (click)="verDetalle(reserva)">
-                  <span class="text-white text-xs font-semibold truncate leading-tight">
-                    {{ reserva.servicio }}
-                  </span>
-                  <span class="text-white/70 text-[10px] truncate leading-tight">
+                  <span class="text-[#C9A84C] text-sm font-semibold truncate leading-tight">
                     {{ reserva.clienteNombre }}
+                  </span>
+                  <span class="text-[#BDBDBD] text-xs truncate leading-tight">
+                    {{ reserva.servicio }}
                   </span>
                 </div>
               </ng-container>
@@ -142,6 +134,8 @@
   [closable]="true"
   [draggable]="false"
   header="Detalle de Reserva"
+  appendTo="body"
+  [baseZIndex]="10000"
   styleClass="w-full max-w-sm">
 
   <div *ngIf="reservaSeleccionada" class="flex flex-col gap-3 py-2 text-sm text-white">
@@ -159,7 +153,7 @@
     </div>
     <div class="flex justify-between border-b border-[#333333] pb-2">
       <span class="text-[#888888]">Hora</span>
-      <span class="font-semibold">{{ reservaSeleccionada.horaInicio }} - {{ reservaSeleccionada.horaFin }}</span>
+      <span class="font-semibold">{{ formatTime(reservaSeleccionada.horaInicio) }} - {{ formatTime(reservaSeleccionada.horaFin) }}</span>
     </div>
     <div class="flex justify-between border-b border-[#333333] pb-2">
       <span class="text-[#888888]">Total</span>
