@@ -1,20 +1,19 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
-import { MiRuletaComponent } from '../mi-ruleta/mi-ruleta.component';
-import { RecompensaObtenida } from '../../../../../core/models/ruleta/recompensa.model';
-import { FidelizacionTarjetaResponse } from '../../../../../core/models/fidelizacion/tarjeta.model';
+import { Component, OnInit } from '@angular/core';
 import { FIDELIZACION_TARJETAS_MOCK } from '../../../../../core/config/fidelizacion-mock.config';
+import { FidelizacionTarjetaResponse } from '../../../../../core/models/fidelizacion/tarjeta.model';
+import { ButtonComponent } from '../../../../../shared/components/button/button.component';
+import { EmptyStateComponent } from '../../../../../shared/components/empty-state/empty-state.component';
+import { ModalComponent } from '../../../../../shared/components/modal/modal.component';
 import { TarjetaGraficoComponent } from '../../../../../shared/components/tarjeta/tarjeta-grafico.component';
-
+import { MiRuletaComponent } from '../mi-ruleta/mi-ruleta.component';
 
 @Component({
   selector: 'app-mis-tarjetas',
   standalone: true,
-  imports: [CommonModule, TarjetaGraficoComponent, MiRuletaComponent],
-  templateUrl: './mis-tarjetas.html'
+  imports: [TarjetaGraficoComponent, MiRuletaComponent, ModalComponent, EmptyStateComponent, ButtonComponent],
+  templateUrl: './mis-tarjetas.html',
 })
 export class MisTarjetasComponent implements OnInit {
-
   // Backend: private tarjetaService = inject(FidelizacionTarjetaService);
 
   misTarjetas: FidelizacionTarjetaResponse[] = [];
@@ -31,35 +30,20 @@ export class MisTarjetasComponent implements OnInit {
   cargarMisTarjetas(): void {
     this.cargando = true;
     this.error = null;
-    this.misTarjetas = FIDELIZACION_TARJETAS_MOCK.map(tarjeta => ({ ...tarjeta }));
+    this.misTarjetas = FIDELIZACION_TARJETAS_MOCK.map((tarjeta) => ({ ...tarjeta }));
     this.cargando = false;
 
     // Backend:
     // this.tarjetaService.obtenerMisTarjetas().subscribe({ ... });
   }
 
-  // Se dispara tanto desde (canjear) como desde (verRuleta) del app-tarjeta-grafico:
-  // ambos abren el mismo modal de ruleta, que internamente decide si es interactiva
-  // (girosDisponibles > 0) o solo de vista previa.
-  onCanjear(tarjeta: FidelizacionTarjetaResponse): void {
+  /** Lo usan (canjear) y (verRuleta) del app-tarjeta-grafico */
+  abrirRuleta(tarjeta: FidelizacionTarjetaResponse): void {
     this.tarjetaRuletaSeleccionada = tarjeta;
     this.showRuletaModal = true;
   }
 
-  verRuleta(tarjeta: FidelizacionTarjetaResponse): void {
-    this.tarjetaRuletaSeleccionada = tarjeta;
-    this.showRuletaModal = true;
-  }
-
-  cerrarModalRuleta(): void {
-    this.showRuletaModal = false;
+  alCerrarRuleta(): void {
     this.tarjetaRuletaSeleccionada = null;
-  }
-
-  onGiroRealizado(recompensa: RecompensaObtenida): void {
-    void recompensa;
-    if (this.tarjetaRuletaSeleccionada) {
-      this.tarjetaRuletaSeleccionada.girosDisponibles = 0;
-    }
   }
 }

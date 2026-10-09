@@ -11,12 +11,11 @@ export const ADMIN_MENU = [
     icon: 'pi pi-briefcase',
     items: [
       {
-        label: "Reservas",
-        icon: "pi pi-calendar",
-        routerLink: ["operaciones/reservas"],
-        permission: "RESERVA_READ_ALL"
+        label: 'Reservas',
+        icon: 'pi pi-calendar',
+        routerLink: ['operaciones/reservas'],
+        permission: 'RESERVA_READ_ALL',
       },
-
       {
         label: 'Ventas',
         icon: 'pi pi-shopping-cart',
@@ -29,6 +28,12 @@ export const ADMIN_MENU = [
         routerLink: ['operaciones/reclamos'],
       },
     ],
+  },
+
+  {
+    label: 'Sueldos',
+    icon: 'pi pi-wallet',
+    routerLink: ['sueldos'],
   },
 
   {
@@ -55,13 +60,12 @@ export const ADMIN_MENU = [
         routerLink: ["gestion/usuarios"],
         permission: "USUARIO_READ_ALL"
       },
-        {
-    label: "Sueldos",
-    icon: "pi pi-wallet",
-    routerLink: ["sueldos"],
-  },
-
-    ]
+      {
+        label: 'Sueldos',
+        icon: 'pi pi-wallet',
+        routerLink: ['sueldos'],
+      },
+    ],
   },
 
   {
@@ -150,7 +154,7 @@ export const ADMIN_MENU = [
     icon: 'pi pi-server',
     items: [
       {
-        label: 'Perfil de administrador',
+        label: 'Perfil',
         icon: ' pi pi-user',
         routerLink: ['sistema/perfil'],
         permission: 'CONFIGURACION_READ',

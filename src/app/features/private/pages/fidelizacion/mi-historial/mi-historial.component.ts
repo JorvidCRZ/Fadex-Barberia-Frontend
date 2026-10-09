@@ -1,22 +1,26 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-
-import { CardModule } from 'primeng/card';
-import { ButtonModule } from 'primeng/button';
-import { TagModule } from 'primeng/tag';
-import { SkeletonModule } from 'primeng/skeleton';
-import { TimelineModule } from 'primeng/timeline';
-import { MessageModule } from 'primeng/message';
-import { GiroResponse } from '../../../../../core/models/ruleta/giro.model';
-import { Movimiento, Origen } from '../../../../../core/models/fidelizacion/movimiento.model';
+import { Component, OnInit, signal } from '@angular/core';
+import { BadgeTone } from '../../../../../core/config/status-badge.config';
 import { FIDELIZACION_GIROS_MOCK, FIDELIZACION_MOVIMIENTOS_MOCK } from '../../../../../core/config/fidelizacion-mock.config';
+import { Movimiento, Origen } from '../../../../../core/models/fidelizacion/movimiento.model';
+import { GiroResponse } from '../../../../../core/models/ruleta/giro.model';
+import { ButtonComponent } from '../../../../../shared/components/button/button.component';
+import { EmptyStateComponent } from '../../../../../shared/components/empty-state/empty-state.component';
+import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
+import { StatusBadgeComponent } from '../../../../../shared/components/status-badge/status-badge.component';
+import { DateFormatPipe } from '@/app/shared/pipes/dat.pipe';
+
+/** Color del marcador del timeline según el tono del origen */
+const MARCADOR_POR_TONO: Partial<Record<BadgeTone, string>> = {
+  warning: 'text-brand-gold',
+  success: 'text-success',
+  info: 'text-info',
+};
 
 @Component({
   selector: 'app-mi-historial',
   standalone: true,
-  imports: [CommonModule, CardModule, ButtonModule, TagModule, SkeletonModule, TimelineModule, MessageModule],
+  imports: [PageHeaderComponent, StatusBadgeComponent, EmptyStateComponent, ButtonComponent, DateFormatPipe],
   templateUrl: './mi-historial.html',
-  styleUrl: './mi-historial.scss',
 })
 export class MiHistorialComponent implements OnInit {
   // Backend:
@@ -45,7 +49,6 @@ export class MiHistorialComponent implements OnInit {
   cargarGiros(): void {
     this.cargandoGiros.set(true);
     this.errorGiros.set(null);
-
     this.giros.set([...FIDELIZACION_GIROS_MOCK]);
     this.cargandoGiros.set(false);
 
@@ -58,10 +61,9 @@ export class MiHistorialComponent implements OnInit {
   }
 
   // ===== Movimientos =====
-  cargarMovimientosRecientes(limite: number = 5): void {
+  cargarMovimientosRecientes(limite = 5): void {
     this.cargandoMovimientos.set(true);
     this.errorMovimientos.set(null);
-
     this.movimientos.set(FIDELIZACION_MOVIMIENTOS_MOCK.slice(0, limite));
     this.cargandoMovimientos.set(false);
 
@@ -72,7 +74,6 @@ export class MiHistorialComponent implements OnInit {
   cargarMovimientosTodos(): void {
     this.cargandoMovimientos.set(true);
     this.errorMovimientos.set(null);
-
     this.movimientos.set([...FIDELIZACION_MOVIMIENTOS_MOCK]);
     this.cargandoMovimientos.set(false);
 
@@ -81,12 +82,13 @@ export class MiHistorialComponent implements OnInit {
   }
 
   toggleVistaMovimientos(): void {
-    this.vistaCompleta.set(!this.vistaCompleta());
-    this.vistaCompleta() ? this.cargarMovimientosTodos() : this.cargarMovimientosRecientes();
+    this.vistaCompleta.update((v) => !v);
+    this.recargarMovimientos();
   }
 
   recargarMovimientos(): void {
-    this.vistaCompleta() ? this.cargarMovimientosTodos() : this.cargarMovimientosRecientes();
+    if (this.vistaCompleta()) this.cargarMovimientosTodos();
+    else this.cargarMovimientosRecientes();
   }
 
   origenLabel(origen: Origen): string {
@@ -107,12 +109,16 @@ export class MiHistorialComponent implements OnInit {
     }
   }
 
-  origenSeverity(origen: Origen): 'warn' | 'success' | 'info' | 'secondary' {
+  origenTono(origen: Origen): BadgeTone {
     switch (origen) {
-      case Origen.RESERVA: return 'warn';
+      case Origen.RESERVA: return 'warning';
       case Origen.VENTA: return 'success';
       case Origen.AJUSTE: return 'info';
-      default: return 'secondary';
+      default: return 'neutral';
     }
+  }
+
+  marcadorClase(origen: Origen): string {
+    return MARCADOR_POR_TONO[this.origenTono(origen)] ?? 'text-text-secondary';
   }
 }

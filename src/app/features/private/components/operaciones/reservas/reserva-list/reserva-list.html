@@ -1,17 +1,16 @@
-<div class="p-4 md:p-6 lg:p-8 bg-neutral-primary-lighter rounded-base shadow-sm">
-
-        <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
-            <div>
-                <h1 class="text-xl font-semibold text-neutral-primary-darker">Reservas</h1>
-                <p class="text-sm text-neutral-primary-dark mt-0.5">Gestiona todas las citas desde un solo lugar</p>
-            </div>
-            <div class="flex items-center gap-3">
-                <button pButton label="Ver calendario" icon="pi pi-calendar" class="p-button-outlined" (click)="abrirCalendario()"></button>
-                <button pButton label="Nueva reserva" icon="pi pi-plus" class="boton-primary" (click)="abrirCrear()"></button>
-            </div>
+<div class="p-4 md:p-6 lg:p-8">
+    <div class="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+            <h1 class="text-xl font-semibold text-text-primary">Reservas</h1>
+            <p class="mt-0.5 text-sm text-text-secondary">Gestiona todas las citas del sistema</p>
         </div>
+        <div class="flex gap-2">
+            <app-button variant="secondary" icon="pi-calendar" label="Calendario" (clicked)="abrirCalendario()" />
+            <app-button variant="primary" icon="pi-plus" label="Nueva reserva" (clicked)="abrirCrear()" />
+        </div>
+    </div>
 
-    <div class="flex flex-col gap-4 mb-4">
+    <div class="mb-4 flex flex-col gap-4">
         <app-search-bar placeholder="Buscar por cliente" (search)="buscarCliente($event)" />
         <app-filtros [fields]="filtrosFields" [titulo]="texto" [text]="texto" [acordeon]="true"
             (buscar)="onBuscar($event)" (limpiar)="onLimpiar()" />
@@ -25,163 +24,118 @@
 
             <ng-template #header>
                 <tr>
-                    <th class="whitespace-nowrap text-center">Cliente</th>
-                    <th class="whitespace-nowrap text-center">Barbero</th>
-                    <th class="whitespace-nowrap text-center">Servicio</th>
-                    <th class="whitespace-nowrap text-center">Fecha / Hora</th>
-                    <th class="whitespace-nowrap text-center">Tipo</th>
-                    <th class="whitespace-nowrap text-center">Estado</th>
-                    <th class="whitespace-nowrap text-center">Acciones</th>
+                    <th>Cliente</th>
+                    <th>Barbero</th>
+                    <th>Servicio</th>
+                    <th>Fecha</th>
+                    <th>Tipo</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
                 </tr>
             </ng-template>
 
-            <ng-template #body let-reserva pTemplate="body">
+            <ng-template #body let-reserva>
                 <tr>
-                    <td class="whitespace-nowrap text-center font-medium"><span class="inline-block align-middle text-gray-400">{{ reserva.clienteNombre || 'N/A' }}</span></td>
-                    <td class="whitespace-nowrap text-center"><span class="inline-block align-middle text-gray-400">{{ reserva.barberoNombre || 'N/A' }}</span></td>
-                    <td class="whitespace-nowrap text-center"><span class="inline-block align-middle text-gray-500">{{ reserva.servicio || 'N/A' }}</span></td>
-                    <td class="whitespace-nowrap text-center">
-                        <div class="flex flex-col items-center">
-                            <span class="inline-block align-middle text-white">{{ reserva.fecha | dateHelper  }}</span>
-                        </div>
+                    <td class="whitespace-nowrap">{{ reserva.clienteNombre || 'N/A' }}</td>
+                    <td class="whitespace-nowrap">{{ reserva.barberoNombre || 'N/A' }}</td>
+                    <td class="whitespace-nowrap">{{ reserva.servicio || 'N/A' }}</td>
+                    <td class="whitespace-nowrap text-text-table">{{ reserva.fecha | dateHelper }}</td>
+
+                    <td class="whitespace-nowrap">
+                        <app-status-badge type="text" tone="info"
+                            [value]="reserva.tipoReserva === 'RESERVA_VIRTUAL' ? 'Virtual' : 'Gratis'" />
                     </td>
 
-                    <td class="whitespace-nowrap text-center">
-                        <app-status-badge type="text" [value]="reserva.tipoReserva === 'RESERVA_VIRTUAL' ? 'Virtual' : 'Gratis'" customClass="badge-text estado-info" />
-                    </td>
-
-                    <td class="whitespace-nowrap text-center">
+                    <td class="whitespace-nowrap">
                         <div class="flex flex-col items-center gap-1">
-                            <app-status-badge type="text" [value]="reserva.estadoReserva || 'Sin estado'" [customClass]="'badge-text ' + getEstadoClass(reserva.estadoReserva)" />
-                            <span *ngIf="reserva.recordatorioEnviado" class="flex items-center gap-1 text-[10px] text-emerald-600"><i class="pi pi-whatsapp"></i> Avisado</span>
+                            <app-status-badge type="text" [value]="reserva.estadoReserva || 'Sin estado'" />
+                            @if (reserva.recordatorioEnviado) {
+                                <span class="flex items-center gap-1 text-[10px] text-success">
+                                    <i class="pi pi-whatsapp"></i> Avisado
+                                </span>
+                            }
                         </div>
                     </td>
 
-                    <td class="whitespace-nowrap text-center">
-                                                <div class="flex flex-row justify-center">
-                                                        <app-button
-                                                            variant="ver-tabla"
-                                                            icon="pi pi-eye"
-                                                            [tooltip]="'Ver detalle'"
-                                                            (clicked)="verDetalle(reserva)">
-                                                        </app-button>
-                                                </div>
+                    <td class="whitespace-nowrap">
+                        <div class="flex flex-row justify-center">
+                            @if (reserva.estadoReserva !== 'FINALIZADA' && reserva.estadoReserva !== 'CANCELADA') {
+                                <app-button variant="agregar" icon="pi-wallet" tooltip="Cobrar y generar venta"
+                                    (clicked)="cobrarReserva(reserva)" />
+                            }
+                            <app-button variant="ver-tabla" icon="pi-eye" tooltip="Ver detalle"
+                                (clicked)="verDetalle(reserva)" />
+                        </div>
                     </td>
                 </tr>
             </ng-template>
 
             <ng-template #emptymessage>
                 <tr>
-                    <td colspan="7" class="text-center py-16">
-                        <div class="flex flex-col items-center gap-3 text-neutral-primary-dark">
+                    <td colspan="7" class="py-16 text-center">
+                        <div class="flex flex-col items-center gap-3 text-text-muted">
                             <i class="pi pi-calendar-times text-4xl"></i>
                             <p class="text-sm font-medium">No hay reservas que coincidan</p>
-                            <p-button label="Limpiar filtros" [text]="true" size="small" (onClick)="onLimpiar()" />
+                            <app-button variant="limpiar" icon="pi-filter-slash" label="Limpiar filtros" size="sm"
+                                (clicked)="onLimpiar()" />
                         </div>
                     </td>
                 </tr>
             </ng-template>
-
         </p-table>
     </div>
 </div>
 
-<!-- Modal calendario -->
-<p-dialog [(visible)]="mostrarCalendario" [modal]="true" [dismissableMask]="true" [closable]="true" [style]="{ width: '95vw', maxWidth: '1200px' }" (onHide)="cerrarCalendario()">
-    <ng-template pTemplate="header">
-        <div class="flex items-center justify-between w-full">
-            <div>
-                <h3 class="text-lg font-semibold text-white">Calendario de Reservas</h3>
-                <p class="text-sm text-neutral-primary-dark mt-0.5">Agenda del {{ (reservas[0]?.fecha) | date:'dd/MM/yyyy' }}</p>
+<!-- Detalle -->
+<app-modal [(visible)]="showDetalle" titulo="Detalle de Reserva" mode="ver" maxWidth="28rem">
+    @if (reservaSeleccionada) {
+        <div class="flex flex-col gap-3 py-2 text-sm text-text-primary">
+            <div class="flex justify-between border-b border-ui-border pb-2">
+                <span class="text-text-secondary">Cliente</span>
+                <span class="font-semibold">{{ reservaSeleccionada.clienteNombre }}</span>
+            </div>
+            <div class="flex justify-between border-b border-ui-border pb-2">
+                <span class="text-text-secondary">Barbero</span>
+                <span class="font-semibold">{{ reservaSeleccionada.barberoNombre || 'N/A' }}</span>
+            </div>
+            <div class="flex justify-between border-b border-ui-border pb-2">
+                <span class="text-text-secondary">Servicio</span>
+                <span class="font-semibold">{{ reservaSeleccionada.servicio || 'N/A' }}</span>
+            </div>
+            <div class="flex justify-between border-b border-ui-border pb-2">
+                <span class="text-text-secondary">Fecha</span>
+                <span class="font-semibold">{{ reservaSeleccionada.fecha | date: 'dd/MM/yyyy' }}</span>
+            </div>
+            <div class="flex justify-between border-b border-ui-border pb-2">
+                <span class="text-text-secondary">Hora</span>
+                <span class="font-semibold">{{ reservaSeleccionada.horaInicio }} - {{ reservaSeleccionada.horaFin }}</span>
+            </div>
+            <div class="flex items-center justify-between border-b border-ui-border pb-2">
+                <span class="text-text-secondary">Tipo</span>
+                <app-status-badge type="text" tone="info"
+                    [value]="reservaSeleccionada.tipoReserva === 'RESERVA_VIRTUAL' ? 'Virtual' : 'Gratis'" />
+            </div>
+            <div class="flex justify-between border-b border-ui-border pb-2">
+                <span class="text-text-secondary">Total</span>
+                <span class="font-semibold text-brand-gold">{{ reservaSeleccionada.total | moneda }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+                <span class="text-text-secondary">Estado</span>
+                <app-status-badge type="text" [value]="reservaSeleccionada.estadoReserva || 'Sin estado'" />
             </div>
         </div>
-    </ng-template>
+    }
+</app-modal>
 
-    <app-calendar-reservas />
-</p-dialog>
+<!-- Nueva reserva -->
+<app-modal [(visible)]="mostrarFormulario" titulo="Nueva Reserva" mode="crear" [icono]="icono" maxWidth="50rem">
+    <app-create-reserva [resetTrigger]="resetFormTrigger" (guardar)="onReservaGuardada()"
+        (cancelarEvento)="cerrarFormulario()" />
+</app-modal>
 
-<p-dialog [(visible)]="showDetalle" [modal]="true" [closable]="true" [draggable]="false" header="Detalle de Reserva" styleClass="w-full max-w-md">
-    <div *ngIf="reservaSeleccionada" class="flex flex-col gap-4 py-2">
-        <div class="flex items-center gap-4 pb-4 border-b border-yellow-500/20">
-            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 shadow-md shadow-yellow-500/20">
-                <i class="pi pi-user text-lg text-black"></i>
-            </div>
-            <div>
-                <p class="text-lg font-bold text-white">{{ reservaSeleccionada.clienteNombre }}</p>
-                <p class="text-sm font-medium text-yellow-400">Cliente</p>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-
-            <div class="rounded-xl border border-purple-500/20 bg-neutral-primary-lighter p-4">
-                <div class="mb-2 flex items-center gap-2">
-                    <i class="pi pi-user text-purple-400"></i>
-                    <span class="text-[11px] font-semibold uppercase tracking-widest text-purple-400">Barbero</span>
-                </div>
-                <p class="text-base font-semibold text-white">{{ reservaSeleccionada.barberoNombre || 'N/A' }}</p>
-            </div>
-
-            <div class="rounded-xl border border-sky-500/20 bg-neutral-primary-lighter p-4">
-                <div class="mb-2 flex items-center gap-2">
-                    <i class="pi pi-briefcase text-sky-400"></i>
-                    <span class="text-[11px] font-semibold uppercase tracking-widest text-sky-400">Servicio</span>
-                </div>
-                <p class="text-base font-semibold text-white">{{ reservaSeleccionada.servicio || 'N/A' }}</p>
-            </div>
-
-            <div class="rounded-xl border border-green-500/20 bg-neutral-primary-lighter p-4">
-                <div class="mb-2 flex items-center gap-2">
-                    <i class="pi pi-calendar text-green-400"></i>
-                    <span class="text-[11px] font-semibold uppercase tracking-widest text-green-400">Fecha</span>
-                </div>
-                <p class="text-base font-semibold text-white">{{ reservaSeleccionada.fecha | date:'dd/MM/yyyy' }}</p>
-            </div>
-
-            <div class="rounded-xl border border-orange-500/20 bg-neutral-primary-lighter p-4">
-                <div class="mb-2 flex items-center gap-2">
-                    <i class="pi pi-clock text-orange-400"></i>
-                    <span class="text-[11px] font-semibold uppercase tracking-widest text-orange-400">Hora</span>
-                </div>
-                <p class="text-base font-semibold text-white">{{ reservaSeleccionada.horaInicio | dateHelper  }} - {{ reservaSeleccionada.horaFin | dateHelper  }}</p>
-            </div>
-
-            <div class="rounded-xl border border-violet-500/20 bg-neutral-primary-lighter p-4">
-                <div class="mb-2 flex items-center gap-2">
-                    <i class="pi pi-tag text-violet-400"></i>
-                    <span class="text-[11px] font-semibold uppercase tracking-widest text-violet-400">Tipo</span>
-                </div>
-                <p class="text-base font-semibold text-white">
-                    {{ reservaSeleccionada.tipoReserva === 'RESERVA_VIRTUAL' ? 'Virtual' : 'Gratis' }}
-                </p>
-            </div>
-
-            <div class="rounded-xl border border-yellow-500/30 bg-gradient-to-r from-yellow-500/10 to-transparent p-4">
-                <div class="mb-2 flex items-center gap-2">
-                    <i class="pi pi-wallet text-yellow-400"></i>
-                    <span class="text-[11px] font-semibold uppercase tracking-widest text-yellow-400">Total</span>
-                </div>
-                <p class="text-2xl font-extrabold text-yellow-300">S/. {{ reservaSeleccionada.total }}</p>
-            </div>
-
-        </div>
-
-        <!-- Estado -->
-        <div class="flex items-center justify-between rounded-xl border border-emerald-500/20 bg-neutral-primary-lighter p-4">
-            <div>
-                <p class="text-[11px] font-semibold uppercase tracking-widest text-emerald-400">Estado</p>
-                <p class="text-xs text-neutral-400">Estado actual de la reserva</p>
-            </div>
-
-            <app-status-badge type="text" [value]="reservaSeleccionada.estadoReserva || 'Sin estado'" [customClass]="'badge-text ' + getEstadoClass(reservaSeleccionada.estadoReserva)"/>
-        </div>
-    </div>
-</p-dialog>
-
-
-<p-dialog [(visible)]="mostrarFormulario" [modal]="true" [dismissableMask]="true" [closable]="true" [style]="{ width: '100vw', maxWidth: '50rem' }" (onHide)="cerrarFormulario()">
-    <ng-template pTemplate="header">
-        <app-dialog-header [icono]="icono" title="Nueva Reserva" mode="crear" />
-    </ng-template>
-    <app-create-reserva [resetTrigger]="resetFormTrigger" (guardar)="onReservaGuardada()" (cancelarEvento)="cerrarFormulario()" />
-</p-dialog>
+<!-- Calendario -->
+<app-modal [(visible)]="mostrarCalendario" titulo="Calendario de Reservas" mode="ver" icono="pi-calendar" maxWidth="75rem">
+    @if (mostrarCalendario) {
+        <app-calendar-reservas />
+    }
+</app-modal>

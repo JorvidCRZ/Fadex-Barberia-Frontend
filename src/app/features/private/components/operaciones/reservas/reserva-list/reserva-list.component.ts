@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { TableLazyLoadEvent, TableModule } from 'primeng/table';
@@ -14,20 +14,34 @@ import { ReservaService } from '@/app/core/services/operaciones/reserva.service'
 import { Reserva, ReservaFiltro } from '@/app/core/models/operaciones/Reserva.model';
 import { NotificationService } from '@/app/core/services/common/notification.service';
 import { DialogHeaderComponent } from '@/app/shared/components/dialog-header/dialog-header.component';
-import { CreateReserva } from '../reserva-create/create-reserva/create-reserva.component';
 import { DateFormatPipe } from '@/app/shared/pipes/dat.pipe';
-import { CalendarReservas } from '@/app/features/private/components/operaciones/reservas/reserva-calendar/reserva-calendar';
+import { CreateReserva } from '../reserva-create/create-reserva.component';
+import { CalendarReservas } from '../reserva-calendar/reserva-calendar.component';
 import { ButtonComponent } from '@/app/shared/components/button/button.component';
+import { MonedaPipe } from '@/app/shared/pipes/moneda.pipe';
+import { ModalComponent } from '@/app/shared/components/modal/modal.component';
 
 @Component({
   selector: 'app-reserva-list',
   standalone: true,
   imports: [
-    CommonModule, FormsModule, ButtonModule, DialogModule, TableModule, DialogHeaderComponent, CreateReserva,
-    TooltipModule, StatusBadgeComponent, FiltrosComponent, SearchBarComponent, DateFormatPipe, CalendarReservas, ButtonComponent
+    CommonModule,
+    FormsModule,
+    ButtonModule,
+    DialogModule,
+    TableModule,
+    CreateReserva,
+    TooltipModule,
+    StatusBadgeComponent,
+    FiltrosComponent,
+    SearchBarComponent,
+    DateFormatPipe,
+    CalendarReservas,
+    ButtonComponent, 
+    MonedaPipe,
+    ModalComponent
   ],
   templateUrl: './reserva-list.html',
-  styleUrls: ['./reserva-list.scss'],
 })
 export class ReservaList implements OnInit {
   private router = inject(Router);
@@ -49,39 +63,40 @@ export class ReservaList implements OnInit {
 
   showDetalle = false;
   reservaSeleccionada: Reserva | null = null;
+  mostrarCalendario = false;
+  private route = inject(ActivatedRoute); // import desde '@angular/router'
 
+  abrirCalendario(): void {
+    this.mostrarCalendario = true;
+  }
+
+  cerrarCalendario(): void {
+    this.mostrarCalendario = false;
+  }
   ngOnInit(): void {
     this.cargarReservas(0, this.rows);
+    if (this.route.snapshot.queryParamMap.has('nueva')) {
+    this.abrirCrear();
+  }
   }
 
   cargarReservas(page: number, size: number): void {
     this.cargado = false;
-    this.reservaService.obtenerReservas({ ...this.filtro, page, size, sort: 'fecha,desc' }).subscribe({
-      next: (resp) => {
-        this.reservas = resp.data.content;
-        this.totalRecords = resp.data.totalElements;
-        this.cargado = true;
-        this.cd.detectChanges();
-      },
-      error: (err) => {
-        // TODO: quitar mock cuando el backend esté listo
-        this.notify.showHttpError(err.message);
-        const mock: Reserva[] = [
-          { id: 1, reservaId: 1, clienteNombre: 'Diego Salazar', barberoNombre: 'Renzo Castillo', servicio: 'Fade + barba', fecha: new Date('2026-06-18'), horaInicio: new Date('2026-06-18T10:00:00'), horaFin: new Date('2026-06-18T10:30:00'), tipoReserva: 'RESERVA_PRESENCIAL_INSTANTANEO' as any, total: 35, estadoReserva: 'CONFIRMADA' as any },
-          { id: 2, reservaId: 2, clienteNombre: 'Mateo Huamán', barberoNombre: 'Álvaro Mendoza', servicio: 'Corte clásico', fecha: new Date('2026-06-18'), horaInicio: new Date('2026-06-18T11:30:00'), horaFin: new Date('2026-06-18T12:00:00'), tipoReserva: 'RESERVA_VIRTUAL' as any, total: 42, estadoReserva: 'PENDIENTE_PAGO' as any },
-          { id: 3, reservaId: 3, clienteNombre: 'Sebastián Flores', barberoNombre: 'José Luis Ramos', servicio: 'Perfilado de barba', fecha: new Date('2026-06-18'), horaInicio: new Date('2026-06-18T14:00:00'), horaFin: new Date('2026-06-18T14:30:00'), tipoReserva: 'RESERVA_VIRTUAL' as any, total: 30, estadoReserva: 'FINALIZADA' as any },
-          { id: 4, reservaId: 4, clienteNombre: 'Valeria Quispe', barberoNombre: 'Renzo Castillo', servicio: 'Corte premium', fecha: new Date('2026-06-19'), horaInicio: new Date('2026-06-19T09:30:00'), horaFin: new Date('2026-06-19T10:00:00'), tipoReserva: 'RESERVA_PRESENCIAL_INSTANTANEO' as any, total: 50, estadoReserva: 'CANCELADA' as any },
-          { id: 5, reservaId: 5, clienteNombre: 'Andrés Chávez', barberoNombre: 'Bruno Espinoza', servicio: 'Fade clásico', fecha: new Date('2026-06-19'), horaInicio: new Date('2026-06-19T16:00:00'), horaFin: new Date('2026-06-19T16:30:00'), tipoReserva: 'RESERVA_PRESENCIAL_INSTANTANEO' as any, total: 38, estadoReserva: 'CONFIRMADA' as any },
-          { id: 6, reservaId: 6, clienteNombre: 'Laura Rojas', barberoNombre: 'Álvaro Mendoza', servicio: 'Corte mujer', fecha: new Date('2026-06-18'), horaInicio: new Date('2026-06-18T15:00:00'), horaFin: new Date('2026-06-18T15:30:00'), tipoReserva: 'RESERVA_VIRTUAL' as any, total: 45, estadoReserva: 'CONFIRMADA' as any },
-          { id: 7, reservaId: 7, clienteNombre: 'Marcos Peña', barberoNombre: 'José Luis Ramos', servicio: 'Recorte', fecha: new Date('2026-06-20'), horaInicio: new Date('2026-06-20T10:00:00'), horaFin: new Date('2026-06-20T10:30:00'), tipoReserva: 'RESERVA_PRESENCIAL_INSTANTANEO' as any, total: 28, estadoReserva: 'PENDIENTE_PAGO' as any },
-          { id: 8, reservaId: 8, clienteNombre: 'Camila Ortiz', barberoNombre: 'Bruno Espinoza', servicio: 'Barba', fecha: new Date('2026-06-18'), horaInicio: new Date('2026-06-18T12:00:00'), horaFin: new Date('2026-06-18T12:30:00'), tipoReserva: 'RESERVA_VIRTUAL' as any, total: 22, estadoReserva: 'FINALIZADA' as any },
-        ];
-        this.reservas = mock;
-        this.totalRecords = mock.length;
-        this.cargado = true;
-        this.cd.detectChanges();
-      }
-    });
+    this.reservaService
+      .obtenerReservas({ ...this.filtro, page, size, sort: 'fecha,desc' })
+      .subscribe({
+        next: (resp) => {
+          this.reservas = resp.data.content;
+          this.totalRecords = resp.data.totalElements;
+          this.cargado = true;
+          this.cd.detectChanges();
+        },
+        error: (err) => {
+          this.notify.showHttpError(err.message);
+          this.cargado = true;
+          this.cd.detectChanges();
+        },
+      });
   }
 
   onLazyLoad(event: TableLazyLoadEvent): void {
@@ -113,15 +128,13 @@ export class ReservaList implements OnInit {
 
   cobrarReserva(reserva: Reserva): void {
     this.router.navigate(['/dashboard/admin/operaciones/pos'], {
-      state: { reservaCobrar: reserva }
+      state: { reservaCobrar: reserva },
     });
   }
-
 
   editarReserva(reserva: Reserva): void {
     this.router.navigate([`/dashboard/admin/operaciones/reservas/editar/${reserva.id}`]);
   }
-
 
   mostrarFormulario = false;
   resetFormTrigger = 0;
@@ -152,12 +165,18 @@ export class ReservaList implements OnInit {
   // AJUSTA los case si EstadoReserva.ts trae otros nombres
   getEstadoClass(estado: string | null): string {
     switch (estado) {
-      case 'CONFIRMADA': return 'estado-confirmada';
-      case 'PENDIENTE_PAGO': return 'estado-pendiente';
-      case 'EN_PROCESO': return 'estado-en-proceso';
-      case 'FINALIZADA': return 'estado-completada';
-      case 'CANCELADA': return 'estado-cancelada';
-      default: return 'estado-default';
+      case 'CONFIRMADA':
+        return 'estado-confirmada';
+      case 'PENDIENTE_PAGO':
+        return 'estado-pendiente';
+      case 'EN_PROCESO':
+        return 'estado-en-proceso';
+      case 'FINALIZADA':
+        return 'estado-completada';
+      case 'CANCELADA':
+        return 'estado-cancelada';
+      default:
+        return 'estado-default';
     }
   }
 }

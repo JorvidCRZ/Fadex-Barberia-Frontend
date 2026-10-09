@@ -1,25 +1,25 @@
-import { Component, inject, OnInit, Input } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
-import { ToastModule } from 'primeng/toast';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { DialogModule } from 'primeng/dialog';
-import { MessageService } from 'primeng/api';
-import { ReservaService } from '@/app/core/services/operaciones/reserva.service';
-import { Reserva } from '@/app/core/models/operaciones/Reserva.model';
 import { finalize } from 'rxjs';
+import { ReservaService } from '@/app/core/services/operaciones/reserva.service';
+import { NotificationService } from '@/app/core/services/common/notification.service';
+import { Reserva } from '@/app/core/models/operaciones/Reserva.model';
+import { ButtonComponent } from '@/app/shared/components/button/button.component';
+import { StatusBadgeComponent } from '@/app/shared/components/status-badge/status-badge.component';
+import { ModalComponent } from '@/app/shared/components/modal/modal.component';
+import { MonedaPipe } from '@/app/shared/pipes/moneda.pipe';
 
-@Component({ 
+@Component({
   selector: 'app-calendar-reservas',
   standalone: true,
-  imports: [CommonModule, ToastModule, DialogModule],
-  providers: [MessageService, DatePipe],
+  imports: [CommonModule, DialogModule, ButtonComponent, StatusBadgeComponent,ModalComponent, MonedaPipe],
   templateUrl: './reserva-calendar.html',
 })
 export class CalendarReservas implements OnInit {
-
-  @Input() showHeader = true;
-
   private reservaService = inject(ReservaService);
-  private messageService = inject(MessageService);
+  private notify = inject(NotificationService);
+  private cd = inject(ChangeDetectorRef);
 
   isLoading = false;
   fechaActual = new Date();
@@ -32,66 +32,89 @@ export class CalendarReservas implements OnInit {
   reservaSeleccionada: Reserva | null = null;
 
   horasGrilla = [
-    '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-    '12:00', '12:30', '13:00', '13:30', '14:00', '14:30',
-    '15:00', '15:30', '16:00', '16:30', '17:00', '17:30',
-    '18:00', '18:30', '19:00', '19:30'
-  ];
-
-  // Mock en memoria para mostrar en el calendario cuando no haya backend
-  // TODO: quitar mock cuando el backend esté listo
-  private readonly mockReservas: Reserva[] = [
-    { id: 1, reservaId: 1, clienteNombre: 'Diego Salazar', barberoNombre: 'Renzo Castillo', servicio: 'Fade clásico', fecha: new Date('2026-10-08'), horaInicio: new Date('2026-10-08T10:00:00'), horaFin: new Date('2026-10-08T10:30:00'), tipoReserva:  'RESERVA_PRESENCIAL_INSTANTANEO' as any, total: 35, estadoReserva: 'CONFIRMADA' as any },
-    { id: 2, reservaId: 2, clienteNombre: 'Mateo Huamán', barberoNombre: 'Álvaro Mendoza', servicio: 'Corte clásico', fecha: new Date('2026-10-08'), horaInicio: new Date('2026-10-08T11:30:00'), horaFin: new Date('2026-10-08T12:00:00'), tipoReserva: 'RESERVA_VIRTUAL' as any, total: 42, estadoReserva: 'PENDIENTE_PAGO' as any },
-    { id: 3, reservaId: 3, clienteNombre: 'Sebastián Flores', barberoNombre: 'José Luis Ramos', servicio: 'Perfilado de barba', fecha: new Date('2026-10-08'), horaInicio: new Date('2026-10-08T14:00:00'), horaFin: new Date('2026-10-08T14:30:00'), tipoReserva: 'RESERVA_VIRTUAL' as any, total: 30, estadoReserva: 'FINALIZADA' as any },
-    { id: 4, reservaId: 4, clienteNombre: 'Valeria Quispe', barberoNombre: 'Renzo Castillo', servicio: 'Corte premium', fecha: new Date('2026-10-09'), horaInicio: new Date('2026-10-09T09:30:00'), horaFin: new Date('2026-10-09T10:00:00'), tipoReserva: 'RESERVA_PRESENCIAL_INSTANTANEO' as any, total: 50, estadoReserva: 'CANCELADA' as any },
-    { id: 5, reservaId: 5, clienteNombre: 'Andrés Chávez', barberoNombre: 'Bruno Espinoza', servicio: 'Fade clásico', fecha: new Date('2026-10-09'), horaInicio: new Date('2026-10-09T16:00:00'), horaFin: new Date('2026-10-09T16:30:00'), tipoReserva: 'RESERVA_PRESENCIAL_INSTANTANEO' as any, total: 38, estadoReserva: 'CONFIRMADA' as any },
-    { id: 6, reservaId: 6, clienteNombre: 'Laura Rojas', barberoNombre: 'Álvaro Mendoza', servicio: 'Corte mujer', fecha: new Date('2026-10-08'), horaInicio: new Date('2026-10-08T15:00:00'), horaFin: new Date('2026-10-08T15:30:00'), tipoReserva: 'RESERVA_VIRTUAL' as any, total: 45, estadoReserva: 'CONFIRMADA' as any },
-    { id: 7, reservaId: 7, clienteNombre: 'Marcos Peña', barberoNombre: 'José Luis Ramos', servicio: 'Recorte', fecha: new Date('2026-10-09'), horaInicio: new Date('2026-10-09T10:00:00'), horaFin: new Date('2026-10-09T10:30:00'), tipoReserva: 'RESERVA_PRESENCIAL_INSTANTANEO' as any, total: 28, estadoReserva: 'PENDIENTE_PAGO' as any },
-    { id: 8, reservaId: 8, clienteNombre: 'Camila Ortiz', barberoNombre: 'Bruno Espinoza', servicio: 'Barba', fecha: new Date('2026-10-08'), horaInicio: new Date('2026-10-08T12:00:00'), horaFin: new Date('2026-10-08T12:30:00'), tipoReserva: 'RESERVA_VIRTUAL' as any, total: 22, estadoReserva: 'FINALIZADA' as any },
+    '09:00',
+    '09:30',
+    '10:00',
+    '10:30',
+    '11:00',
+    '11:30',
+    '12:00',
+    '12:30',
+    '13:00',
+    '13:30',
+    '14:00',
+    '14:30',
+    '15:00',
+    '15:30',
+    '16:00',
+    '16:30',
+    '17:00',
+    '17:30',
+    '18:00',
+    '18:30',
+    '19:00',
+    '19:30',
   ];
 
   ngOnInit(): void {
     this.cargarReservas();
   }
 
+  /** yyyy-MM-dd en hora LOCAL (toISOString usa UTC y desfasa el día) */
+  private aISO(fecha: Date): string {
+    const y = fecha.getFullYear();
+    const m = String(fecha.getMonth() + 1).padStart(2, '0');
+    const d = String(fecha.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
+  get fechaTexto(): string {
+    return this.fechaActual.toLocaleDateString('es-PE', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+  }
+
+  get fechaCorta(): string {
+    return this.fechaActual.toLocaleDateString('es-PE', { day: 'numeric', month: 'long' });
+  }
+
   cargarReservas(): void {
     this.isLoading = true;
-    this.reservaService.getReservas(0, 1000)
-      .pipe(finalize(() => this.isLoading = false))
+    this.reservaService
+      .getReservas(0, 1000)
+      .pipe(
+        finalize(() => {
+          this.isLoading = false;
+          this.cd.detectChanges();
+        }),
+      )
       .subscribe({
-        next: (response) => {
-            this.todasLasReservas = response?.data?.content ?? [];
-            this.filtrarPorFecha();
+        next: (resp) => {
+          this.todasLasReservas = resp?.data?.content ?? [];
+          this.filtrarPorFecha();
         },
-        error: () => {
-            // Si falla el backend, usar mock en memoria para mostrar el calendario
-            this.todasLasReservas = this.mockReservas;
-            this.filtrarPorFecha();
-            this.messageService.add({
-              severity: 'warn',
-              summary: 'Datos de ejemplo',
-              detail: 'No se pudieron cargar las reservas desde el servidor. Mostrando datos de ejemplo.'
-            });
-        }
+        error: (err) =>
+          this.notify.showHttpError(err?.message ?? 'No se pudieron cargar las reservas'),
       });
   }
 
   filtrarPorFecha(): void {
-    const fechaStr = this.fechaActual.toISOString().split('T')[0];
-    this.reservasDelDia = this.todasLasReservas.filter(r => {
-      if (!r || r.fecha == null) return false;
-      // fecha puede venir como string o Date; usar coerción segura a string
-      const fechaVal = typeof (r as any).fecha === 'string'
-        ? (r as any).fecha
-        : (r.fecha instanceof Date ? (r.fecha as Date).toISOString() : String((r as any).fecha));
-      return String(fechaVal).split('T')[0] === fechaStr;
-    });
-    // Extraer barberos únicos del día
-    this.barberos = [...new Set(this.reservasDelDia.map(r => r.barberoNombre))];
-    // Asegurar los 4 barberos del admin aunque no tengan reservas
-    const adminBarberos = ['Renzo Castillo', 'Álvaro Mendoza', 'José Luis Ramos', 'Bruno Espinoza'];
-    for (const b of adminBarberos) if (!this.barberos.includes(b)) this.barberos.push(b);
+    const fechaStr = this.aISO(this.fechaActual);
+    this.reservasDelDia = this.todasLasReservas.filter(
+      (r) => this.fechaReservaISO(r.fecha) === fechaStr,
+    );
+    this.barberos = [...new Set(this.reservasDelDia.map((r) => r.barberoNombre))];
+  }
+
+  /** Normaliza la fecha de la reserva a yyyy-MM-dd, sea string o Date */
+  private fechaReservaISO(fecha: unknown): string {
+    if (fecha instanceof Date) {
+      return this.aISO(fecha);
+    }
+    return String(fecha ?? '').substring(0, 10);
   }
 
   cambiarDia(dias: number): void {
@@ -107,40 +130,28 @@ export class CalendarReservas implements OnInit {
   }
 
   get esHoy(): boolean {
-    const hoy = new Date().toISOString().split('T')[0];
-    return this.fechaActual.toISOString().split('T')[0] === hoy;
+    return this.aISO(this.fechaActual) === this.aISO(new Date());
   }
 
-  // Busca reserva para un barbero en una hora específica
   getReserva(barbero: string, hora: string): Reserva | null {
-    return this.reservasDelDia.find(r => {
-      if (!r || !r.horaInicio) return false;
-      const hi = r.horaInicio instanceof Date ? r.horaInicio : new Date(r.horaInicio as any);
-      const hh = String(hi.getHours()).padStart(2, '0');
-      const mm = String(hi.getMinutes()).padStart(2, '0');
-      return r.barberoNombre === barbero && `${hh}:${mm}` === hora;
-    }) ?? null;
-  }
-
-  // Formatea un Date o string a 'HH:mm'
-  formatTime(value: Date | string | null): string {
-    if (!value) return '';
-    const d = value instanceof Date ? value : new Date(value as any);
-    const hh = String(d.getHours()).padStart(2, '0');
-    const mm = String(d.getMinutes()).padStart(2, '0');
-    return `${hh}:${mm}`;
+    return (
+      this.reservasDelDia.find(
+        (r) => r.barberoNombre === barbero && String(r.horaInicio).substring(0, 5) === hora,
+      ) ?? null
+    );
   }
 
   getColorEstado(estado: string | null): string {
     switch (estado) {
       case 'CONFIRMADA':
-        return 'bg-[#1a3a2a] border border-[#2d6a4a]';
+        return 'bg-success/10 border border-success/40';
       case 'PENDIENTE':
-        return 'bg-[#3a2a1a] border border-[#C9A84C]/50';
+      case 'PENDIENTE_PAGO':
+        return 'bg-warning/10 border border-warning/40';
       case 'CANCELADA':
-        return 'bg-[#3a1a1a] border border-[#c0392b]/50';
+        return 'bg-danger/10 border border-danger/40';
       default:
-        return 'bg-[#2a2a2a] border border-[#444444]';
+        return 'bg-ui-elevated border border-ui-border';
     }
   }
 

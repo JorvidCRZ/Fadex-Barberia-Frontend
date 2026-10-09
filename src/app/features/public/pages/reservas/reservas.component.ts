@@ -2,46 +2,37 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { DialogModule } from 'primeng/dialog';
-import { ButtonModule } from 'primeng/button';
+import { ModalComponent } from '@/app/shared/components/modal/modal.component';
+import { ButtonComponent } from '@/app/shared/components/button/button.component';
 // import { TokenService } from '@/app/core/services/auth/token.service';
 
 @Component({
   selector: 'app-reservas',
   standalone: true,
-  imports: [CommonModule, DialogModule, ButtonModule],
+  imports: [CommonModule, DialogModule, ButtonComponent, ModalComponent],
   template: `
-    <div *ngIf="!verificado" class="min-h-screen bg-black flex items-center justify-center">
-      <div class="text-center">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500 mx-auto"></div>
-        <p class="text-white mt-4">Verificando acceso...</p>
-      </div>
+   @if (!verificado) {
+  <div class="flex min-h-screen items-center justify-center bg-ui-black">
+    <div class="text-center">
+      <i class="pi pi-spin pi-spinner text-4xl text-brand-gold"></i>
+      <p class="mt-4 text-text-primary">Verificando acceso...</p>
     </div>
-
-    <p-dialog header=" Acceso restringido" [(visible)]="showModal" [modal]="true" [closable]="false" [dismissableMask]="false" [style]="{ width: '400px' }">
-      <div class="text-center py-4">
-        <div class="inline-flex items-center justify-center w-16 h-16 bg-yellow-500/20 rounded-full mb-4">
-          <i class="pi pi-lock text-yellow-500 text-2xl"></i>
-        </div>
-        <h3 class="text-white text-xl font-bold mb-2">¡Necesitas iniciar sesión!</h3>
-        <p class="text-gray-400 text-sm mb-6"> Para agendar una cita debes tener una cuenta activa.  Inicia sesión para continuar.</p>
-        <div class="flex gap-3 justify-center">
-          <button pButton label="Cancelar" (click)="cancelar()" class="boton-secondary"></button>
-          <button pButton label="Iniciar sesión" (click)="irALogin()" class="boton-primary"></button>
-        </div>
-      </div>
-    </p-dialog>
+  </div>
+}
+<app-modal [(visible)]="showModal" titulo="Acceso restringido" mode="ver" icono="pi-lock" maxWidth="26rem" [cerrable]="false">
+  <div class="py-4 text-center">
+    <div class="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-brand-gold-soft">
+      <i class="pi pi-lock text-2xl text-brand-gold"></i>
+    </div>
+    <h3 class="mb-2 text-xl font-bold text-text-primary">¡Necesitas iniciar sesión!</h3>
+    <p class="mb-6 text-sm text-text-secondary">Para agendar una cita debes tener una cuenta activa. Inicia sesión para continuar.</p>
+    <div class="flex justify-center gap-3">
+      <app-button variant="cancel" icon="pi-times" label="Cancelar" (clicked)="cancelar()" />
+      <app-button variant="primary" icon="pi-sign-in" label="Iniciar sesión" (clicked)="irALogin()" />
+    </div>
+  </div>
+</app-modal>
   `,
-  styles: [`
-    :host ::ng-deep .p-dialog .p-dialog-header {
-      background-color: #0c0c0c;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      color: white;
-    }
-
-    :host ::ng-deep .p-dialog .p-dialog-content {
-      background-color: #0c0c0c;
-    }
-  `]
 })
 export class ReservasComponent implements OnInit {
   showModal = false;
@@ -59,7 +50,7 @@ export class ReservasComponent implements OnInit {
       // if (isLoggedIn) {
       //   this.router.navigate(['/mi-cuenta/reservar/agendar']);
       // } else {
-        this.showModal = true;
+      this.showModal = true;
       // }
       // this.verificado = true;
     }, 1000);

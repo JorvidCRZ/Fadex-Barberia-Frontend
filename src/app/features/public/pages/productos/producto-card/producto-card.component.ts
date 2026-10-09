@@ -1,5 +1,4 @@
 import { CardModule } from 'primeng/card';
-import { ButtonModule } from 'primeng/button';
 import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { SolesPipe } from '../../../../../shared/pipes/moneda.pipe';
 import { Producto } from '../../../../../core/models/catalogos/productos.model';
@@ -7,11 +6,12 @@ import { SafeImageUrlPipe } from '../../../../../shared/pipes/safe-image-url.pip
 import { CarritoService } from '../../../../../core/services/catalogos/carrito.service';
 import { NotificationService } from '../../../../../core/services/common/notification.service';
 import { StatusBadgeComponent } from '../../../../../shared/components/status-badge/status-badge.component';
+import { ButtonComponent } from '@/app/shared/components/button/button.component';
 
 @Component({
   standalone: true,
   selector: 'app-producto-card',
-  imports: [ButtonModule, CardModule, SolesPipe, SafeImageUrlPipe, StatusBadgeComponent],
+  imports: [ CardModule, SolesPipe, SafeImageUrlPipe, StatusBadgeComponent, ButtonComponent],
   templateUrl: './producto-card.html',
   styleUrl: './producto-card.scss',
 })

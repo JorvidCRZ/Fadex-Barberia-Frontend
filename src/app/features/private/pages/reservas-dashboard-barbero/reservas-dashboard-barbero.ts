@@ -23,7 +23,6 @@ interface CitaBarbero {
   standalone: true,
   imports: [CommonModule, ButtonModule, TableModule],
   templateUrl: './reservas-dashboard-barbero.html',
-  styleUrl: './reservas-dashboard-barbero.css',
 })
 export class ReservasDashboardBarbero implements OnInit {
 
