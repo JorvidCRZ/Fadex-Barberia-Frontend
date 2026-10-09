@@ -29,7 +29,6 @@ import { of } from 'rxjs';
         DialogModule, ProductoSelectorComponent, ServicioSelectorComponent, DialogHeaderComponent
     ],
     templateUrl: './regla-form.html',
-    styleUrl: './regla-form.css',
 })
 export class ReglaFormComponent implements OnChanges, OnInit {
     @Output() guardar = new EventEmitter<FidelizacionReglaRequest>();

@@ -13,7 +13,7 @@ import { ReclamoRequest, ReclamoResponse } from '@/app/core/models/operaciones/r
   selector: 'app-reclamos',
   imports: [CommonModule, ButtonModule, DialogModule, DialogHeaderComponent, ReclamoTableComponent, ReclamoFormComponent],
   templateUrl: './reclamos.html',
-  styleUrl: './reclamos.css',
+  styleUrl: './reclamos.scss',
 })
 export class ReclamosComponent {
   private router = inject(Router);

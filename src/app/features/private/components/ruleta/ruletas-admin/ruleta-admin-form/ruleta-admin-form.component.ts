@@ -15,7 +15,7 @@ import { campoInvalido, marcarFormulario } from '@/app/shared/utils/form-utils.c
   standalone: true,
   imports: [ReactiveFormsModule, InputTextModule, SelectModule, CheckboxModule, ButtonModule, MessageModule, InputNumberModule],
   templateUrl: './ruleta-admin-form.html',
-  styleUrl: './ruleta-admin-form.css',
+  styleUrl: './ruleta-admin-form.scss',
 })
 export class RuletaAdminFormComponent implements OnChanges, OnInit {
   @Output() guardar = new EventEmitter<RuletaRequest>();

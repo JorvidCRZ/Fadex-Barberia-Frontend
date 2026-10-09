@@ -23,7 +23,6 @@ import { buildCategoryTree } from '@/app/shared/utils/buildCategoryTree.componen
   imports: [ServicioFormComponent, ServicioTableComponent, DialogModule, ButtonModule,
     CommonModule, FormsModule, SearchBarComponent, DialogHeaderComponent, FiltrosComponent],
   templateUrl: './servicios.html',
-  styleUrl: './servicios.css',
 })
 export class ServiciosComponent implements OnInit {
   private cd = inject(ChangeDetectorRef);

@@ -8,7 +8,7 @@ import { formatearTexto } from '@/app/shared/utils/formatear-text.utils.componen
   selector: 'app-reclamo-table',
   imports: [CommonModule, TableModule],
   templateUrl: './reclamo-table.html',
-  styleUrl: './reclamo-table.css',
+  styleUrl: './reclamo-table.scss',
 })
 export class ReclamoTableComponent {
   @Input({ required: true }) reclamos: ReclamoResponse[] = [];
