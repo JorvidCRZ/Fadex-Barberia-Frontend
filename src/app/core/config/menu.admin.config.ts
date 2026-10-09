@@ -23,24 +23,12 @@ export const ADMIN_MENU = [
         routerLink: ['operaciones/ventas'],
         permission: 'VENTA_READ_ALL',
       },
-
-      {
-        label: "Pagos",
-        icon: "pi pi-credit-card",
-        routerLink: ["operaciones/pagos"],
-      },
       {
         label: 'Reclamos',
         icon: 'pi pi-exclamation-circle',
         routerLink: ['operaciones/reclamos'],
       },
     ],
-  },
-
-  {
-    label: "Sueldos",
-    icon: "pi pi-wallet",
-    routerLink: ["sueldos"],
   },
 
   {
@@ -66,14 +54,12 @@ export const ADMIN_MENU = [
         icon: "pi pi-users",
         routerLink: ["gestion/usuarios"],
         permission: "USUARIO_READ_ALL"
-      }
-
-      ,
-      {
-        label: "Sueldos",
-        icon: "pi pi-wallet",
-        routerLink: ["sueldos"],
-      }
+      },
+        {
+    label: "Sueldos",
+    icon: "pi pi-wallet",
+    routerLink: ["sueldos"],
+  },
 
     ]
   },
