@@ -1,300 +1,330 @@
-<div class="min-h-screen bg-ui-surface p-6 text-text-primary max-sm:p-3">
+@switch (rol) {
 
-  <!-- HEADER -->
-  <div class="mb-5 rounded-2xl border border-ui-border-soft bg-ui-card px-6 py-5">
-    <h1 class="text-2xl font-bold text-white">Hola, {{ username }}</h1>
-    <p class="mt-0.5 text-sm text-text-secondary">Bienvenido nuevamente a Fadex Barber</p>
-  </div>
-
-  @if (loading) {
-    <div class="py-10 text-center text-sm text-text-muted">
-      <i class="pi pi-spin pi-spinner mr-2"></i>Cargando datos...
-    </div>
-  }
-
-  @if (error && !loading) {
-    <div class="mb-4 rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
-      <i class="pi pi-exclamation-triangle mr-2"></i>{{ error }}
-    </div>
-  }
-
-  @if (!loading && !error) {
-
-    <!-- KPIs -->
-    <section class="mb-8">
-      <app-stats [items]="statsItems" />
-    </section>
-
-    <!-- PRÓXIMAS CITAS -->
-  <!-- PRÓXIMAS CITAS -->
-<section class="mb-8">
-
-    <div class="mb-4 flex items-center justify-between">
-
-        <div>
-            <h2 class="text-xl font-bold text-white">
-                Próximas citas
-            </h2>
-
-            <p class="mt-1 text-sm text-text-muted">
-                Tus próximas reservas programadas
-            </p>
+  <!-- ═══════════════════════════════ ADMIN ═══════════════════════════════ -->
+  @case ('admin') {
+    <div class="dashboard">
+      <div class="dashboard__header">
+        <div class="dashboard__header-left">
+          <h1 class="dashboard__title">Dashboard Administrador</h1>
+          <p class="dashboard__subtitle">Resumen general del negocio</p>
         </div>
+      </div>
 
-        <button
-            class="boton-ghost !px-4 !py-2 text-sm"
-            (click)="onVerHistorial()">
+      @if (error) {
+        <div class="dashboard__error">
+          <i class="pi pi-exclamation-triangle mr-2"></i>{{ error }}
+        </div>
+      }
 
-            Ver todas
-
-        </button>
-
-    </div>
-
-    @if (proximasCitas.length) {
-
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-
-            @for (cita of proximasCitas; track cita.reservaId) {
-
+      <div class="kpi-grid">
+        @if (loading) {
+          @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+            <div class="kpi-card kpi-card--skeleton"></div>
+          }
+        } @else {
+          @for (kpi of kpiCards; track kpi.label) {
+            <div class="kpi-card">
+              <div class="kpi-card__icon"><i class="pi pi-{{ kpi.icon }}"></i></div>
+              <div class="kpi-card__label">{{ kpi.label }}</div>
+              <div class="kpi-card__value">{{ kpi.value }}</div>
+              @if (kpi.delta) {
                 <div
-                    class="group relative overflow-hidden rounded-2xl border border-ui-border-soft bg-ui-card p-5 transition-all duration-200 hover:-translate-y-1 hover:border-brand-gold/40">
-
-                    <!-- Línea superior -->
-                    <div
-                        class="absolute left-0 right-0 top-0 h-[2px] bg-brand-gold">
-                    </div>
-
-                    <!-- Cabecera -->
-                    <div class="flex items-start justify-between gap-3">
-
-                        <div>
-
-                            <span
-                                class="text-[10px] font-bold tracking-[0.18em] text-brand-gold">
-                                PRÓXIMA CITA
-                            </span>
-
-                            <h3
-                                class="mt-2 text-lg font-bold text-white">
-                                {{ cita.servicio }}
-                            </h3>
-
-                        </div>
-
-                        <!-- Estado -->
-                        <span
-                            class="shrink-0 rounded-full border border-brand-gold/20 bg-brand-gold/10 px-2.5 py-1 text-[10px] font-semibold text-brand-gold">
-
-                            {{ cita.estado }}
-
-                        </span>
-
-                    </div>
-
-                    <!-- Información -->
-                    <div class="mt-5 flex flex-col gap-3">
-
-                        <!-- Fecha -->
-                        <div class="flex items-center gap-3">
-
-                            <div
-                                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-gold/10">
-
-                                <i
-                                    class="pi pi-calendar text-brand-gold">
-                                </i>
-
-                            </div>
-
-                            <div>
-
-                                <p class="text-[11px] text-text-muted">
-                                    Fecha
-                                </p>
-
-                                <p class="text-sm font-medium text-white">
-                                    {{ formatFechaCita(cita.fecha) }}
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                        <!-- Hora -->
-                        <div class="flex items-center gap-3">
-
-                            <div
-                                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/5">
-
-                                <i
-                                    class="pi pi-clock text-text-secondary">
-                                </i>
-
-                            </div>
-
-                            <div>
-
-                                <p class="text-[11px] text-text-muted">
-                                    Hora
-                                </p>
-
-                                <p class="text-sm font-medium text-white">
-                                    {{ cita.hora }}
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                        <!-- Barbero -->
-                        <div class="flex items-center gap-3">
-
-                            <div
-                                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/5">
-
-                                <i
-                                    class="pi pi-user text-text-secondary">
-                                </i>
-
-                            </div>
-
-                            <div>
-
-                                <p class="text-[11px] text-text-muted">
-                                    Barbero
-                                </p>
-
-                                <p class="text-sm font-medium text-white">
-                                    {{ cita.barbero }}
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <!-- Footer -->
-                    <div
-                        class="mt-5 flex items-center justify-between border-t border-ui-border-soft pt-4">
-
-                        <div>
-
-                            <p class="text-[11px] text-text-muted">
-                                Total
-                            </p>
-
-                            <p class="text-sm font-bold text-brand-gold">
-
-                                @if (cita.monto === 'Gratis' || cita.monto === '—') {
-
-                                    {{ cita.monto }}
-
-                                } @else {
-
-                                    S/ {{ cita.monto }}
-
-                                }
-
-                            </p>
-
-                        </div>
-
-                        <button
-                            class="boton-ghost !px-3 !py-2 text-xs"
-                            (click)="onVerDetalle(cita.reservaId)">
-
-                            Ver detalle
-
-                            <i class="pi pi-arrow-right ml-1 text-[10px]"></i>
-
-                        </button>
-
-                    </div>
-
+                  class="kpi-card__delta"
+                  [class.kpi-card__delta--positive]="kpi.deltaPositive"
+                  [class.kpi-card__delta--negative]="!kpi.deltaPositive"
+                >
+                  <i class="pi" [class.pi-arrow-up-right]="kpi.deltaPositive" [class.pi-arrow-down-right]="!kpi.deltaPositive"></i>
+                  {{ kpi.delta }}
                 </div>
-
-            }
-
-        </div>
-
-    } @else {
-
-        <!-- Sin citas -->
-        <div
-            class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-ui-border-soft bg-ui-card px-6 py-10 text-center">
-
-            <div
-                class="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-brand-gold/10">
-
-                <i class="pi pi-calendar text-xl text-brand-gold"></i>
-
+              }
             </div>
+          }
+        }
+      </div>
 
-            <p class="font-medium text-white">
-                No tienes citas programadas
-            </p>
-
-            <p class="mt-1 text-sm text-text-muted">
-                Agenda tu próxima visita a Fadex Barber.
-            </p>
-
-            <button
-                class="boton-ver mt-4 !px-5 !py-2.5"
-                routerLink="/mi-cuenta/reservar">
-
-                <i class="pi pi-plus mr-2"></i>
-                Agendar cita
-
-            </button>
-
+      <div class="citas-section">
+        <div class="citas-section__header">
+          <h2 class="citas-section__title">Próximas Citas</h2>
+          <app-button variant="primary" size="sm" icon="pi-refresh" label="Actualizar"
+                      [loading]="loadingCitas" (clicked)="refrescarCitas()" />
         </div>
 
-    }
+        <div class="citas-table-wrapper">
+          <table class="citas-table">
+            <thead>
+              <tr>
+                <th>Cliente</th><th>Hora</th><th>Servicio</th><th>Tipo</th><th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (loadingCitas) {
+                <tr>
+                  <td colspan="5" class="citas-table__empty">
+                    <i class="pi pi-spin pi-spinner mr-2"></i>Actualizando...
+                  </td>
+                </tr>
+              } @else if (citas.length === 0) {
+                <tr>
+                  <td colspan="5" class="citas-table__empty">
+                    <i class="pi pi-calendar mr-2"></i>No hay citas programadas para hoy
+                  </td>
+                </tr>
+              }
 
-</section>
+              @for (cita of citas; track cita.idReserva) {
+                <tr>
+                  <td>
+                    <div class="cliente-nombre">{{ getNombreCompleto(cita) }}</div>
+                    <div class="cliente-tel">
+                      <i class="pi pi-phone mr-1" style="font-size:10px"></i>{{ cita.telefonoCliente }}
+                    </div>
+                  </td>
+                  <td>
+                    <span class="hora"><i class="pi pi-clock mr-1"></i>{{ cita.horaInicio }}</span>
+                  </td>
+                  <td>
+                    <span class="badge-base servicio-badge">
+                      <i class="pi pi-scissors mr-1"></i>{{ getServicioResumen(cita) }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge-base"
+                          [class.badge-rol]="cita.tipoReserva === 'ONLINE'"
+                          [class.badge-text]="cita.tipoReserva === 'PRESENCIAL'">
+                      {{ cita.tipoReserva }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge-base" [ngClass]="getEstadoClass(cita.estado)">
+                      {{ getEstadoLabel(cita.estado) }}
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-    <!-- ACTIVIDAD RECIENTE -->
-    <section>
-      <div class="mb-3 flex items-center justify-between">
-        <h2 class="text-xl font-bold text-white">Actividad reciente</h2>
-        <button class="boton-ghost !px-4 !py-2 text-sm" (click)="onVerHistorial()">
-          Ver historial completo
+      <div class="prediccion-section">
+        <div class="prediccion-section__header">
+          <h2 class="prediccion-section__title">Predicción de clientes por día</h2>
+          <span class="prediccion-badge">Próxima semana</span>
+        </div>
+
+        @if (loadingPrediccion) {
+          <div class="prediccion-loading"><i class="pi pi-spin pi-spinner mr-2"></i>Calculando predicción...</div>
+        } @else {
+          <div class="prediccion-chart-wrap"><canvas #barCanvas></canvas></div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- ═══════════════════════════════ BARBERO ═══════════════════════════════ -->
+  @case ('barbero') {
+    <div class="barbero-dashboard">
+      <div class="barbero-header">
+        <div class="barbero-user">
+          <div class="barbero-avatar">{{ primerNombre.charAt(0) }}{{ primerApellido.charAt(0) }}</div>
+          <div class="barbero-greeting">
+            <h2>¡Hola, {{ primerNombre }}!</h2>
+            <p>Aquí está tu resumen del día</p>
+          </div>
+        </div>
+
+        <button class="barbero-status" [class.barbero-status--ocupado]="isOcupado" (click)="toggleEstado()">
+          <i class="pi" [class.pi-check-circle]="!isOcupado" [class.pi-times-circle]="isOcupado"></i>
+          {{ estadoLabel }}
         </button>
       </div>
 
-      <p-table [value]="historialReciente" [tableStyle]="{ 'min-width': '40rem' }">
-        <ng-template #header>
-          <tr>
-            <th>Fecha</th>
-            <th>Servicio</th>
-            <th>Barbero</th>
-            <th>Monto</th>
-            <th>Estado</th>
-          </tr>
-        </ng-template>
+      <p class="barbero-section-title">Panel del día</p>
+      <app-stats [items]="statsBarbero" />
 
-        <ng-template #body let-item>
-          <tr>
-            <td>{{ formatFechaTabla(item.fecha) }}</td>
-            <td>{{ item.servicio }}</td>
-            <td>{{ item.barbero }}</td>
-            <td>
-              <span class="badge-base border-brand-gold/25 bg-brand-gold/10 text-brand-gold">
-                {{ item.monto === 'Gratis' || item.monto === '—' ? item.monto : 'S/ ' + item.monto }}
-              </span>
-            </td>
-            <td><app-status-badge [value]="item.estado" type="text" /></td>
-          </tr>
-        </ng-template>
+      <p class="barbero-section-title">Resumen de actividad</p>
+      <div class="barbero-grid">
+        <div class="barbero-card">
+          <div class="barbero-card__head">
+            <h3>Mi agenda hoy</h3>
+            <p>Citas programadas para hoy</p>
+          </div>
 
-        <ng-template #emptymessage>
-          <tr>
-            <td colspan="5" class="!text-center text-text-muted">Aún no tienes actividad reciente</td>
-          </tr>
-        </ng-template>
-      </p-table>
-    </section>
+          @if (loading) {
+            <p class="barbero-empty">Cargando citas...</p>
+          } @else {
+            @for (cita of citasBarbero; track $index) {
+              <div class="barbero-cita" [class.barbero-cita--active]="getEstado(cita) === 'EN_PROCESO'">
+                <span class="barbero-cita__hora">{{ getHora(cita) }}</span>
+                <div class="barbero-cita__info">
+                  <div class="barbero-cita__cliente">{{ getNombreCliente(cita) }}</div>
+                  <div class="barbero-cita__servicio">{{ getNombreServicio(cita) }}</div>
+                </div>
+                <div class="barbero-cita__right">
+                  <div class="barbero-cita__precio">S/ {{ getPrecio(cita) | number:'1.0-0' }}</div>
+                  <app-status-badge [value]="getEstado(cita)" type="text" />
+                </div>
+              </div>
+            } @empty {
+              <p class="barbero-empty">No hay citas para hoy.</p>
+            }
+          }
+        </div>
+
+        <div class="barbero-card">
+          <div class="barbero-card__head">
+            <h3>Actividad semanal</h3>
+            <p>Servicios realizados esta semana</p>
+          </div>
+
+          <div class="barbero-chart-box"><canvas #barCanvas></canvas></div>
+
+          <div class="barbero-sueldo-box">
+            <div class="barbero-sueldo-row">
+              <span class="barbero-sueldo-label"><i class="pi pi-wallet"></i> Sueldo base</span>
+              <span class="barbero-sueldo-amount">S/ {{ sueldoBase | number:'1.2-2' }}</span>
+            </div>
+            <div class="barbero-sueldo-row">
+              <span class="barbero-sueldo-label"><i class="pi pi-percentage"></i> Comisión semanal ({{ pctComision }}%)</span>
+              <span class="barbero-sueldo-amount">S/ {{ comisionSemanal | number:'1.2-2' }}</span>
+            </div>
+            <div class="barbero-sueldo-total">
+              <span class="barbero-total-label">Total semana</span>
+              <span class="barbero-total-val">S/ {{ totalSemana | number:'1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   }
-</div>
+
+  <!-- ═══════════════════════════════ CLIENTE ═══════════════════════════════ -->
+  @default {
+    <div class="min-h-screen bg-ui-surface p-6 text-text-primary max-sm:p-3">
+
+      <div class="mb-5 rounded-2xl border border-ui-border-soft bg-ui-card px-6 py-5">
+        <h1 class="text-2xl font-bold text-white">Hola, {{ username }}</h1>
+        <p class="mt-0.5 text-sm text-text-secondary">Bienvenido nuevamente a Fadex Barber</p>
+      </div>
+
+      @if (loading) {
+        <div class="py-10 text-center text-sm text-text-muted">
+          <i class="pi pi-spin pi-spinner mr-2"></i>Cargando datos...
+        </div>
+      } @else if (error) {
+        <div class="mb-4 rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
+          <i class="pi pi-exclamation-triangle mr-2"></i>{{ error }}
+        </div>
+      } @else {
+
+        <section class="mb-8">
+          <app-stats [items]="statsCliente" />
+        </section>
+
+        <!-- Reservas actuales (tabla) + detalle de la seleccionada (card) -->
+        <section class="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <!-- Card de detalle -->
+          @if (seleccionada; as cita) {
+            <div class="relative overflow-hidden rounded-2xl border border-ui-border-soft bg-ui-card p-5">
+              <div class="absolute left-0 right-0 top-0 h-[2px] bg-brand-gold"></div>
+
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <span class="text-[10px] font-bold tracking-[0.18em] text-brand-gold">DETALLE DE LA CITA</span>
+                  <h3 class="mt-2 text-lg font-bold text-white">{{ cita.servicio }}</h3>
+                </div>
+                <app-status-badge [value]="cita.estado" type="text" />
+              </div>
+
+              <div class="mt-5 flex flex-col gap-3">
+                <div class="flex items-center gap-3">
+                  <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-gold/10">
+                    <i class="pi pi-calendar text-brand-gold"></i>
+                  </div>
+                  <div>
+                    <p class="text-[11px] text-text-muted">Fecha</p>
+                    <p class="text-sm font-medium capitalize text-white">{{ formatFechaCita(cita.fecha) }}</p>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                  <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/5">
+                    <i class="pi pi-clock text-text-secondary"></i>
+                  </div>
+                  <div>
+                    <p class="text-[11px] text-text-muted">Hora</p>
+                    <p class="text-sm font-medium text-white">{{ cita.hora }}</p>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                  <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/5">
+                    <i class="pi pi-user text-text-secondary"></i>
+                  </div>
+                  <div>
+                    <p class="text-[11px] text-text-muted">Barbero</p>
+                    <p class="text-sm font-medium text-white">{{ cita.barbero }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-5 flex items-center justify-between border-t border-ui-border-soft pt-4">
+                <div>
+                  <p class="text-[11px] text-text-muted">Total</p>
+                  <p class="text-sm font-bold text-brand-gold">
+                    {{ cita.monto === 'Gratis' || cita.monto === '—' ? cita.monto : 'S/ ' + cita.monto }}
+                  </p>
+                </div>
+                <app-button variant="ghost" size="sm" label="Ver detalle" icon="pi-arrow-right"
+                            (clicked)="onVerDetalle(cita.reservaId)" />
+              </div>
+            </div>
+          } @else {
+            <div class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-ui-border-soft bg-ui-card px-6 py-10 text-center">
+              <div class="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-brand-gold/10">
+                <i class="pi pi-calendar text-xl text-brand-gold"></i>
+              </div>
+              <p class="font-medium text-white">No tienes citas programadas</p>
+              <p class="mt-1 text-sm text-text-muted">Agenda tu próxima visita a Fadex Barber.</p>
+              <a class="boton-ver mt-4 !px-5 !py-2.5" routerLink="/mi-cuenta/reservar/agendar">
+                <i class="pi pi-plus mr-2"></i>Agendar cita
+              </a>
+            </div>
+          }
+        </section>
+
+        <!-- Actividad reciente -->
+        <section>
+          <div class="mb-3 flex items-center justify-between">
+            <h2 class="text-xl font-bold text-white">Actividad reciente</h2>
+            <app-button variant="ghost" size="sm" label="Ver historial completo" (clicked)="onVerHistorial()" />
+          </div>
+
+          <p-table [value]="historialReciente" [tableStyle]="{ 'min-width': '40rem' }">
+            <ng-template #header>
+              <tr><th>Fecha</th><th>Servicio</th><th>Barbero</th><th>Monto</th><th>Estado</th></tr>
+            </ng-template>
+
+            <ng-template #body let-item>
+              <tr>
+                <td>{{ formatFechaTabla(item.fecha) }}</td>
+                <td>{{ item.servicio }}</td>
+                <td>{{ item.barbero }}</td>
+                <td>
+                  <span class="badge-base border-brand-gold/25 bg-brand-gold/10 text-brand-gold">
+                    {{ item.monto === 'Gratis' || item.monto === '—' ? item.monto : 'S/ ' + item.monto }}
+                  </span>
+                </td>
+                <td><app-status-badge [value]="item.estado" type="text" /></td>
+              </tr>
+            </ng-template>
+
+            <ng-template #emptymessage>
+              <tr><td colspan="5" class="!text-center text-text-muted">Aún no tienes actividad reciente</td></tr>
+            </ng-template>
+          </p-table>
+        </section>
+      }
+    </div>
+  }
+}

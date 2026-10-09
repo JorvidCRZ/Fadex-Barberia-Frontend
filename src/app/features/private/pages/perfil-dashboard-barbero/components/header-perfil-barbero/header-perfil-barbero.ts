@@ -6,7 +6,6 @@ import { Divider } from "primeng/divider";
   selector: 'app-header-perfil-barbero',
   imports: [Divider],
   templateUrl: './header-perfil-barbero.html',
-  styleUrl: './header-perfil-barbero.css',
 })
 export class HeaderPerfilBarbero {
   @Input() barberoNombre = 'Barbero';

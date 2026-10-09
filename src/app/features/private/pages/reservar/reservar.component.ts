@@ -66,7 +66,7 @@ const HORARIOS = Array.from({ length: 20 }, (_, i) => {
   standalone: true,
   imports: [
     CommonModule, ReactiveFormsModule, DialogModule, SelectModule, DatePickerModule,
-    CheckboxModule, DialogHeaderComponent,
+    CheckboxModule
   ],
   templateUrl: './reservar.html',
 })

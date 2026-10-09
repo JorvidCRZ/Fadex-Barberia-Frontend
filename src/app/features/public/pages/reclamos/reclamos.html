@@ -83,7 +83,7 @@
       <p class="text-text-secondary text-sm">Tu código de seguimiento es:</p>
       <span class="text-brand-gold text-2xl font-bold tracking-widest">{{ numeroReclamo }}</span>
       <p class="text-text-muted text-xs">También hemos enviado este código a tu correo electrónico. Guárdalo para consultar el estado de tu solicitud.</p>
-      <button type="button" (click)="registrarOtro()" class="boton-primary mt-2 mx-auto">Registrar otro reclamo</button>
+      <app-button variant="primary" icon="pi-plus" label="Registrar otro reclamo" styleClass="mt-2 mx-auto" (clicked)="registrarOtro()" />
     </div>
   }
 
@@ -102,6 +102,7 @@
         </div>
         <div class="mt-4 grid grid-cols-4 gap-2">
           @for (nombre of nombresPasos; track nombre; let i = $index) {
+           
             <button type="button" [disabled]="i >= pasoActual" (click)="irAlPaso(i)" class="flex flex-col items-center gap-1 text-center">
               <span class="flex h-8 w-8 items-center justify-center rounded-full border text-xs font-bold"
                 [class.border-brand-gold]="i <= pasoActual" [class.bg-brand-gold]="i <= pasoActual"
@@ -109,6 +110,7 @@
                 [class.text-text-muted]="i > pasoActual">{{ i < pasoActual ? '✓' : i + 1 }}</span>
               <span class="hidden text-[11px] sm:block" [class.text-brand-gold]="i <= pasoActual" [class.text-text-muted]="i > pasoActual">{{ nombre }}</span>
             </button>
+
           }
         </div>
       </div>
@@ -281,11 +283,7 @@
                   <span class="text-text-secondary text-xs truncate max-w-xs">{{ archivo.name }}</span>
                   <span class="text-text-subtle text-xs shrink-0">{{ formatearTamano(archivo.size) }}</span>
                 </div>
-                <button type="button" (click)="eliminarArchivo(i)" class="text-text-subtle hover:text-brand-red transition ml-4 shrink-0">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"/>
-                  </svg>
-                </button>
+                <app-button variant="eliminar-tabla" icon="pi-times" tooltip="Quitar archivo" (clicked)="eliminarArchivo(i)" />
               </div>
             }
           </div>
@@ -329,20 +327,12 @@
       }
 
       <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
-        <button type="button" (click)="pasoAnterior()" [disabled]="pasoActual === 0 || enviando" class="boton-secondary p-button" [class.invisible]="pasoActual === 0">← Atrás</button>
+        <app-button variant="secondary" label="← Atrás" [disabled]="pasoActual === 0 || enviando"
+          [styleClass]="pasoActual === 0 ? 'invisible' : ''" (clicked)="pasoAnterior()" />
         <div class="flex flex-col gap-3 sm:flex-row">
-        <button pButton type="button" (click)="onLimpiar()" [disabled]="enviando" class="boton-secondary p-button">Limpiar</button>
-        <button pButton type="submit" [disabled]="enviando" class="boton-primary p-button flex items-center gap-2 justify-center">
-          @if (enviando) {
-            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
-            </svg>
-            Enviando...
-          } @else {
-            {{ pasoActual === totalPasos - 1 ? 'Enviar solicitud' : 'Continuar →' }}
-          }
-        </button>
+          <app-button variant="secondary" label="Limpiar" [disabled]="enviando" (clicked)="onLimpiar()" />
+          <app-button variant="primary" type="submit" [loading]="enviando" loadingLabel="Enviando..."
+            [label]="pasoActual === totalPasos - 1 ? 'Enviar solicitud' : 'Continuar →'" />
         </div>
       </div>
     </form>

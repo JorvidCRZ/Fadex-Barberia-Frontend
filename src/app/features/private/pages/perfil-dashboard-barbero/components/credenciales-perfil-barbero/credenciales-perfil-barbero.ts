@@ -12,7 +12,6 @@ import { Divider } from "primeng/divider";
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, Divider],
   templateUrl: './credenciales-perfil-barbero.html',
-  styleUrl: './credenciales-perfil-barbero.css',
 })
 export class CredencialesPerfilBarbero {
 

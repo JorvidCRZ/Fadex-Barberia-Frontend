@@ -9,18 +9,18 @@ import { InputTextModule } from 'primeng/inputtext';
 import { MessageModule } from 'primeng/message';
 import { SelectModule } from 'primeng/select';
 import { TextareaModule } from 'primeng/textarea';
-import { NotificationService } from '../../../../core/services/common/notification.service';
 import { ReclamoService } from '../../../../core/services/operaciones/reclamo.service';
+import { NotificationService } from '../../../../core/services/common/notification.service';
 import { TIPO_DOCUMENTO_OPTIONS, TIPO_PROBLEMA_OPTIONS, TIPO_RECLAMACION_OPTIONS } from '../../../../core/models/common/select.option.model';
 import { campoInvalido, marcarFormulario } from '../../../../shared/utils/form-utils.component';
 import { TipoReclamacion } from '../../../../core/models/operaciones/reclamos-model/reclamo.enum.model';
 import { ReclamoPublicoRequest } from '../../../../core/models/operaciones/reclamos-model/reclamo.model';
+import { ButtonComponent } from '@/app/shared/components/button/button.component';
 
 @Component({
   selector: 'app-reclamos',
   imports: [ReactiveFormsModule, SelectModule, InputTextModule, InputNumberModule, CheckboxModule,
-    TextareaModule, ButtonModule, DatePickerModule, MessageModule, CommonModule
-  ],
+    TextareaModule, ButtonModule, DatePickerModule, MessageModule, CommonModule, ButtonComponent],
   templateUrl: './reclamos.html'
 })
 export class ReclamosComponent implements OnInit {

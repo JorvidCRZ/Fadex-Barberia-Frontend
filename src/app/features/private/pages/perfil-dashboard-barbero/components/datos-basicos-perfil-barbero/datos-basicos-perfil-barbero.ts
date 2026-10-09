@@ -9,7 +9,6 @@ import { Divider } from "primeng/divider";
   selector: 'app-datos-basicos-perfil-barbero',
   imports: [CommonModule, FormsModule, Divider],
   templateUrl: './datos-basicos-perfil-barbero.html',
-  styleUrl: './datos-basicos-perfil-barbero.css',
 })
 export class DatosBasicosPerfilBarbero implements OnInit {
 

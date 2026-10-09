@@ -39,7 +39,6 @@ export interface ServicioHistorialDTO {
     FiltrosComponent
   ],
   templateUrl: './cortes-dashboard-barbero.html',
-  styleUrl: './cortes-dashboard-barbero.css',
 })
 export class CortesDashboardBarbero implements OnInit {
 
