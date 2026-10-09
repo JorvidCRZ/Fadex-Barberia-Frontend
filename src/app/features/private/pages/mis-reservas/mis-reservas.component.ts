@@ -74,10 +74,29 @@ export class MisReservasComponent implements OnInit {
     this.rows = size;
 
     if (environment.useMockData) {
-      const inicio = page * size;
-      this.reservas = RESERVAS_MOCK.slice(inicio, inicio + size);
-      this.totalRecords = RESERVAS_MOCK.length;
-      this.loading = false;
+      this.reservaService.getMisReservas(page, size)
+        .pipe(finalize(() => (this.loading = false)))
+        .subscribe({
+          next: (response: ApiResponse<Page<Reserva>>) => {
+            if (response.success && response.data) {
+              this.reservas = response.data.content;
+              this.totalRecords = response.data.totalElements;
+              this.rows = response.data.pageSize || size;
+            } else {
+              this.reservas = [];
+              this.totalRecords = 0;
+            }
+          },
+          error: () => {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'No se pudieron cargar tus reservas',
+            });
+            this.reservas = [];
+            this.totalRecords = 0;
+          },
+        });
       return;
     }
 
@@ -112,6 +131,31 @@ export class MisReservasComponent implements OnInit {
 
   recargar(): void {
     this.cargarMisReservas();
+  }
+
+  private getReservasMockLocales(): Reserva[] {
+    try {
+      const raw = localStorage.getItem('fadex_mock_reservas');
+      if (!raw) {
+        return [];
+      }
+
+      const parsed = JSON.parse(raw) as Reserva[];
+      if (!Array.isArray(parsed) || parsed.length === 0) {
+        return [];
+      }
+
+      return [...parsed]
+        .sort((a, b) => Number(b.reservaId || b.id || 0) - Number(a.reservaId || a.id || 0))
+        .map((reserva) => ({
+          ...reserva,
+          fecha: new Date(reserva.fecha),
+          horaInicio: new Date(reserva.horaInicio),
+          horaFin: new Date(reserva.horaFin),
+        }));
+    } catch {
+      return RESERVAS_MOCK;
+    }
   }
 
   // ── Nueva reserva (modal) ──────────────────────────────────────────────────
