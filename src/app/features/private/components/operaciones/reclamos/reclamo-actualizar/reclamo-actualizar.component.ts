@@ -18,7 +18,7 @@ import { SolesPipe } from '@/app/shared/pipes/moneda.pipe';
     ButtonModule, MessageModule, InputNumberModule,SolesPipe
   ],
   templateUrl: './reclamo-actualizar.html',
-  styleUrl: './reclamo-actualizar.css',
+  styleUrl: './reclamo-actualizar.scss',
 })
 export class ReclamoActualizarComponent implements OnInit, OnChanges {
   @Output() guardar        = new EventEmitter<ReclamoSolucionRequest>();

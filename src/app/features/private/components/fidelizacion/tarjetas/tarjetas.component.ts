@@ -25,7 +25,6 @@ import { of } from 'rxjs';
     DialogHeaderComponent, TarjetaTableComponent, TarjetaFormComponent, FiltrosComponent, TarjetaGraficoComponent
   ],
   templateUrl: './tarjetas.html',
-  styleUrl: './tarjetas.css',
 })
 export class TarjetasComponent implements OnInit {
   private cd = inject(ChangeDetectorRef);

@@ -32,7 +32,7 @@ import { of } from 'rxjs';
     imports: [ReactiveFormsModule, InputTextModule, SelectModule, CheckboxModule, ButtonModule, MessageModule, InputNumberModule, PremioCardComponent, ImageModule,
         FileUploadModule, ProductoSelectorComponent, DialogHeaderComponent, DialogModule, ServicioSelectorComponent, SafeImageUrlPipe],
     templateUrl: './ruleta-item-form.html',
-    styleUrl: './ruleta-item-form.css',
+    styleUrl: './ruleta-item-form.scss',
 })
 export class RuletaItemFormComponent implements OnChanges, OnInit {
     @Output() guardar = new EventEmitter<{ data: RuletaItemRequest, imagen?: File | null }>();

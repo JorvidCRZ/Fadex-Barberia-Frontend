@@ -24,7 +24,6 @@ interface LineaCarrito {
   standalone: true,
   imports: [CommonModule, FormsModule, SelectModule],
   templateUrl: './pos.html',
-  styleUrls: ['./pos.css']
 })
 export class PosComponent {
 

@@ -12,7 +12,7 @@ import { SafeImageUrlPipe } from '@/app/shared/pipes/safe-image-url.pipe';
   selector: 'app-reclamo-detalle',
   imports: [ButtonModule, CommonModule, StatusBadgeComponent, ImageModule, SafeImageUrlPipe],
   templateUrl: './reclamo-detalle.html',
-  styleUrl: './reclamo-detalle.css',
+  styleUrl: './reclamo-detalle.scss',
 })
 export class ReclamoDetalleComponent implements OnInit {
   private router = inject(Router);

@@ -30,7 +30,7 @@ import { of } from 'rxjs';
   imports: [CommonModule, FormsModule, ButtonModule, DialogModule, RuletaPreviewComponent, TabsModule, RuletaAdminFormComponent, RuletaConfiguracionesComponent,
     RuletaAdminTableComponent, RuletaItemFormComponent, RuletaItemTableComponent, DialogHeaderComponent, SearchBarComponent,FiltrosComponent],
   templateUrl: './ruletas-admin.html',
-  styleUrl: './ruletas-admin.css',
+  styleUrl: './ruletas-admin.scss',
 })
 export class RuletasAdminComponent implements OnInit {
 
