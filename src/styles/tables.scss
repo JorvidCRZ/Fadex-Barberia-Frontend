@@ -87,11 +87,102 @@ p-table{
    TABLE ACTIONS
    ======================================== */
 
-.boton-editar-tabla .p-button,
-.boton-eliminar-tabla .p-button,
-.p-button.boton-eliminar-tabla,
-.boton-ver-tabla .p-button,
-.boton-agregar .p-button {
+/* El host (p-button) no pinta nada */
+.boton-ver-tabla:not(.p-button),
+.boton-editar-tabla:not(.p-button),
+.boton-eliminar-tabla:not(.p-button),
+.boton-agregar:not(.p-button) {
+    display: inline-flex;
+    background: transparent !important;
+    border: none !important;
     box-shadow: none !important;
+    padding: 0 !important;
+}
+
+/* Solo el <button> real se estiliza (base común) */
+.boton-ver-tabla.p-button,
+.boton-ver-tabla > .p-button,
+.boton-editar-tabla.p-button,
+.boton-editar-tabla > .p-button,
+.boton-eliminar-tabla.p-button,
+.boton-eliminar-tabla > .p-button,
+.boton-agregar.p-button,
+.boton-agregar > .p-button {
+    width: 2rem !important;
+    height: 2rem !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    transition: all 0.2s ease;
+}
+
+/* Ver: dorado */
+.boton-ver-tabla.p-button,
+.boton-ver-tabla > .p-button {
+    color: rgb(var(--color-brand-gold)) !important;
+    border: 1px solid rgb(var(--color-brand-gold) / 0.3) !important;
+    background: rgb(var(--color-brand-gold) / 0.08) !important;
+}
+.boton-ver-tabla.p-button:hover,
+.boton-ver-tabla > .p-button:hover {
+    background: rgb(var(--color-brand-gold)) !important;
+    color: #000 !important;
+    transform: translateY(-1px);
+}
+
+/* Agregar: dorado */
+.boton-agregar.p-button,
+.boton-agregar > .p-button {
+    color: rgb(var(--color-brand-gold)) !important;
+    border: 1px solid rgb(var(--color-brand-gold) / 0.3) !important;
+    background: rgb(var(--color-brand-gold) / 0.08) !important;
+}
+.boton-agregar.p-button:hover,
+.boton-agregar > .p-button:hover {
+    background: rgb(var(--color-brand-gold)) !important;
+    color: #000 !important;
+    transform: translateY(-1px);
+}
+
+/* Editar: azul */
+.boton-editar-tabla.p-button,
+.boton-editar-tabla > .p-button {
+    color: #60a5fa !important;
+    border: 1px solid rgb(96 165 250 / 0.3) !important;
+    background: rgb(96 165 250 / 0.08) !important;
+}
+.boton-editar-tabla.p-button:hover,
+.boton-editar-tabla > .p-button:hover {
+    background: #60a5fa !important;
+    color: #000 !important;
+    transform: translateY(-1px);
+}
+
+/* Eliminar: rojo */
+.boton-eliminar-tabla.p-button,
+.boton-eliminar-tabla > .p-button {
+    color: #f87171 !important;
+    border: 1px solid rgb(248 113 113 / 0.3) !important;
+    background: rgb(248 113 113 / 0.08) !important;
+}
+.boton-eliminar-tabla.p-button:hover,
+.boton-eliminar-tabla > .p-button:hover {
+    background: #ef4444 !important;
+    color: #fff !important;
+    transform: translateY(-1px);
+}
+
+/* Sin outline al enfocar */
+.boton-ver-tabla.p-button:focus-visible,
+.boton-ver-tabla > .p-button:focus-visible,
+.boton-editar-tabla.p-button:focus-visible,
+.boton-editar-tabla > .p-button:focus-visible,
+.boton-eliminar-tabla.p-button:focus-visible,
+.boton-eliminar-tabla > .p-button:focus-visible,
+.boton-agregar.p-button:focus-visible,
+.boton-agregar > .p-button:focus-visible {
+    outline: none !important;
+    box-shadow: 0 0 0 2px rgb(var(--color-brand-gold) / 0.4) !important;
 }
 }

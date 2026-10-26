@@ -4,11 +4,12 @@ import { BarberoService, FiltroBarberoBusqueda, DireccionOrden, OrdenarBarberoPo
 import { HeaderBarbero } from "./components/header-barbero/header-barbero.component";
 import { ResumenGeneralBarberoComponent } from './components/resumen-general-barbero/resumen-general-barbero.component';
 import { TableBarbero } from './components/table-barbero/table-barbero.component';
-import { FiltrarBarbero } from "./components/filtrar-barbero/filtrar-barbero.component";
+import { FiltrosComponent } from '@/app/shared/components/filtros/filtros.component';
+import { FilterField } from '@/app/core/models/common/filtro.model';
 
 @Component({
   selector: 'app-barberos',
-  imports: [HeaderBarbero, ResumenGeneralBarberoComponent, TableBarbero, FiltrarBarbero],
+  imports: [HeaderBarbero, ResumenGeneralBarberoComponent, TableBarbero, FiltrosComponent],
   templateUrl: './barberos.html',
   styleUrl: './barberos.scss',
 })
@@ -28,16 +29,46 @@ export class Barberos implements OnInit {
 
   private barberoService = inject(BarberoService);
 
-  readonly barberosMemoria = [
-    { barberoId: 1, persona: { nombre: 'Renzo', apellido: 'Castillo', email: 'renzo.castillo@gmail.com' }, estado: 'Disponible', comision: '35%', sueldo: 'S/ 4,820.00' },
-    { barberoId: 2, persona: { nombre: 'Álvaro', apellido: 'Mendoza', email: 'alvaro.mendoza@gmail.com' }, estado: 'Disponible', comision: '32%', sueldo: 'S/ 4,260.00' },
-    { barberoId: 3, persona: { nombre: 'José Luis', apellido: 'Ramos', email: 'joseluis.ramos@gmail.com' }, estado: 'Disponible', comision: '30%', sueldo: 'S/ 3,790.00' },
-    { barberoId: 4, persona: { nombre: 'Bruno', apellido: 'Espinoza', email: 'bruno.espinoza@gmail.com' }, estado: 'Descanso', comision: '30%', sueldo: 'S/ 3,140.00' },
-  ];
+  readonly filtroFields: FilterField[] = [
+    {
+      key: 'estado',
+      label: 'Estado',
+      type: 'select',
+      placeholder: 'Todos',
+      options: [
+        { value: 'disponible',     label: 'Disponible'     },
+        { value: 'ocupado',        label: 'Ocupado'        },
+        { value: 'inhabilitados',  label: 'Inhabilitados'  },
+      ],
+    },
+    {
+      key: 'orden',
+      label: 'Ordenar',
+      type: 'select',
+      placeholder: 'Seleccionar',
+      options: [
+        { value: 'fechaIngreso_desc', label: 'Fecha (más recientes)' },
+        { value: 'fechaIngreso_asc',  label: 'Fecha (más antiguas)'  },
+        { value: 'experiencia_desc',  label: 'Experiencia (mayor)'   },
+        { value: 'experiencia_asc',   label: 'Experiencia (menor)'   },
+        { value: 'sueldo_desc',       label: 'Sueldo (mayor)'        },
+        { value: 'sueldo_asc',        label: 'Sueldo (menor)'        },
+        { value: 'comision_desc',     label: 'Comisión (mayor)'      },
+        { value: 'comision_asc',      label: 'Comisión (menor)'      },
+      ],
+    },
+  ] as FilterField[];
 
   ngOnInit(): void {
-    // this.loadPage(0);
-    this.aplicarPaginaMemoria();
+    this.loadPage(0);
+  }
+
+  onBuscarFiltros(v: any): void {
+    if (v.estado === 'inhabilitados') {
+      this.onShowInhabilitados();
+      return;
+    }
+    this.onApplyFilters({ estado: v.estado ?? '', order: v.orden ?? '' });
   }
 
   private extraerPersona(b: any): { persona: any; nombre: string; apellido: string; email: string } {
@@ -81,29 +112,19 @@ export class Barberos implements OnInit {
   private aplicarPagina(res: any): void {
     if (!res || !res.success) return;
     const p = res.data;
-    this.barberos     = this.mapBarberos(p.content || []);
+    this.barberos      = this.mapBarberos(p.content || []);
     this.totalElements = p.totalElements || 0;
-    this.currentPage  = p.pageNumber || 0;
-    this.totalPages   = p.totalPages || 0;
+    this.currentPage   = p.pageNumber || 0;
+    this.totalPages    = p.totalPages || 0;
   }
 
   loadPage(page: number = 0, size: number = this.pageSize, filtros: FiltroBarberoBusqueda = this.filtrosActuales): void {
-    /*
     const useFilters = Boolean(filtros.estado || filtros.ordenarPor || filtros.direccion);
     const request$ = useFilters
       ? this.barberoService.buscar(filtros, page, size)
       : this.barberoService.listar(page, size);
 
     request$.subscribe((res: any) => this.aplicarPagina(res));
-    */
-    this.aplicarPaginaMemoria(page);
-  }
-
-  private aplicarPaginaMemoria(page = 0): void {
-    this.barberos = this.barberosMemoria;
-    this.totalElements = this.barberosMemoria.length;
-    this.currentPage = page;
-    this.totalPages = 1;
   }
 
   onSearch(query: string): void {

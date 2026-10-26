@@ -6,12 +6,11 @@ import { NotificationService } from '@/app/core/services/common/notification.ser
 import { HeaderPerfilUsuario } from './components/header-perfil-usuario/header-perfil-usuario.component';
 import { CredencialesPerfilUsuario } from './components/credenciales-perfil-usuario/credenciales-perfil-usuario.component';
 import { DatosBasicosPerfilUsuario } from './components/datos-basicos-perfil-usuario/datos-basicos-perfil-usuario.component';
-import { RolesPermisosPerfilUsuario } from './components/roles-permisos-perfil-usuario/roles-permisos-perfil-usuario.component';
 
 @Component({
   selector: 'app-perfil-usuario',
   standalone: true,
-  imports: [CommonModule, HeaderPerfilUsuario,RolesPermisosPerfilUsuario , DatosBasicosPerfilUsuario, CredencialesPerfilUsuario ],
+  imports: [CommonModule, HeaderPerfilUsuario, DatosBasicosPerfilUsuario, CredencialesPerfilUsuario],
   templateUrl: './perfil-usuario.html',
 })
 export class PerfilUsuario implements OnInit {
@@ -33,14 +32,6 @@ export class PerfilUsuario implements OnInit {
   cargando = false;
   errorCarga = '';
 
-  readonly usuariosMemoria = [
-    { usuarioId: 1, nombre: 'María Fernanda', apellido: 'Torres', telefono: '987 000 001', email: 'maria.torres@gmail.com', username: 'admin1' },
-    { usuarioId: 2, nombre: 'Renzo', apellido: 'Castillo', telefono: '986 410 251', email: 'renzo.castillo@gmail.com', username: 'renzo.c' },
-    { usuarioId: 3, nombre: 'Álvaro', apellido: 'Mendoza', telefono: '942 704 188', email: 'alvaro.mendoza@gmail.com', username: 'alvaro.m' },
-    { usuarioId: 4, nombre: 'Valeria', apellido: 'Quispe', telefono: '987 245 613', email: 'valeria.quispe@gmail.com', username: 'valeria.q' },
-    { usuarioId: 5, nombre: 'Diego', apellido: 'Salazar', telefono: '946 318 722', email: 'diego.salazar@gmail.com', username: 'diego.s' },
-  ];
-
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
@@ -50,58 +41,40 @@ export class PerfilUsuario implements OnInit {
   }
 
   private cargarUsuario(id: number): void {
-    /*
     if (!id) {
-        this.errorCarga = 'No se encontró el usuario solicitado.';
-        return;
+      this.errorCarga = 'No se encontró el usuario solicitado.';
+      return;
     }
 
     this.cargando = true;
     this.errorCarga = '';
 
     this.usuarioService.obtenerPorId(id).subscribe({
-        next: (response) => {
-            const data: any = response?.data ?? {};
+      next: (response) => {
+        const data: any = response?.data ?? {};
 
-            // ✅ El response es plano: { idUsuario, username, nombre, apellido, email, telefono, rol }
-            this.usuarioId  = Number(data?.idUsuario ?? id);
-            this.nombre     = data?.nombre    ?? '—';
-            this.apellido   = data?.apellido  ?? '—';
-            this.telefono   = data?.telefono  ?? '—';
-            this.email      = data?.email     ?? '—';
-            this.usuario    = data?.username  ?? 'No disponible';
-            this.contrasena = 'No disponible'; // el response no trae password
+        // El response es plano: { idUsuario, username, nombre, apellido, email, telefono, rol }
+        this.usuarioId  = Number(data?.idUsuario ?? id);
+        this.nombre     = data?.nombre    ?? '—';
+        this.apellido   = data?.apellido  ?? '—';
+        this.telefono   = data?.telefono  ?? '—';
+        this.email      = data?.email     ?? '—';
+        this.usuario    = data?.username  ?? 'No disponible';
+        this.contrasena = 'No disponible'; // el response no trae password
 
-            const nombreCompleto = [this.nombre, this.apellido].filter(Boolean).join(' ').trim();
-            this.usuarioNombre     = nombreCompleto || this.usuario || `Usuario ${id}`;
-            this.usuarioIniciales  = this.getInitials(this.usuarioNombre);
-            this.usuarioDescripcion = `ID usuario: ${this.usuarioId}`;
-            this.cargando = false;
-        },
-        error: () => {
-            this.cargando = false;
-            this.errorCarga = 'No se pudo cargar el perfil del usuario.';
-            this.notificationService.showError(this.errorCarga);
-        },
+        const nombreCompleto = [this.nombre, this.apellido].filter(Boolean).join(' ').trim();
+        this.usuarioNombre      = nombreCompleto || this.usuario || `Usuario ${id}`;
+        this.usuarioIniciales   = this.getInitials(this.usuarioNombre);
+        this.usuarioDescripcion = `ID usuario: ${this.usuarioId}`;
+        this.cargando = false;
+      },
+      error: () => {
+        this.cargando = false;
+        this.errorCarga = 'No se pudo cargar el perfil del usuario.';
+        this.notificationService.showError(this.errorCarga);
+      },
     });
-    */
-    const data = this.usuariosMemoria.find((item) => item.usuarioId === id);
-    if (!data) {
-      this.errorCarga = 'No se pudo cargar el perfil del usuario.';
-      return;
-    }
-
-    this.usuarioId = data.usuarioId;
-    this.nombre = data.nombre;
-    this.apellido = data.apellido;
-    this.telefono = data.telefono;
-    this.email = data.email;
-    this.usuario = data.username;
-    this.usuarioNombre = `${data.nombre} ${data.apellido}`;
-    this.usuarioIniciales = this.getInitials(this.usuarioNombre);
-    this.usuarioDescripcion = `ID usuario: ${this.usuarioId}`;
-    this.cargando = false;
-}
+  }
 
   private getInitials(name: string): string {
     const parts = name.split(' ').filter(Boolean);
@@ -117,8 +90,5 @@ export class PerfilUsuario implements OnInit {
     return `${'•'.repeat(maskedLength)}${password.slice(-4)}`;
   }
 
-  
-
   volver = () => window.history.back();
-
 }

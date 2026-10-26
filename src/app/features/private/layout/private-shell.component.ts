@@ -31,8 +31,6 @@ import { ButtonComponent } from '../../../shared/components/button/button.compon
       <div class="flex h-16 items-center justify-between border-b border-ui-border bg-ui-black px-4 md:px-6">
         <div class="flex items-center gap-3">
           <span class="inline-flex md:hidden">
-            <button pButton type="button" class="boton-sidebar-toggle"
-              (click)="toggleSidebar()" aria-label="Abrir o cerrar menú" icon="pi pi-bars"></button>
           </span>
           <span class="inline-flex md:hidden">
   <app-button variant="sidebar-toggle" icon="bars"
