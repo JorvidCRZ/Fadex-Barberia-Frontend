@@ -1,0 +1,331 @@
+/* =========================
+   RESUMEN BARBERO
+========================= */
+
+.wrap {
+  padding: 1.5rem;
+  min-height: 100vh;
+  background: var(--color-ui-surface);
+  color: var(--color-text-primary);
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  background: var(--color-ui-card);
+  border: 1px solid var(--color-ui-borderSoft);
+  border-radius: 1rem;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.avatar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--color-brand-gold-soft);
+  border: 1.5px solid var(--color-brand-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-brand-gold);
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.greeting h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.greeting p {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  margin: 2px 0 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.btn-estado {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.4rem 0.9rem;
+  border-radius: 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid #16a34a;
+  background: rgba(22, 163, 74, 0.08);
+  color: #4ade80;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-estado.ocupado {
+  border-color: #dc2626;
+  background: rgba(220, 38, 38, 0.08);
+  color: #f87171;
+}
+
+.btn-salir {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0.4rem 0.9rem;
+  border-radius: 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid var(--color-ui-border);
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-salir:hover {
+  background: var(--color-ui-elevated);
+  color: #ffffff;
+}
+
+/* ── Section title ───────────────────────────────────────────────────────── */
+.section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0 0 0.75rem;
+}
+
+/* ── KPI Grid ────────────────────────────────────────────────────────────── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.kpi {
+  position: relative;
+  background: var(--color-ui-card);
+  border: 1px solid var(--color-ui-borderSoft);
+  border-radius: 1rem;
+  padding: 1rem 1.1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.kpi:hover {
+  transform: translateY(-2px);
+  border-color: rgba(212, 175, 55, 0.25);
+}
+
+.kpi-label {
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: 0.5rem;
+  padding-right: 1.8rem;
+}
+
+.kpi-val {
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.1;
+}
+
+.kpi-sub {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  margin-top: 0.4rem;
+}
+
+.kpi-icon {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 1.1rem;
+  color: var(--color-brand-gold);
+  opacity: 0.5;
+}
+
+/* ── Bottom grid ─────────────────────────────────────────────────────────── */
+.bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.card {
+  background: var(--color-ui-card);
+  border: 1px solid var(--color-ui-borderSoft);
+  border-radius: 1rem;
+  padding: 1.25rem 1.5rem;
+}
+
+.card-head {
+  margin-bottom: 1rem;
+}
+
+.card-head h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+}
+
+.card-head p {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  margin: 2px 0 0;
+}
+
+.empty-msg {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  padding: 1rem 0;
+}
+
+/* ── Citas ───────────────────────────────────────────────────────────────── */
+.cita {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.75rem 1rem;
+  background: var(--color-ui-elevated);
+  border-radius: 0.75rem;
+  margin-bottom: 8px;
+  border: 1px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.cita.active {
+  border-color: var(--color-brand-gold);
+  background: var(--color-brand-gold-soft);
+}
+
+.cita-hora {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-brand-gold);
+  min-width: 42px;
+}
+
+.cita-info {
+  flex: 1;
+}
+
+.cita-cliente {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.cita-servicio {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  margin-top: 1px;
+}
+
+.cita-right {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.cita-precio {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #4ade80;
+}
+
+.cita-badge {
+  font-size: 0.65rem;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 0.5rem;
+  display: inline-block;
+  margin-top: 3px;
+}
+
+.badge-finalizada {
+  background: rgba(74, 222, 128, 0.1);
+  color: #4ade80;
+  border: 1px solid rgba(74, 222, 128, 0.2);
+}
+
+.badge-proceso {
+  background: var(--color-brand-gold-soft);
+  color: var(--color-brand-gold);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+}
+
+.badge-pendiente {
+  background: transparent;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-ui-border);
+}
+
+/* ── Chart ───────────────────────────────────────────────────────────────── */
+.chart-box {
+  height: 200px;
+  position: relative;
+}
+
+/* ── Sueldo ──────────────────────────────────────────────────────────────── */
+.sueldo-box {
+  background: var(--color-ui-elevated);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  margin-top: 1rem;
+}
+
+.sueldo-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  padding: 3px 0;
+}
+
+.sueldo-total {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #ffffff;
+  border-top: 1px solid var(--color-ui-borderSoft);
+  padding-top: 8px;
+  margin-top: 6px;
+}
+
+.total-val {
+  color: var(--color-brand-gold);
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .wrap { padding: 0.75rem; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .bottom-grid { grid-template-columns: 1fr; }
+}

@@ -1,10 +1,13 @@
-import { CommonModule } from '@angular/common';
-import { ButtonModule } from 'primeng/button';
 import { Chart, registerables } from 'chart.js';
-import { Movimiento, Origen } from '../../../core/models/fidelizacion/movimiento.model';
+import { DecimalPipe, NgClass } from '@angular/common';
+import { Movimiento } from '../../../core/models/fidelizacion/movimiento.model';
 import { FidelizacionTarjetaResponse } from '../../../core/models/fidelizacion/tarjeta.model';
 import { FIDELIZACION_MOVIMIENTOS_MOCK } from '../../../core/config/fidelizacion-mock.config';
+import { ButtonComponent } from '../button/button.component';
+import { StatusBadgeComponent } from '../status-badge/status-badge.component';
 import { Component, EventEmitter, Input, OnInit, OnDestroy, Output, ViewChild, ElementRef, signal } from '@angular/core';
+import { MovimientosListaComponent } from './movimiento-lista.component';
+import { ProgresoBarraComponent } from './pogreso-barra.component';
 Chart.register(...registerables);
 
 type TarjetaConMeta = FidelizacionTarjetaResponse & { meta: number };
@@ -12,7 +15,14 @@ type TarjetaConMeta = FidelizacionTarjetaResponse & { meta: number };
 @Component({
     standalone: true,
     selector: 'app-tarjeta-grafico',
-    imports: [CommonModule, ButtonModule],
+    imports: [
+        NgClass,
+        DecimalPipe,
+        ButtonComponent,
+        StatusBadgeComponent,
+        ProgresoBarraComponent,
+        MovimientosListaComponent,
+    ],
     templateUrl: './tarjeta-grafico.html',
     styleUrl: './tarjeta-grafico.scss',
 })
@@ -34,8 +44,6 @@ export class TarjetaGraficoComponent implements OnInit, OnDestroy {
     // Backend: private notify = inject(NotificationService);
     private chart: Chart | null = null;
 
-    readonly Origen = Origen;
-    readonly Math = Math;
     private readonly iconosCategoria = ['pi-scissors', 'pi-heart', 'pi-user', 'pi-sparkles', 'pi-star'];
 
     private tarjetaExpandidaId = signal<number | null>(null);
@@ -47,10 +55,6 @@ export class TarjetaGraficoComponent implements OnInit, OnDestroy {
 
     // toggle Tarjetas / Gráfico — solo aplica a variantes admin y cliente
     vista: 'tarjetas' | 'grafico' = 'tarjetas';
-
-    private readonly gold = '#c9a84c';
-    private readonly textColor = 'rgba(255,255,255,0.55)';
-    private readonly gridColor = 'rgba(255,255,255,0.06)';
 
     ngOnInit(): void {
         if (this.variante === 'dashboard') {
@@ -85,12 +89,31 @@ export class TarjetaGraficoComponent implements OnInit, OnDestroy {
         return this.tarjetasSinMeta.map((t) => t.categoriaNombre).join(', ');
     }
 
+    /** Alto del canvas según la cantidad de barras (antes se usaba Math en el template) */
+    get alturaGrafico(): number {
+        return Math.max(140, this.tarjetasConMeta.length * 55);
+    }
+
+    /**
+     * Lee un token de tokens.scss (tripleta "R G B") y lo devuelve como rgba(...) con comas,
+     * que es el formato que Chart.js sí entiende. Así el gráfico usa el mismo dorado que el resto del UI.
+     */
+    private colorToken(token: string, alpha = 1): string {
+        const valor = getComputedStyle(document.documentElement).getPropertyValue(token).trim();
+        const [r, g, b] = valor.split(/\s+/);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
     private buildChart(): void {
         if (!this.progresoRef) return;
         this.chart?.destroy();
 
         const conMeta = this.tarjetasConMeta;
         if (!conMeta.length) return;
+
+        const dorado = this.colorToken('--color-brand-gold');
+        const textColor = this.colorToken('--color-text-secondary');
+        const gridColor = 'rgba(255, 255, 255, 0.06)';
 
         const ctx = this.progresoRef.nativeElement.getContext('2d')!;
         this.chart = new Chart(ctx, {
@@ -101,7 +124,7 @@ export class TarjetaGraficoComponent implements OnInit, OnDestroy {
                     {
                         label: 'Progreso',
                         data: conMeta.map((t) => Math.round((t.progreso / t.meta) * 100)),
-                        backgroundColor: this.gold,
+                        backgroundColor: dorado,
                         borderRadius: 6,
                         barPercentage: 0.5,
                         categoryPercentage: 0.6,
@@ -127,10 +150,10 @@ export class TarjetaGraficoComponent implements OnInit, OnDestroy {
                     x: {
                         min: 0,
                         max: 100,
-                        ticks: { color: this.textColor, font: { size: 11 }, callback: (v) => v + '%' },
-                        grid: { color: this.gridColor },
+                        ticks: { color: textColor, font: { size: 11 }, callback: (v) => v + '%' },
+                        grid: { color: gridColor },
                     },
-                    y: { ticks: { color: this.textColor, font: { size: 11 } }, grid: { display: false } },
+                    y: { ticks: { color: textColor, font: { size: 11 } }, grid: { display: false } },
                 },
             },
         });
@@ -208,7 +231,6 @@ export class TarjetaGraficoComponent implements OnInit, OnDestroy {
         // this.movimientoService.obtenerMovimientos({ tarjetaId, size: 30, sort: 'createdAt,desc' }).subscribe({ ... });
     }
 
-    // 👇 ahora usa la meta propia de cada tarjeta
     progresoPct(tarjeta: FidelizacionTarjetaResponse): number {
         if (!tarjeta.meta) return 0;
         return Math.min((tarjeta.progreso / tarjeta.meta) * 100, 100);
@@ -225,23 +247,5 @@ export class TarjetaGraficoComponent implements OnInit, OnDestroy {
 
     puedeCanjear(tarjeta: FidelizacionTarjetaResponse): boolean {
         return tarjeta.girosDisponibles > 0 && tarjeta.cicloActivo;
-    }
-
-    iconoOrigen(origen: Origen): string {
-        switch (origen) {
-            case Origen.VENTA: return 'pi-shopping-cart';
-            case Origen.RESERVA: return 'pi-calendar';
-            case Origen.AJUSTE: return 'pi-sliders-h';
-            default: return 'pi-circle';
-        }
-    }
-
-    labelOrigen(origen: Origen): string {
-        switch (origen) {
-            case Origen.VENTA: return 'Venta';
-            case Origen.RESERVA: return 'Reserva';
-            case Origen.AJUSTE: return 'Ajuste';
-            default: return origen;
-        }
     }
 }

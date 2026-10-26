@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { TableLazyLoadEvent, TableModule } from 'primeng/table';
@@ -14,18 +14,34 @@ import { ReservaService } from '@/app/core/services/operaciones/reserva.service'
 import { Reserva, ReservaFiltro } from '@/app/core/models/operaciones/Reserva.model';
 import { NotificationService } from '@/app/core/services/common/notification.service';
 import { DialogHeaderComponent } from '@/app/shared/components/dialog-header/dialog-header.component';
-import { CreateReserva } from '../reserva-create/create-reserva/create-reserva.component';
 import { DateFormatPipe } from '@/app/shared/pipes/dat.pipe';
+import { CreateReserva } from '../reserva-create/create-reserva.component';
+import { CalendarReservas } from '../reserva-calendar/reserva-calendar.component';
+import { ButtonComponent } from '@/app/shared/components/button/button.component';
+import { MonedaPipe } from '@/app/shared/pipes/moneda.pipe';
+import { ModalComponent } from '@/app/shared/components/modal/modal.component';
 
 @Component({
   selector: 'app-reserva-list',
   standalone: true,
   imports: [
-    CommonModule, FormsModule, ButtonModule, DialogModule, TableModule, DialogHeaderComponent, CreateReserva,
-    TooltipModule, StatusBadgeComponent, FiltrosComponent, SearchBarComponent, DateFormatPipe
+    CommonModule,
+    FormsModule,
+    ButtonModule,
+    DialogModule,
+    TableModule,
+    CreateReserva,
+    TooltipModule,
+    StatusBadgeComponent,
+    FiltrosComponent,
+    SearchBarComponent,
+    DateFormatPipe,
+    CalendarReservas,
+    ButtonComponent, 
+    MonedaPipe,
+    ModalComponent
   ],
   templateUrl: './reserva-list.html',
-  styleUrls: ['./reserva-list.scss'],
 })
 export class ReservaList implements OnInit {
   private router = inject(Router);
@@ -44,26 +60,40 @@ export class ReservaList implements OnInit {
 
   showDetalle = false;
   reservaSeleccionada: Reserva | null = null;
+  mostrarCalendario = false;
+  private route = inject(ActivatedRoute); // import desde '@angular/router'
 
+  abrirCalendario(): void {
+    this.mostrarCalendario = true;
+  }
+
+  cerrarCalendario(): void {
+    this.mostrarCalendario = false;
+  }
   ngOnInit(): void {
     this.cargarReservas(0, this.rows);
+    if (this.route.snapshot.queryParamMap.has('nueva')) {
+    this.abrirCrear();
+  }
   }
 
   cargarReservas(page: number, size: number): void {
     this.cargado = false;
-    this.reservaService.obtenerReservas({ ...this.filtro, page, size, sort: 'fecha,desc' }).subscribe({
-      next: (resp) => {
-        this.reservas = resp.data.content;
-        this.totalRecords = resp.data.totalElements;
-        this.cargado = true;
-        this.cd.detectChanges();
-      },
-      error: (err) => {
-        this.notify.showHttpError(err.message);
-        this.cargado = true;
-        this.cd.detectChanges();
-      }
-    });
+    this.reservaService
+      .obtenerReservas({ ...this.filtro, page, size, sort: 'fecha,desc' })
+      .subscribe({
+        next: (resp) => {
+          this.reservas = resp.data.content;
+          this.totalRecords = resp.data.totalElements;
+          this.cargado = true;
+          this.cd.detectChanges();
+        },
+        error: (err) => {
+          this.notify.showHttpError(err.message);
+          this.cargado = true;
+          this.cd.detectChanges();
+        },
+      });
   }
 
   onLazyLoad(event: TableLazyLoadEvent): void {
@@ -95,15 +125,13 @@ export class ReservaList implements OnInit {
 
   cobrarReserva(reserva: Reserva): void {
     this.router.navigate(['/dashboard/admin/operaciones/pos'], {
-      state: { reservaCobrar: reserva }
+      state: { reservaCobrar: reserva },
     });
   }
-
 
   editarReserva(reserva: Reserva): void {
     this.router.navigate([`/dashboard/admin/operaciones/reservas/editar/${reserva.id}`]);
   }
-
 
   mostrarFormulario = false;
   resetFormTrigger = 0;
@@ -126,12 +154,18 @@ export class ReservaList implements OnInit {
   // AJUSTA los case si EstadoReserva.ts trae otros nombres
   getEstadoClass(estado: string | null): string {
     switch (estado) {
-      case 'CONFIRMADA': return 'estado-confirmada';
-      case 'PENDIENTE_PAGO': return 'estado-pendiente';
-      case 'EN_PROCESO': return 'estado-en-proceso';
-      case 'FINALIZADA': return 'estado-completada';
-      case 'CANCELADA': return 'estado-cancelada';
-      default: return 'estado-default';
+      case 'CONFIRMADA':
+        return 'estado-confirmada';
+      case 'PENDIENTE_PAGO':
+        return 'estado-pendiente';
+      case 'EN_PROCESO':
+        return 'estado-en-proceso';
+      case 'FINALIZADA':
+        return 'estado-completada';
+      case 'CANCELADA':
+        return 'estado-cancelada';
+      default:
+        return 'estado-default';
     }
   }
 }

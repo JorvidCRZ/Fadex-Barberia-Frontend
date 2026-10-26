@@ -24,7 +24,7 @@
         <p class="mx-auto mt-3 max-w-md text-sm text-text-secondary">Agrega productos desde el catálogo o ficha de producto.</p>
 
         <div class="mt-8 flex justify-center">
-            <p-button label="Ir al catálogo" icon="pi pi-arrow-left" (click)="continuarCompra()"styleClass="boton-primary" />
+            <app-button variant="primary" icon="pi-arrow-left" label="Ir al catálogo" (clicked)="continuarCompra()" />
         </div>
     </div>
     }
@@ -75,17 +75,19 @@
                                     </div>
                                 </td>
 
-                                <td class="px-5 py-4 text-center font-medium text-text-primary">{{ item.producto.precio | soles }}</td>
+                                <td class="px-5 py-4 text-center font-medium text-text-primary">{{ precioItem(item) | soles }}</td>
 
                                 <td class="px-5 py-4 text-center">
                                     <div class="flex items-center justify-center gap-2">
-                                        <button class="size-10 rounded bg-ui-elevated hover:bg-brand-gold text-2xl transition cursor-pointer" (click)="actualizarCantidad(i, item.cantidad - 1)" [attr.aria-label]="'Disminuir cantidad de ' + item.producto.nombre">-</button>
+                                        <app-button variant="tabla" icon="pi-minus" tooltip="Disminuir cantidad" styleClass="border border-ui-border bg-ui-elevated text-text-primary hover:bg-brand-gold hover:text-black" (clicked)="actualizarCantidad(i, item.cantidad - 1)" />
                                         <span class="w-10 text-center font-semibold text-text-primary">{{ item.cantidad }}</span>
-                                        <button class="size-10 rounded bg-ui-elevated hover:bg-brand-gold text-2xl transition cursor-pointer" [disabled]="item.cantidad >= item.producto.stock" (click)="actualizarCantidad(i, item.cantidad + 1)" [attr.aria-label]="'Aumentar cantidad de ' + item.producto.nombre">+</button>
+                                        <app-button variant="tabla" icon="pi-plus" tooltip="Aumentar cantidad" styleClass="border border-ui-border bg-ui-elevated text-text-primary hover:bg-brand-gold hover:text-black" [disabled]="item.cantidad >= item.producto.stock" (clicked)="actualizarCantidad(i, item.cantidad + 1)" />
                                     </div>
                                 </td>
-                                <td class="px-5 py-4 text-right font-bold text-brand-gold">{{ item.cantidad * (item.producto.precioPromo ?? item.producto.precioVenta ?? item.producto.precio) | soles }}</td>
-                                <td class="px-5 py-4 text-center"><p-button styleClass="boton-eliminar-tabla" icon="pi pi-trash" ariaLabel="Eliminar producto" (click)="eliminarProducto(i)" /></td>
+                                <td class="px-5 py-4 text-right font-bold text-brand-gold">{{ subtotalItem(item) | soles }}</td>
+                                <td class="px-5 py-4 text-center">
+                                    <app-button variant="eliminar-tabla" icon="pi-trash" tooltip="Eliminar producto" (clicked)="eliminarProducto(i)" />
+                                </td>
                             </tr>
                         }
                     </tbody>
@@ -93,7 +95,7 @@
             </div>
 
             <div class="flex justify-between items-center px-5 py-4 border-t border-ui-border bg-ui-black">
-                <p-button label="Continuar comprando" icon="pi pi-arrow-left" severity="secondary" (click)="continuarCompra()" styleClass="boton-secondary" />
+                <app-button variant="secondary" icon="pi-arrow-left" label="Continuar comprando" (clicked)="continuarCompra()" />
                 <p class="text-sm text-text-secondary">Sigue agregando productos</p>
             </div>
 
@@ -109,7 +111,7 @@
 
                 <div class="flex justify-between">
                     <span>Envío</span>
-                    <span class="text-brand-gold font-semibold">Gratis</span>
+                    <span class="font-semibold text-success">Gratis</span>
                 </div>
 
                 <div class="border-t border-ui-border pt-4 flex justify-between">
@@ -118,9 +120,9 @@
                 </div>
 
             </div>
-            <div class="mt-6 space-y-3">
-                <p-button label="Procesar compra" icon="pi pi-check" styleClass="boton-primary w-full mb-4" (click)="procesarCompra()" />
-                <p-button label="Vaciar carrito" icon="pi pi-eraser" styleClass="boton-danger w-full" (click)="vaciarCarrito()" />
+            <div class="mt-6 flex flex-col gap-3">
+                <app-button variant="primary" icon="pi-check" label="Procesar compra" [fullWidth]="true" (clicked)="procesarCompra()" />
+                <app-button variant="danger" icon="pi-eraser" label="Vaciar carrito" [fullWidth]="true" (clicked)="vaciarCarrito()" />
             </div>
         </aside>
     </div>

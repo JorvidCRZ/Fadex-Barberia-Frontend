@@ -1,11 +1,8 @@
 <div class="servicio-detail-modal">
   <div class="servicio-detail-modal-content">
     <div class="servicio-detail-header">
-      <button type="button" class="servicio-detail-back-button" (click)="cerrar.emit()">
-        <i class="pi pi-arrow-left" aria-hidden="true"></i>
-        Volver
-      </button>
-    </div>
+    <app-button variant="cierre" icon="pi-times" tooltip="Cerrar" (clicked)="cerrar.emit()" />
+</div>
 
     @if (cargando) {
       <div class="servicio-detail-loading">Cargando detalle...</div>
@@ -44,10 +41,7 @@
             <span class="servicio-detail-buy-label">Reserva segura</span>
             <p class="servicio-detail-buy-price">S/ {{ servicio.precio }}</p>
             <p class="servicio-detail-buy-caption">Precio del servicio</p>
-            <button type="button" class="servicio-detail-book-button" (click)="reservar.emit()">
-              <i class="pi pi-calendar" aria-hidden="true"></i>
-              Agendar cita
-            </button>
+            <app-button variant="primary" icon="pi-calendar" label="Agendar cita" [fullWidth]="true" (clicked)="reservar.emit()" />
             <div class="servicio-detail-subtotal">
               <span>Total de la reserva</span>
               <strong>S/ {{ servicio.precio }}</strong>

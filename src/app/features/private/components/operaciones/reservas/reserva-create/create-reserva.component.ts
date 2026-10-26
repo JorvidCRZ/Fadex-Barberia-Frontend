@@ -17,16 +17,18 @@ import { Servicio, ServicioFiltro } from '@/app/core/models/catalogos/servicios.
 import { ServicioService } from '@/app/core/services/catalogos/servicio.service';
 import { ReservaService } from '@/app/core/services/operaciones/reserva.service';
 import { ReservaRequest } from '@/app/core/models/reserva/reservaRequest';
+import { ModalComponent } from '@/app/shared/components/modal/modal.component';
+import { ButtonComponent } from '@/app/shared/components/button/button.component';
 
 @Component({
   selector: 'app-create-reserva',
   standalone: true,
   imports: [
-    CommonModule, FormsModule, ReactiveFormsModule, AutoCompleteModule, SelectModule, DatePickerModule, ButtonModule, ToastModule, DialogModule
+    CommonModule, FormsModule, ReactiveFormsModule, AutoCompleteModule, SelectModule, DatePickerModule,
+    ButtonModule, ToastModule, DialogModule,ModalComponent, ButtonComponent
   ],
   providers: [MessageService],
   templateUrl: './create-reserva.html',
-  styleUrl: './create-reserva.scss'
 })
 export class CreateReserva implements OnInit, OnDestroy, OnChanges {
 

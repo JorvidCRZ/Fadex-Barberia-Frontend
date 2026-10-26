@@ -1,0 +1,42 @@
+/* ========================================
+   DIALOG HEADER
+   Un solo lugar define el color de cada modo (misma receta que badges.scss:
+   borde y fondo al 30% / 10%, texto en el tono -400).
+   Para agregar un modo nuevo: una línea en $dialog-header-modes.
+   Los valores son tripletas RGB para poder usar rgb(var(--dh) / alpha).
+   ======================================== */
+
+$dialog-header-modes: (
+    "ver":      74 222 128,                 // green-400  (igual que boton-ver-tabla)
+    "editar":   96 165 250,                 // blue-400   (igual que boton-editar-tabla)
+    "eliminar": 248 113 113,                // red-400    (igual que boton-eliminar-tabla)
+    "anular":   251 191 36,                 // amber-400  (igual que boton-anular)
+);
+
+.dialog-header-base {
+    // crear = dorado de marca (token), el resto sale del mapa
+    --dh: var(--color-brand-gold);
+
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: rgb(var(--color-text-primary));
+}
+
+.dialog-header-icon {
+
+    color: rgb(var(--dh));
+}
+
+.dialog-header-title {
+    line-height: 1.2;
+    color: rgb(var(--dh));
+}
+
+@each $modo, $rgb in $dialog-header-modes {
+    .dialog-header-#{$modo} {
+        --dh: #{$rgb};
+    }
+}

@@ -1,0 +1,127 @@
+<form [formGroup]="reservaForm" (ngSubmit)="guardarReserva()">
+
+  <div class="flex items-center gap-2 border-b border-ui-border bg-brand-gold-soft px-6 py-3">
+    <i class="pi pi-info-circle text-sm text-brand-gold"></i>
+    <span class="text-xs font-semibold uppercase tracking-widest text-text-primary">Información de la reserva</span>
+  </div>
+
+  <div class="grid grid-cols-1 gap-5 p-6 md:grid-cols-2">
+
+    <!-- Cliente -->
+    <div class="flex flex-col gap-1.5">
+      <label class="flex items-center gap-1.5">Cliente <span class="text-brand-gold">*</span>
+        @if (buscandoCliente) { <i class="pi pi-spin pi-spinner text-xs text-brand-gold"></i> }
+      </label>
+      <p-autoComplete [(ngModel)]="clienteSeleccionado" [ngModelOptions]="{ standalone: true }"
+        [suggestions]="clientesSugeridos" (completeMethod)="buscarCliente($event)"
+        (onSelect)="onSeleccionarCliente($event)" (onClear)="onLimpiarCliente()" optionLabel="nombreCompleto"
+        placeholder="Escribe para buscar un cliente..." [minLength]="1" [showClear]="true" [forceSelection]="true"
+        styleClass="w-full" [class.border-danger]="clienteInvalido" [inputStyle]="{ width: '100%' }">
+        <ng-template let-cliente pTemplate="item">
+          <span class="block truncate">{{ cliente.nombreCompleto }}</span>
+        </ng-template>
+        <ng-template pTemplate="empty">
+          <span class="px-2 text-xs text-text-secondary">No se encontraron clientes</span>
+        </ng-template>
+      </p-autoComplete>
+    </div>
+
+    <!-- Barbero -->
+    <div class="flex flex-col gap-1.5">
+      <label class="flex items-center gap-1.5">Barbero <span class="text-brand-gold">*</span>
+        @if (buscandoBarbero) { <i class="pi pi-spin pi-spinner text-xs text-brand-gold"></i> }
+      </label>
+      <p-autoComplete [(ngModel)]="barberoSeleccionado" [ngModelOptions]="{ standalone: true }"
+        [suggestions]="barberosSugeridos" (completeMethod)="buscarBarbero($event)"
+        (onSelect)="onSeleccionarBarbero($event)" (onClear)="onLimpiarBarbero()" optionLabel="nombreCompleto"
+        placeholder="Escribe para buscar un barbero..." [minLength]="1" [showClear]="true" [forceSelection]="true"
+        styleClass="w-full" [class.border-danger]="barberoInvalido" [inputStyle]="{ width: '100%' }">
+        <ng-template let-barbero pTemplate="item">
+          <span class="block truncate">{{ barbero.nombreCompleto }}</span>
+        </ng-template>
+        <ng-template pTemplate="empty">
+          <span class="px-2 text-xs text-text-secondary">No se encontraron barberos</span>
+        </ng-template>
+      </p-autoComplete>
+    </div>
+
+    <!-- Servicio -->
+    <div class="flex flex-col gap-1.5">
+      <label class="flex items-center gap-1.5">Servicio <span class="text-brand-gold">*</span>
+        @if (buscandoServicio) { <i class="pi pi-spin pi-spinner text-xs text-brand-gold"></i> }
+      </label>
+      <p-autoComplete [(ngModel)]="servicioSeleccionado" [ngModelOptions]="{ standalone: true }"
+        [suggestions]="serviciosSugeridos" (completeMethod)="buscarServicio($event)"
+        (onSelect)="onSeleccionarServicio($event)" (onClear)="onLimpiarServicio()" optionLabel="nombre"
+        placeholder="Escribe para buscar un servicio..." [minLength]="1" [showClear]="true" [forceSelection]="true"
+        styleClass="w-full" [class.border-danger]="servicioInvalido" [inputStyle]="{ width: '100%' }">
+        <ng-template let-servicio pTemplate="item">
+          <span class="block truncate">{{ servicio.nombre }}</span>
+        </ng-template>
+        <ng-template pTemplate="empty">
+          <span class="px-2 text-xs text-text-secondary">No se encontraron servicios</span>
+        </ng-template>
+      </p-autoComplete>
+    </div>
+
+    <!-- Fecha -->
+    <div class="flex flex-col gap-1.5">
+      <label>Fecha <span class="text-brand-gold">*</span></label>
+      <p-datepicker formControlName="fecha" [showIcon]="true" [minDate]="today" dateFormat="dd/mm/yy"
+        styleClass="w-full" (onSelect)="onFechaChange()" />
+    </div>
+
+    <!-- Hora -->
+    <div class="flex flex-col gap-1.5">
+      <label>Hora <span class="text-brand-gold">*</span></label>
+      <p-select formControlName="hora" [options]="horarios" optionLabel="label" optionValue="value"
+        placeholder="Selecciona una hora" styleClass="w-full" />
+    </div>
+
+    <!-- Observaciones -->
+    <div class="flex flex-col gap-1.5 md:col-span-2">
+      <label>Observaciones</label>
+      <textarea rows="3" formControlName="observacion" class="resize-none"
+        placeholder="Escribe alguna observación adicional..."></textarea>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="flex justify-end gap-3 border-t border-ui-border bg-ui-black px-6 py-4">
+    <app-button variant="cancel" icon="pi-times" label="Cancelar" (clicked)="cancelar()" />
+    <app-button variant="primary" type="submit" icon="pi-calendar-plus" label="Guardar Reserva"
+      [loading]="isLoading" loadingLabel="Guardando..." />
+  </div>
+</form>
+
+<!-- Confirmación -->
+<app-modal [(visible)]="showConfirmDialog" titulo="Confirmar Reserva" mode="crear" icono="pi-check-circle" maxWidth="28rem">
+  <div class="flex flex-col gap-3 py-2 text-sm text-text-primary">
+    <div class="flex justify-between border-b border-ui-border pb-2">
+      <span class="text-text-secondary">Cliente</span>
+      <span class="font-semibold">{{ getClienteNombre() }}</span>
+    </div>
+    <div class="flex justify-between border-b border-ui-border pb-2">
+      <span class="text-text-secondary">Barbero</span>
+      <span class="font-semibold">{{ getBarberoNombre() }}</span>
+    </div>
+    <div class="flex justify-between border-b border-ui-border pb-2">
+      <span class="text-text-secondary">Servicio</span>
+      <span class="font-semibold">{{ getServicioNombre() }}</span>
+    </div>
+    <div class="flex justify-between border-b border-ui-border pb-2">
+      <span class="text-text-secondary">Fecha</span>
+      <span class="font-semibold">{{ reservaPreview?.fechaFormateada }}</span>
+    </div>
+    <div class="flex justify-between">
+      <span class="text-text-secondary">Hora</span>
+      <span class="font-semibold text-brand-gold">{{ reservaPreview?.hora }}</span>
+    </div>
+  </div>
+
+  <div class="mt-4 flex justify-end gap-3 border-t border-ui-border pt-4">
+    <app-button variant="cancel" icon="pi-times" label="Cancelar" (clicked)="showConfirmDialog = false" />
+    <app-button variant="submit" icon="pi-check" label="Confirmar" [loading]="isLoading"
+      loadingLabel="Guardando..." (clicked)="confirmarGuardar()" />
+  </div>
+</app-modal>

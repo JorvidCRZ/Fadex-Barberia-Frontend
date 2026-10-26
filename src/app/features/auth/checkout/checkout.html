@@ -72,10 +72,8 @@
 
             </div>
 
-            <div class="mt-5 rounded-xl bg-brand-gold/10 p-3 text-center text-xs text-text-secondary">
-                Revisa los datos antes de confirmar tu compra.
-            </div>
-            <p-button label="Continuar al pago" icon="pi pi-credit-card" styleClass="boton-primary w-full mt-4" (onClick)="irAPago()"></p-button>
+            <div class="mt-5 mb-2 rounded-xl bg-brand-gold/10 p-3 text-center text-xs text-text-secondary">Revisa los datos antes de confirmar tu compra.</div>
+            <app-button variant="submit" icon="pi-credit-card" label="Proceder al pago" [fullWidth]="true" (clicked)="irAPago()" />
         </aside>
     </div>
 

@@ -1,109 +1,103 @@
 <div>
-    <div class="seg-header">
-        <i class="pi pi-star-fill"></i>
-        <h2>Seguimiento</h2>
-    </div>
+    <app-page-header titulo="Seguimiento" icono="star-fill" subtitulo="Tus giros y movimientos de puntos" class="mb-4 block" />
 
-    <div class="seg-columns">
+    <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
 
         <!-- ===================== MIS GIROS ===================== -->
-        <p-card>
-            <ng-template pTemplate="header">
-                <div class="card-header-row">
-                    <span class="title"><i class="pi pi-history"></i> Mis giros</span>
-                    <span class="subtitle">{{ giros().length }} registrados</span>
-                </div>
-            </ng-template>
+        <section class="overflow-hidden rounded-2xl border border-white/[0.06] bg-ui-card">
+            <div class="flex items-center justify-between px-5 pb-0 pt-4">
+                <span class="flex items-center gap-2 font-semibold text-text-primary">
+                    <i class="pi pi-history text-brand-gold"></i> Mis giros
+                </span>
+                <span class="text-xs text-text-muted">{{ giros().length }} registrados</span>
+            </div>
 
-            <ng-template pTemplate="content">
-                <!-- Loading -->
-                <div *ngIf="cargandoGiros()" class="giro-grid">
-                    <p-skeleton *ngFor="let s of [1,2,3,4]" height="6rem" borderRadius="10px"></p-skeleton>
+            <div class="p-5 pt-4">
+                @if (cargandoGiros()) {
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    @for (s of [1, 2, 3, 4]; track s) {
+                    <div class="h-24 animate-pulse rounded-xl bg-ui-elevated"></div>
+                    }
                 </div>
-
-                <!-- Error -->
-                <div *ngIf="!cargandoGiros() && errorGiros()">
-                    <p-message severity="error" [text]="errorGiros()!" styleClass="w-full" variant="simple" size="small"></p-message>
-                    <p-button label="Reintentar" icon="pi pi-refresh" [text]="true" size="small" styleClass="mt-2" (onClick)="cargarGiros()"></p-button>
-                </div>
-
-                <!-- Empty -->
-                <div *ngIf="!cargandoGiros() && !errorGiros() && giros().length === 0" class="empty-state">
-                    <i class="pi pi-ticket"></i>
-                    <span>Aún no tienes giros registrados.</span>
-                    <small>Cuando completes tu progreso, tus giros aparecerán aquí.</small>
-                </div>
-
-                <!-- Cards de giros -->
-                <div *ngIf="!cargandoGiros() && !errorGiros() && giros().length > 0" class="giro-grid">
-                    <div *ngFor="let giro of giros()" class="giro-item">
-                        <div class="giro-top">
+                } @else if (errorGiros()) {
+                <app-empty-state tipo="error" [mensaje]="errorGiros()!">
+                    <app-button variant="secondary" size="sm" icon="refresh" label="Reintentar" (clicked)="cargarGiros()" />
+                </app-empty-state>
+                } @else if (giros().length === 0) {
+                <app-empty-state icono="ticket" mensaje="Aún no tienes giros registrados." detalle="Cuando completes tu progreso, tus giros aparecerán aquí." />
+                } @else {
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    @for (giro of giros(); track giro.numeroGiro) {
+                    <div class="rounded-xl border border-white/[0.06] bg-ui-surface p-4 transition-colors hover:border-brand-gold">
+                        <div class="flex items-start justify-between gap-2">
                             <div>
-                                <div class="ruleta">{{ giro.ruletaNombre }}</div>
-                                <div class="premio">{{ giro.premio }}</div>
+                                <div class="text-[11px] uppercase tracking-wide text-text-muted">{{ giro.ruletaNombre }}</div>
+                                <div class="mt-0.5 text-base font-semibold text-brand-gold">{{ giro.premio }}</div>
                             </div>
-                            <p-tag [value]="'Giro #' + giro.numeroGiro" severity="secondary"></p-tag>
+                            <app-status-badge type="text" tone="neutral" [humanize]="false" [value]="'Giro #' + giro.numeroGiro" />
                         </div>
-                        <div class="giro-bottom">
-                            <span>{{ giro.fecha | date:'dd MMM yyyy, HH:mm' }}</span>
-                            <span *ngIf="giro.probAplicada != null">Prob. {{ formatearProbabilidad(giro.probAplicada)}}</span>
+                        <div class="mt-3 flex items-center justify-between text-xs text-text-muted">
+                            <span>{{ giro.fecha | dateHelper }}</span>
+                            @if (giro.probAplicada != null) {
+                            <span>Prob. {{ formatearProbabilidad(giro.probAplicada) }}</span>
+                            }
                         </div>
                     </div>
+                    }
                 </div>
-            </ng-template>
-        </p-card>
+                }
+            </div>
+        </section>
 
         <!-- ===================== MOVIMIENTOS ===================== -->
-        <p-card>
-            <ng-template pTemplate="header">
-                <div class="card-header-row">
-                    <span class="title">
-                        <i class="pi pi-clock"></i>
-                        {{ vistaCompleta() ? 'Mis movimientos' : 'Últimos movimientos' }}
-                    </span>
-                    <p-button [label]="vistaCompleta() ? 'Ver recientes' : 'Ver todos'" [text]="true" size="small" (onClick)="toggleVistaMovimientos()"></p-button>
-                </div>
-            </ng-template>
+        <section class="overflow-hidden rounded-2xl border border-white/[0.06] bg-ui-card">
+            <div class="flex items-center justify-between px-5 pt-4">
+                <span class="flex items-center gap-2 font-semibold text-text-primary">
+                    <i class="pi pi-clock text-brand-gold"></i>
+                    {{ vistaCompleta() ? 'Mis movimientos' : 'Últimos movimientos' }}
+                </span>
+                <app-button variant="ghost" size="sm" [label]="vistaCompleta() ? 'Ver recientes' : 'Ver todos'" (clicked)="toggleVistaMovimientos()" />
+            </div>
 
-            <ng-template pTemplate="content">
-                <!-- Loading -->
-                <div *ngIf="cargandoMovimientos()" class="skeleton-stack">
-                    <p-skeleton *ngFor="let s of [1,2,3,4,5]" height="3rem" borderRadius="8px"></p-skeleton>
+            <div class="p-5 pt-4">
+                @if (cargandoMovimientos()) {
+                <div class="flex flex-col gap-2">
+                    @for (s of [1, 2, 3, 4, 5]; track s) {
+                    <div class="h-12 animate-pulse rounded-lg bg-ui-elevated"></div>
+                    }
                 </div>
-
-                <!-- Error -->
-                <div *ngIf="!cargandoMovimientos() && errorMovimientos()">
-                    <p-message severity="error" [text]="errorMovimientos()!" styleClass="w-full" variant="simple" size="small"></p-message>
-                    <p-button label="Reintentar" icon="pi pi-refresh" [text]="true" size="small" styleClass="mt-2" (onClick)="recargarMovimientos()"></p-button>
-                </div>
-
-                <!-- Empty -->
-                <div *ngIf="!cargandoMovimientos() && !errorMovimientos() && movimientos().length === 0"
-                    class="empty-state">
-                    <i class="pi pi-list"></i>
-                    <span>Sin movimientos por ahora.</span>
-                </div>
-
-                <!-- Timeline -->
-                <p-timeline *ngIf="!cargandoMovimientos() && !errorMovimientos() && movimientos().length > 0" [value]="movimientos()" align="left">
-                    <ng-template pTemplate="marker" let-mov>
-                        <span class="mov-marker" [ngClass]="'sev-' + origenSeverity(mov.origen)">
+                } @else if (errorMovimientos()) {
+                <app-empty-state tipo="error" [mensaje]="errorMovimientos()!">
+                    <app-button variant="secondary" size="sm" icon="refresh" label="Reintentar" (clicked)="recargarMovimientos()" />
+                </app-empty-state>
+                } @else if (movimientos().length === 0) {
+                <app-empty-state icono="list" mensaje="Sin movimientos por ahora." />
+                } @else {
+                <ol class="m-0 list-none p-0">
+                    @for (mov of movimientos(); track $index; let ultimo = $last) {
+                    <li class="relative flex gap-3 pb-4">
+                        @if (!ultimo) {
+                        <span class="absolute bottom-0 left-[1.125rem] top-9 w-px bg-ui-border" aria-hidden="true"></span>
+                        }
+                        <span class="flex size-9 shrink-0 items-center justify-center rounded-full bg-ui-elevated" [class]="marcadorClase(mov.origen)">
                             <i [class]="origenIcon(mov.origen)"></i>
                         </span>
-                    </ng-template>
-
-                    <ng-template pTemplate="content" let-mov>
-                        <div class="mov-content">
-                            <div class="mov-row">
-                                <span class="mov-desc">{{ mov.descripcion || origenLabel(mov.origen) }}</span>
-                                <p-tag [value]="(mov.puntos >= 0 ? '+' : '') + mov.puntos + ' pts'" [severity]="mov.puntos >= 0 ? 'success' : 'danger'"></p-tag>
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center justify-between gap-3">
+                                <span class="truncate text-sm text-text-primary">{{ mov.descripcion || origenLabel(mov.origen) }}</span>
+                                <app-status-badge type="text" [tone]="mov.puntos >= 0 ? 'success' : 'danger'" [humanize]="false"
+                                    [value]="(mov.puntos >= 0 ? '+' : '') + mov.puntos + ' pts'" />
                             </div>
-                            <div class="mov-meta">{{ origenLabel(mov.origen) }} · {{ mov.createdAt | date:'dd MMM yyyy,HH:mm' }}</div>
+                            <div class="mt-0.5 text-xs uppercase tracking-wide text-text-muted">
+                                {{ origenLabel(mov.origen) }} · {{ mov.createdAt | dateHelper }}
+                            </div>
                         </div>
-                    </ng-template>
-                </p-timeline>
-            </ng-template>
-        </p-card>
+                    </li>
+                    }
+                </ol>
+                }
+            </div>
+        </section>
 
     </div>
 </div>

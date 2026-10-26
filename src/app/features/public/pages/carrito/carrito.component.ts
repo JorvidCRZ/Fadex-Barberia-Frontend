@@ -2,19 +2,19 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { TableModule } from 'primeng/table';
-import { ButtonModule } from 'primeng/button';
-import { InputNumberModule } from 'primeng/inputnumber';
 import { SafeImageUrlPipe } from '../../../../shared/pipes/safe-image-url.pipe';
 import { SolesPipe } from '../../../../shared/pipes/moneda.pipe';
 import { NotificationService } from '../../../../core/services/common/notification.service';
 import { TokenService } from '../../../../core/services/auth/token.service';
-import { CarritoService } from '../../../../core/services/catalogos/carrito.service';
+import { CarritoService, obtenerPrecio } from '../../../../core/services/catalogos/carrito.service';
+import { ButtonComponent } from '@/app/shared/components/button/button.component';
+import { CarritoItem } from '@/app/core/models/catalogos/carrito.model';
 
 @Component({
   selector: 'app-carrito',
   standalone: true,
-  imports: [ CommonModule, FormsModule, TableModule, ButtonModule, InputNumberModule, SafeImageUrlPipe, SolesPipe],
+  imports: [CommonModule, FormsModule, ButtonComponent, SafeImageUrlPipe, SolesPipe],
+
   templateUrl: './carrito.html'
 })
 export class CarritoComponent {
@@ -28,6 +28,14 @@ export class CarritoComponent {
   readonly subtotal = this.carritoService.subtotal;
   readonly total = this.carritoService.total;
   readonly cantidad = this.carritoService.cantidad;
+
+  precioItem(item: CarritoItem): number {
+    return obtenerPrecio(item.producto);
+  }
+  
+  subtotalItem(item: CarritoItem): number {
+    return item.cantidad * obtenerPrecio(item.producto);
+  }
 
   procesarCompra(): void {
     if (!this.tokenService.isLogged()) {

@@ -20,9 +20,8 @@
 
     <ng-template #footer>
       <div class="producto-card-actions">
-        <button pButton label="Ver" icon="pi pi-eye" class="boton-ver" (click)="onVer()"></button>
-        <button pButton type="button" icon="pi pi-shopping-cart" class="boton-comprar" [disabled]="!producto.stock" [attr.aria-label]="producto.stock ? 'Agregar al carrito' : 'Producto agotado'" (click)="agregarAlCarrito()"></button>
-      </div>
+        <app-button variant="ver" icon="pi-eye" label="Ver" (clicked)="onVer()" />
+        <app-button variant="comprar" icon="pi-shopping-cart" [disabled]="!producto.stock" [tooltip]="producto.stock ? 'Agregar al carrito' : 'Producto agotado'" (clicked)="agregarAlCarrito()" /></div>
     </ng-template>
   </p-card>
 </div>
