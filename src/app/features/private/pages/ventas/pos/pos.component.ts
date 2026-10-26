@@ -27,7 +27,6 @@ import { Cliente } from '../../../../../core/models/gestion/cliente/cliente.mode
     DialogModule
   ],
   templateUrl: './pos.html',
-  styleUrls: ['./pos.css']
 })
 export class PosComponent implements OnInit, OnDestroy {
 

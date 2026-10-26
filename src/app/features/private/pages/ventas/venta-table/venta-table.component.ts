@@ -18,7 +18,6 @@ import { ConfirmPopoverComponent } from '../../../../../shared/components/confir
     ConfirmPopoverComponent 
   ],
   templateUrl: './venta-table.html',
-  styleUrls: ['./venta-table.css'],
   encapsulation: ViewEncapsulation.None
 })
 export class VentaTableComponent {
