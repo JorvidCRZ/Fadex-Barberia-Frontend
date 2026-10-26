@@ -1,13 +1,10 @@
 import { Router, RouterOutlet, NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
-import { CommonModule, registerLocaleData } from '@angular/common';
-import localeEsPe from '@angular/common/locales/es-PE';
+import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { LoadingService } from './core/services/common/loading.service';
 import { ConfiguracionService } from './core/services/common/configuracion.service';
-
-registerLocaleData(localeEsPe);
 
 @Component({
   selector: 'app-root',
@@ -23,7 +20,6 @@ export class App implements OnInit {
   readonly isLoading = toSignal(this.loadingService.isLoading$, { initialValue: false });
 
   protected readonly title = signal('fadex-barberia-frontend');
-  // private tokenService = inject(TokenService);
 
   ngOnInit(): void {
     this.configService.cargarConfiguracion();
@@ -41,6 +37,5 @@ export class App implements OnInit {
         this.loadingService.hide();
       }
     });
-    // this.tokenService.initPermisos();
   }
 }
