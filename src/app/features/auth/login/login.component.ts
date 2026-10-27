@@ -1,5 +1,4 @@
 import { finalize } from 'rxjs';
-import { ButtonModule } from 'primeng/button';
 import { CommonModule } from '@angular/common';
 import { MessageModule } from 'primeng/message';
 import { PasswordModule } from 'primeng/password';
@@ -11,11 +10,10 @@ import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { TokenService } from '../../../core/services/auth/token.service';
 import { campoInvalido } from '../../../shared/utils/form-utils.component';
 import { LogoComponent } from '../../../shared/components/logo/logo.component';
+import { ButtonComponent } from '@/app/shared/components/button/button.component';
 import { NotificationService } from '../../../core/services/common/notification.service';
-import {
-  Component, inject, signal, OnInit, AfterViewInit, OnDestroy, ViewChild, ElementRef
-} from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { Component, inject, signal, OnInit, AfterViewInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 
 export interface GoogleCredentialResponse {
   credential: string;
@@ -29,9 +27,8 @@ declare var google: any;
   selector: 'app-login',
   standalone: true,
   imports: [
-    ReactiveFormsModule, FormsModule, InputTextModule, CheckboxModule,
-    ButtonModule, LogoComponent, PasswordModule, MessageModule,
-    RouterModule, CommonModule
+    ReactiveFormsModule, FormsModule, InputTextModule, CheckboxModule, LogoComponent, 
+    PasswordModule, MessageModule, RouterModule, CommonModule, ButtonComponent
   ],
   templateUrl: './login.html',
 })

@@ -11,7 +11,7 @@
     class="relative z-10 w-full max-w-5xl rounded-2xl overflow-hidden border border-brand-gold/30 bg-brand-black shadow-card grid grid-cols-1 lg:grid-cols-2">
     <div class="bg-ui-surface p-8 lg:p-12 flex flex-col justify-center">
       <div class="flex flex-col items-center text-center mb-8">
-        <app-logo></app-logo>
+        <app-logo/>
         <h1 class="mt-5 text-2xl font-bold tracking-tight text-brand-white">Bienvenido de nuevo</h1>
         <p class="mt-2 text-sm text-text-muted">Inicia sesión para gestionar tus reservas y compras.</p>
       </div>
@@ -19,22 +19,20 @@
       <form [formGroup]="formularioLogin" (ngSubmit)="login()" class="auth-form">
         <div class="part-form">
           <label for="username" class="label-form">Usuario</label>
-          <input pInputText id="username" formControlName="username" placeholder="Ingrese su usuario" autocomplete="username"
-            class="inputs-text" />
+          <input pInputText id="username" formControlName="username" placeholder="Ingrese su usuario" autocomplete="username" class="inputs-text" />
           @if (campoInvalido('username')) {
-          <p-message severity="error" variant="simple" size="small">El usuario es obligatorio</p-message>
+            <p-message severity="error" variant="simple" size="small">El usuario es obligatorio</p-message>
           }
         </div>
 
         <div class="part-form">
           <div class="flex items-center justify-between">
             <label for="password" class="label-form">Contraseña</label>
-            <a routerLink="/forgot-password" class="text-xs font-medium text-brand-gold transition-colors hover:text-brand-gold-hover">¿La olvidaste?</a>
+            <a routerLink="/forgot-password"class="text-xs font-medium text-brand-gold transition-colors hover:text-brand-gold-hover">¿La olvidaste?</a>
           </div>
-          <p-password inputId="password" formControlName="password" [toggleMask]="true" [feedback]="false"
-            autocomplete="current-password" placeholder="••••••••" class="w-full" />
+          <p-password inputId="password" formControlName="password" [toggleMask]="true" [feedback]="false" autocomplete="current-password" placeholder="••••••••" class="w-full" />
           @if (campoInvalido('password')) {
-          <p-message severity="error" variant="simple" size="small">La contraseña es obligatoria</p-message>
+            <p-message severity="error" variant="simple" size="small">La contraseña es obligatoria</p-message>
           }
         </div>
 
@@ -42,7 +40,8 @@
           <p-checkbox formControlName="remember" binary="true"></p-checkbox>
           <span class="text-text-secondary text-sm">Recordarme en este dispositivo</span>
         </div>
-        <button pButton type="submit" label="Iniciar sesión" icon="pi pi-sign-in" [loading]="loading()" class="boton-primary w-full"></button>
+
+        <app-button type="submit" variant="primary" label="Iniciar sesión" icon="pi pi-sign-in" [loading]="loading()" [fullWidth]="true" />
 
         <div class="relative flex items-center py-2">
           <div class="flex-grow border-t border-ui-border-soft"></div>
@@ -68,8 +67,7 @@
       <!-- Estado: inactivo -->
       @if (!scannerEnabled() && !qrScanned()) {
       <div class="flex flex-col items-center gap-4">
-        <div
-          class="flex w-full max-w-[280px] flex-col items-center gap-4 rounded-2xl border border-dashed border-brand-gold/40 bg-ui-surface p-8">
+        <div class="flex w-full max-w-[280px] flex-col items-center gap-4 rounded-2xl border border-dashed border-brand-gold/40 bg-ui-surface p-8">
           <div class="flex size-14 items-center justify-center rounded-full bg-brand-gold/10">
             <i class="pi pi-camera text-2xl text-brand-gold"></i>
           </div>
@@ -78,23 +76,18 @@
             <p class="mt-1 text-xs text-text-muted">Activa la cámara para continuar</p>
           </div>
         </div>
-        <button pButton type="button" label="Activar escáner" icon="pi pi-camera" class="boton-primary w-full max-w-[280px]"
-          (click)="activarEscaner()"></button>
+        <app-button variant="primary" label="Activar escáner" icon="pi pi-camera" [fullWidth]="true" class="w-full max-w-[280px]" (clicked)="activarEscaner()" />
       </div>
       }
 
       <!-- Estado: escaneando -->
       @if (scannerEnabled() && !qrScanned()) {
       <div class="flex flex-col items-center gap-4 w-full">
-        <div
-          class="rounded-2xl overflow-hidden border-4 border-brand-gold shadow-dialog w-[260px] h-[260px]">
+        <div class="rounded-2xl overflow-hidden border-4 border-brand-gold shadow-dialog w-[260px] h-[260px]">
           <video #videoElement autoplay playsinline muted class="w-full h-full object-cover"></video>
         </div>
-        <p class="text-text-muted text-xs text-center">
-          Apunta la cámara al código QR del usuario
-        </p>
-        <button pButton type="button" label="Cancelar" icon="pi pi-times" severity="secondary" class="w-full"
-          (click)="cancelarQr()"></button>
+        <p class="text-text-muted text-xs text-center"> Apunta la cámara al código QR del usuario</p>
+        <app-button variant="secondary" label="Cancelar" icon="pi pi-times" [fullWidth]="true" class="w-full max-w-[280px]" (clicked)="cancelarQr()" />
       </div>
       }
 
@@ -108,16 +101,14 @@
 
         <div class="w-full">
           <label class="text-text-secondary text-sm mb-2 block">Ingresa tu PIN</label>
-          <input pInputText type="password" [ngModel]="pin()" (ngModelChange)="pin.set($event)" maxlength="6" placeholder="● ● ● ●"
-            class="inputs-text text-center text-2xl tracking-[0.5em] w-full" (keyup.enter)="loginConQr()" />
+          <input pInputText type="password" [ngModel]="pin()" (ngModelChange)="pin.set($event)" maxlength="6" placeholder="● ● ● ●" class="inputs-text text-center text-2xl tracking-[0.5em] w-full" (keyup.enter)="loginConQr()" />
           @if (pinError()) {
-          <p class="text-danger text-xs mt-2">{{ pinError() }}</p>
+            <p class="text-danger text-xs mt-2">{{ pinError() }}</p>
           }
         </div>
 
-        <button pButton type="button" label="Ingresar" icon="pi pi-sign-in" [loading]="loadingQr()" class="boton-primary w-full" (click)="loginConQr()"></button>
-
-        <button pButton type="button" label="Volver a escanear" icon="pi pi-refresh" severity="secondary" class="w-full" (click)="cancelarQr()"></button>
+        <app-button variant="primary" label="Ingresar" icon="pi pi-sign-in" [loading]="loadingQr()" [fullWidth]="true" (clicked)="loginConQr()" />
+        <app-button variant="secondary" label="Volver a escanear" icon="pi pi-refresh" [fullWidth]="true" (clicked)="cancelarQr()" />
       </div>
       }
 
