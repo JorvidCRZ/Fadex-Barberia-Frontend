@@ -1,19 +1,22 @@
 import { Component, EventEmitter, Input, Output, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { TableModule, TableLazyLoadEvent } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
-import { DialogModule } from 'primeng/dialog';
+import { TooltipModule } from 'primeng/tooltip';
 import { Venta } from '@/app/core/models/ventas/venta.model';
-import { ConfirmPopoverComponent } from '@/app/shared/components/confirm-popover/confirm-popover.component';
-import { ButtonComponent } from '@/app/shared/components/button/button.component'; // ajusta la ruta
-import { MonedaPipe } from '@/app/shared/pipes/moneda.pipe';                          // ajusta la ruta
+import { ConfirmPopoverComponent } from '@/app/shared/components/confirm-popover/confirm-popover.component'; 
 
 @Component({
   selector: 'app-venta-table',
   standalone: true,
   imports: [
-    CommonModule, TableModule, ButtonModule, DialogModule,
-    ConfirmPopoverComponent, ButtonComponent, MonedaPipe
+    CommonModule,
+    FormsModule,
+    TableModule,
+    ButtonModule,
+    TooltipModule,
+    ConfirmPopoverComponent 
   ],
   templateUrl: './venta-table.html',
   styleUrls: ['./venta-table.scss'],
@@ -21,10 +24,9 @@ import { MonedaPipe } from '@/app/shared/pipes/moneda.pipe';                    
 })
 export class VentaTableComponent {
   @Input() ventas: Venta[] = [];
-  @Input() cargado = true;
+  @Input() cargado = false;
   @Input() totalRecords = 0;
   @Input() rows = 25;
-  @Input() esAdmin = false;
 
   @Output() lazyLoad = new EventEmitter<TableLazyLoadEvent>();
   @Output() eliminar = new EventEmitter<Venta>();
@@ -69,7 +71,7 @@ export class VentaTableComponent {
   }
 
   cancelarEliminar() {
-    this.mostrarConfirmacion = false;
-    this.ventaAEliminar = null;
+    this.mostrarConfirmacion = false; 
+    this.ventaAEliminar = null; 
   }
 }

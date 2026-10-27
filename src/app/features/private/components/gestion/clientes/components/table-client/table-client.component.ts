@@ -10,8 +10,7 @@ import { Cliente } from '@/app/core/models/gestion/cliente/cliente.model';
 @Component({
   selector: 'app-table-client',
   imports: [CommonModule, RouterModule, ButtonModule, TableModule, TooltipModule],
-  templateUrl: './table-client.html',
-  styleUrl: './table-client.scss',
+  templateUrl: './table-client.html'
 })
 export class TableClient {
 
