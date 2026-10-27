@@ -3,9 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TableModule, TableLazyLoadEvent } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
+import { DialogModule } from 'primeng/dialog';
 import { TooltipModule } from 'primeng/tooltip';
 import { Venta } from '@/app/core/models/ventas/venta.model';
-import { ConfirmPopoverComponent } from '@/app/shared/components/confirm-popover/confirm-popover.component'; 
+import { ConfirmPopoverComponent } from '@/app/shared/components/confirm-popover/confirm-popover.component';
+import { ButtonComponent } from '@/app/shared/components/button/button.component'; // ajusta la ruta
+import { MonedaPipe } from '@/app/shared/pipes/moneda.pipe'; // ajusta la ruta
 
 @Component({
   selector: 'app-venta-table',
@@ -15,8 +18,11 @@ import { ConfirmPopoverComponent } from '@/app/shared/components/confirm-popover
     FormsModule,
     TableModule,
     ButtonModule,
+    DialogModule,
     TooltipModule,
-    ConfirmPopoverComponent 
+    ConfirmPopoverComponent,
+    ButtonComponent,
+    MonedaPipe
   ],
   templateUrl: './venta-table.html',
   styleUrls: ['./venta-table.scss'],
@@ -27,6 +33,7 @@ export class VentaTableComponent {
   @Input() cargado = false;
   @Input() totalRecords = 0;
   @Input() rows = 25;
+  @Input() esAdmin = true; // TEMPORAL: cambiar cuando exista el login
 
   @Output() lazyLoad = new EventEmitter<TableLazyLoadEvent>();
   @Output() eliminar = new EventEmitter<Venta>();
@@ -71,7 +78,7 @@ export class VentaTableComponent {
   }
 
   cancelarEliminar() {
-    this.mostrarConfirmacion = false; 
-    this.ventaAEliminar = null; 
+    this.mostrarConfirmacion = false;
+    this.ventaAEliminar = null;
   }
 }
