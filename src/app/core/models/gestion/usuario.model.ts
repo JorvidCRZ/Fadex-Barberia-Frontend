@@ -32,3 +32,10 @@ export interface Permiso {
     nombre: string;
     descripcion: string;
 }
+
+export interface FiltroUsuario {
+  rol: string;
+  tipo: string;
+  qr: string;
+  cantidadRoles: string;
+}
