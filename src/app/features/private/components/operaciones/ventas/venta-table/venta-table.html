@@ -1,88 +1,211 @@
-<div class="rounded-xl border border-[#C9A84C]/25 bg-[#121212] overflow-hidden">
-    <div class="w-full overflow-x-auto">
-        <p-table [value]="ventas" [paginator]="ventas.length > rows" [rows]="rows" dataKey="ventaId" expandableRows
-            [tableStyle]="{ 'min-width': '900px' }">
+<p-table [value]="ventas" [loading]="!cargado" dataKey="ventaId" expandableRows styleClass="tabla-estandar"
+  [tableStyle]="{ 'min-width': '1000px' }">
 
-            <ng-template #header>
-                <tr class="text-sm text-[#C9A84C]">
-                    <th class="text-left font-normal px-4 py-3">N° Venta</th>
-                    <th class="text-left font-normal px-4 py-3">Cliente</th>
-                    <th class="text-left font-normal px-4 py-3">Comprobante</th>
-                    <th class="text-left font-normal px-4 py-3">Método de pago</th>
-                    <th class="text-left font-normal px-4 py-3">Cant. items</th>
-                    <th class="text-left font-normal px-4 py-3">Fecha</th>
-                    <th class="text-left font-normal px-4 py-3">Total</th>
-                    <th class="text-center font-normal px-4 py-3">Acciones</th>
-                </tr>
-            </ng-template>
+  <ng-template pTemplate="header">
+    <tr>
+      <th>N° Venta</th>
+      <th>Cliente</th>
+      <th>Comprobante</th>
+      <th>Método Pago</th>
+      <th>Cant. Ítems</th>
+      <th>Fecha</th>
+      <th>Total</th>
+      <th>Acciones</th>
+    </tr>
+  </ng-template>
 
-            <ng-template #body let-venta let-expanded="expanded">
-                <tr class="text-sm border-t border-[#C9A84C]/15">
-                    <td class="px-4 py-4 whitespace-nowrap">
-                        <div class="flex items-center gap-3">
-                            <button type="button" [pRowToggler]="venta" aria-label="Ver detalle"
-                                class="text-gray-300 hover:text-[#C9A84C] transition">
-                                <i class="pi text-xs" [ngClass]="expanded ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
-                            </button>
-                            <span class="text-white">{{ venta.numeroCorrelativo || ('#' + venta.ventaId) }}</span>
-                        </div>
-                    </td>
-                    <td class="px-4 py-4 whitespace-nowrap text-white">{{ venta.clienteNombre }}</td>
-                    <td class="px-4 py-4 whitespace-nowrap">
-                        <span class="inline-block px-2 py-1 rounded-md bg-white/10 text-xs text-gray-200">{{ venta.tipoComprobante }}</span>
-                    </td>
-                    <td class="px-4 py-4 whitespace-nowrap text-white">{{ venta.metodoPago || '-' }}</td>
-                    <td class="px-4 py-4 whitespace-nowrap text-white">{{ venta.detalles?.length || 0 }}</td>
-                    <td class="px-4 py-4 whitespace-nowrap text-gray-400">{{ venta.fecha | date:'dd/MM/yyyy' }}</td>
-                    <td class="px-4 py-4 whitespace-nowrap font-bold text-[#C9A84C]">S/ {{ calcularTotal(venta) | number:'1.2-2' }}</td>
-                    <td class="px-4 py-4 text-center">
-                        <button type="button" (click)="pedirConfirmacion(venta)" aria-label="Eliminar venta"
-                            class="text-red-500 hover:text-red-400 transition">
-                            <i class="pi pi-trash"></i>
-                        </button>
-                    </td>
-                </tr>
-            </ng-template>
+  <ng-template pTemplate="body" let-venta let-expanded="expanded">
+    <tr>
+      <td>
+        <div class="inline-flex items-center gap-3">
+          @if ((venta.detalles ?? []).length > 0) {
+            <p-button type="button" [pRowToggler]="venta" class="boton-expandir-tabla"
+              [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"></p-button>
+          }
+          <span class="font-medium text-text-muted">
+            {{ venta.numeroCorrelativo || ('#' + venta.ventaId) }}
+          </span>
+        </div>
+      </td>
+      <td class="font-medium">{{ venta.clienteNombre }}</td>
+      <td class="capitalize">{{ (venta.tipoComprobante || '') | lowercase }}</td>
+      <td>
+        @if (venta.metodoPago) {
+          <span class="inline-flex items-center gap-2">
+            <i class="pi pi-wallet text-xs"></i>{{ venta.metodoPago }}
+          </span>
+        } @else {
+          <span class="text-text-muted">-</span>
+        }
+      </td>
+      <td>{{ venta.detalles?.length || 0 }} ítem(s)</td>
+      <td>
+        <div class="flex flex-col items-center">
+          <span class="font-medium">{{ venta.fecha | date:'dd/MM/yyyy' }}</span>
+          <span class="text-xs text-text-muted">{{ venta.fecha | date:'HH:mm' }}</span>
+        </div>
+      </td>
+      <td><span class="font-bold text-brand-gold">{{ calcularTotal(venta) | moneda }}</span></td>
+      <td>
+        <div class="flex items-center justify-center gap-2">
+          <app-button variant="ver-tabla" icon="eye" tooltip="Ver detalle" (clicked)="verDetalle(venta)" />
+          @if (esAdmin) {
+            <app-button variant="eliminar-tabla" icon="trash" tooltip="Eliminar" (clicked)="pedirConfirmacion(venta)" />
+          }
+        </div>
+      </td>
+    </tr>
+  </ng-template>
 
-            <ng-template #expandedrow let-venta>
-                <tr>
-                    <td colspan="8" class="p-0">
-                        <div class="m-3 p-4 rounded-lg border border-[#C9A84C]/20 bg-[#0c0c0c]">
-                            <h3 class="text-xs text-[#C9A84C] uppercase tracking-wider mb-3">Detalle de la venta</h3>
-                            <div class="flex flex-col gap-2">
-                                @for (d of venta.detalles; track $index) {
-                                <div class="flex items-center justify-between text-sm border-b border-white/5 pb-2">
-                                    <div class="flex flex-col">
-                                        <span class="text-white">{{ d.productoNombre || d.servicioNombre }}</span>
-                                        <span class="text-[11px] text-gray-500">
-                                            {{ d.cantidad }} x S/ {{ d.precioUnitario | number:'1.2-2' }} · {{ d.productoNombre ? 'Producto' : 'Servicio' }}
-                                        </span>
-                                    </div>
-                                    <span class="font-semibold text-[#C9A84C]">S/ {{ d.cantidad * d.precioUnitario | number:'1.2-2' }}</span>
-                                </div>
-                                }
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-            </ng-template>
+  <ng-template pTemplate="rowexpansion" let-venta>
+    <tr>
+      <td colspan="8" class="p-0">
+        <div class="card-detalle mx-4 my-3 p-5">
+          <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
 
-            <ng-template #emptymessage>
-                <tr>
-                    <td colspan="8" class="px-4 py-10 text-center text-gray-500">
-                        <i class="pi pi-inbox text-3xl block mb-2 opacity-40"></i>
-                        Sin ventas registradas
-                    </td>
-                </tr>
-            </ng-template>
-        </p-table>
-    </div>
-</div>
+            <div>
+              <p class="label-detalle mb-3"><i class="pi pi-box mr-2 text-brand-gold"></i>Productos físicos</p>
+              <div class="flex flex-col gap-2">
+                @for (detalle of venta.detalles; track detalle.detalleVentaId) {
+                  @if (detalle.productoNombre) {
+                    <div class="card-detalle !p-3 flex items-center justify-between">
+                      <div>
+                        <p class="m-0 text-sm font-medium">{{ detalle.productoNombre }}</p>
+                        <p class="m-0 text-xs text-text-muted">
+                          {{ detalle.cantidad }} unid. x {{ detalle.precioUnitario | moneda }}
+                        </p>
+                      </div>
+                      <span class="font-bold text-brand-gold">{{ subtotalDe(detalle) | moneda }}</span>
+                    </div>
+                  }
+                }
+              </div>
+            </div>
+
+            <div>
+              <p class="label-detalle mb-3"><i class="pi pi-scissors mr-2 text-brand-gold"></i>Servicios realizados</p>
+              <div class="flex flex-col gap-2">
+                @for (detalle of venta.detalles; track detalle.detalleVentaId) {
+                  @if (detalle.servicioNombre) {
+                    <div class="card-detalle !p-3 flex items-center justify-between">
+                      <div>
+                        <p class="m-0 text-sm font-medium">{{ detalle.servicioNombre }}</p>
+                        <p class="m-0 text-xs text-text-muted">Servicio único</p>
+                      </div>
+                      <span class="font-bold text-brand-gold">{{ subtotalDe(detalle) | moneda }}</span>
+                    </div>
+                  }
+                }
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </td>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="emptymessage">
+    <tr>
+      <td colspan="8" class="celda-vacia">
+        <div class="flex flex-col items-center gap-3">
+          <i class="pi pi-inbox text-5xl text-text-muted opacity-30"></i>
+          <p class="m-0 text-lg text-text-muted">Sin ventas registradas</p>
+        </div>
+      </td>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="loadingbody">
+    <tr>
+      <td colspan="8" class="celda-vacia">
+        <div class="flex flex-col items-center gap-3">
+          <div class="size-10 animate-spin rounded-full border-4 border-brand-gold border-t-transparent"></div>
+          <p class="m-0 text-text-muted">Cargando ventas...</p>
+        </div>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<!-- MODAL DETALLE -->
+<p-dialog [(visible)]="mostrarDetalle" [modal]="true" [draggable]="false" [resizable]="false"
+  styleClass="w-11/12 md:w-5/12 shadow-dialog" header="Detalle de Venta" [baseZIndex]="10000">
+
+  <ng-template pTemplate="content">
+    @if (ventaDetalle) {
+      <div class="space-y-5 p-4">
+
+        <div class="flex items-center justify-between border-b border-ui-border-soft pb-4">
+          <div>
+            <p class="label-detalle mb-1">N° de venta</p>
+            <p class="m-0 text-lg font-bold text-brand-gold">
+              {{ ventaDetalle.numeroCorrelativo || ('#' + ventaDetalle.ventaId) }}
+            </p>
+          </div>
+          <span class="capitalize">{{ (ventaDetalle.tipoComprobante || '') | lowercase }}</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="card-detalle">
+            <p class="label-detalle mb-1">Cliente</p>
+            <p class="m-0 font-medium">{{ ventaDetalle.clienteNombre }}</p>
+          </div>
+          <div class="card-detalle">
+            <p class="label-detalle mb-1">Método de pago</p>
+            <p class="m-0 font-medium">{{ ventaDetalle.metodoPago || '-' }}</p>
+          </div>
+        </div>
+
+        <div>
+          <p class="label-detalle mb-2">Detalle</p>
+          <div class="flex flex-col gap-2">
+            @for (detalle of ventaDetalle.detalles; track detalle.detalleVentaId) {
+              <div class="card-detalle !p-3 flex items-center justify-between">
+                <div class="flex items-center">
+                  <i class="pi mr-3 text-brand-gold" [class.pi-box]="!!detalle.productoNombre"
+                    [class.pi-scissors]="!detalle.productoNombre"></i>
+                  <div>
+                    <p class="m-0 text-sm font-medium">{{ detalle.productoNombre || detalle.servicioNombre }}</p>
+                    <p class="m-0 text-xs text-text-muted">
+                      @if (detalle.productoNombre) {
+                        {{ detalle.cantidad }} unid. x {{ detalle.precioUnitario | moneda }}
+                      } @else {
+                        Servicio
+                      }
+                    </p>
+                  </div>
+                </div>
+                <span class="font-bold text-brand-gold">{{ subtotalDe(detalle) | moneda }}</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="card-detalle !border-brand-gold/20 mt-4 flex items-center justify-between">
+          <div>
+            <p class="label-detalle mb-1">Fecha</p>
+            <p class="m-0 font-mono">{{ ventaDetalle.fecha | date:'dd/MM/yyyy HH:mm' }}</p>
+          </div>
+          <div class="text-right">
+            <p class="label-detalle mb-1">Total</p>
+            <p class="m-0 text-2xl font-bold text-brand-gold">{{ calcularTotal(ventaDetalle) | moneda }}</p>
+          </div>
+        </div>
+
+      </div>
+    }
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <app-button variant="primary" size="sm" label="Cerrar" (clicked)="mostrarDetalle = false" />
+  </ng-template>
+</p-dialog>
 
 <app-confirm-popover
-    [visible]="mostrarConfirmacion"
-    [mensaje]="mensajeConfirmacion"
-    mode="eliminar"
-    (confirm)="confirmarEliminar()"
-    (cancel)="cancelarEliminar()">
+  [visible]="mostrarConfirmacion"
+  [mensaje]="mensajeConfirmacion"
+  mode="eliminar"
+  (confirm)="confirmarEliminar()"
+  (cancel)="cancelarEliminar()">
 </app-confirm-popover>

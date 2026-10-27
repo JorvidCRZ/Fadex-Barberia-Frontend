@@ -1,31 +1,57 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TableModule } from 'primeng/table';
+import { TableModule, TableLazyLoadEvent } from 'primeng/table';
+import { ButtonModule } from 'primeng/button';
+import { DialogModule } from 'primeng/dialog';
 import { Venta } from '@/app/core/models/ventas/venta.model';
 import { ConfirmPopoverComponent } from '@/app/shared/components/confirm-popover/confirm-popover.component';
+import { ButtonComponent } from '@/app/shared/components/button/button.component'; // ajusta la ruta
+import { MonedaPipe } from '@/app/shared/pipes/moneda.pipe';                          // ajusta la ruta
 
 @Component({
   selector: 'app-venta-table',
   standalone: true,
-  imports: [CommonModule, TableModule, ConfirmPopoverComponent],
+  imports: [
+    CommonModule, TableModule, ButtonModule, DialogModule,
+    ConfirmPopoverComponent, ButtonComponent, MonedaPipe
+  ],
   templateUrl: './venta-table.html',
-  styleUrls: ['./venta-table.scss']
+  styleUrls: ['./venta-table.scss'],
+  encapsulation: ViewEncapsulation.None
 })
 export class VentaTableComponent {
-
   @Input() ventas: Venta[] = [];
-  @Input() rows = 10;
+  @Input() cargado = true;
+  @Input() totalRecords = 0;
+  @Input() rows = 25;
+  @Input() esAdmin = false;
 
+  @Output() lazyLoad = new EventEmitter<TableLazyLoadEvent>();
   @Output() eliminar = new EventEmitter<Venta>();
 
   mostrarConfirmacion = false;
   mensajeConfirmacion = '';
   ventaAEliminar: Venta | null = null;
 
+  mostrarDetalle = false;
+  ventaDetalle: Venta | null = null;
+
+  verDetalle(venta: Venta) {
+    this.ventaDetalle = venta;
+    this.mostrarDetalle = true;
+  }
+
+  subtotalDe(det: any): number {
+    return det.subtotal != null
+      ? Number(det.subtotal)
+      : Number(det.precioUnitario) * Number(det.cantidad);
+  }
+
   calcularTotal(venta: Venta): number {
-    return (venta.detalles ?? []).reduce((acc, det) => {
-      return acc + (Number(det.precioUnitario) * Number(det.cantidad));
-    }, 0);
+    return (venta.detalles ?? []).reduce(
+      (acc: number, det: any) => acc + this.subtotalDe(det),
+      0
+    );
   }
 
   pedirConfirmacion(venta: Venta) {

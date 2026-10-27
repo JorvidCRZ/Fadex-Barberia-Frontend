@@ -67,6 +67,9 @@ export class VentasComponent implements OnInit {
   esBarbero = false;
   userId: number | null = null;
 
+  get esAdmin(): boolean {
+  return !this.esBarbero;
+}
   private readonly ventasMock: Venta[] = [
     {
       ventaId: 1001,
@@ -162,6 +165,7 @@ export class VentasComponent implements OnInit {
     });
   }
 
+  
   crearVenta(data: any): void {
     this.ventaService.crearVenta(data).subscribe({
       next: (resp) => {
