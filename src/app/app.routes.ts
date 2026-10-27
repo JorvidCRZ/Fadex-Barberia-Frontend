@@ -114,7 +114,7 @@ export const routes: Routes = [
           { path: 'barberos', loadComponent: () => import('./features/private/components/gestion/barberos/barberos.component').then(m => m.Barberos) },
         ]
       },
-      { path: 'perfil', component: PerfilBarbero },
+      { path: 'perfil', loadComponent: () => import('./features/private/pages/perfil/perfil.component').then(m => m.PerfilComponent) },
       { path: '**', loadComponent: () => import('./shared/components/error404/error404.component').then(m => m.Error404Component) }
     ]
   },

@@ -3,9 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TableModule, TableLazyLoadEvent } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
+import { DialogModule } from 'primeng/dialog';
 import { TooltipModule } from 'primeng/tooltip';
 import { Venta } from '@/app/core/models/ventas/venta.model';
-import { ConfirmPopoverComponent } from '@/app/shared/components/confirm-popover/confirm-popover.component'; 
+import { ConfirmPopoverComponent } from '@/app/shared/components/confirm-popover/confirm-popover.component';
+import { ButtonComponent } from '@/app/shared/components/button/button.component'; // ajusta la ruta
+import { MonedaPipe } from '@/app/shared/pipes/moneda.pipe'; // ajusta la ruta
 
 @Component({
   selector: 'app-venta-table',
@@ -15,19 +18,22 @@ import { ConfirmPopoverComponent } from '@/app/shared/components/confirm-popover
     FormsModule,
     TableModule,
     ButtonModule,
+    DialogModule,
     TooltipModule,
-    ConfirmPopoverComponent 
+    ConfirmPopoverComponent,
+    ButtonComponent,
+    MonedaPipe
   ],
   templateUrl: './venta-table.html',
   styleUrls: ['./venta-table.scss'],
   encapsulation: ViewEncapsulation.None
 })
 export class VentaTableComponent {
-
   @Input() ventas: Venta[] = [];
   @Input() cargado = false;
   @Input() totalRecords = 0;
   @Input() rows = 25;
+  @Input() esAdmin = true; // TEMPORAL: cambiar cuando exista el login
 
   @Output() lazyLoad = new EventEmitter<TableLazyLoadEvent>();
   @Output() eliminar = new EventEmitter<Venta>();
@@ -36,10 +42,25 @@ export class VentaTableComponent {
   mensajeConfirmacion = '';
   ventaAEliminar: Venta | null = null;
 
+  mostrarDetalle = false;
+  ventaDetalle: Venta | null = null;
+
+  verDetalle(venta: Venta) {
+    this.ventaDetalle = venta;
+    this.mostrarDetalle = true;
+  }
+
+  subtotalDe(det: any): number {
+    return det.subtotal != null
+      ? Number(det.subtotal)
+      : Number(det.precioUnitario) * Number(det.cantidad);
+  }
+
   calcularTotal(venta: Venta): number {
-    return (venta.detalles ?? []).reduce((acc, det) => {
-      return acc + (Number(det.precioUnitario) * Number(det.cantidad));
-    }, 0);
+    return (venta.detalles ?? []).reduce(
+      (acc: number, det: any) => acc + this.subtotalDe(det),
+      0
+    );
   }
 
   pedirConfirmacion(venta: Venta) {
@@ -57,7 +78,7 @@ export class VentaTableComponent {
   }
 
   cancelarEliminar() {
-    this.mostrarConfirmacion = false; 
-    this.ventaAEliminar = null; 
+    this.mostrarConfirmacion = false;
+    this.ventaAEliminar = null;
   }
 }

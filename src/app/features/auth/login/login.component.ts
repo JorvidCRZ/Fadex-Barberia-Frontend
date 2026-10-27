@@ -12,7 +12,9 @@ import { TokenService } from '../../../core/services/auth/token.service';
 import { campoInvalido } from '../../../shared/utils/form-utils.component';
 import { LogoComponent } from '../../../shared/components/logo/logo.component';
 import { NotificationService } from '../../../core/services/common/notification.service';
-import {Component,inject,OnInit,AfterViewInit,OnDestroy,ViewChild,ElementRef} from '@angular/core';
+import {
+  Component, inject, signal, OnInit, AfterViewInit, OnDestroy, ViewChild, ElementRef
+} from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 
 export interface GoogleCredentialResponse {
@@ -47,17 +49,17 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // ── Login normal ──────────────────────────────
   formularioLogin!: FormGroup;
-  loading = false;
+  loading = signal(false);
   formSubmitted = false;
   campoInvalido = (campo: string) => campoInvalido(this.formularioLogin, campo, this.formSubmitted);
 
   // ── QR ───────────────────────────────────────
-  qrScanned = false;
-  qrToken = '';
-  pin = '';
-  loadingQr = false;
-  scannerEnabled = false;
-  pinError = '';
+  qrScanned = signal(false);
+  scannerEnabled = signal(false);
+  loadingQr = signal(false);
+  pin = signal('');
+  pinError = signal('');
+  private qrToken = '';
   private stream: MediaStream | null = null;
 
   ngOnInit() {
@@ -87,9 +89,12 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
       this.notify.showError('Completa correctamente el formulario');
       return;
     }
-    this.loading = true;
-    this.authService.login(this.formularioLogin.value)
-      .pipe(finalize(() => this.loading = false))
+
+    const { username, password } = this.formularioLogin.value;
+
+    this.loading.set(true);
+    this.authService.login({ username, password })
+      .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: () => {
           this.notify.showSuccess('Bienvenido al sistema');
@@ -130,9 +135,9 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   handleGoogleCredentialResponse(response: GoogleCredentialResponse) {
-    this.loading = true;
+    this.loading.set(true);
     this.authService.loginWithGoogle(response.credential)
-      .pipe(finalize(() => this.loading = false))
+      .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: () => {
           this.notify.showSuccess('Bienvenido al sistema con Google');
@@ -147,17 +152,17 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   // ── QR Scanner ────────────────────────────────
   async activarEscaner() {
     this.cancelarQr();
-    this.scannerEnabled = true;
+    this.scannerEnabled.set(true);
 
+    // Espera a que Angular pinte el <video> dentro del @if
     setTimeout(async () => {
       try {
         const devices = await navigator.mediaDevices.enumerateDevices();
-        const videoDevices = devices.filter(d => d.kind === 'videoinput');
-        const device = videoDevices[0];
+        const device = devices.find(d => d.kind === 'videoinput');
 
         if (!device) {
           this.notify.showError('No se encontró ninguna cámara');
-          this.scannerEnabled = false;
+          this.scannerEnabled.set(false);
           return;
         }
 
@@ -169,80 +174,83 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
         await this.videoElement.nativeElement.play();
 
         this.scanQrFromVideo();
-
-      } catch (err: any) {
+      } catch (err) {
         console.error(err);
-        this.scannerEnabled = false;
+        this.scannerEnabled.set(false);
         this.notify.showError('No se pudo iniciar la cámara. Usa HTTPS o revisa permisos.');
       }
     }, 300);
   }
 
- private async scanQrFromVideo() {
-  const { BrowserMultiFormatReader } = await import('@zxing/browser');
-  const reader = new BrowserMultiFormatReader();
+  private async scanQrFromVideo() {
+    const { BrowserMultiFormatReader } = await import('@zxing/browser');
+    const reader = new BrowserMultiFormatReader();
 
-  const tick = async () => {
-    if (!this.scannerEnabled || this.qrScanned) return;
+    const tick = () => {
+      if (!this.scannerEnabled() || this.qrScanned()) return;
 
-    try {
-      const result = reader.decodeFromCanvas(this.getCanvasFromVideo());
-      if (result) {
-        this.onQrScanned(result.getText());
-        return;
-      }
-    } catch (_) {}
+      try {
+        const canvas = this.getCanvasFromVideo();
+        if (canvas) {
+          const result = reader.decodeFromCanvas(canvas);
+          if (result) {
+            this.onQrScanned(result.getText());
+            return;
+          }
+        }
+      } catch (_) { /* no se encontró QR en este frame */ }
 
-    setTimeout(tick, 200); 
-  };
+      setTimeout(tick, 200);
+    };
 
-  tick();
-}
+    tick();
+  }
 
-private getCanvasFromVideo(): HTMLCanvasElement {
-  const video = this.videoElement.nativeElement;
-  const canvas = document.createElement('canvas');
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  canvas.getContext('2d')!.drawImage(video, 0, 0);
-  return canvas;
-}
+  private getCanvasFromVideo(): HTMLCanvasElement | null {
+    const video = this.videoElement?.nativeElement;
+    if (!video || !video.videoWidth) return null;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d')!.drawImage(video, 0, 0);
+    return canvas;
+  }
 
   stopCamera() {
     if (this.stream) {
       this.stream.getTracks().forEach(track => track.stop());
       this.stream = null;
     }
-    this.scannerEnabled = false;
+    this.scannerEnabled.set(false);
   }
 
   onQrScanned(result: string) {
-    if (!result || this.qrScanned) return;
-    console.log('QR TOKEN LEIDO:', result);
+    if (!result || this.qrScanned()) return;
     this.qrToken = result;
-    this.qrScanned = true;
+    this.qrScanned.set(true);
     this.stopCamera();
   }
 
   loginConQr() {
-    console.log('Enviando qrToken:', this.qrToken);
-    console.log('Enviando pin:', this.pin);
-    if (!this.pin || this.pin.length < 4) {
-      this.pinError = 'Ingresa tu PIN de 4 a 6 dígitos';
+    if (!this.pin() || this.pin().length < 4) {
+      this.pinError.set('Ingresa tu PIN de 4 a 6 dígitos');
       return;
     }
-    this.loadingQr = true;
-    this.pinError = '';
-    this.authService.loginWithQr(this.qrToken, this.pin)
-      .pipe(finalize(() => this.loadingQr = false))
+
+    this.loadingQr.set(true);
+    this.pinError.set('');
+    this.authService.loginWithQr(this.qrToken, this.pin())
+      .pipe(finalize(() => this.loadingQr.set(false)))
       .subscribe({
         next: () => {
           this.notify.showSuccess('Bienvenido al sistema');
           this.redirectUser();
         },
         error: (err) => {
-          this.pinError = err?.error?.message || 'QR o PIN incorrecto';
-          this.qrScanned = false;
+          this.pinError.set(err?.error?.message || 'QR o PIN incorrecto');
+          this.pin.set('');
+          this.qrScanned.set(false);
           this.qrToken = '';
         }
       });
@@ -250,10 +258,10 @@ private getCanvasFromVideo(): HTMLCanvasElement {
 
   cancelarQr() {
     this.stopCamera();
-    this.qrScanned = false;
+    this.qrScanned.set(false);
     this.qrToken = '';
-    this.pin = '';
-    this.pinError = '';
+    this.pin.set('');
+    this.pinError.set('');
   }
 
   private redirectUser() {
