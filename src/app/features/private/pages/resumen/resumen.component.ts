@@ -47,7 +47,7 @@ interface CitaResumen {
   selector: 'app-resumen',
   standalone: true,
   imports: [
-    CommonModule, DatePipe, RouterLink, TableModule,
+    CommonModule, RouterLink, TableModule,
     StatsComponent, StatusBadgeComponent, ButtonComponent,
   ],
   templateUrl: './resumen.html',

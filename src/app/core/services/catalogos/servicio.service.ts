@@ -1,64 +1,52 @@
-import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { SERVICIOS_MOCK } from '../../config/servicios-mock.config';
-import { mockPageResponse, mockResponse } from '../../config/mock-response.config';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { environment } from '@/environments/environment';
 import { Servicio, ServicioFiltro, ServicioRequest } from '../../models/catalogos/servicios.model';
 import { ApiResponse, PageResponse } from '../../models/common/index.model';
+import { buildHttpParamsComponent } from '@/app/shared/utils/build-http-params.component';
+import { buildFormData } from '@/app/shared/utils/build-form-data.component';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+    providedIn: 'root'
+})
 export class ServicioService {
-    private readonly servicios = [...SERVICIOS_MOCK];
 
-    obtenerServicioPublicos(filter: Partial<ServicioFiltro> = {}): Observable<ApiResponse<PageResponse<Servicio>>> {
-        return of(mockResponse(mockPageResponse(this.filtrar(filter, true), filter.page ?? 0, filter.size ?? 10)));
+    private apiUrl = `${environment.apiUrl}/servicios`;
+    private http = inject(HttpClient);
+
+    obtenerServicioPublicos(filter?: Partial<ServicioFiltro>) {
+        return this.http.get<ApiResponse<PageResponse<Servicio>>>(`${this.apiUrl}/publicados`, { params: buildHttpParamsComponent(filter) });
     }
 
-    obtenerServicioPublicosId(id: number): Observable<ApiResponse<Servicio>> {
-        const servicio = this.servicios.find(item => item.servicioId === id && item.publicado && item.estado);
-        return of(mockResponse(servicio ?? null as unknown as Servicio));
+    obtenerServicioPublicosId(id: number) {
+        return this.http.get<ApiResponse<Servicio>>(`${this.apiUrl}/publicados/${id}`);
     }
 
-    obtenerServiciosConFiltro(filter: Partial<ServicioFiltro> = {}): Observable<ApiResponse<PageResponse<Servicio>>> {
-        return of(mockResponse(mockPageResponse(this.filtrar(filter), filter.page ?? 0, filter.size ?? 10)));
+    obtenerServiciosConFiltro(filter?: Partial<ServicioFiltro>) {
+        return this.http.get<ApiResponse<PageResponse<Servicio>>>(this.apiUrl, { params: buildHttpParamsComponent(filter) });
     }
 
-    obtenerServicioPorId(id: number): Observable<ApiResponse<Servicio>> {
-        const servicio = this.servicios.find(item => item.servicioId === id);
-        return of(mockResponse(servicio ?? null as unknown as Servicio));
+    obtenerServicioPorId(id: number) {
+        return this.http.get<ApiResponse<Servicio>>(`${this.apiUrl}/${id}`);
     }
 
-    crearServicio(data: ServicioRequest, _archivos?: File[]): Observable<ApiResponse<Servicio>> {
-        return of(mockResponse({ ...data, servicioId: this.servicios.length + 1, categoriaNombre: '', urlsMultimedia: [] }));
+    crearServicio(data: ServicioRequest, archivos?: File[]) {
+        return this.http.post<ApiResponse<Servicio>>(this.apiUrl,buildFormData('servicio', data, archivos));
     }
 
-    actualizarServicio(id: number, data: ServicioRequest, _archivos?: File[]): Observable<ApiResponse<Servicio>> {
-        return of(mockResponse({ ...data, servicioId: id, categoriaNombre: '', urlsMultimedia: [] }));
+    actualizarServicio(id: number, data: ServicioRequest, archivos?: File[]) {
+        return this.http.put<ApiResponse<Servicio>>(`${this.apiUrl}/${id}`,buildFormData('servicio', data, archivos));
+    }
+    cambiarEstado(id: number, estado: boolean) {
+        return this.http.patch<ApiResponse<Servicio>>(`${this.apiUrl}/${id}/estado`, {}, { params: buildHttpParamsComponent({ estado }) });
     }
 
-    cambiarEstado(id: number, estado: boolean): Observable<ApiResponse<Servicio>> {
-        const servicio = this.servicios.find(item => item.servicioId === id);
-        return of(mockResponse({ ...(servicio ?? this.servicios[0]), estado }));
+    cambiarPublicado(id: number, publicado: boolean) {
+        return this.http.patch<ApiResponse<Servicio>>(`${this.apiUrl}/${id}/publicacion`, {}, { params: buildHttpParamsComponent({ publicado }) });
     }
 
-    cambiarPublicado(id: number, publicado: boolean): Observable<ApiResponse<Servicio>> {
-        const servicio = this.servicios.find(item => item.servicioId === id);
-        return of(mockResponse({ ...(servicio ?? this.servicios[0]), publicado }));
-    }
-
-    eliminarServicio(_id: number): Observable<void> {
-        return of(void 0);
-    }
-
-    private filtrar(filter: Partial<ServicioFiltro>, soloPublicados = false): Servicio[] {
-        const nombre = filter.nombre?.trim().toLowerCase();
-        return this.servicios.filter(servicio =>
-            (!soloPublicados || (servicio.publicado && servicio.estado)) &&
-            (!nombre || servicio.nombre.toLowerCase().includes(nombre)) &&
-            (filter.categoriaId == null || servicio.categoriaId === filter.categoriaId) &&
-            (filter.estado == null || servicio.estado === filter.estado) &&
-            (filter.publicado == null || servicio.publicado === filter.publicado) &&
-            (filter.precioMin == null || servicio.precio >= filter.precioMin) &&
-            (filter.precioMax == null || servicio.precio <= filter.precioMax)
-        );
+    eliminarServicio(id: number): Observable<void> {
+        return this.http.delete<void>(`${this.apiUrl}/${id}`);
     }
 }
