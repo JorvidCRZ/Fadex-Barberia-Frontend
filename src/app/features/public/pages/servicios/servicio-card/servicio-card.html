@@ -1,21 +1,24 @@
-<div (click)="onSeleccionar()" class="relative bg-brand-black border border-ui-border-soft hover:border-brand-gold rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-brand-gold/10 group flex flex-col cursor-pointer">
+<div role="button" tabindex="0" (click)="onSeleccionar()" (keydown.enter)="onSeleccionar()" [attr.aria-label]="'Ver ' + servicio.nombre"
+class="relative bg-brand-black border border-ui-border-white/60 hover:border-brand-gold rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-brand-gold/10 group flex flex-col cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-brand-gold">
 
-    <div class="w-full aspect-square bg-brand-white/5 group-hover:bg-brand-gold/10 transition overflow-hidden">
-        <img [src]="servicio.urlsMultimedia[0] | safeImageUrl" [alt]="servicio.nombre" (error)="img.src='/assets/banners/cortebarba.jpg'" #img class="w-full h-full object-cover transform group-hover:scale-110 transition duration-300" />
+    <div class="relative w-full aspect-[4/3] bg-brand-white/5 overflow-hidden">
+        <img [alt]="servicio.nombre" [src]="getImagen() | safeImageUrl" (error)="onImgError($event)"
+             class="absolute inset-0 w-full h-full object-cover transform group-hover:scale-110 transition duration-300" />
+        <span class="absolute top-2 left-2 bg-black *:bg-opacity-50 text-brand-white text-xs font-semibold p-0 m-0 rounded-xl">
+            <app-status-badge type="text" [value]="servicio.categoriaNombre" customClass="estado-servicio" />
+        </span>
     </div>
 
-    <div class="p-3 flex flex-col flex-1">
-        <span class="absolute top-2 left-2 bg-brand-black/50 rounded-full px-2 py-1">
-            <app-status-badge type="text" [value]="servicio.categoriaNombre" customClass="badge-text estado-servicio "/>
-        </span>
-        <p class="text-text-secondary text-xs leading-relaxed mb-3 flex-1">{{ servicio.nombre }}</p>
-        <div class="flex items-center justify-between pt-2 border-t border-ui-border-soft">
-            <span class="text-brand-gold font-bold text-lg">{{ servicio.precio | soles  }}</span>
-            <span class="text-text-muted text-xs flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>{{ servicio.duracion }} min
+    <div class="p-4 flex flex-col flex-1 gap-3">
+        <h3 class="text-brand-white text-base font-semibold leading-snug line-clamp-2 min-h-[2.75rem]">{{ servicio.nombre }}</h3>
+
+        <div class="flex items-center justify-between pt-3 border-t border-ui-border-soft">
+            <span class="text-brand-gold font-bold text-lg">{{ servicio.precio | soles }}</span>
+            <span class="text-text-secondary text-xs flex items-center gap-1">
+                <i class="pi pi-clock text-[11px]" aria-hidden="true"></i>{{ servicio.duracion }} min
             </span>
         </div>
+
+        <span class="text-brand-gold text-sm font-medium group-hover:underline">Ver detalle →</span>
     </div>
 </div>

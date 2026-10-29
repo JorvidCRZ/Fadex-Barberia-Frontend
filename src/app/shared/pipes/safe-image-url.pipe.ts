@@ -39,9 +39,3 @@ export class SafeImageUrlPipe implements PipeTransform {
   }
 }
 
-@Pipe({
-  name: 'safeMultimediaUrl',
-  standalone: true,
-  pure: false,
-})
-export class SafeMultimediaUrlPipe extends SafeImageUrlPipe {}

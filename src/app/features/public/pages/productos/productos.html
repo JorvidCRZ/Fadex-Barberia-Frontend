@@ -6,28 +6,25 @@
 
 <section class="producto-page-section">
 	<div class="mx-auto max-w-7xl">
-		<app-filtros [fields]="filtrosFields" [titulo]="texto" (buscar)="onBuscar($event)"(limpiar)="onLimpiar()" [text]="texto"/>
+		<app-filtros [fields]="filtrosFields()" [titulo]="texto" (buscar)="onBuscar($event)" (limpiar)="onLimpiar()" [text]="texto" />
 
 		<div class="producto-page-summary">
-			<span>{{ totalRecords || productos.length }} producto(s) encontrado(s)</span>
-			@if (cargando) {
+			<span>{{ totalRecords() || productos().length }} producto(s) encontrado(s)</span>
+			@if (cargando()) {
 				<span>Cargando productos...</span>
 			}
 		</div>
 
 		<div class="mt-8">
-			<app-producto-lista [productos]="productos" (verProducto)="verProducto($event)" />
+			<app-producto-lista [productos]="productos()" (verProducto)="verProducto($event)" />
 		</div>
 
 		<div class="producto-page-paginator">
-			<p-paginator [first]="page * size" [rows]="size" [totalRecords]="totalRecords" [rowsPerPageOptions]="[8, 12, 24, 48]" [showCurrentPageReport]="true" currentPageReportTemplate="Página {currentPage} de {totalPages} · {totalRecords} producto(s)" (onPageChange)="onPaginatorChange($event)"></p-paginator>
+			<p-paginator [first]="page() * size()" [rows]="size()" [totalRecords]="totalRecords()" [rowsPerPageOptions]="[8, 12, 24, 48]" [showCurrentPageReport]="true" currentPageReportTemplate="Página {currentPage} de {totalPages} · {totalRecords} producto(s)" (onPageChange)="onPaginatorChange($event)"></p-paginator>
 		</div>
 	</div>
 </section>
 
-@if (productoSeleccionado) {
-	<app-producto-detalle
-		[producto]="productoSeleccionado"
-		(cerrar)="cerrarDetalle()"
-	/>
+@if (productoSeleccionado(); as seleccionado) {
+	<app-producto-detalle [producto]="seleccionado" (cerrar)="cerrarDetalle()" />
 }

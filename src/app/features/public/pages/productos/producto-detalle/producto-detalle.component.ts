@@ -3,21 +3,10 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { Router } from '@angular/router';
-import {
-  Component,
-  EventEmitter,
-  Input,
-  OnChanges,
-  Output,
-  SimpleChanges,
-  inject,
-} from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, inject} from '@angular/core';
 import { SafeImageUrlPipe } from '../../../../../shared/pipes/safe-image-url.pipe';
 import { SolesPipe } from '../../../../../shared/pipes/moneda.pipe';
-import {
-  CarritoService,
-  obtenerPrecio,
-} from '../../../../../core/services/catalogos/carrito.service';
+import { CarritoService, obtenerPrecio } from '../../../../../core/services/catalogos/carrito.service';
 import { NotificationService } from '../../../../../core/services/common/notification.service';
 import { INVENTARIO_CONFIG } from '../../../../../core/config/valores.config';
 import { Producto } from '../../../../../core/models/catalogos/productos.model';

@@ -6,24 +6,23 @@
 <section class="bg-brand-black py-10 px-4">
   <div class="mx-auto max-w-7xl flex flex-col gap-6">
 
-    <app-filtros [fields]="filtrosFields" titulo="Servicios" (buscar)="onBuscar($event)" (limpiar)="onLimpiar()" />
+    <app-filtros [fields]="filtrosFields()" titulo="Servicios" (buscar)="onBuscar($event)" (limpiar)="onLimpiar()" />
 
     <div class="flex items-center justify-between text-sm text-text-secondary">
-      <span>{{ totalRecords }} servicio(s) disponible(s)</span>
-      @if (cargando) { <span>Cargando...</span> }
+      <span>{{ totalRecords() }} servicio(s) disponible(s)</span>
+      @if (cargando()) { <span>Cargando...</span> }
     </div>
 
     <div class="mt-8">
-      <app-servicio-lista [servicios]="servicios" [cargando]="cargando" (seleccionado)="abrirDetalle($event)" />
-		</div>
-    
+      <app-servicio-lista [servicios]="servicios()" [cargando]="cargando()" (seleccionado)="abrirDetalle($event)" />
+    </div>
+
     <div class="producto-page-paginator">
-      <p-paginator [first]="page * size" [rows]="size" [totalRecords]="totalRecords" [rowsPerPageOptions]="[10, 20, 50]" [showCurrentPageReport]="true" currentPageReportTemplate="Página {currentPage} de {totalPages} · {totalRecords} servicio(s)" (onPageChange)="onPaginatorChange($event)" />
-		</div>
+      <p-paginator [first]="page() * size()" [rows]="size()" [totalRecords]="totalRecords()" [rowsPerPageOptions]="[10, 20, 50]" [showCurrentPageReport]="true" currentPageReportTemplate="Página {currentPage} de {totalPages} · {totalRecords} servicio(s)" (onPageChange)="onPaginatorChange($event)" />
+    </div>
   </div>
 </section>
 
-
-@if (mostrarModal) {
-<app-servicio-detalle [servicio]="servicioSeleccionado" [cargando]="cargandoDetalle" (cerrar)="cerrarModal()" (reservar)="irAReservar()" />
+@if (mostrarModal()) {
+  <app-servicio-detalle [servicio]="servicioSeleccionado()" [cargando]="cargandoDetalle()" (cerrar)="cerrarModal()" (reservar)="irAReservar()" />
 }

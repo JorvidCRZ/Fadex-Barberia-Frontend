@@ -63,7 +63,7 @@ const SOLO_ICONO = new Set<ButtonVariant>([
         <i [class]="claseIcono"></i>
       }
       @if (!soloIcono && textoVisible) {
-        <span>{{ textoVisible }}</span>
+        <span>  {{ textoVisible }}</span>
       }
     </p-button>
   `,

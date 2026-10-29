@@ -95,3 +95,9 @@ p-table{
     box-shadow: none !important;
 }
 }
+
+
+.p-paginator-page.p-paginator-page-selected,.p-paginator-page:not(.p-disabled):not(.p-paginator-page-selected):hover, .p-paginator-first:not(.p-disabled):hover, .p-paginator-prev:not(.p-disabled):hover, .p-paginator-next:not(.p-disabled):hover, .p-paginator-last:not(.p-disabled):hover {
+    background: rgb(var(--color-brand-gold)) !important;
+    color: black !important;
+}
