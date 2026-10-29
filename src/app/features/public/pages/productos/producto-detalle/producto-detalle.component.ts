@@ -16,15 +16,8 @@ import { ButtonComponent } from '@/app/shared/components/button/button.component
 @Component({
   standalone: true,
   selector: 'app-producto-detalle',
-  imports: [
-    CommonModule,
-    FormsModule,
-    ButtonComponent,
-    InputNumberModule,
-    SafeImageUrlPipe,
-    StatusBadgeComponent,
-    ImageModule,
-    SolesPipe,
+  imports: [ CommonModule, FormsModule, ButtonComponent, InputNumberModule, SafeImageUrlPipe,
+     StatusBadgeComponent, ImageModule, SolesPipe,
   ],
   templateUrl: './producto-detalle.html',
 })
@@ -46,10 +39,7 @@ export class ProductoDetalleComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['producto'] && this.producto) {
       this.imagenSeleccionada = this.obtenerImagenPrincipal(this.producto);
-      this.images = (this.producto.urlsMultimedia ?? []).map((u: string) => ({
-        itemImageSrc: u,
-        thumbnailImageSrc: u,
-      }));
+      this.images = (this.producto.urlsMultimedia ?? []).map((u: string) => ({itemImageSrc: u,thumbnailImageSrc: u,}));
     }
     this.cantidad = 1;
   }
