@@ -1,16 +1,16 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 // import { ActivatedRoute } from '@angular/router';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
-// import { Observable, map, of, switchMap } from 'rxjs';
+import { Observable, map, of, switchMap } from 'rxjs';
 import { InputTextModule } from 'primeng/inputtext';
 // import { ToastModule } from 'primeng/toast';
 // import { MessageService } from 'primeng/api';
-// import { Persona } from '../../../../core/models/gestion/persona/persona.model';
-// import { PersonaUpdateRequest } from '../../../../core/models/gestion/persona/persona-update.model';
-// import { AuthService } from '../../../../core/services/auth/auth.service';
+import { Persona } from '../../../../core/models/gestion/persona/persona.model';
+import { PersonaUpdateRequest } from '../../../../core/models/gestion/persona/persona-update.model';
+import { AuthService } from '../../../../core/services/auth/auth.service';
+import { BarberoService } from '../../../../core/services/gestion/barbero.service';
+import { PersonaService } from '../../../../core/services/gestion/persona.service';
 // import { ClienteService } from '../../../../core/services/gestion/cliente.service';
-// import { BarberoService } from '../../../../core/services/gestion/barbero.service';
-// import { PersonaService } from '../../../../core/services/gestion/persona.service';
 import { TokenService } from '../../../../core/services/auth/token.service';
 
 // ─── Modelo ───────────────────────────────────────────────────────────────────
@@ -56,16 +56,15 @@ const PERMISOS_ADMIN: string[] = [
 const passwordsCoinciden = (g: AbstractControl): ValidationErrors | null =>
   g.get('passwordNueva')?.value === g.get('confirmarPassword')?.value ? null : { noCoinciden: true };
 
-// Backend: transformar la respuesta de Persona cuando se reactive la API.
-// const desdePersona = (p: Persona): PerfilCuenta => ({
-//   personaId: p.personaId,
-//   usuarioId: p.usuario?.idUsuario,
-//   nombre: p.nombre,
-//   apellido: p.apellido,
-//   telefono: p.telefono ?? '',
-//   email: p.email,
-//   usuario: p.usuario?.user,
-// });
+const desdePersona = (p: Persona): PerfilCuenta => ({
+  personaId: p.personaId,
+  usuarioId: p.usuario?.idUsuario,
+  nombre: p.nombre,
+  apellido: p.apellido,
+  telefono: p.telefono ?? '',
+  email: p.email,
+  usuario: p.usuario?.user,
+});
 
 const PERFILES_MEMORIA: Record<RolPerfil, PerfilCuenta> = {
   ADMIN: { personaId: 1, usuarioId: 1, nombre: 'Administrador', apellido: 'Demo', telefono: '900000000', email: 'admin@gmail.com', usuario: 'admin', permisos: PERMISOS_ADMIN },
@@ -87,10 +86,10 @@ export class PerfilComponent implements OnInit {
 
   // Backend: dependencias conservadas para cuando se habilite la API.
   // private readonly toast = inject(MessageService);
-  // private readonly personaService = inject(PersonaService);
-  // private readonly authService = inject(AuthService);
   // private readonly clienteService = inject(ClienteService);
-  // private readonly barberoService = inject(BarberoService);
+private readonly personaService = inject(PersonaService);
+private readonly authService = inject(AuthService);
+private readonly barberoService = inject(BarberoService);
 
   // El rol viene de la ruta: data: { rol: 'CLIENTE' | 'BARBERO' | 'ADMIN' }
   readonly rol: RolPerfil = this.obtenerRol();
@@ -156,45 +155,32 @@ export class PerfilComponent implements OnInit {
     this.cargar();
   }
 
-  cargar(): void {
-    this.cargando.set(true);
+cargar(): void {
+  if (this.rol !== 'BARBERO') {
     const p = { ...PERFILES_MEMORIA[this.rol] };
     this.perfil.set(p);
     this.formPerfil.patchValue({ nombre: p.nombre, apellido: p.apellido, telefono: p.telefono, email: p.email });
-    this.cargando.set(false);
+    return;
   }
 
-  // Backend: carga original por rol, desactivada mientras el perfil trabaja en memoria.
-  // private obtenerPerfil(): Observable<PerfilCuenta> {
-  //   switch (this.rol) {
-  //     case 'CLIENTE':
-  //       return this.clienteService.obtenerPerfilPropio().pipe(
-  //         map(({ data }) => ({ ...desdePersona(data.persona), fechaRegistro: data.fechaRegistro })),
-  //       );
-  //     case 'BARBERO':
-  //       return this.barberoService.obtenerMiBarberoId().pipe(
-  //         switchMap((r) => this.barberoService.obtenerPorId(r.data)),
-  //         map(({ data }) => ({ ...desdePersona(data.persona), descripcion: data.descripcion || 'Sin descripción disponible' })),
-  //       );
-  //     case 'ADMIN':
-  //       return of({ personaId: 1, usuarioId: 1, nombre: 'Admin', apellido: 'Sistema', telefono: '900000000', email: 'admin@gmail.com', usuario: 'admin1', permisos: PERMISOS_ADMIN });
-  //   }
-  // }
-
+  this.cargando.set(true);
+  this.barberoService.obtenerMiBarberoId().pipe(
+    switchMap((r) => this.barberoService.obtenerPorId(r.data)),
+    map(({ data }) => ({ ...desdePersona(data.persona), descripcion: data.descripcion || 'Sin descripción disponible' })),
+  ).subscribe({
+    next: (p) => {
+      this.perfil.set(p);
+      this.formPerfil.patchValue({ nombre: p.nombre, apellido: p.apellido, telefono: p.telefono, email: p.email });
+      this.cargando.set(false);
+    },
+    error: (err) => {
+      console.error('Error cargando perfil barbero:', err);
+      this.cargando.set(false);
+    },
+  });
+}
   // ── Acciones ──
-  guardarPerfil(): void {
-    if (this.formPerfil.invalid) {
-      this.formPerfil.markAllAsTouched();
-      return;
-    }
 
-    const p = this.perfil();
-    this.guardandoPerfil.set(true);
-
-    const { nombre, apellido, telefono } = this.formPerfil.getRawValue();
-    this.perfil.update((actual) => ({ ...actual, nombre: nombre!, apellido: apellido!, telefono: telefono ?? '' }));
-    this.guardandoPerfil.set(false);
-  }
 
   // Backend: guardado original conservado para reactivar con PersonaService.
   // const dto: PersonaUpdateRequest = { nombre: nombre!, apellido: apellido!, telefono: telefono ?? '', email: p.email };
@@ -206,27 +192,9 @@ export class PerfilComponent implements OnInit {
   //   error: () => undefined,
   // });
 
-  cambiarPassword(): void {
-    if (this.formPassword.invalid) {
-      this.formPassword.markAllAsTouched();
-      return;
-    }
 
-    this.guardandoPassword.set(true);
 
-    const { passwordActual, passwordNueva } = this.formPassword.getRawValue();
 
-    void passwordActual;
-    void passwordNueva;
-    this.guardandoPassword.set(false);
-    this.formPassword.reset();
-  }
-
-  // Backend: cambio original conservado para reactivar con AuthService.
-  // this.authService.cambiarPassword(passwordActual!, passwordNueva!).subscribe({
-  //   next: () => this.formPassword.reset(),
-  //   error: (err) => console.error(err.error?.message ?? 'La contraseña actual es incorrecta.'),
-  // });
 
   toggleVisible(campo: CampoPassword): void {
     this.visible.update((v) => ({ ...v, [campo]: !v[campo] }));
@@ -246,5 +214,63 @@ export class PerfilComponent implements OnInit {
   // private notificar(severity: 'success' | 'error', summary: string, detail: string): void {
   //   this.toast.add({ severity, summary, detail, life: 3000 });
   // }
+
+  guardarPerfil(): void {
+  if (this.formPerfil.invalid) {
+    this.formPerfil.markAllAsTouched();
+    return;
+  }
+
+  const { nombre, apellido, telefono } = this.formPerfil.getRawValue();
+
+  if (this.rol !== 'BARBERO') {
+    this.perfil.update((actual) => ({ ...actual, nombre: nombre!, apellido: apellido!, telefono: telefono ?? '' }));
+    return;
+  }
+
+  const p = this.perfil();
+  const dto: PersonaUpdateRequest = { nombre: nombre!, apellido: apellido!, telefono: telefono ?? '', email: p.email };
+  const request$ = p.personaId
+    ? this.personaService.actualizarPersona(p.personaId, dto)
+    : this.personaService.actualizarPersonaPorUsuarioId(p.usuarioId!, dto);
+
+  this.guardandoPerfil.set(true);
+  request$.subscribe({
+    next: () => {
+      this.perfil.update((actual) => ({ ...actual, ...dto }));
+      this.guardandoPerfil.set(false);
+    },
+    error: (err) => {
+      console.error('Error guardando perfil:', err);
+      this.guardandoPerfil.set(false);
+    },
+  });
+}
+
+cambiarPassword(): void {
+  if (this.formPassword.invalid) {
+    this.formPassword.markAllAsTouched();
+    return;
+  }
+
+  const { passwordActual, passwordNueva } = this.formPassword.getRawValue();
+
+  if (this.rol !== 'BARBERO') {
+    this.formPassword.reset();
+    return;
+  }
+
+  this.guardandoPassword.set(true);
+  this.authService.cambiarPassword(passwordActual!, passwordNueva!).subscribe({
+    next: () => {
+      this.guardandoPassword.set(false);
+      this.formPassword.reset();
+    },
+    error: (err) => {
+      console.error(err.error?.message ?? 'La contraseña actual es incorrecta.');
+      this.guardandoPassword.set(false);
+    },
+  });
+}
 
 }

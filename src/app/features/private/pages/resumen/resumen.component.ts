@@ -1,10 +1,9 @@
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { TableModule } from 'primeng/table';
 import { Subject, forkJoin, takeUntil } from 'rxjs';
 import Chart, { ChartConfiguration } from 'chart.js/auto'; // 'auto' ya registra todos los controladores
-
 import { environment } from '@/environments/environment'; // ajusta la ruta si tu alias es otro
 import { TokenService } from '@/app/core/services/auth/token.service';
 import { BarberoService } from '@/app/core/services/gestion/barbero.service';
@@ -63,6 +62,7 @@ export class ResumenComponent implements OnInit, OnDestroy {
   private resumenSvc = inject(ResumenadminService);
   private prediccionSvc = inject(PrediccionService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
   private chart?: Chart;
   private destroy$ = new Subject<void>();
 
@@ -106,13 +106,13 @@ export class ResumenComponent implements OnInit, OnDestroy {
   kpis: ClienteDetalleResumenDTO | null = null;
   seleccionada: CitaResumen | null = null; // la que se muestra en el card de detalle
 
-  // ═══════════════════════════════════════════════════════════════════════
-  ngOnInit(): void {
-    this.rol = this.resolverRol();
-    if (this.esCliente) this.cargarCliente();
-    else if (this.esBarbero) this.cargarBarbero();
-    else this.cargarAdmin();
-  }
+ngOnInit(): void {
+  this.rol = this.resolverRol();
+  console.log('mock:', environment.useMockData, '| rol:', this.rol);
+  if (this.esCliente) this.cargarCliente();
+  else if (this.esBarbero) this.cargarBarbero();
+  else this.cargarAdmin();
+}
 
   ngOnDestroy(): void {
     this.chart?.destroy();
@@ -231,12 +231,8 @@ export class ResumenComponent implements OnInit, OnDestroy {
   trackByCita(_: number, cita: CitaBarberoResponseDTO): number { return cita.idReserva; }
 
   // ═══════════════════════════ BARBERO ═══════════════════════════
+  // ═══════════════════════════ BARBERO ═══════════════════════════
   private cargarBarbero(): void {
-    if (environment.useMockData) {
-      this.cargarBarberoMock();
-      return;
-    }
-
     this.barberoSvc.getPerfil().pipe(takeUntil(this.destroy$)).subscribe({
       next: ({ data: perfil }) => {
         this.nombre = `${perfil.nombre} ${perfil.apellido}`;
@@ -268,49 +264,23 @@ export class ResumenComponent implements OnInit, OnDestroy {
             this.sueldoBase = semanal.sueldoBase ?? this.sueldoBase;
 
             this.loading = false;
+            this.cdr.detectChanges();
             this.pintarSemana();
           },
-          error: () => { this.loading = false; },
+          error: (err) => {
+            console.error('Error cargando resumen barbero:', err);
+            this.loading = false;
+            this.cdr.detectChanges();
+          },
         });
       },
-      error: () => { this.nombre = 'Barbero'; this.loading = false; },
+      error: (err) => {
+        console.error('Error cargando perfil barbero:', err);
+        this.nombre = 'Barbero';
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
     });
-  }
-
-  private cargarBarberoMock(): void {
-    this.nombre = 'Gersone M';
-    this.isOcupado = true;
-    this.pctComision = 10;
-    this.sueldoBase = 0;
-
-    this.citasBarbero = [
-      { horaInicio: '13:30:00', nombreCliente: 'Ana', apellidoCliente: 'Torres', servicios: [{ nombreCorte: 'Fade', precio: 20 }], estado: 'FINALIZADA' },
-    ];
-    const finalizadas = this.citasBarbero.filter(c => this.getEstado(c) === 'FINALIZADA');
-
-    this.cortesHoy = finalizadas.length;
-    this.metaCortes = this.citasBarbero.length;
-    this.ingresosHoy = finalizadas.reduce((s, c) => s + this.getPrecio(c), 0);
-    this.comisionHoy = Number((this.ingresosHoy * this.pctComision / 100).toFixed(2));
-    this.clientesHoy = this.cortesHoy;
-
-    const previos = [2, 3, 1, 4, 2, 3];
-    const hoy = new Date();
-    this.dias = [
-      ...previos.map((atendidos, i) => {
-        const d = new Date(hoy);
-        d.setDate(hoy.getDate() - (previos.length - i));
-        return { fecha: this.toIsoDate(d), atendidos };
-      }),
-      { fecha: this.toIsoDate(hoy), atendidos: this.cortesHoy },
-    ];
-
-    const totalCortes = this.dias.reduce((s, d) => s + d.atendidos, 0);
-    this.comisionSemanal = Number((totalCortes * 20 * this.pctComision / 100).toFixed(2));
-    this.totalSemana = this.sueldoBase + this.comisionSemanal;
-
-    this.loading = false;
-    this.pintarSemana();
   }
 
   private pintarSemana(): void {
