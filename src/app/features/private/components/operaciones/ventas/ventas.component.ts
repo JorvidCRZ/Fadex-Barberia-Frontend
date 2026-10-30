@@ -1,4 +1,5 @@
-import { Component, inject, OnInit } from '@angular/core';
+
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -16,7 +17,6 @@ import { FiltrosComponent } from '@/app/shared/components/filtros/filtros.compon
 
 import { NotificationService } from '@/app/core/services/common/notification.service';
 import { VentaService } from '@/app/core/services/venta/venta.service';
-import { TokenService } from '@/app/core/services/auth/token.service'; 
 
 import { Venta } from '@/app/core/models/ventas/venta.model';
 import { VentaDetalle } from '@/app/core/models/ventas/detalle.model';
@@ -46,7 +46,7 @@ export class VentasComponent implements OnInit {
   private notify = inject(NotificationService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
-  private tokenService = inject(TokenService); 
+  private cdr = inject(ChangeDetectorRef);
 
   ventas: Venta[] = [];
   ventaSeleccionada: Venta | null = null;
@@ -64,28 +64,19 @@ export class VentasComponent implements OnInit {
   filtrosFields = FILTROS_VENTA;
 
   esBarbero = false;
-  userId: number | null = null;
 
   ngOnInit(): void {
     this.esBarbero = this.router.url.includes('/barbero');
-    
-    const id = Number(this.tokenService.getUserId());
-    this.userId = isNaN(id) ? null : id;
-
     this.cargarVentas(0, this.rows);
   }
 
-  cargarVentas(page: number, size: number): void {
+     cargarVentas(page: number, size: number): void {
     this.cargado = false;
 
     this.filtro.page = page;
     this.filtro.size = size;
 
-    const peticion$ = (this.esBarbero && this.userId)
-      ? this.ventaService.obtenerMisVentas(this.userId) 
-      : this.ventaService.obtenerVentas(this.filtro);  
-
-    peticion$.subscribe({
+    this.ventaService.obtenerVentas(this.filtro).subscribe({
       next: (resp) => {
         this.ventas = resp.data.map((venta: Venta) => {
 
@@ -100,16 +91,20 @@ export class VentasComponent implements OnInit {
           };
 
         });
+
+        this.totalRecords = this.ventas.length;
         this.calcularResumen();
         this.cargado = true;
+        this.cdr.detectChanges();
       },
-      error: () => {
-        console.warn('Backend no disponible, manteniendo datos actuales.');
+      error: (err) => {
+        console.error('Error cargando ventas:', err);
         this.cargado = true;
+        this.cdr.detectChanges();
       }
     });
   }
-
+  
   crearVenta(data: any): void {
     this.ventaService.crearVenta(data).subscribe({
       next: (resp) => {
@@ -141,6 +136,8 @@ export class VentasComponent implements OnInit {
   }
 
   eliminarVenta(venta: Venta): void {
+    if (this.esBarbero) return; // el barbero no elimina, solo el administrador
+
     this.ventaService.eliminarVenta(venta.ventaId).subscribe({
       next: (resp) => {
         this.notify.showSuccess(resp.message);

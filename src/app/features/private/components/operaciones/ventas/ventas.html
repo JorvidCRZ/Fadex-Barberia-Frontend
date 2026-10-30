@@ -23,14 +23,15 @@
         [promedio]="promedio">
     </app-venta-resumen>
 
-    <app-venta-table
-        [ventas]="ventas"
-        [cargado]="cargado"
-        [totalRecords]="totalRecords"
-        [rows]="rows"
-        (lazyLoad)="onLazyLoad($event)"
-        (eliminar)="eliminarVenta($event)">
-    </app-venta-table>
+<app-venta-table
+    [ventas]="ventas"
+    [cargado]="cargado"
+    [totalRecords]="totalRecords"
+    [rows]="rows"
+    [esAdmin]="!esBarbero"
+    (lazyLoad)="onLazyLoad($event)"
+    (eliminar)="eliminarVenta($event)">
+</app-venta-table>
 </div>
 
 <p-dialog

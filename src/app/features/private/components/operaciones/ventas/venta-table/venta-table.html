@@ -1,5 +1,14 @@
-<p-table [value]="ventas" [loading]="!cargado" dataKey="ventaId" expandableRows styleClass="tabla-estandar"
-  [tableStyle]="{ 'min-width': '1000px' }">
+<p-table
+  [value]="ventas"
+  [loading]="!cargado"
+  [paginator]="true"
+  [rows]="10"
+  [showCurrentPageReport]="true"
+  currentPageReportTemplate="Viendo {first} a {last} de {totalRecords} entradas"
+  [tableStyle]="{ 'min-width': '1000px' }"
+  dataKey="ventaId"
+  expandableRows
+  styleClass="tabla-estandar">
 
   <ng-template pTemplate="header">
     <tr>
