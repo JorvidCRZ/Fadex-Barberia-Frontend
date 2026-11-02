@@ -8,7 +8,9 @@ import { MessageModule } from 'primeng/message';
 import { PasswordModule } from 'primeng/password';
 import { HeaderUsuario } from "./components/header-usuario/header-usuario.component";
 import { TableUsers } from './components/table-users/table-users.component';
-import { FiltrarUsers, FiltroUsuario } from './components/filtrar-users/filtrar-users.component';
+import { FiltroUsuario } from '@/app/core/models/gestion/usuario.model';
+import { FiltrosComponent } from '@/app/shared/components/filtros/filtros.component';
+import { FilterField } from '@/app/core/models/common/filtro.model';
 import { UsuarioService } from '@/app/core/services/auth/usuario.service';
 import { NotificationService } from '@/app/core/services/common/notification.service';
 import { UsuarioTablaResponse } from '@/app/core/models/gestion/usuario.model';
@@ -19,7 +21,7 @@ import { campoInvalido, marcarFormulario } from '@/app/shared/utils/form-utils.c
 @Component({
   selector: 'app-usuario',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ButtonModule, DialogModule, InputTextModule, MessageModule, PasswordModule, HeaderUsuario, FiltrarUsers, TableUsers,],
+  imports: [CommonModule, ReactiveFormsModule, ButtonModule, DialogModule, InputTextModule, MessageModule, PasswordModule, HeaderUsuario, FiltrosComponent, TableUsers,],
   templateUrl: './usuario.html',
 })
 export class Usuario implements OnInit {
@@ -46,13 +48,39 @@ export class Usuario implements OnInit {
     multiplesRoles?: boolean;
   } = {};
 
-  readonly usuariosMemoria = [
-    { usuarioId: 1, username: 'admin1', persona: { nombre: 'María Fernanda', apellido: 'Torres' }, roles: ['Administrador'], tieneQr: true, tienePin: true },
-    { usuarioId: 2, username: 'renzo.c', persona: { nombre: 'Renzo', apellido: 'Castillo' }, roles: ['Barbero'], tieneQr: true, tienePin: true },
-    { usuarioId: 3, username: 'alvaro.m', persona: { nombre: 'Álvaro', apellido: 'Mendoza' }, roles: ['Barbero'], tieneQr: true, tienePin: true },
-    { usuarioId: 4, username: 'valeria.q', persona: { nombre: 'Valeria', apellido: 'Quispe' }, roles: ['Cliente'], tieneQr: true, tienePin: true },
-    { usuarioId: 5, username: 'diego.s', persona: { nombre: 'Diego', apellido: 'Salazar' }, roles: ['Cliente'], tieneQr: true, tienePin: true },
-  ];
+  readonly filtroFields: FilterField[] = [
+    {
+      key: 'rol',
+      label: 'Rol',
+      type: 'select',
+      placeholder: 'Todos',
+      options: [
+        { value: 'ADMIN',   label: 'Admin'   },
+        { value: 'BARBERO', label: 'Barbero' },
+        { value: 'CLIENTE', label: 'Cliente' },
+      ],
+    },
+    {
+      key: 'qr',
+      label: 'QR',
+      type: 'select',
+      placeholder: 'Todos',
+      options: [
+        { value: 'conQr', label: 'Con QR' },
+        { value: 'sinQr', label: 'Sin QR' },
+      ],
+    },
+    {
+      key: 'cantidadRoles',
+      label: 'Cantidad de roles',
+      type: 'select',
+      placeholder: 'Todos',
+      options: [
+        { value: 'unRol',          label: 'Un rol'          },
+        { value: 'multiplesRoles', label: 'Múltiples roles' },
+      ],
+    },
+  ] as FilterField[];
 
   filtrosActuales: FiltroUsuario = {
     rol: '',
@@ -77,16 +105,23 @@ export class Usuario implements OnInit {
   }
 
   ngOnInit(): void {
-    // this.cargarUsuarios(0);
-    this.aplicarUsuariosMemoria(0);
+    this.cargarUsuarios(0);
+  }
+
+  onBuscarFiltros(v: any): void {
+    this.onApplyFilters({
+      rol: v?.rol ?? '',
+      tipo: '',
+      qr: v?.qr ?? '',
+      cantidadRoles: v?.cantidadRoles ?? '',
+    });
   }
 
   onPageChange(event: { page: number; size: number }): void {
-  this.cargarUsuarios(event.page);
-}
+    this.cargarUsuarios(event.page);
+  }
 
   cargarUsuarios(page: number = 0): void {
-    /*
     this.cargando = true;
     this.errorCarga = '';
 
@@ -103,16 +138,6 @@ export class Usuario implements OnInit {
         this.errorCarga = 'No se pudo cargar la tabla de usuarios.';
       },
     });
-    */
-    this.aplicarUsuariosMemoria(page);
-  }
-
-  private aplicarUsuariosMemoria(page: number): void {
-    this.usuarios = this.usuariosMemoria as unknown as UsuarioTablaResponse[];
-    this.totalElements = this.usuariosMemoria.length;
-    this.totalPages = 1;
-    this.currentPage = page;
-    this.cargando = false;
   }
 
   onPrevPage(): void {
@@ -220,9 +245,7 @@ export class Usuario implements OnInit {
   onPhoneInput(event: any): void {
     const input = event.target as HTMLInputElement;
     let val = (input.value || '').toString();
-    // remove non-digits and limit to 9 chars
     val = val.replace(/\D/g, '').slice(0, 9);
-    // limit to 9 digits (no requirement about starting digit)
     input.value = val;
     this.adminForm.get('telefono')?.setValue(val, { emitEvent: true });
   }

@@ -104,12 +104,27 @@ p-button.boton-comprar .p-button:not(:disabled):active {
 }
 
 p-button.boton-primary .p-button,
-button.boton-primary.p-button {
-    @apply border-brand-gold/30 bg-brand-gold/10 text-brand-gold;
+.boton-primary.p-button {
+    background: rgb(var(--color-brand-gold) / 0.1) !important;
+    border: 1px solid rgb(var(--color-brand-gold) / 0.3) !important;
+    color: rgb(var(--color-brand-gold)) !important;
+}
 
-    &:hover {
-        @apply border-brand-gold bg-brand-gold text-black;
-    }
+p-button.boton-primary .p-button:not(:disabled):hover,
+.boton-primary.p-button:not(:disabled):hover {
+    background: rgb(var(--color-brand-gold)) !important;
+    border-color: rgb(var(--color-brand-gold)) !important;
+    color: rgb(var(--color-brand-black)) !important;
+}
+
+p-button.boton-primary .p-button:not(:disabled):active,
+.boton-primary.p-button:not(:disabled):active,
+p-button.boton-primary .p-button:focus-visible,
+.boton-primary.p-button:focus-visible {
+    background: rgb(var(--color-brand-gold) / 0.1) !important;
+    border-color: rgb(var(--color-brand-gold) / 0.3) !important;
+    color: rgb(var(--color-brand-gold)) !important;
+    box-shadow: none !important;
 }
 
 .boton-secondary {

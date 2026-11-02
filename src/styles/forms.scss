@@ -393,6 +393,10 @@ p-password svg {
 }
 
 .filtros-acordeon {
+    .p-accordionpanel {
+        border: 0 !important;
+        background: rgb(var(--color-ui-surface)) !important;
+    }
     .p-accordionpanel,
     .p-accordioncontent,
     .p-accordioncontent-content {

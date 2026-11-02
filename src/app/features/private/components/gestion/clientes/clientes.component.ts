@@ -2,7 +2,8 @@ import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HeaderClient } from './components/header-client/header-client.component';
 import { ResumenGeneralClient } from './components/resumen-general-client/resumen-general-client.component';
-import { FiltrarClients } from './components/filtrar-clients/filtrar-clients.component';
+import { FiltrosComponent } from '@/app/shared/components/filtros/filtros.component';
+import { FilterField } from '@/app/core/models/common/filtro.model';
 import { TableClient } from './components/table-client/table-client.component';
 import { ClienteService } from '@/app/core/services/gestion/cliente.service';
 import { ClienteFilterCriteria, ClienteFilterMode } from '@/app/core/models/gestion/cliente/cliente-filter.model';
@@ -11,7 +12,7 @@ import { Cliente } from '@/app/core/models/gestion/cliente/cliente.model';
 @Component({
   selector: 'app-clientes',
   standalone: true,
-  imports: [HeaderClient, ResumenGeneralClient, FiltrarClients, TableClient],
+  imports: [HeaderClient, ResumenGeneralClient, FiltrosComponent, TableClient],
   templateUrl: './clientes.html',
   styleUrl: './clientes.scss',
 })
@@ -38,18 +39,46 @@ export class Clientes implements OnInit {
   currentPage: number = 0;
   totalPages: number = 0;
 
-  readonly clientesMemoria: Cliente[] = [
-    { clienteId: 1, fechaRegistro: '2026-09-01', persona: { personaId: 1, nombre: 'Valeria', apellido: 'Quispe', telefono: '987 245 613', email: 'valeria.quispe@gmail.com', usuario: { idUsuario: 1, user: 'valeria.q', qrToken: '' } } },
-    { clienteId: 2, fechaRegistro: '2026-09-03', persona: { personaId: 2, nombre: 'Diego', apellido: 'Salazar', telefono: '946 318 722', email: 'diego.salazar@gmail.com', usuario: { idUsuario: 2, user: 'diego.s', qrToken: '' } } },
-    { clienteId: 3, fechaRegistro: '2026-09-05', persona: { personaId: 3, nombre: 'Mateo', apellido: 'Huamán', telefono: '912 804 371', email: 'mateo.h@outlook.com', usuario: { idUsuario: 3, user: 'mateo.h', qrToken: '' } } },
-    { clienteId: 4, fechaRegistro: '2026-09-09', persona: { personaId: 4, nombre: 'Luciana', apellido: 'Paredes', telefono: '975 116 408', email: 'luciana.paredes@gmail.com', usuario: { idUsuario: 4, user: 'luciana.p', qrToken: '' } } },
-    { clienteId: 5, fechaRegistro: '2026-09-12', persona: { personaId: 5, nombre: 'Sebastián', apellido: 'Flores', telefono: '930 667 219', email: 'sebastian.flores@gmail.com', usuario: { idUsuario: 5, user: 'sebastian.f', qrToken: '' } } },
-    { clienteId: 6, fechaRegistro: '2026-09-18', persona: { personaId: 6, nombre: 'Camila', apellido: 'Rojas', telefono: '994 251 803', email: 'camila.rojas@gmail.com', usuario: { idUsuario: 6, user: 'camila.r', qrToken: '' } } },
-  ];
+  readonly filtroFields: FilterField[] = [
+    {
+      key: 'modo',
+      label: 'Ordenar',
+      type: 'select',
+      placeholder: 'Todos los clientes',
+      options: [
+        { value: 'todos',          label: 'Todos los clientes' },
+        { value: 'recientes',      label: 'Recientes'          },
+        { value: 'mes',            label: 'Este mes'           },
+        { value: 'anio',           label: 'Este año'           },
+        { value: 'deshabilitados', label: 'Deshabilitados'     },
+      ],
+    },
+    {
+      key: 'year',
+      label: 'Año',
+      type: 'select',
+      placeholder: 'Todos',
+      options: Array.from({ length: 8 }, (_, i) => {
+        const y = new Date().getFullYear() - i;
+        return { value: y, label: String(y) };
+      }),
+    },
+    {
+      key: 'month',
+      label: 'Mes',
+      type: 'select',
+      placeholder: 'Todos',
+      options: [
+        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+      ].map((label, i) => ({ value: i + 1, label })),
+    },
+    { key: 'fromDate', label: 'Desde', type: 'date' },
+    { key: 'toDate',   label: 'Hasta', type: 'date' },
+  ] as FilterField[];
 
   ngOnInit(): void {
-    // this.cargarClientes();
-    this.aplicarRespuestaMemoria(0);
+    this.cargarClientes();
   }
 
   cargarClientes(page: number = 0): void {
@@ -57,22 +86,10 @@ export class Clientes implements OnInit {
   }
 
   private cargarClientesBase(page: number = 0): void {
-    /*
     this.clienteService.listar(page, this.pageSize).subscribe({
       next: (response) => this.aplicarRespuestaListado(response, page),
       error: (error) => console.error('Error al cargar clientes', error),
     });
-    */
-    this.aplicarRespuestaMemoria(page);
-  }
-
-  private aplicarRespuestaMemoria(page: number): void {
-    const start = page * this.pageSize;
-    this.clients = this.clientesMemoria.slice(start, start + this.pageSize);
-    this.visibleClients = this.clients;
-    this.totalElements = this.clientesMemoria.length;
-    this.currentPage = page;
-    this.totalPages = Math.ceil(this.totalElements / this.pageSize);
   }
 
   onPageChange(page: number): void {
@@ -113,22 +130,20 @@ export class Clientes implements OnInit {
     });
   }
 
-  onCustomModeChange(isCustomMode: boolean): void {
-    if (isCustomMode) {
-      this.searchTerm = '';
-      this.activeFilter = 'personalizado';
-      this.filterCriteria = {
-        mode: 'personalizado',
-        year: null,
-        month: null,
-        fromDate: '',
-        toDate: '',
-      };
-      this.cargarClientesBase(0);
-      return;
-    }
+  onBuscarFiltros(v: any): void {
+    const personalizado = !!(v.year || v.month || v.fromDate || v.toDate);
 
-    this.activeFilter = this.filterCriteria.mode === 'personalizado' ? 'todos' : this.filterCriteria.mode;
+    this.onFilterChange({
+      mode: personalizado ? 'personalizado' : (v.modo ?? 'todos'),
+      year: v.year ?? null,
+      month: v.month ?? null,
+      fromDate: v.fromDate ?? '',
+      toDate: v.toDate ?? '',
+    });
+  }
+
+  onLimpiarFiltros(): void {
+    this.onFilterChange({ mode: 'todos', year: null, month: null, fromDate: '', toDate: '' });
   }
 
   private cargarClientesFiltrados(page: number, criteria: ClienteFilterCriteria): void {

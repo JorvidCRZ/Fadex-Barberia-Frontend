@@ -10,7 +10,6 @@ import { NotificationService } from '../../../../../../core/services/common/noti
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './registrar-client.html',
-  styleUrl: './registrar-client.scss',
 })
 export class RegistrarClient {
   form: FormGroup;

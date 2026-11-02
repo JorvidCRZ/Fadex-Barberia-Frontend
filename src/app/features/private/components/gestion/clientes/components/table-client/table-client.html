@@ -1,5 +1,4 @@
-<div class="p-4 md:p-6 lg:p-8 bg-neutral-primary-lighter rounded-base shadow-sm">
-
+<div class="p-4 md:p-6 lg:p-8">
 	<div class="relative w-full overflow-x-auto">
 		<p-table [value]="clients" [lazy]="true" (onLazyLoad)="onLazyLoad($event)" [paginator]="true"
 			[rows]="rows" [first]="currentPage * rows" [totalRecords]="totalElements" dataKey="clienteId"
@@ -8,39 +7,28 @@
 
 			<ng-template #header>
 				<tr>
-					<th class="whitespace-nowrap text-center">ID</th>
-					<th class="whitespace-nowrap text-left">Nombre</th>
-					<th class="whitespace-nowrap text-left">Apellido</th>
-					<th class="whitespace-nowrap text-left">Número</th>
-					<th class="whitespace-nowrap text-left">Correo</th>
-					<th class="whitespace-nowrap text-center">Acción</th>
+					<th>ID</th>
+					<th>Nombre</th>
+					<th>Apellido</th>
+					<th>Número</th>
+					<th>Correo</th>
+					<th>Acciones</th>
 				</tr>
 			</ng-template>
 
 			<ng-template #body let-c pTemplate="body">
 				<tr>
-					<td class="whitespace-nowrap text-center">
-						<span class="cliente-avatar mx-auto">{{ initials(c.persona.nombre + ' ' + c.persona.apellido) }}</span>
+					<td class="px-4 py-2 whitespace-nowrap">
+						<span class="flex size-8 items-center justify-center rounded-full border border-brand-gold/20 bg-brand-gold/15 text-xs font-bold tracking-wide text-brand-gold">
+							{{ initials(c.persona.nombre + ' ' + c.persona.apellido) }}
+						</span>
 					</td>
-
-					<td class="whitespace-nowrap text-left font-medium text-neutral-primary-darker">
-						{{ c.persona.nombre }}
-					</td>
-
-					<td class="whitespace-nowrap text-left font-medium text-neutral-primary-darker">
-						{{ c.persona.apellido }}
-					</td>
-
-					<td class="whitespace-nowrap text-left text-neutral-primary-dark">
-						{{ c.persona.telefono || 'N/A' }}
-					</td>
-
-					<td class="whitespace-nowrap text-left text-neutral-primary-dark">
-						{{ c.persona.email || 'N/A' }}
-					</td>
-
-					<td class="whitespace-nowrap text-center">
-						<div class="flex flex-row justify-center gap-1">
+					<td class="whitespace-nowrap font-medium">{{ c.persona.nombre }}</td>
+					<td class="whitespace-nowrap font-medium">{{ c.persona.apellido }}</td>
+					<td class="whitespace-nowrap">{{ c.persona.telefono || 'N/A' }}</td>
+					<td class="whitespace-nowrap">{{ c.persona.email || 'N/A' }}</td>
+					<td class="whitespace-nowrap">
+						<div class="flex items-center justify-center gap-2">
 							@if (isSearchMode) {
 								<p-button icon="pi pi-eye" class="boton-editar-tabla" pTooltip="Ver detalle" tooltipPosition="top" [routerLink]="[c.clienteId]" />
 								<p-button icon="pi pi-user-minus" class="boton-eliminar-tabla" pTooltip="Deshabilitar" tooltipPosition="top" (onClick)="onDelete(c.clienteId)" />
@@ -58,8 +46,8 @@
 
 			<ng-template #emptymessage>
 				<tr>
-					<td colspan="6" class="text-center py-16">
-						<div class="flex flex-col items-center gap-3 text-neutral-primary-dark">
+					<td colspan="6" class="py-16 text-center">
+						<div class="flex flex-col items-center gap-3">
 							<i class="pi pi-users text-4xl"></i>
 							<p class="text-sm font-medium">No hay clientes que coincidan</p>
 						</div>
@@ -69,5 +57,4 @@
 
 		</p-table>
 	</div>
-
 </div>
