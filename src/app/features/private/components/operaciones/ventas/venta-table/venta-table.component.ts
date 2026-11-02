@@ -6,9 +6,10 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { TooltipModule } from 'primeng/tooltip';
 import { Venta } from '@/app/core/models/ventas/venta.model';
+import { VentaDetalle } from '@/app/core/models/ventas/detalle.model';
 import { ConfirmPopoverComponent } from '@/app/shared/components/confirm-popover/confirm-popover.component';
-import { ButtonComponent } from '@/app/shared/components/button/button.component'; // ajusta la ruta
-import { MonedaPipe } from '@/app/shared/pipes/moneda.pipe'; // ajusta la ruta
+import { ButtonComponent } from '@/app/shared/components/button/button.component';
+import { MonedaPipe } from '@/app/shared/pipes/moneda.pipe';
 
 @Component({
   selector: 'app-venta-table',
@@ -22,18 +23,19 @@ import { MonedaPipe } from '@/app/shared/pipes/moneda.pipe'; // ajusta la ruta
     TooltipModule,
     ConfirmPopoverComponent,
     ButtonComponent,
-    MonedaPipe
+    MonedaPipe,
   ],
   templateUrl: './venta-table.html',
   styleUrls: ['./venta-table.scss'],
   encapsulation: ViewEncapsulation.None
 })
 export class VentaTableComponent {
+
   @Input() ventas: Venta[] = [];
   @Input() cargado = false;
   @Input() totalRecords = 0;
   @Input() rows = 25;
-  @Input() esAdmin = true; // TEMPORAL: cambiar cuando exista el login
+  @Input() esAdmin = true;
 
   @Output() lazyLoad = new EventEmitter<TableLazyLoadEvent>();
   @Output() eliminar = new EventEmitter<Venta>();
@@ -41,26 +43,22 @@ export class VentaTableComponent {
   mostrarConfirmacion = false;
   mensajeConfirmacion = '';
   ventaAEliminar: Venta | null = null;
-
   mostrarDetalle = false;
   ventaDetalle: Venta | null = null;
 
-  verDetalle(venta: Venta) {
+  verDetalle(venta: Venta): void {
     this.ventaDetalle = venta;
     this.mostrarDetalle = true;
   }
 
-  subtotalDe(det: any): number {
-    return det.subtotal != null
-      ? Number(det.subtotal)
-      : Number(det.precioUnitario) * Number(det.cantidad);
+  subtotalDe(detalle: VentaDetalle): number {
+    return detalle.subtotal != null
+      ? Number(detalle.subtotal)
+      : Number(detalle.precioUnitario) * Number(detalle.cantidad);
   }
 
   calcularTotal(venta: Venta): number {
-    return (venta.detalles ?? []).reduce(
-      (acc: number, det: any) => acc + this.subtotalDe(det),
-      0
-    );
+    return (venta.detalles ?? []).reduce((acc, detalle) => acc + this.subtotalDe(detalle), 0);
   }
 
   pedirConfirmacion(venta: Venta) {

@@ -19,6 +19,7 @@ export class TableUsers {
   @Input() usuarios: UsuarioTablaResponse[] = [];
   @Input() totalElements = 0;
   @Input() pageSize = 10;
+  @Input() cargando = false;
   @Input() inhabilitadosMode = false;
   @Input() isSearchMode = false;
 

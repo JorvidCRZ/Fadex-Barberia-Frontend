@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HeaderClient } from './components/header-client/header-client.component';
 import { ResumenGeneralClient } from './components/resumen-general-client/resumen-general-client.component';
@@ -20,6 +20,7 @@ export class Clientes implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private clienteService = inject(ClienteService);
+  private cd = inject(ChangeDetectorRef);
 
   readonly pageSize = 7;
 
@@ -38,6 +39,7 @@ export class Clientes implements OnInit {
   totalElements: number = 0;
   currentPage: number = 0;
   totalPages: number = 0;
+  cargando = true;
 
   readonly filtroFields: FilterField[] = [
     {
@@ -86,9 +88,14 @@ export class Clientes implements OnInit {
   }
 
   private cargarClientesBase(page: number = 0): void {
+    this.cargando = true;
     this.clienteService.listar(page, this.pageSize).subscribe({
       next: (response) => this.aplicarRespuestaListado(response, page),
-      error: (error) => console.error('Error al cargar clientes', error),
+      error: (error) => {
+        this.cargando = false;
+        console.error('Error al cargar clientes', error);
+        this.cd.detectChanges();
+      },
     });
   }
 
@@ -147,12 +154,17 @@ export class Clientes implements OnInit {
   }
 
   private cargarClientesFiltrados(page: number, criteria: ClienteFilterCriteria): void {
+    this.cargando = true;
     const size = this.pageSize;
 
     if (criteria.mode === 'todos') {
       this.clienteService.listar(page, size).subscribe({
         next: (response) => this.aplicarRespuestaListado(response, page),
-        error: (error) => console.error('Error al cargar clientes', error),
+        error: (error) => {
+          this.cargando = false;
+          console.error('Error al cargar clientes', error);
+          this.cd.detectChanges();
+        },
       });
       return;
     }
@@ -160,7 +172,11 @@ export class Clientes implements OnInit {
     if (criteria.mode === 'recientes' || criteria.mode === 'mes' || criteria.mode === 'anio') {
       this.clienteService.filtrarPorTipo(criteria.mode, page, size).subscribe({
         next: (response) => this.aplicarRespuestaListado(response, page),
-        error: (error) => console.error('Error al filtrar clientes', error),
+        error: (error) => {
+          this.cargando = false;
+          console.error('Error al filtrar clientes', error);
+          this.cd.detectChanges();
+        },
       });
       return;
     }
@@ -168,7 +184,11 @@ export class Clientes implements OnInit {
     if (criteria.mode === 'deshabilitados') {
       this.clienteService.listarInhabilitados(page, size).subscribe({
         next: (response) => this.aplicarRespuestaListado(response, page),
-        error: (error) => console.error('Error al cargar clientes inhabilitados', error),
+        error: (error) => {
+          this.cargando = false;
+          console.error('Error al cargar clientes inhabilitados', error);
+          this.cd.detectChanges();
+        },
       });
       return;
     }
@@ -178,18 +198,27 @@ export class Clientes implements OnInit {
     if (rango) {
       this.clienteService.filtrarPorRango(rango.fechaInicio, rango.fechaFin, page, size).subscribe({
         next: (response) => this.aplicarRespuestaListado(response, page),
-        error: (error) => console.error('Error al filtrar clientes por rango', error),
+        error: (error) => {
+          this.cargando = false;
+          console.error('Error al filtrar clientes por rango', error);
+          this.cd.detectChanges();
+        },
       });
     }
   }
 
   private cargarPaginaActual(page: number): void {
+    this.cargando = true;
     const search = typeof this.searchTerm === 'string' ? this.searchTerm.trim() : '';
 
     if (search) {
       this.clienteService.buscarPorNombre(search, page, this.pageSize).subscribe({
         next: (response) => this.aplicarRespuestaListado(response, page),
-        error: (error) => console.error('Error al buscar clientes', error),
+        error: (error) => {
+          this.cargando = false;
+          console.error('Error al buscar clientes', error);
+          this.cd.detectChanges();
+        },
       });
       return;
     }
@@ -235,10 +264,12 @@ export class Clientes implements OnInit {
   }
 
   private aplicarRespuestaListado(response: any, page: number): void {
+    this.cargando = false;
     this.clients = response.data.content;
     this.visibleClients = response.data.content;
     this.totalElements = response.data.totalElements;
     this.currentPage = response.data.pageNumber ?? page;
     this.totalPages = response.data.totalPages;
+    this.cd.detectChanges();
   }
 }

@@ -29,7 +29,7 @@ export const routes: Routes = [
   {
     path: 'dashboard/admin', component: DashboardAdministrativoComponent, canActivate: [authGuard], data: { roles: ['admin'] }, children: [
       { path: '', redirectTo: 'resumen', pathMatch: 'full' },
-      { path: 'resumen', loadComponent: () => import('./features/private/pages/resumen/resumen.component').then(m => m.ResumenComponent) },
+      { path: 'resumen', loadComponent: () => import('./features/private/components/resumen/resumen.component').then(m => m.ResumenComponent) },
       {
         path: 'catalogo', children: [
           { path: 'categorias', loadComponent: () => import('./features/private/components/catalogo/categorias/categorias.component').then(m => m.CategoriasComponent) },
@@ -92,7 +92,7 @@ export const routes: Routes = [
   {
     path: 'dashboard/barbero', component: DashboardBarberoComponent, canActivate: [authGuard], data: { roles: ['barbero'] }, children: [
       { path: '', redirectTo: 'resumen', pathMatch: 'full' },
-      { path: 'resumen', loadComponent: () => import('./features/private/pages/resumen/resumen.component').then(m => m.ResumenComponent) },
+      { path: 'resumen', loadComponent: () => import('./features/private/components/resumen/resumen.component').then(m => m.ResumenComponent) },
       { path: 'reservas', loadComponent: () => import('./features/private/components/reserva/reserva.component').then(m => m.ReservaComponent) },
       { path: 'cortes', loadComponent: () => import('./features/private/components/cortes/cortes.component').then(m => m.CortesComponent) },
       {
@@ -139,7 +139,7 @@ export const routes: Routes = [
       {
         path: 'mi-cuenta', component: DashboardClienteComponent, canActivate: [authGuard], data: { roles: ['cliente'] }, children: [
           { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-          { path: 'dashboard', loadComponent: () => import('./features/private/pages/resumen/resumen.component').then(m => m.ResumenComponent) },
+          { path: 'dashboard', loadComponent: () => import('./features/private/components/resumen/resumen.component').then(m => m.ResumenComponent) },
           { path: 'reservar/agendar', loadComponent: () => import('./features/private/pages/reservar/reservar.component').then(m => m.ReservarComponent), canActivate: [authGuard] },
           { path: 'reservas/mis-reservas', loadComponent: () => import('./features/private/pages/mis-reservas/mis-reservas.component').then(m => m.MisReservasComponent) },
           { path: 'checkout/:reservaId', component: CheckoutComponent, canActivate: [authGuard], data: { roles: ['cliente'] } },

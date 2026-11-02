@@ -19,6 +19,7 @@ export class TableBarbero {
   @Input() currentPage: number = 0;
   @Input() totalPages: number = 0;
   @Input() pageSize: number = 7;
+  @Input() cargando = false;
   @Input() inhabilitadosMode: boolean = false;
   @Input() isSearchMode: boolean = false;
   @Output() pageChange = new EventEmitter<number>();
