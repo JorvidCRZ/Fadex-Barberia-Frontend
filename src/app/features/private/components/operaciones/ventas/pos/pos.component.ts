@@ -9,6 +9,7 @@ import { ClienteService } from '@/app/core/services/gestion/cliente.service';
 import { VentaService } from '@/app/core/services/venta/venta.service';
 import { NotificationService } from '@/app/core/services/common/notification.service';
 import { BarberoService } from '@/app/core/services/gestion/barbero.service';
+import { Venta } from '@/app/core/models/ventas/venta.model';
 
 interface ProductoPos {
   id: number;
@@ -298,22 +299,57 @@ export class PosComponent implements OnInit {
 
     this.procesando = true;
     this.ventaService.crearVenta(request).subscribe({
-      next: () => {
+      next: (respuesta) => {
         this.mostrarModalPago = false;
         this.notify.showSuccess(this.reservaIdActiva
           ? '¡Venta registrada y Reserva completada con éxito!'
           : '¡Venta registrada con éxito!');
+        const ventaCreada = respuesta.data;
         this.carrito = [];
         this.reservaIdActiva = null;
         this.procesando = false;
-        this.regresarAlHistorial();
+
+        if (ventaCreada?.ventaId) {
+          this.descargarComprobanteAutomaticamente(ventaCreada);
+        } else {
+          this.notify.showError('La venta se registró, pero no se recibió su comprobante.');
+          this.regresarAlHistorial();
+        }
       },
-      error: () => {
+      error: (err) => {
+        console.error('Error procesando cobro:', err);
         this.mostrarModalPago = false;
         this.procesando = false;
         this.notify.showError('Ocurrió un error al procesar la venta.');
       },
     });
+  }
+
+  private descargarComprobanteAutomaticamente(venta: Venta): void {
+    this.ventaService.descargarComprobantePdf(venta.ventaId).subscribe({
+      next: (blob: Blob) => {
+        const url = URL.createObjectURL(blob);
+        const enlace = document.createElement('a');
+        enlace.href = url;
+        enlace.download = this.nombreArchivoComprobante(venta);
+        enlace.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        this.regresarAlHistorial();
+      },
+      error: (err: unknown) => {
+        console.error('Error descargando comprobante después del cobro:', err);
+        this.notify.showError('La venta se registró, pero no se pudo descargar el comprobante.');
+        this.regresarAlHistorial();
+      }
+    });
+  }
+
+  private nombreArchivoComprobante(venta: Venta): string {
+    const tipo = venta.tipoComprobante?.toLowerCase() ?? 'comprobante';
+    const numero = venta.serieComprobante && venta.numeroComprobante
+      ? `${venta.serieComprobante}-${venta.numeroComprobante}`
+      : venta.numeroCorrelativo || String(venta.ventaId);
+    return `${tipo}-${numero}.pdf`;
   }
 
   regresarAlHistorial(): void {
