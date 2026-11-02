@@ -1,13 +1,15 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { SelectModule } from 'primeng/select';
+import { DialogModule } from 'primeng/dialog';
 import { ProductoService } from '@/app/core/services/catalogos/producto.service';
 import { ClienteService } from '@/app/core/services/gestion/cliente.service';
 import { VentaService } from '@/app/core/services/venta/venta.service';
 import { NotificationService } from '@/app/core/services/common/notification.service';
-import { TokenService } from '@/app/core/services/auth/token.service';
+import { BarberoService } from '@/app/core/services/gestion/barbero.service';
+import { Venta } from '@/app/core/models/ventas/venta.model';
 
 interface ProductoPos {
   id: number;
@@ -32,7 +34,7 @@ interface Opcion<T = string> {
 @Component({
   selector: 'app-pos',
   standalone: true,
-  imports: [CommonModule, FormsModule, SelectModule],
+  imports: [CommonModule, FormsModule, SelectModule, DialogModule],
   templateUrl: './pos.html',
 })
 export class PosComponent implements OnInit {
@@ -43,7 +45,8 @@ export class PosComponent implements OnInit {
   private productoService = inject(ProductoService);
   private clienteService = inject(ClienteService);
   private ventaService = inject(VentaService);
-  private tokenService = inject(TokenService);
+  private barberoService = inject(BarberoService);
+  private cdr = inject(ChangeDetectorRef);
 
   // Datos del backend
   productos: ProductoPos[] = [];
@@ -69,14 +72,17 @@ export class PosComponent implements OnInit {
   carrito: LineaCarrito[] = [];
 
   procesando = false;
+  mostrarModalPago = false;
 
   // Cobro de reserva
   reservaIdActiva: number | null = null;
   nombreClienteReserva = '';
+  private barberoIdActual: number | null = null;
 
   ngOnInit(): void {
     this.cargarReservaSiExiste();
     this.cargarCatalogos();
+    this.cargarBarberoActual();
   }
 
   // ───────── Carga de datos ─────────
@@ -84,22 +90,55 @@ export class PosComponent implements OnInit {
   private cargarCatalogos(): void {
     this.productoService.obtenerProductosActivos().subscribe({
       next: (res: any) => {
-        const lista: any[] = res?.data?.content || res?.data || [];
+        const lista: any[] = this.extraerLista(res);
         this.productos = lista.map(p => this.mapearProducto(p));
+        this.cdr.detectChanges();
       },
-      error: () => this.notify.showError('Error al cargar productos'),
+      error: (err) => {
+        console.error('Error cargando productos para POS:', err);
+        this.notify.showError('No se pudieron cargar los productos.');
+        this.cdr.detectChanges();
+      },
     });
 
     this.clienteService.listar(0, 1000).subscribe({
       next: (res: any) => {
-        const lista: any[] = res?.data?.content || res?.data || [];
+        const lista: any[] = this.extraerLista(res);
         this.clientes = lista.map(c => ({
           label: this.nombreCliente(c),
-          value: c.id,
+          value: c.clienteId ?? c.id,
         }));
+        this.cdr.detectChanges();
       },
-      error: () => this.notify.showError('Error al cargar clientes'),
+      error: (err) => {
+        console.error('Error cargando clientes para POS:', err);
+        this.notify.showError('No se pudieron cargar los clientes.');
+        this.cdr.detectChanges();
+      },
     });
+  }
+
+  private cargarBarberoActual(): void {
+    if (!this.router.url.includes('/dashboard/barbero/')) return;
+
+    this.barberoService.getPerfil().subscribe({
+      next: (res) => {
+        this.barberoIdActual = res.data?.barberoId ?? null;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error cargando barbero actual:', err);
+        this.notify.showError('No se pudo identificar al barbero actual.');
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  private extraerLista(res: any): any[] {
+    const datos = res?.data;
+    if (Array.isArray(datos)) return datos;
+    if (Array.isArray(datos?.content)) return datos.content;
+    return [];
   }
 
   // Ajusta los nombres de campo según tu modelo Producto / Cliente
@@ -115,9 +154,11 @@ export class PosComponent implements OnInit {
   }
 
   private nombreCliente(c: any): string {
-    return c.nombreCompleto
-      ?? [c.nombre ?? c.nombres, c.apellido ?? c.apellidos].filter(Boolean).join(' ')
-      ?? `Cliente ${c.id}`;
+    const nombrePersona = c.persona
+      ? [c.persona.nombre, c.persona.apellido].filter(Boolean).join(' ')
+      : [c.nombre ?? c.nombres, c.apellido ?? c.apellidos].filter(Boolean).join(' ');
+
+    return c.nombreCompleto || nombrePersona || `Cliente ${c.clienteId ?? c.id}`;
   }
 
   private cargarReservaSiExiste(): void {
@@ -223,6 +264,12 @@ export class PosComponent implements OnInit {
       return;
     }
 
+    this.mostrarModalPago = true;
+  }
+
+  confirmarYProcesarCobro(): void {
+    if (this.procesando) return;
+
     // En cobro de reserva el servicio ya lo gestiona el backend vía reservaId;
     // solo se envían los productos adicionales.
     const detalles = this.carrito
@@ -234,11 +281,15 @@ export class PosComponent implements OnInit {
         precioUnitario: l.producto.precio,
       }));
 
-    const userId = Number(this.tokenService.getUserId());
+    const esBarbero = this.router.url.includes('/dashboard/barbero/');
+    if (esBarbero && this.barberoIdActual === null) {
+      this.notify.showWarn('Espera a que se cargue el perfil del barbero.');
+      return;
+    }
 
     const request: any = {
       clienteId: this.reservaIdActiva ? null : this.cliente,
-      barberoId: isNaN(userId) ? null : userId,
+      barberoId: esBarbero ? this.barberoIdActual : null,
       fecha: new Date(),
       tipoComprobante: this.comprobante,
       metodoPago: this.metodo,
@@ -248,20 +299,57 @@ export class PosComponent implements OnInit {
 
     this.procesando = true;
     this.ventaService.crearVenta(request).subscribe({
-      next: () => {
+      next: (respuesta) => {
+        this.mostrarModalPago = false;
         this.notify.showSuccess(this.reservaIdActiva
           ? '¡Venta registrada y Reserva completada con éxito!'
           : '¡Venta registrada con éxito!');
+        const ventaCreada = respuesta.data;
         this.carrito = [];
         this.reservaIdActiva = null;
         this.procesando = false;
-        this.regresarAlHistorial();
+
+        if (ventaCreada?.ventaId) {
+          this.descargarComprobanteAutomaticamente(ventaCreada);
+        } else {
+          this.notify.showError('La venta se registró, pero no se recibió su comprobante.');
+          this.regresarAlHistorial();
+        }
       },
-      error: () => {
+      error: (err) => {
+        console.error('Error procesando cobro:', err);
+        this.mostrarModalPago = false;
         this.procesando = false;
         this.notify.showError('Ocurrió un error al procesar la venta.');
       },
     });
+  }
+
+  private descargarComprobanteAutomaticamente(venta: Venta): void {
+    this.ventaService.descargarComprobantePdf(venta.ventaId).subscribe({
+      next: (blob: Blob) => {
+        const url = URL.createObjectURL(blob);
+        const enlace = document.createElement('a');
+        enlace.href = url;
+        enlace.download = this.nombreArchivoComprobante(venta);
+        enlace.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        this.regresarAlHistorial();
+      },
+      error: (err: unknown) => {
+        console.error('Error descargando comprobante después del cobro:', err);
+        this.notify.showError('La venta se registró, pero no se pudo descargar el comprobante.');
+        this.regresarAlHistorial();
+      }
+    });
+  }
+
+  private nombreArchivoComprobante(venta: Venta): string {
+    const tipo = venta.tipoComprobante?.toLowerCase() ?? 'comprobante';
+    const numero = venta.serieComprobante && venta.numeroComprobante
+      ? `${venta.serieComprobante}-${venta.numeroComprobante}`
+      : venta.numeroCorrelativo || String(venta.ventaId);
+    return `${tipo}-${numero}.pdf`;
   }
 
   regresarAlHistorial(): void {

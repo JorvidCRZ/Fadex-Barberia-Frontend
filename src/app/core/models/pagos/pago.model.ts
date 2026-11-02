@@ -3,7 +3,7 @@ export type TipoPago = 'RESERVA' | 'VENTA' | 'SERVICIO' | 'PRODUCTO' | 'MIXTO';
 
 export interface PagoRequest {
   clienteId: number;
-  barberoId: number;
+  barberoId?: number;
   reservaId?: number;
   ventaId?: number;
   monto: number;

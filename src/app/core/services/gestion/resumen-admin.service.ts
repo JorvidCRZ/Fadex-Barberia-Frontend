@@ -80,7 +80,7 @@ calcularCortesRealizados(citas: CitaBarberoResponseDTO[] = []): number {
 
   // ── Construir las 8 KPI cards ─────────────────────────────────────────────
 
-  buildKpiCards(data: DashboardData): KpiCard[] {
+  buildKpiCards(data: Pick<DashboardData, 'clientes' | 'barberos' | 'citas'>): KpiCard[] {
 const ingresos = this.calcularIngresosCortes(data.citas || []);
 const cortes   = this.calcularCortesRealizados(data.citas || []);
     const citasComp = this.calcularCitasCompletadas(data.citas || []);

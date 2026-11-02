@@ -28,6 +28,8 @@ export class TableClient {
 
   @Input() rows: number = 10;
 
+  @Input() cargando = false;
+
   @Output() pageChange = new EventEmitter<number>();
 
   @Output() delete = new EventEmitter<number>();

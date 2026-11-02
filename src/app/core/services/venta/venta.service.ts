@@ -1,5 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { ApiResponse } from '../../models/common/index.model';
 import { Venta } from '../../models/ventas/venta.model';
 import { VentaFiltro } from '../../models/ventas/venta.model';
@@ -39,5 +40,11 @@ export class VentaService {
 
   eliminarVenta(id: number) {
     return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/${id}`);
+  }
+
+  descargarComprobantePdf(ventaId: number): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${ventaId}/comprobante/pdf`, {
+      responseType: 'blob'
+    });
   }
 }

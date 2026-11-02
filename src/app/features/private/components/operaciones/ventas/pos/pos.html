@@ -5,6 +5,73 @@
             <h1 class="text-2xl font-bold text-white m-0">Crear Venta</h1>
             <p class="text-xs text-gray-500 mt-1">Selecciona productos y procesa el cobro</p>
         </div>
+
+        <p-dialog
+            [(visible)]="mostrarModalPago"
+            [modal]="true"
+            [draggable]="false"
+            [resizable]="false"
+            [closable]="!procesando"
+            [dismissableMask]="!procesando"
+            header="Confirmar Pago"
+            styleClass="pos-pago-dialog"
+            [style]="{ width: 'min(450px, calc(100vw - 2rem))' }">
+            <div class="flex flex-col gap-5 pt-2">
+                <div class="flex flex-col items-center justify-center rounded-xl border border-[#C9A84C]/30 bg-[#C9A84C]/10 p-4">
+                    <span class="mb-1 text-sm font-medium uppercase tracking-widest text-[#C9A84C]">Monto a cobrar</span>
+                    <span class="text-4xl font-black text-white">S/ {{ totalVenta | number:'1.2-2' }}</span>
+                </div>
+
+                @switch (metodo) {
+                    @case ('EFECTIVO') {
+                        <div class="flex flex-col items-center justify-center rounded-xl border border-green-500/30 bg-green-500/5 px-4 py-6 text-center">
+                            <i class="pi pi-money-bill mb-4 text-5xl text-green-500"></i>
+                            <h3 class="mb-2 text-lg font-bold text-white">Pago en Efectivo</h3>
+                            <p class="text-sm leading-relaxed text-gray-400">Recibe el efectivo del cliente y verifica el vuelto antes de confirmar.</p>
+                        </div>
+                    }
+                    @case ('YAPE') {
+                        <div class="flex flex-col items-center justify-center rounded-xl border border-purple-500/30 bg-purple-500/5 px-4 py-6 text-center">
+                            <i class="pi pi-qrcode mb-4 text-5xl text-purple-400"></i>
+                            <h3 class="mb-2 text-lg font-bold text-white">Pago por Yape</h3>
+                            <p class="text-sm leading-relaxed text-gray-400">Confirma que el pago haya sido recibido antes de continuar.</p>
+                        </div>
+                    }
+                    @case ('PLIN') {
+                        <div class="flex flex-col items-center justify-center rounded-xl border border-cyan-500/30 bg-cyan-500/5 px-4 py-6 text-center">
+                            <i class="pi pi-qrcode mb-4 text-5xl text-cyan-400"></i>
+                            <h3 class="mb-2 text-lg font-bold text-white">Pago por Plin</h3>
+                            <p class="text-sm leading-relaxed text-gray-400">Confirma que el pago haya sido recibido antes de continuar.</p>
+                        </div>
+                    }
+                    @case ('TARJETA') {
+                        <div class="flex flex-col items-center justify-center rounded-xl border border-blue-500/30 bg-blue-500/5 px-4 py-6 text-center">
+                            <i class="pi pi-credit-card mb-4 text-5xl text-blue-400"></i>
+                            <h3 class="mb-2 text-lg font-bold text-white">Pago con Tarjeta</h3>
+                            <p class="text-sm leading-relaxed text-gray-400">Verifica la aprobación en el POS antes de confirmar.</p>
+                        </div>
+                    }
+                    @case ('TRANSFERENCIA') {
+                        <div class="flex flex-col items-center justify-center rounded-xl border border-blue-500/30 bg-blue-500/5 px-4 py-6 text-center">
+                            <i class="pi pi-building mb-4 text-5xl text-blue-400"></i>
+                            <h3 class="mb-2 text-lg font-bold text-white">Transferencia bancaria</h3>
+                            <p class="text-sm leading-relaxed text-gray-400">Verifica la transferencia antes de confirmar la venta.</p>
+                        </div>
+                    }
+                }
+
+                <div class="flex gap-3 pt-1">
+                    <button type="button" [disabled]="procesando" (click)="mostrarModalPago = false"
+                        class="w-full rounded-md border border-white/20 bg-black py-2.5 text-sm text-white transition-colors hover:border-[#C9A84C]">
+                        <i class="pi pi-times mr-2"></i>Cancelar
+                    </button>
+                    <button type="button" [disabled]="procesando" (click)="confirmarYProcesarCobro()"
+                        class="w-full rounded-md bg-[#C9A84C] py-2.5 text-sm font-medium text-black transition-colors hover:bg-[#E2B95A] disabled:opacity-60">
+                        <i class="pi pi-check mr-2"></i>{{ procesando ? 'Procesando...' : 'Confirmar Pago' }}
+                    </button>
+                </div>
+            </div>
+        </p-dialog>
         <button type="button" (click)="regresarAlHistorial()"
             class="border border-[#C9A84C] ring-1 ring-[#C9A84C]/40 text-white text-sm rounded-md px-4 py-2 flex items-center gap-2 hover:bg-[#C9A84C]/10 transition-colors">
             <i class="pi pi-angle-left text-xs"></i> Regresar a ventas
@@ -57,7 +124,17 @@
             <div class="p-4 flex flex-col gap-4">
                 <div class="flex flex-col gap-1.5">
                     <label class="text-xs text-gray-400">Cliente</label>
-                    <p-select [options]="clientes" [(ngModel)]="cliente" styleClass="w-full" />
+                    <p-select
+                        [options]="clientes"
+                        [(ngModel)]="cliente"
+                        [filter]="true"
+                        filterBy="label"
+                        optionLabel="label"
+                        optionValue="value"
+                        placeholder="Buscar cliente..."
+                        emptyMessage="No se encontraron clientes"
+                        emptyFilterMessage="No se encontraron clientes"
+                        styleClass="w-full" />
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
