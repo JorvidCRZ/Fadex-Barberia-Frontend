@@ -137,7 +137,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: () => {
-          this.notify.showSuccess('Bienvenido al sistema con Google');
+          this.notify.showSuccess('Bienvenido '+ this.tokenService.getUserDisplayName());
           this.redirectUser();
         },
         error: (err) => {

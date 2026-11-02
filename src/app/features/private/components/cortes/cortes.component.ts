@@ -17,7 +17,7 @@ import { ServicioHistorialDTO } from '@/app/core/models/gestion/barbero/cortes.m
   selector: 'app-cortes',
   standalone: true,
   imports: [
-    CommonModule, FormsModule, DatePipe, DecimalPipe, TableModule, DialogModule,
+    CommonModule, FormsModule, DatePipe, TableModule, DialogModule,
     FiltrosComponent, ButtonComponent, MonedaPipe
   ],
   templateUrl: './cortes.html',

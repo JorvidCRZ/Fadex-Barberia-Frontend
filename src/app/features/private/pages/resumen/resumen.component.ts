@@ -1,10 +1,9 @@
 import { ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { TableModule } from 'primeng/table';
 import { Subject, forkJoin, takeUntil } from 'rxjs';
 import Chart, { ChartConfiguration } from 'chart.js/auto'; // 'auto' ya registra todos los controladores
-import { environment } from '@/environments/environment'; // ajusta la ruta si tu alias es otro
 import { TokenService } from '@/app/core/services/auth/token.service';
 import { BarberoService } from '@/app/core/services/gestion/barbero.service';
 import { ResumenCliente } from '@/app/core/services/gestion/resumen-cliente.service';
@@ -16,11 +15,10 @@ import { StatsCard } from '@/app/core/models/common/card.model';
 import { StatsComponent } from '@/app/shared/components/stats/stats.component';
 import { StatusBadgeComponent } from '@/app/shared/components/status-badge/status-badge.component';
 import { ButtonComponent } from '@/app/shared/components/button/button.component';
-import { HISTORIAL_RECIENTE_MOCK, PROXIMAS_CITAS_MOCK, RESUMEN_CLIENTE_MOCK } from '@/app/core/config/privado-mock.config';
 
 type Rol = 'admin' | 'barbero' | 'cliente';
 
-/** Cita tal como la pinta el barbero (mock o API) */
+/** Cita tal como la pinta el barbero (API) */
 type CitaBarbero = {
   horaInicio?: string;
   hora?: string;
@@ -106,13 +104,12 @@ export class ResumenComponent implements OnInit, OnDestroy {
   kpis: ClienteDetalleResumenDTO | null = null;
   seleccionada: CitaResumen | null = null; // la que se muestra en el card de detalle
 
-ngOnInit(): void {
-  this.rol = this.resolverRol();
-  console.log('mock:', environment.useMockData, '| rol:', this.rol);
-  if (this.esCliente) this.cargarCliente();
-  else if (this.esBarbero) this.cargarBarbero();
-  else this.cargarAdmin();
-}
+  ngOnInit(): void {
+    this.rol = this.resolverRol();
+    if (this.esCliente) this.cargarCliente();
+    else if (this.esBarbero) this.cargarBarbero();
+    else this.cargarAdmin();
+  }
 
   ngOnDestroy(): void {
     this.chart?.destroy();
@@ -138,11 +135,13 @@ ngOnInit(): void {
           this.kpiCards = this.resumenSvc.buildKpiCards(data);
           this.citas = data.citas ?? [];
           this.loading = false;
+          this.render();
         },
         error: (err) => {
           console.error('Error cargando dashboard:', err);
           this.error = 'No se pudo cargar el dashboard. Verifica la conexión.';
           this.loading = false;
+          this.render();
         },
       });
 
@@ -154,8 +153,8 @@ ngOnInit(): void {
     this.resumenSvc.getCitasHoy()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (citas) => { this.citas = citas; this.loadingCitas = false; },
-        error: () => { this.loadingCitas = false; },
+        next: (citas) => { this.citas = citas; this.loadingCitas = false; this.render(); },
+        error: () => { this.loadingCitas = false; this.render(); },
       });
   }
 
@@ -173,6 +172,7 @@ ngOnInit(): void {
           this.diaPico = preds.find(p => p.clientes_predichos === max)?.dia ?? '';
           this.totalEstimado = vals.reduce((a, b) => a + b, 0);
           this.loadingPrediccion = false;
+          this.render(); // dibuja el <canvas> antes de crear el gráfico
 
           this.pintar({
             type: 'line',
@@ -198,7 +198,7 @@ ngOnInit(): void {
             },
           });
         },
-        error: () => { this.loadingPrediccion = false; },
+        error: () => { this.loadingPrediccion = false; this.render(); },
       });
   }
 
@@ -230,7 +230,6 @@ ngOnInit(): void {
   trackByKpi(_: number, kpi: KpiCard): string { return kpi.label; }
   trackByCita(_: number, cita: CitaBarberoResponseDTO): number { return cita.idReserva; }
 
-  // ═══════════════════════════ BARBERO ═══════════════════════════
   // ═══════════════════════════ BARBERO ═══════════════════════════
   private cargarBarbero(): void {
     this.barberoSvc.getPerfil().pipe(takeUntil(this.destroy$)).subscribe({
@@ -312,13 +311,9 @@ ngOnInit(): void {
   }
 
   toggleEstado(): void {
-    if (environment.useMockData) {
-      this.isOcupado = !this.isOcupado;
-      return;
-    }
     this.barberoSvc.toggleOcupado(this.barberoId).pipe(takeUntil(this.destroy$)).subscribe({
-      next: ({ data }) => { this.isOcupado = data.estado === 'ocupado' || data.status === 'ocupado'; },
-      error: () => { this.isOcupado = !this.isOcupado; },
+      next: ({ data }) => { this.isOcupado = data.estado === 'ocupado' || data.status === 'ocupado'; this.render(); },
+      error: () => { this.isOcupado = !this.isOcupado; this.render(); },
     });
   }
 
@@ -353,16 +348,11 @@ ngOnInit(): void {
 
   // ═══════════════════════════ CLIENTE ═══════════════════════════
   private cargarCliente(): void {
-    this.username = this.tokenService.getUserDisplayName() || 'Cliente Demo';
-
-    if (environment.useMockData) {
-      this.proximasCitas = PROXIMAS_CITAS_MOCK.map(r => this.mapCita(r));
-      this.historialReciente = HISTORIAL_RECIENTE_MOCK.map(r => this.mapCita(r));
-      this.kpis = RESUMEN_CLIENTE_MOCK;
-      this.seleccionada = this.proximasCitas[0] ?? null;
-      this.loading = false;
-      return;
-    }
+    // Si el token solo trae el correo, mostramos la parte antes de la @
+    const display = this.tokenService.getUserDisplayName() || 'Cliente';
+    this.username = display.includes('@') ? display.split('@')[0] : display;
+    this.loading = true;
+    this.error = null;
 
     this.clienteSvc.cargarDashboard().pipe(takeUntil(this.destroy$)).subscribe({
       next: ({ proximasCitas, historialReciente, kpis }) => {
@@ -371,16 +361,18 @@ ngOnInit(): void {
         this.kpis = kpis;
         this.seleccionada = this.proximasCitas[0] ?? null;
         this.loading = false;
+        this.render();
       },
       error: (err) => {
         console.error('ERROR DASHBOARD:', err);
         this.error = 'Error al cargar el dashboard. Intenta nuevamente.';
         this.loading = false;
+        this.render();
       },
     });
   }
 
-  /** Sirve para mock (estado) y para API (estadoReserva) */
+  /** Acepta `estadoReserva` o `estado` según cómo lo mande el backend */
   private mapCita(r: any): CitaResumen {
     return {
       reservaId: r.reservaId,
@@ -405,7 +397,7 @@ ngOnInit(): void {
       { title: 'Cortes', value: this.kpis.totalCortes, description: 'Últimas semanas', icon: 'pi pi-scissors' },
       { title: 'Total gastado', value: `S/ ${this.kpis.totalGastado}`, description: 'Acumulado', icon: 'pi pi-wallet', accentClass: 'bg-green-500', accentTextClass: 'text-green-400', iconBgClass: 'bg-green-500/10' },
       { title: 'Última visita', value: this.formatFechaCorta(this.kpis.ultimaVisita), description: this.formatUltimaVisita(this.kpis.ultimaVisita), icon: 'pi pi-calendar', accentClass: 'bg-blue-500', accentTextClass: 'text-blue-400', iconBgClass: 'bg-blue-500/10' },
-      { title: 'Reservas activas', value: this.kpis.totalReservas, description: 'Próximas citas', icon: 'pi pi-book', accentClass: 'bg-teal-500', accentTextClass: 'text-teal-400', iconBgClass: 'bg-teal-500/10' },
+      { title: 'Reservas activas', value: this.proximasCitas.length, description: 'Próximas citas', icon: 'pi pi-book', accentClass: 'bg-teal-500', accentTextClass: 'text-teal-400', iconBgClass: 'bg-teal-500/10' },
     ];
   }
 
@@ -443,6 +435,11 @@ ngOnInit(): void {
   }
 
   // ═══════════════════════════ UTILIDADES ═══════════════════════════
+  /** Fuerza el repintado: en apps zoneless los cambios hechos en callbacks async no se reflejan solos */
+  private render(): void {
+    this.cdr.detectChanges();
+  }
+
   /** Crea/recrea el gráfico cuando el canvas ya está en el DOM */
   private pintar(config: ChartConfiguration): void {
     setTimeout(() => {
@@ -459,11 +456,5 @@ ngOnInit(): void {
 
   private precioServicio(s: any): number {
     return typeof s?.precio === 'number' ? s.precio : 0;
-  }
-
-  private toIsoDate(date: Date): string {
-    const d = new Date(date);
-    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-    return d.toISOString().slice(0, 10);
   }
 }

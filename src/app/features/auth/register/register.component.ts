@@ -8,7 +8,7 @@ import { Router, RouterLink } from '@angular/router';
 import { environment } from '../../../../environments/environment';
 import { AuthService } from '../../../core/services/auth/auth.service';
 import { TokenService } from '../../../core/services/auth/token.service';
-import { Component, inject, OnInit, AfterViewInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, AfterViewInit } from '@angular/core';
 import { LogoComponent } from '../../../shared/components/logo/logo.component';
 import { NotificationService } from '../../../core/services/common/notification.service';
 import { campoInvalido, marcarFormulario } from '../../../shared/utils/form-utils.component';
@@ -24,7 +24,7 @@ export interface GoogleCredentialResponse {
 declare var google: any;
 
 const soloLetrasValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
-  const valor: string = control.value ?? '';                                                                                                                                                                                                                                                  
+  const valor: string = control.value ?? '';
   return /^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s'-]+$/.test(valor.trim()) ? null : { soloLetras: true };
 };
 
@@ -42,10 +42,10 @@ const usernameValidator: ValidatorFn = (control: AbstractControl): ValidationErr
 const passwordSeguraValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
   const valor: string = control.value ?? '';
   const errores: ValidationErrors = {};
-  if (valor.length < 8)          errores['minLength']    = true;
-  if (!/[A-Z]/.test(valor))      errores['sinMayuscula'] = true;
-  if (!/[0-9]/.test(valor))      errores['sinNumero']    = true;
-  if (!/[^a-zA-Z0-9]/.test(valor)) errores['sinSimbolo'] = true;
+  if (valor.length < 8)            errores['minLength']    = true;
+  if (!/[A-Z]/.test(valor))        errores['sinMayuscula'] = true;
+  if (!/[0-9]/.test(valor))        errores['sinNumero']    = true;
+  if (!/[^a-zA-Z0-9]/.test(valor)) errores['sinSimbolo']   = true;
   return Object.keys(errores).length ? errores : null;
 };
 
@@ -71,11 +71,12 @@ const gmailValidator: ValidatorFn = (control: AbstractControl): ValidationErrors
   templateUrl: './register.html'
 })
 export class RegisterComponent implements AfterViewInit {
-  private fb          = inject(FormBuilder);
-  private authService = inject(AuthService);
-  private router      = inject(Router);
+  private fb           = inject(FormBuilder);
+  private authService  = inject(AuthService);
+  private router       = inject(Router);
   private tokenService = inject(TokenService);
-  private notify      = inject(NotificationService);
+  private notify       = inject(NotificationService);
+  private cdr          = inject(ChangeDetectorRef);
 
   errorMsg  = '';
   loading   = false;
@@ -86,13 +87,13 @@ export class RegisterComponent implements AfterViewInit {
       nombre:          ['', [Validators.required, Validators.minLength(2), soloLetrasValidator]],
       apellido:        ['', [Validators.required, Validators.minLength(2), soloLetrasValidator]],
       telefono:        ['', [Validators.required, telefonoPeruanoValidator]],
-      email:           ['', [ Validators.required, Validators.email, gmailValidator ]],
+      email:           ['', [Validators.required, Validators.email, gmailValidator]],
       username:        ['', [Validators.required, Validators.minLength(4), usernameValidator]],
       password:        ['', [Validators.required, passwordSeguraValidator]],
       passwordConfirm: ['', [Validators.required]],
       terminos:        [false, [Validators.requiredTrue]],
     },
-    { validators: passwordsIgualesValidator }   
+    { validators: passwordsIgualesValidator }
   );
 
   ngAfterViewInit() {
@@ -116,14 +117,34 @@ export class RegisterComponent implements AfterViewInit {
     return 'Contraseña inválida';
   }
 
+  /** Checklist de requisitos de la contraseña (evita el aviso NG8107 del template) */
+  get passwordReglas(): { texto: string; ok: boolean }[] {
+    const e = this.passwordCtrl?.errors ?? {};
+    return [
+      { texto: 'Mínimo 8 caracteres',              ok: !e['minLength'] },
+      { texto: 'Al menos una mayúscula',           ok: !e['sinMayuscula'] },
+      { texto: 'Al menos un número',               ok: !e['sinNumero'] },
+      { texto: 'Al menos un símbolo (@, #, !...)', ok: !e['sinSimbolo'] },
+    ];
+  }
+
+  /** Solo muestra el error si el usuario ya tocó el campo o intentó enviar el formulario */
   get confirmError(): string {
-    if (this.passwordConfirmCtrl?.errors?.['required']) return 'Confirma tu contraseña';
-    if (this.registerForm.errors?.['passwordsNoCoinciden'] && this.submitted) return 'Las contraseñas no coinciden';
+    const ctrl = this.passwordConfirmCtrl;
+    if (!ctrl || !(ctrl.touched || ctrl.dirty || this.submitted)) return '';
+    if (ctrl.errors?.['required']) return 'Confirma tu contraseña';
+    if (this.registerForm.errors?.['passwordsNoCoinciden']) return 'Las contraseñas no coinciden';
     return '';
+  }
+
+  /** Fuerza el repintado: en apps zoneless los cambios hechos en callbacks async no se reflejan solos */
+  private render(): void {
+    this.cdr.detectChanges();
   }
 
   // REGISTRO SIN GOOGLE
   onSubmit(): void {
+    if (this.loading) return; // evita doble envío si el botón también dispara ngSubmit
     this.submitted = true;
     marcarFormulario(this.registerForm);
 
@@ -158,11 +179,12 @@ export class RegisterComponent implements AfterViewInit {
           this.errorMsg = msg || 'Error al registrarse. Intenta de nuevo.';
         }
         this.loading = false;
+        this.render();
       },
     });
   }
 
-  // REGISTRO CON GOOGLE 
+  // REGISTRO CON GOOGLE
   initGoogleSignIn() {
     if (typeof google === 'undefined') {
       const script = document.createElement('script');
@@ -182,18 +204,20 @@ export class RegisterComponent implements AfterViewInit {
       callback: this.handleGoogleCredentialResponse.bind(this)
     });
 
-    const googleBtnContainer = document.getElementById("google-register-button");
+    const googleBtnContainer = document.getElementById('google-register-button');
     if (googleBtnContainer) {
+      // Google solo acepta píxeles (200–400), no porcentajes
+      const width = Math.min(Math.max(googleBtnContainer.clientWidth, 200), 400);
       google.accounts.id.renderButton(
         googleBtnContainer,
-        { theme: "filled_black", size: "large", shape: "rectangular", width: "100%" }
+        { theme: 'filled_black', size: 'large', shape: 'rectangular', width }
       );
     }
   }
 
   handleGoogleCredentialResponse(response: GoogleCredentialResponse) {
     this.loading = true;
-    this.authService.loginWithGoogle(response.credential).pipe(finalize(() => this.loading = false)).subscribe({
+    this.authService.loginWithGoogle(response.credential).pipe(finalize(() => { this.loading = false; this.render(); })).subscribe({
       next: () => {
         this.notify.showSuccess('Cuenta creada y sesión iniciada con Google');
         const home = this.tokenService.getHomeByRole();

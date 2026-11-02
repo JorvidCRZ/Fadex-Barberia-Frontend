@@ -13,13 +13,7 @@ export interface ClienteResumen {
   deltaRetencion: string;
 
 }
-// ─── API Wrapper ─────────────────────────────────────────────────────────────
-export interface ApiResponse<T> {
-  success: boolean;
-  message: string;
-  data: T;
-  timestamp: string;
-}
+
 
 // ─── Auth / Token (guardado en localStorage tras login) ──────────────────────
 export interface TokenData {
