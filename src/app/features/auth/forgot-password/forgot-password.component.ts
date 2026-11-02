@@ -9,12 +9,13 @@ import { AuthService } from '../../../core/services/auth/auth.service';
 import { campoInvalido } from '../../../shared/utils/form-utils.component';
 import { LogoComponent } from '../../../shared/components/logo/logo.component';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ButtonComponent } from '@/app/shared/components/button/button.component';
 
 
 @Component({
   selector: 'app-forgot-password',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, InputTextModule, ButtonModule, MessageModule, LogoComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, InputTextModule, ButtonModule, MessageModule, LogoComponent, ButtonComponent],
   templateUrl: './forgot-password.html',
 })
 export class ForgotPasswordComponent implements OnInit {

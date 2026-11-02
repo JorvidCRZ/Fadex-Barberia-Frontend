@@ -6,7 +6,7 @@
     }
 
     &::placeholder {
-        @apply text-text-muted;
+        @apply text-text-primary;
     }
 }
 
@@ -116,7 +116,6 @@ textarea:-webkit-autofill:focus,
     border-radius: 0.75rem !important;
 }
 
-
 /* ========================================
    FORMULARIO DE RECLAMOS / PRIME INPUTS
    ======================================== */
@@ -159,7 +158,7 @@ app-reclamos {
     .p-inputnumber-input::placeholder,
     .p-datepicker-input::placeholder,
     textarea::placeholder {
-        color: rgb(var(--color-text-muted)) !important;
+        color: rgb(var(--color-text-primary)) !important;
     }
 
     .p-inputtext:hover,
@@ -262,14 +261,14 @@ app-search-bar input {
 .filtros-panel p-inputnumber .p-inputnumber-input {
     min-height: 2.75rem !important;
     padding: 0.55rem 0.65rem !important;
-    font-size: 0.85rem;
+    // font-size: 0.85rem;
     border: 1px solid rgb(var(--color-ui-border)) !important;
     border-radius: 0.75rem !important;
     background: rgb(var(--color-ui-card)) !important;
     color: rgb(var(--color-text-primary)) !important;
 
     &::placeholder {
-        color: rgb(var(--color-text-muted)) !important;
+        color: rgb(var(--color-text-primary)) !important;
     }
 }
 
@@ -295,7 +294,7 @@ app-search-bar input {
 .filtros-panel .p-select-label.p-placeholder,
 .filtros-panel .p-multiselect-label.p-placeholder,
 .filtros-panel .p-treeselect-label.p-placeholder {
-    color: rgb(var(--color-text-muted)) !important;
+    color: rgb(var(--color-text-primary)) !important;
 }
 
 .filtros-panel .p-select:not(.p-disabled):hover,

@@ -24,15 +24,15 @@ export class AuthService {
   }
 
   login(data: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<ApiResponse<LoginResponse>>(`${this.API}/login`, data).pipe(map((res) => res.data),this.saveSession(),);
+    return this.http.post<ApiResponse<LoginResponse>>(`${this.API}/login`, data).pipe(map((res) => res.data), this.saveSession());
   }
 
   loginWithGoogle(idToken: string): Observable<LoginResponse> {
-    return this.http.post<ApiResponse<LoginResponse>>(`${this.API}/google`, { idToken }).pipe(map((res) => res.data),this.saveSession(),);
+    return this.http.post<ApiResponse<LoginResponse>>(`${this.API}/google`, { idToken }).pipe(map((res) => res.data), this.saveSession());
   }
 
   loginWithQr(qrToken: string, pin: string): Observable<LoginResponse> {
-    return this.http.post<ApiResponse<LoginResponse>>(`${this.API}/qr-login`, { qrToken, pin }).pipe(map((res) => res.data),this.saveSession(),);
+    return this.http.post<ApiResponse<LoginResponse>>(`${this.API}/qr-login`, { qrToken, pin }).pipe(map((res) => res.data), this.saveSession());
   }
 
   refreshToken(): Observable<ApiResponse<LoginResponse>> {
@@ -53,11 +53,12 @@ export class AuthService {
   }
 
   cambiarPassword(passwordActual: string, passwordNueva: string): Observable<ApiResponse<void>> {
-    return this.http.patch<ApiResponse<void>>(`${this.API}/change-password`, { passwordActual, passwordNueva, });
+    return this.http.patch<ApiResponse<void>>(`${this.API}/change-password`, { passwordActual, passwordNueva });
   }
 
+  /** OJO: esta ruta NO cuelga de /auth → /api/v1/usuarios/cliente */
   register(data: ClienteRegister): Observable<ApiResponse<any>> {
-    return this.http.post<ApiResponse<any>>(`${this.API}/usuarios/cliente`, data);
+    return this.http.post<ApiResponse<any>>(`${environment.apiUrl}/usuarios/cliente`, data);
   }
 
   verificarTokenReset(token: string): Observable<void> {

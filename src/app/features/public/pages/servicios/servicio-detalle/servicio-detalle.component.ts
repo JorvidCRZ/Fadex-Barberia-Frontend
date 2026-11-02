@@ -21,9 +21,7 @@ export class ServicioDetalleComponent {
   readonly imagenPorDefecto = '/assets/servicio.jpg'; 
 
   getImagen(): string {
-    return this.servicio?.urlsMultimedia?.length
-      ? this.servicio.urlsMultimedia[0]
-      : this.imagenPorDefecto;
+    return this.servicio?.urlsMultimedia?.length ? this.servicio.urlsMultimedia[0] : this.imagenPorDefecto;
   }
 
   onImgError(event: Event): void {
