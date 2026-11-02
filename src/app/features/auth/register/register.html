@@ -173,9 +173,7 @@
         }
 
         <div class="col-span-full flex flex-col gap-4 border-t border-ui-border-soft pt-5 text-center">
-          <button pButton type="submit" icon="pi pi-user-plus" [disabled]="loading" class="w-full boton-primary">
-            {{ loading ? 'Creando cuenta...' : 'Crear cuenta' }}
-          </button>
+          <app-button variant="primary"  [disabled]="loading"  label="{{ loading ? 'Creando cuenta...' : 'Crear cuenta' }}" icon="pi pi-user-plus" [fullWidth]="true" class="w-full" />
 
           <div class="flex items-center gap-3">
             <div class="h-px flex-1 bg-ui-border-soft"></div>

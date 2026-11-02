@@ -73,7 +73,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
 
   initForm() {
     this.formularioLogin = this.fb.group({
-      username: ['', [Validators.required, Validators.minLength(4), Validators.pattern(/^[^@]+$/)]],
+      username: ['', [Validators.required, Validators.minLength(4)]],
       password: ['', [Validators.required, Validators.minLength(3)]],
       remember: [false]
     });

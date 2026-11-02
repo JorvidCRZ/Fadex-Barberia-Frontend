@@ -13,6 +13,7 @@ import { LogoComponent } from '../../../shared/components/logo/logo.component';
 import { NotificationService } from '../../../core/services/common/notification.service';
 import { campoInvalido, marcarFormulario } from '../../../shared/utils/form-utils.component';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from "@angular/forms";
+import { ButtonComponent } from '@/app/shared/components/button/button.component';
 
 export interface GoogleCredentialResponse {
   credential: string;
@@ -65,7 +66,7 @@ const gmailValidator: ValidatorFn = (control: AbstractControl): ValidationErrors
   selector: 'app-register',
   imports: [
     LogoComponent, InputTextModule, MessageModule, CheckboxModule,
-    PasswordModule, ReactiveFormsModule, RouterLink, ButtonModule
+    PasswordModule, ReactiveFormsModule, RouterLink, ButtonModule, ButtonComponent
   ],
   templateUrl: './register.html'
 })
