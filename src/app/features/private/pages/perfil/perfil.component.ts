@@ -10,6 +10,8 @@ import { PersonaUpdateRequest } from '../../../../core/models/gestion/persona/pe
 import { AuthService } from '../../../../core/services/auth/auth.service';
 import { BarberoService } from '../../../../core/services/gestion/barbero.service';
 import { PersonaService } from '../../../../core/services/gestion/persona.service';
+import { UsuarioService } from '../../../../core/services/auth/usuario.service';
+import { NotificationService } from '../../../../core/services/common/notification.service';
 // import { ClienteService } from '../../../../core/services/gestion/cliente.service';
 import { TokenService } from '../../../../core/services/auth/token.service';
 
@@ -72,6 +74,14 @@ const PERFILES_MEMORIA: Record<RolPerfil, PerfilCuenta> = {
   CLIENTE: { personaId: 3, usuarioId: 3, nombre: 'Juan', apellido: 'Pérez', telefono: '982321324', email: 'jdcruzp11@gmail.com', usuario: 'cliente', fechaRegistro: '2026-01-15' },
 };
 
+const PERFIL_VACIO: PerfilCuenta = {
+  personaId: 0,
+  nombre: '',
+  apellido: '',
+  telefono: '',
+  email: '',
+};
+
 // ─── Componente ───────────────────────────────────────────────────────────────
 
 @Component({
@@ -90,13 +100,15 @@ export class PerfilComponent implements OnInit {
 private readonly personaService = inject(PersonaService);
 private readonly authService = inject(AuthService);
 private readonly barberoService = inject(BarberoService);
+private readonly usuarioService = inject(UsuarioService);
+private readonly notify = inject(NotificationService);
 
   // El rol viene de la ruta: data: { rol: 'CLIENTE' | 'BARBERO' | 'ADMIN' }
   readonly rol: RolPerfil = this.obtenerRol();
   readonly rolLabel = ROL_LABEL[this.rol];
 
   // ── Estado ──
-  perfil = signal<PerfilCuenta>(PERFILES_MEMORIA.CLIENTE);
+  perfil = signal<PerfilCuenta>(PERFIL_VACIO);
   cargando = signal(false);
   guardandoPerfil = signal(false);
   guardandoPassword = signal(false);
@@ -156,7 +168,50 @@ private readonly barberoService = inject(BarberoService);
   }
 
 cargar(): void {
-  if (this.rol !== 'BARBERO') {
+  if (this.rol === 'ADMIN') {
+    const userId = this.tokenService.getUserId();
+    const idUsuario = typeof userId === 'number' ? userId : Number(userId);
+
+    this.cargando.set(true);
+    const consulta = Number.isInteger(idUsuario) && idUsuario > 0
+      ? this.usuarioService.obtenerPorId(idUsuario)
+      : this.usuarioService.buscar(this.nombreUsuarioToken(), 0, 10).pipe(
+        map((respuesta) => {
+          const usuarios = respuesta.data?.content ?? [];
+          const username = this.nombreUsuarioToken().toLowerCase();
+          const usuario = usuarios.find((item: any) =>
+            String(item.usuario ?? item.username ?? '').toLowerCase() === username
+          );
+          if (!usuario?.idUsuario) {
+            throw new Error('No se encontró el usuario administrador autenticado.');
+          }
+          return this.usuarioService.obtenerPorId(Number(usuario.idUsuario));
+        }),
+        switchMap((peticion) => peticion),
+      );
+
+    consulta.subscribe({
+      next: ({ data }) => {
+        const perfil = this.perfilDesdeUsuario(data, Number(data?.idUsuario ?? idUsuario));
+        this.perfil.set(perfil);
+        this.formPerfil.patchValue({
+          nombre: perfil.nombre,
+          apellido: perfil.apellido,
+          telefono: perfil.telefono,
+          email: perfil.email,
+        });
+        this.cargando.set(false);
+      },
+      error: (err) => {
+        console.error('Error cargando perfil administrador:', err);
+        this.cargando.set(false);
+        this.notify.showHttpError(err);
+      },
+    });
+    return;
+  }
+
+  if (this.rol === 'CLIENTE') {
     const p = { ...PERFILES_MEMORIA[this.rol] };
     this.perfil.set(p);
     this.formPerfil.patchValue({ nombre: p.nombre, apellido: p.apellido, telefono: p.telefono, email: p.email });
@@ -178,6 +233,24 @@ cargar(): void {
       this.cargando.set(false);
     },
   });
+}
+
+private perfilDesdeUsuario(data: any, idUsuario: number): PerfilCuenta {
+  return {
+    personaId: Number(data?.personaId ?? data?.persona?.personaId ?? 0),
+    usuarioId: Number(data?.idUsuario ?? idUsuario),
+    nombre: data?.nombre ?? data?.persona?.nombre ?? '',
+    apellido: data?.apellido ?? data?.persona?.apellido ?? '',
+    telefono: data?.telefono ?? data?.persona?.telefono ?? '',
+    email: data?.email ?? data?.persona?.email ?? '',
+    usuario: data?.username ?? data?.usuario ?? data?.user,
+    permisos: data?.permisos ?? PERMISOS_ADMIN,
+  };
+}
+
+private nombreUsuarioToken(): string {
+  const token = this.tokenService.getDecodedToken();
+  return String(token?.username ?? token?.user ?? token?.sub ?? '').trim();
 }
   // ── Acciones ──
 
@@ -221,16 +294,23 @@ cargar(): void {
     return;
   }
 
-  const { nombre, apellido, telefono } = this.formPerfil.getRawValue();
+  const { nombre, apellido, telefono, email } = this.formPerfil.getRawValue();
 
-  if (this.rol !== 'BARBERO') {
+  if (this.rol === 'CLIENTE') {
     this.perfil.update((actual) => ({ ...actual, nombre: nombre!, apellido: apellido!, telefono: telefono ?? '' }));
     return;
   }
 
   const p = this.perfil();
-  const dto: PersonaUpdateRequest = { nombre: nombre!, apellido: apellido!, telefono: telefono ?? '', email: p.email };
-  const request$ = p.personaId
+  const dto: PersonaUpdateRequest = {
+    nombre: nombre!.trim(),
+    apellido: apellido!.trim(),
+    telefono: (telefono ?? '').trim(),
+    email: (email ?? p.email).trim(),
+  };
+  const request$ = this.rol === 'ADMIN'
+    ? this.personaService.actualizarPersonaPorUsuarioId(p.usuarioId!, dto)
+    : p.personaId
     ? this.personaService.actualizarPersona(p.personaId, dto)
     : this.personaService.actualizarPersonaPorUsuarioId(p.usuarioId!, dto);
 
@@ -239,10 +319,12 @@ cargar(): void {
     next: () => {
       this.perfil.update((actual) => ({ ...actual, ...dto }));
       this.guardandoPerfil.set(false);
+      this.notify.showSuccess('Los datos del perfil se guardaron correctamente.');
     },
     error: (err) => {
       console.error('Error guardando perfil:', err);
       this.guardandoPerfil.set(false);
+      this.notify.showHttpError(err);
     },
   });
 }
@@ -255,7 +337,7 @@ cambiarPassword(): void {
 
   const { passwordActual, passwordNueva } = this.formPassword.getRawValue();
 
-  if (this.rol !== 'BARBERO') {
+  if (this.rol === 'CLIENTE') {
     this.formPassword.reset();
     return;
   }
@@ -265,10 +347,12 @@ cambiarPassword(): void {
     next: () => {
       this.guardandoPassword.set(false);
       this.formPassword.reset();
+      this.notify.showSuccess('La contraseña se actualizó correctamente.');
     },
     error: (err) => {
       console.error(err.error?.message ?? 'La contraseña actual es incorrecta.');
       this.guardandoPassword.set(false);
+      this.notify.showHttpError(err);
     },
   });
 }
