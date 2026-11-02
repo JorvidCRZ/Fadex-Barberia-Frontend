@@ -39,6 +39,7 @@ export class VentaTableComponent {
 
   @Output() lazyLoad = new EventEmitter<TableLazyLoadEvent>();
   @Output() eliminar = new EventEmitter<Venta>();
+  @Output() descargarComprobante = new EventEmitter<Venta>();
 
   mostrarConfirmacion = false;
   mensajeConfirmacion = '';

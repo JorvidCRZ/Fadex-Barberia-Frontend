@@ -266,15 +266,15 @@
 
         <div class="flex gap-2">
           @if (ventaPago.tipoComprobante === 'BOLETA') {
-            <button type="button" disabled
-              class="flex w-full items-center justify-center gap-2 rounded-md border border-white/10 px-3 py-2 text-xs text-text-muted opacity-60"
-              title="Disponible próximamente">
+            <button type="button"
+              class="flex w-full items-center justify-center gap-2 rounded-md border border-brand-gold/40 px-3 py-2 text-xs text-brand-gold transition hover:bg-brand-gold/10"
+              (click)="descargarComprobante.emit(ventaPago)">
               <i class="pi pi-file"></i> Descargar boleta
             </button>
           } @else if (ventaPago.tipoComprobante === 'FACTURA') {
-            <button type="button" disabled
-              class="flex w-full items-center justify-center gap-2 rounded-md border border-white/10 px-3 py-2 text-xs text-text-muted opacity-60"
-              title="Disponible próximamente">
+            <button type="button"
+              class="flex w-full items-center justify-center gap-2 rounded-md border border-brand-gold/40 px-3 py-2 text-xs text-brand-gold transition hover:bg-brand-gold/10"
+              (click)="descargarComprobante.emit(ventaPago)">
               <i class="pi pi-file-pdf"></i> Descargar factura
             </button>
           }

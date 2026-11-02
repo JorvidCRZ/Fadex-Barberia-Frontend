@@ -149,6 +149,31 @@ export class VentasComponent implements OnInit {
     });
   }
 
+  descargarComprobante(venta: Venta): void {
+    this.ventaService.descargarComprobantePdf(venta.ventaId).subscribe({
+      next: (blob: Blob) => {
+        const url = URL.createObjectURL(blob);
+        const enlace = document.createElement('a');
+        enlace.href = url;
+        enlace.download = this.nombreArchivoComprobante(venta);
+        enlace.click();
+        URL.revokeObjectURL(url);
+      },
+      error: (err: unknown) => {
+        console.error('Error descargando comprobante:', err);
+        this.notify.showError('No se pudo descargar el comprobante.');
+      }
+    });
+  }
+
+  private nombreArchivoComprobante(venta: Venta): string {
+    const tipo = venta.tipoComprobante?.toLowerCase() ?? 'comprobante';
+    const numero = venta.serieComprobante && venta.numeroComprobante
+      ? `${venta.serieComprobante}-${venta.numeroComprobante}`
+      : venta.numeroCorrelativo || String(venta.ventaId);
+    return `${tipo}-${numero}.pdf`;
+  }
+
   guardarVenta(data: any): void {
     this.crearVenta(data);
   }
