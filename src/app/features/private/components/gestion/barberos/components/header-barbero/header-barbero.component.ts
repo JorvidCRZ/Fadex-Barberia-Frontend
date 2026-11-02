@@ -6,8 +6,7 @@ import { RouterLink } from "@angular/router";
 @Component({
   selector: 'app-header-barbero',
   imports: [SearchBarComponent, ButtonModule, RouterLink],
-  templateUrl: './header-barbero.html',
-  styleUrl: './header-barbero.scss',
+  templateUrl: './header-barbero.html'
 })
 export class HeaderBarbero {
   @Input() title: string = 'Barberos';
