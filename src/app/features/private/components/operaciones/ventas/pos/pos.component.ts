@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { SelectModule } from 'primeng/select';
+import { DialogModule } from 'primeng/dialog';
 import { ProductoService } from '@/app/core/services/catalogos/producto.service';
 import { ClienteService } from '@/app/core/services/gestion/cliente.service';
 import { VentaService } from '@/app/core/services/venta/venta.service';
 import { NotificationService } from '@/app/core/services/common/notification.service';
-import { TokenService } from '@/app/core/services/auth/token.service';
+import { BarberoService } from '@/app/core/services/gestion/barbero.service';
 
 interface ProductoPos {
   id: number;
@@ -32,7 +33,7 @@ interface Opcion<T = string> {
 @Component({
   selector: 'app-pos',
   standalone: true,
-  imports: [CommonModule, FormsModule, SelectModule],
+  imports: [CommonModule, FormsModule, SelectModule, DialogModule],
   templateUrl: './pos.html',
 })
 export class PosComponent implements OnInit {
@@ -43,7 +44,7 @@ export class PosComponent implements OnInit {
   private productoService = inject(ProductoService);
   private clienteService = inject(ClienteService);
   private ventaService = inject(VentaService);
-  private tokenService = inject(TokenService);
+  private barberoService = inject(BarberoService);
   private cdr = inject(ChangeDetectorRef);
 
   // Datos del backend
@@ -70,14 +71,17 @@ export class PosComponent implements OnInit {
   carrito: LineaCarrito[] = [];
 
   procesando = false;
+  mostrarModalPago = false;
 
   // Cobro de reserva
   reservaIdActiva: number | null = null;
   nombreClienteReserva = '';
+  private barberoIdActual: number | null = null;
 
   ngOnInit(): void {
     this.cargarReservaSiExiste();
     this.cargarCatalogos();
+    this.cargarBarberoActual();
   }
 
   // ───────── Carga de datos ─────────
@@ -108,6 +112,22 @@ export class PosComponent implements OnInit {
       error: (err) => {
         console.error('Error cargando clientes para POS:', err);
         this.notify.showError('No se pudieron cargar los clientes.');
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  private cargarBarberoActual(): void {
+    if (!this.router.url.includes('/dashboard/barbero/')) return;
+
+    this.barberoService.getPerfil().subscribe({
+      next: (res) => {
+        this.barberoIdActual = res.data?.barberoId ?? null;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error cargando barbero actual:', err);
+        this.notify.showError('No se pudo identificar al barbero actual.');
         this.cdr.detectChanges();
       },
     });
@@ -243,6 +263,12 @@ export class PosComponent implements OnInit {
       return;
     }
 
+    this.mostrarModalPago = true;
+  }
+
+  confirmarYProcesarCobro(): void {
+    if (this.procesando) return;
+
     // En cobro de reserva el servicio ya lo gestiona el backend vía reservaId;
     // solo se envían los productos adicionales.
     const detalles = this.carrito
@@ -254,11 +280,15 @@ export class PosComponent implements OnInit {
         precioUnitario: l.producto.precio,
       }));
 
-    const userId = Number(this.tokenService.getUserId());
+    const esBarbero = this.router.url.includes('/dashboard/barbero/');
+    if (esBarbero && this.barberoIdActual === null) {
+      this.notify.showWarn('Espera a que se cargue el perfil del barbero.');
+      return;
+    }
 
     const request: any = {
       clienteId: this.reservaIdActiva ? null : this.cliente,
-      barberoId: isNaN(userId) ? null : userId,
+      barberoId: esBarbero ? this.barberoIdActual : null,
       fecha: new Date(),
       tipoComprobante: this.comprobante,
       metodoPago: this.metodo,
@@ -269,6 +299,7 @@ export class PosComponent implements OnInit {
     this.procesando = true;
     this.ventaService.crearVenta(request).subscribe({
       next: () => {
+        this.mostrarModalPago = false;
         this.notify.showSuccess(this.reservaIdActiva
           ? '¡Venta registrada y Reserva completada con éxito!'
           : '¡Venta registrada con éxito!');
@@ -278,6 +309,7 @@ export class PosComponent implements OnInit {
         this.regresarAlHistorial();
       },
       error: () => {
+        this.mostrarModalPago = false;
         this.procesando = false;
         this.notify.showError('Ocurrió un error al procesar la venta.');
       },

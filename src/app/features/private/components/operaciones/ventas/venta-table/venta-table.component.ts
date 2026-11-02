@@ -45,10 +45,17 @@ export class VentaTableComponent {
   ventaAEliminar: Venta | null = null;
   mostrarDetalle = false;
   ventaDetalle: Venta | null = null;
+  mostrarPago = false;
+  ventaPago: Venta | null = null;
 
   verDetalle(venta: Venta): void {
     this.ventaDetalle = venta;
     this.mostrarDetalle = true;
+  }
+
+  verPago(venta: Venta): void {
+    this.ventaPago = venta;
+    this.mostrarPago = true;
   }
 
   subtotalDe(detalle: VentaDetalle): number {

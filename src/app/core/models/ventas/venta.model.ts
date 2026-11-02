@@ -6,6 +6,7 @@ export interface Venta {
   ventaId: number;
   numeroCorrelativo?: string;
   clienteId?: number;
+  barberoId?: number;
   clienteNombre?: string;
   barberoNombre?: string;
   fecha?: string;
