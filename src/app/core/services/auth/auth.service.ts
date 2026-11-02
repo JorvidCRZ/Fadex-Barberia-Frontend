@@ -57,7 +57,7 @@ export class AuthService {
   }
 
   register(data: ClienteRegister): Observable<ApiResponse<any>> {
-    return this.http.post<ApiResponse<any>>(`${environment.apiUrl}/usuarios/cliente`, data);
+    return this.http.post<ApiResponse<any>>(`${this.API}/usuarios/cliente`, data);
   }
 
   verificarTokenReset(token: string): Observable<void> {

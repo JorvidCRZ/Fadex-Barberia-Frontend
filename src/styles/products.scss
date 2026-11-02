@@ -23,7 +23,7 @@
 }
 
 .producto-page-summary {
-    @apply mt-6 flex items-center justify-between text-sm text-text-secondary;
+    @apply mt-6 flex items-center justify-between text-base text-text-secondary;
 }
 
 .producto-page-paginator {
@@ -32,7 +32,24 @@
 
 
 /* ========================================
-   PRODUCT DETAIL
+   BADGE UNIFICADO (productos y servicios)
+   ======================================== */
+
+.badge-categoria,
+.badge-categoria.badge-text {
+    background: rgb(10 10 10 / 0.75) !important;
+    border: 1px solid rgb(var(--color-brand-gold) / 0.6) !important;
+    color: rgb(var(--color-brand-gold)) !important;
+    border-radius: 9999px !important;
+    padding: 0.125rem 0.625rem !important;
+    font-size: 0.875rem !important;
+    font-weight: 500;
+    backdrop-filter: blur(4px);
+}
+
+
+/* ========================================
+   PRODUCT DETAIL (modal)
    ======================================== */
 
 .producto-detail-modal {
@@ -48,7 +65,7 @@
 }
 
 .producto-detail-modal-code {
-    @apply text-xs text-text-muted;
+    @apply text-sm text-text-muted;
 }
 
 .producto-detail-back-button {
@@ -109,7 +126,7 @@
 }
 
 .producto-detail-image-label {
-    @apply absolute left-4 top-4 z-10 rounded-full border border-ui-border-soft bg-ui-black/80 px-3 py-1 text-xs font-medium text-text-secondary;
+    @apply absolute left-4 top-4 z-10 rounded-full border border-ui-border-soft bg-ui-black/80 px-3 py-1 text-sm font-medium text-text-secondary;
 }
 
 .producto-detail-main-image img {
@@ -161,7 +178,7 @@
 }
 
 .producto-detail-rating {
-    @apply mb-5 flex flex-wrap items-center gap-3 text-sm text-text-muted;
+    @apply mb-5 flex flex-wrap items-center gap-3 text-base text-text-muted;
 }
 
 .producto-detail-rating-stars {
@@ -191,19 +208,16 @@
 }
 
 .producto-detail-stock {
-    @apply flex items-center gap-2 text-sm text-success;
+    @apply flex items-center gap-2 text-base text-success;
 }
 
-.producto-detail-stock.out {
-    @apply text-danger;
-}
-
+.producto-detail-stock.out,
 .producto-detail-stock-out {
     @apply text-danger;
 }
 
 .producto-detail-quantity {
-    @apply flex flex-col gap-2;
+    @apply flex flex-col gap-2 text-text-secondary;
 }
 
 .producto-detail-specs {
@@ -211,7 +225,7 @@
 }
 
 .producto-detail-specs .spec-row {
-    @apply grid grid-cols-2 gap-4 text-sm;
+    @apply grid grid-cols-2 gap-4 text-base;
 }
 
 .producto-detail-specs .spec-row span {
@@ -231,7 +245,7 @@
 }
 
 .producto-detail-feature {
-    @apply mb-4 flex items-start gap-3 text-sm text-text-secondary;
+    @apply mb-4 flex items-start gap-3 text-base text-text-secondary;
 }
 
 .producto-detail-feature i {
@@ -247,7 +261,7 @@
 }
 
 .producto-detail-feature small {
-    @apply text-text-secondary;
+    @apply text-sm text-text-secondary;
 }
 
 
@@ -256,15 +270,13 @@
    ======================================== */
 
 .producto-detail-buy {
-    background: linear-gradient(180deg,
-            rgb(18 18 18),
-            rgb(22 22 22 / 0.95));
+    background: linear-gradient(180deg, rgb(18 18 18), rgb(22 22 22 / 0.95));
     padding: 1.25rem;
     border-radius: 12px;
 }
 
 .producto-detail-buy-label {
-    @apply mb-3 block text-xs font-semibold uppercase tracking-[0.18em] text-text-muted;
+    @apply mb-3 block text-sm font-semibold uppercase tracking-[0.18em] text-text-muted;
 }
 
 .producto-detail-buy .p-button {
@@ -296,11 +308,11 @@
    ======================================== */
 
 .producto-detail-note {
-    @apply mt-3 flex items-center justify-between rounded-xl border border-ui-border-soft bg-ui-card px-4 py-3 text-sm text-text-secondary;
+    @apply mt-3 flex items-center justify-between rounded-xl border border-ui-border-soft bg-ui-card px-4 py-3 text-base text-text-secondary;
 }
 
 .producto-detail-note strong {
-    @apply text-base text-text-primary;
+    @apply text-lg text-text-primary;
 }
 
 
@@ -320,6 +332,113 @@
     @apply col-span-full py-10 text-center text-text-secondary;
 }
 
+.producto-card-shell {
+    @apply block h-full w-full overflow-hidden rounded-3xl border border-ui-border bg-ui-card shadow-lg shadow-black/20 transition-transform duration-300 hover:-translate-y-1 hover:shadow-2xl;
+}
+
+.producto-card-container {
+    @apply flex h-full w-full justify-center p-0 md:p-2;
+}
+
+.producto-card-shell.p-card {
+    @apply flex h-full w-full flex-col;
+}
+
+.producto-card-shell .p-card-header {
+    @apply shrink-0;
+}
+
+.producto-card-shell .p-card-body {
+    @apply flex flex-1 flex-col;
+}
+
+.producto-card-shell .p-card-title {
+    @apply min-h-7;
+}
+
+.producto-card-shell .p-card-content {
+    @apply flex flex-1 flex-col;
+}
+
+.producto-card-shell .p-card-footer {
+    @apply mt-auto;
+}
+
+/* Imagen + badge flotando arriba a la izquierda */
+.producto-card-shell .producto-card-media {
+    position: relative;
+    background: #fff;
+    overflow: hidden;
+}
+
+.producto-card-shell .producto-card-image {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: contain;
+    padding: 0.5rem;
+    transition: all 300ms;
+}
+
+.producto-card-shell .producto-card-image:hover {
+    transform: scale(1.03);
+}
+
+.producto-card-shell .producto-card-category-badge {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    z-index: 10;
+}
+
+.producto-card-shell .producto-card-soldout {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    z-index: 10;
+    padding: 0.125rem 0.75rem;
+    border-radius: 9999px;
+    background: #dc2626;
+    color: #fff;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.producto-card-title {
+    @apply line-clamp-2 min-h-[3.25rem] text-lg font-semibold text-brand-white;
+}
+
+.producto-card-description {
+    @apply line-clamp-2 text-sm text-text-muted;
+}
+
+.producto-card-meta {
+    @apply mt-auto flex items-center justify-between pt-3;
+}
+
+.producto-card-price {
+    @apply text-xl font-bold text-brand-gold;
+}
+
+.producto-card-stock {
+    @apply text-sm text-text-secondary;
+}
+
+/* Botones: dos columnas iguales, texto completo */
+/* Botones: dos columnas iguales */
+/* Botones: "Ver" a la izquierda, carrito a la derecha */
+.producto-card-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.producto-card-actions app-button {
+    display: inline-flex;
+    width: auto;
+}
 /* ========================================
    SERVICE DETAIL
    ======================================== */
@@ -365,11 +484,11 @@
 }
 
 .servicio-detail-rating {
-    @apply mt-4 flex items-center gap-3 text-sm text-text-muted;
+    @apply mt-4 flex items-center gap-3 text-base text-text-muted;
 }
 
 .servicio-detail-rating i {
-    @apply text-teal-400;
+    @apply text-brand-gold;
 }
 
 .servicio-detail-price,
@@ -382,11 +501,11 @@
 }
 
 .servicio-detail-description {
-    @apply mt-5 border-y border-ui-border-soft py-5 text-sm leading-relaxed text-text-secondary;
+    @apply mt-5 border-y border-ui-border-soft py-5 text-base leading-relaxed text-text-secondary;
 }
 
 .servicio-detail-specs {
-    @apply mt-6 flex flex-col gap-4 text-sm;
+    @apply mt-6 flex flex-col gap-4 text-base;
 }
 
 .servicio-detail-specs div {
@@ -402,11 +521,11 @@
 }
 
 .servicio-detail-benefit {
-    @apply mt-8 flex items-start gap-3 border-t border-ui-border-soft pt-6 text-sm text-text-secondary;
+    @apply mt-8 flex items-start gap-3 border-t border-ui-border-soft pt-6 text-base text-text-secondary;
 }
 
 .servicio-detail-benefit i {
-    @apply mt-0.5 text-lg text-teal-400;
+    @apply mt-0.5 text-lg text-brand-gold;
 }
 
 .servicio-detail-benefit span {
@@ -418,7 +537,7 @@
 }
 
 .servicio-detail-benefit small {
-    @apply text-text-secondary;
+    @apply text-sm text-text-secondary;
 }
 
 .servicio-detail-buy {
@@ -426,7 +545,7 @@
 }
 
 .servicio-detail-buy-label {
-    @apply block text-xs font-semibold uppercase tracking-[0.18em] text-text-muted;
+    @apply block text-sm font-semibold uppercase tracking-[0.18em] text-text-muted;
 }
 
 .servicio-detail-buy-price {
@@ -434,19 +553,11 @@
 }
 
 .servicio-detail-buy-caption {
-    @apply mt-1 border-b border-ui-border-soft pb-5 text-xs text-text-muted;
-}
-
-.servicio-detail-book-button {
-    @apply mt-5 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-teal-400 bg-teal-500 px-4 py-3 font-bold uppercase tracking-wide text-white transition-colors;
-}
-
-.servicio-detail-book-button:hover {
-    @apply bg-teal-400 text-brand-black;
+    @apply mt-1 border-b border-ui-border-soft pb-5 text-sm text-text-muted;
 }
 
 .servicio-detail-subtotal {
-    @apply mt-5 flex items-center justify-between border-t border-ui-border-soft pt-4 text-sm text-text-secondary;
+    @apply mt-5 flex items-center justify-between border-t border-ui-border-soft pt-4 text-base text-text-secondary;
 }
 
 .servicio-detail-subtotal strong {
@@ -471,89 +582,6 @@
         margin-inline: auto;
         width: 100%;
     }
-}
-
-.producto-card-shell {
-    @apply block h-full w-full overflow-hidden rounded-3xl border border-ui-border bg-ui-card shadow-lg shadow-black/20 transition-transform duration-300 hover:-translate-y-1 hover:shadow-2xl;
-}
-
-.producto-card-container {
-    @apply flex h-full w-full justify-center p-0 md:p-2;
-}
-
-.producto-card-shell.p-card {
-    @apply flex h-full w-full flex-col;
-}
-
-.producto-card-shell .p-card-header {
-    @apply shrink-0;
-}
-
-.producto-card-shell .p-card-body {
-    @apply flex flex-1 flex-col;
-}
-
-.producto-card-shell .p-card-title {
-    @apply min-h-7;
-}
-
-.producto-card-shell .p-card-content {
-    @apply flex flex-1 flex-col;
-}
-
-.producto-card-shell .p-card-footer {
-    @apply mt-auto;
-}
-
-.producto-card-media {
-    @apply relative;
-}
-
-.producto-card-image {
-    @apply h-56 w-full object-cover transition-all duration-300;
-}
-
-.producto-card-image:hover {
-    transform: scale(1.05);
-}
-
-.producto-card-body {
-    display: flex;
-    flex-direction: column;
-    height: 12rem;
-    padding: 1rem 1.5rem 1.5rem;
-}
-
-.producto-card-title {
-    @apply line-clamp-1 text-lg font-semibold text-brand-white;
-}
-
-.producto-card-description {
-    @apply line-clamp-2 text-sm text-text-muted;
-}
-
-.producto-card-meta {
-    @apply mt-auto flex items-center justify-between pt-3 text-yellow-300;
-}
-
-.producto-card-price {
-    @apply text-xl font-bold;
-}
-
-.producto-card-stock {
-    @apply text-sm text-text-secondary;
-}
-
-.producto-card-actions {
-    @apply mt-4 flex items-center justify-between gap-2;
-}
-
-.producto-card-actions .boton-ver {
-    @apply flex-1;
-}
-
-.producto-card-actions .boton-comprar {
-    @apply size-12 shrink-0 px-0;
 }
 
 
@@ -615,7 +643,8 @@
 
     .producto-detail-main-image img {
         height: auto;
-        max-height: 46vh;
+        max-height: 55vh;
+        width: 100%;
         object-fit: contain;
     }
 
@@ -669,11 +698,6 @@
         font-size: 1.4rem;
     }
 
-    .producto-detail-main-image img {
-        max-height: 55vh;
-        width: 100%;
-    }
-
     .producto-detail-back {
         margin: 1rem 0 0.8rem 0.5rem;
     }
@@ -681,11 +705,7 @@
 
 @media (max-width: 640px) {
     .producto-detail-buy {
-        bottom: 12px;
-        left: 50%;
-        width: 100%;
         max-width: 520px;
-        z-index: 80;
         border-radius: 14px;
         padding: 0.85rem 1rem;
     }

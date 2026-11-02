@@ -32,12 +32,13 @@ export class ServicioService {
     }
 
     crearServicio(data: ServicioRequest, archivos?: File[]) {
-        return this.http.post<ApiResponse<Servicio>>(this.apiUrl,buildFormData('servicio', data, archivos));
+        return this.http.post<ApiResponse<Servicio>>(this.apiUrl, buildFormData('servicio', data, archivos));
     }
 
     actualizarServicio(id: number, data: ServicioRequest, archivos?: File[]) {
-        return this.http.put<ApiResponse<Servicio>>(`${this.apiUrl}/${id}`,buildFormData('servicio', data, archivos));
+        return this.http.put<ApiResponse<Servicio>>(`${this.apiUrl}/${id}`, buildFormData('servicio', data, archivos));
     }
+
     cambiarEstado(id: number, estado: boolean) {
         return this.http.patch<ApiResponse<Servicio>>(`${this.apiUrl}/${id}/estado`, {}, { params: buildHttpParamsComponent({ estado }) });
     }

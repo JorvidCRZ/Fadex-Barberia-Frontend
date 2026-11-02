@@ -3,7 +3,7 @@
     <ng-template #header>
       <div class="producto-card-media">
         <img [alt]="producto.nombre" class="producto-card-image" [src]="getImagenProducto(producto) | safeImageUrl" (error)="imagenFallback.src = '/assets/producto.webp'" #imagenFallback />
-        <span class="producto-card-category-badge">
+        <span class="absolute top-2 left-2 bg-black *:bg-opacity-50 text-brand-white text-xs font-semibold p-0 m-0 rounded-xl">
           <app-status-badge type="text" [value]="producto.nombreCategoria" customClass="badge-text estado-producto"/>
         </span>
       </div>
@@ -21,7 +21,7 @@
     <ng-template #footer>
       <div class="producto-card-actions">
         <app-button variant="ver" icon="pi-eye" label="Ver" (clicked)="onVer()" />
-        <app-button variant="comprar" icon="pi-shopping-cart" [disabled]="!producto.stock" [tooltip]="producto.stock ? 'Agregar al carrito' : 'Producto agotado'" (clicked)="agregarAlCarrito()" /></div>
+        <app-button variant="comprar" icon="pi-cart-plus" [disabled]="!producto.stock" [tooltip]="producto.stock ? 'Agregar al carrito' : 'Producto agotado'" (clicked)="agregarAlCarrito()" /></div>
     </ng-template>
   </p-card>
 </div>

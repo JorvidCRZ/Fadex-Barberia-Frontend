@@ -7,7 +7,6 @@ import { CategoriaPublica } from '../../models/catalogos/navigation.model';
 @Injectable({
     providedIn: 'root'
 })
-
 export class NavigationService {
     private readonly router = inject(Router);
 

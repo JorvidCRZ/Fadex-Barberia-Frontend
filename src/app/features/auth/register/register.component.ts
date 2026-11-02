@@ -6,13 +6,13 @@ import { PasswordModule } from 'primeng/password';
 import { InputTextModule } from "primeng/inputtext";
 import { Router, RouterLink } from '@angular/router';
 import { environment } from '../../../../environments/environment';
+import { AuthService } from '../../../core/services/auth/auth.service';
 import { TokenService } from '../../../core/services/auth/token.service';
 import { Component, inject, OnInit, AfterViewInit } from '@angular/core';
-import { NotificationService } from '../../../core/services/common/notification.service';
-import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from "@angular/forms";
-import { AuthService } from '../../../core/services/auth/auth.service';
 import { LogoComponent } from '../../../shared/components/logo/logo.component';
+import { NotificationService } from '../../../core/services/common/notification.service';
 import { campoInvalido, marcarFormulario } from '../../../shared/utils/form-utils.component';
+import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from "@angular/forms";
 
 export interface GoogleCredentialResponse {
   credential: string;
@@ -23,7 +23,7 @@ export interface GoogleCredentialResponse {
 declare var google: any;
 
 const soloLetrasValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
-  const valor: string = control.value ?? '';
+  const valor: string = control.value ?? '';                                                                                                                                                                                                                                                  
   return /^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s'-]+$/.test(valor.trim()) ? null : { soloLetras: true };
 };
 
