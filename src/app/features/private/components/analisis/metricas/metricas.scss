@@ -1,81 +1,209 @@
-$card-bg: #111111;
-$card-border: rgba(201, 168, 76, 0.16);
 $gold: #d4af37;
+$gold-soft: rgba($gold, 0.12);
+$card-bg: #111111;
+$red: #ef4444;
 
-.metricas-card {
-  background: $card-bg;
-  border: 1px solid $card-border;
-  border-radius: 12px;
-}
+$borde-card: rgba(#fff, 0.08);
+$borde-gold: rgba($gold, 0.45);
 
-.metricas-select {
-  appearance: none;
-  -webkit-appearance: none;
-  min-width: 172px;
-  padding: 0.55rem 2.2rem 0.55rem 0.75rem;
-  font-size: 0.8rem;
-  color: #cfcfcf;
-  background: #111111;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  outline: none;
-  cursor: pointer;
-  transition: border-color 0.2s;
+:host {
+  display: block;
 
-  &:hover,
-  &:focus {
-    border-color: rgba($gold, 0.5);
+  // ───────────── CONTENEDOR RAÍZ ─────────────
+  > div {
+    background: var(--color-ui-surface, #0a0a0a);
+    color: var(--color-text-primary, #ffffff);
   }
 
-  option {
-    background: #111111;
-    color: #fff;
-  }
-}
+  // ───────────── HEADER (título + filtros) ─────────────
+  > div > div:first-child {
+    background: var(--color-ui-card, #{$card-bg});
+    border: 1px solid $borde-card;
+    border-radius: 1rem;
 
-.metricas-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.78rem;
-
-  thead tr {
-    border-top: 1px solid $card-border;
-    border-bottom: 1px solid $card-border;
-  }
-
-  th {
-    padding: 0.8rem 0.5rem 0.8rem 1.15rem;
-    text-align: left;
-    font-weight: 400;
-    color: $gold;
-    white-space: nowrap;
-  }
-
-  td {
-    padding: 0.75rem 0.5rem 0.75rem 1.15rem;
-    color: #fff;
-    white-space: nowrap;
-  }
-
-  tbody tr {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    transition: background 0.15s;
-
-    &:last-child {
-      border-bottom: none;
+    h1 {
+      color: $gold;
+      font-weight: 700;
     }
+
+    p {
+      color: var(--color-text-secondary, #9a9a9a);
+    }
+  }
+
+  // ───────────── ERROR ─────────────
+  > div > div[class*='red-950'] {
+    background: rgba($red, 0.1);
+    border: 1px solid rgba($red, 0.3);
+    color: $red;
+    border-radius: 0.75rem;
+  }
+
+  // ───────────── CARGANDO ─────────────
+  > div > div[class*='py-12'] {
+    color: var(--color-text-muted, #8a8a8a);
+
+    span {
+      border-top-color: $gold;
+    }
+  }
+
+  // ───────────── KPI CARDS ─────────────
+  > div > .grid > div {
+    background: var(--color-ui-card, #{$card-bg});
+    border: 1px solid $borde-card;
+    border-radius: 1rem;
+    transition: transform 0.2s ease, border-color 0.2s ease;
 
     &:hover {
-      background: rgba(255, 255, 255, 0.03);
+      transform: translateY(-2px);
+      border-color: $borde-gold;
+    }
+
+    // icono (arriba a la derecha)
+    > i {
+      color: $gold;
+      opacity: 0.6;
+    }
+
+    // label
+    > p:nth-of-type(1) {
+      color: var(--color-text-secondary, #9a9a9a);
+    }
+
+    // valor
+    > p:nth-of-type(2) {
+      color: #fff;
+      font-weight: 700;
+    }
+
+    // subtítulo
+    > p:nth-of-type(3) {
+      color: var(--color-text-muted, #8a8a8a);
+    }
+
+    // etiqueta KPI
+    > .kpi-tag {
+      display: inline-flex;
+      align-items: center;
+      margin-top: 0.4rem;
+      padding: 0.15rem 0.5rem;
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      color: $gold;
+      background: rgba($gold, 0.06);
+      border: 1px solid rgba($gold, 0.35);
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+        > .kpi-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 0.6rem;
+      font-size: 0.68rem;
+      color: var(--color-text-muted, #8a8a8a);
+
+      .cumple {
+        color: #4caf50;
+        font-weight: 600;
+      }
+    }
+
+    > .kpi-bar {
+      height: 4px;
+      margin-top: 0.35rem;
+      background: rgba(#fff, 0.08);
+      border-radius: 999px;
+      overflow: hidden;
+
+      &__fill {
+        height: 100%;
+        background: $gold;
+        border-radius: 999px;
+        transition: width 0.4s ease;
+      }
     }
   }
 
-  th:nth-child(1),
-  td:nth-child(1) { width: 26%; }
-  th:nth-child(2),
-  td:nth-child(2) { width: 16%; }
-  th:nth-child(3),
-  td:nth-child(3) { width: 19%; }
-  th:nth-child(4),
-  td:nth-child(4) { width: 19%; }
+
+  // ───────────── TABS (PrimeNG) ─────────────
+  p-tabs {
+    --p-tabs-tablist-background: transparent;
+    --p-tabs-tabpanel-background: transparent;
+    --p-tabs-tab-background: transparent;
+    --p-tabs-tab-hover-background: transparent;
+    --p-tabs-tab-active-background: transparent;
+    --p-tabs-tab-color: var(--color-text-secondary, #9a9a9a);
+    --p-tabs-tab-hover-color: #fff;
+    --p-tabs-tab-active-color: #{$gold};
+    --p-tabs-active-bar-background: #{$gold};
+
+    background: transparent;
+
+    ::ng-deep {
+      .p-tablist,
+      .p-tablist-content,
+      .p-tablist-tab-list {
+        background: transparent;
+      }
+
+      .p-tablist-tab-list {
+        border: none;
+        border-bottom: 1px solid rgba(#fff, 0.45);
+      }
+
+      .p-tab {
+        background: transparent;
+        border: none;
+        color: var(--color-text-secondary, #9a9a9a);
+        font-weight: 500;
+        transition: color 0.2s ease;
+
+        &:hover {
+          color: #fff;
+        }
+
+        &.p-tab-active {
+          color: $gold;
+        }
+      }
+
+      .p-tablist-active-bar {
+        background: $gold;
+        height: 2px;
+      }
+
+      .p-tabpanels,
+      .p-tabpanel {
+        background: transparent;
+        padding: 0;
+      }
+    }
+  }
+
+  // ───────────── TARJETAS DE GRÁFICAS ─────────────
+  p-tabpanel .grid > div {
+    background: var(--color-ui-card, #{$card-bg});
+    border: 1px solid $borde-card;
+    border-radius: 1rem;
+    padding: 1.25rem;
+
+    // título de la gráfica
+    > div:first-child {
+      color: #fff;
+      font-weight: 600;
+
+      // puntito dorado
+      span {
+        background: $gold;
+      }
+    }
+
+    // contenedor del canvas
+    .relative {
+      height: 220px;
+    }
+  }
 }
