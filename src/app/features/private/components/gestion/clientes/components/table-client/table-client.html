@@ -1,6 +1,6 @@
 <div class="p-4 md:p-6 lg:p-8">
 	<div class="relative w-full overflow-x-auto">
-		<p-table [value]="clients" [lazy]="true" (onLazyLoad)="onLazyLoad($event)" [paginator]="true"
+		<p-table [value]="clients" [lazy]="true" (onLazyLoad)="onLazyLoad($event)" [paginator]="true" [loading]="cargando"
 			[rows]="rows" [first]="currentPage * rows" [totalRecords]="totalElements" dataKey="clienteId"
 			[showCurrentPageReport]="true" currentPageReportTemplate="Viendo {first} a {last} de {totalRecords} entradas"
 			[tableStyle]="{ 'min-width': '960px' }" class="rounded-xl">

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -26,6 +26,7 @@ import { campoInvalido, marcarFormulario } from '@/app/shared/utils/form-utils.c
 })
 export class Usuario implements OnInit {
   private readonly fb = inject(FormBuilder);
+  private readonly cd = inject(ChangeDetectorRef);
   private readonly usuarioService = inject(UsuarioService);
   private readonly notificationService = inject(NotificationService);
   private readonly pageSize = 10;
@@ -136,6 +137,7 @@ export class Usuario implements OnInit {
       error: () => {
         this.cargando = false;
         this.errorCarga = 'No se pudo cargar la tabla de usuarios.';
+        this.cd.detectChanges();
       },
     });
   }
@@ -311,6 +313,7 @@ export class Usuario implements OnInit {
     this.totalPages = pageData.totalPages ?? 0;
     this.currentPage = pageData.number ?? pageData.pageNumber ?? page;
     this.cargando = false;
+    this.cd.detectChanges();
   }
 
   private mapearUsuarioTabla(usuario: UsuarioTablaResponse): any {

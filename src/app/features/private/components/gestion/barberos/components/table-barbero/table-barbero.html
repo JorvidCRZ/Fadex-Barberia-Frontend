@@ -1,7 +1,7 @@
 <div class="p-4 md:p-6 lg:p-8 bg-neutral-primary-lighter rounded-base shadow-sm">
 
 	<div class="relative w-full overflow-x-auto">
-		<p-table [value]="barberos" [lazy]="true" (onLazyLoad)="onLazyLoad($event)" [paginator]="true"
+		<p-table [value]="barberos" [lazy]="true" (onLazyLoad)="onLazyLoad($event)" [paginator]="true" [loading]="cargando"
 			[rows]="pageSize" [first]="currentPage * pageSize" [totalRecords]="totalElements" dataKey="barberoId"
 			[showCurrentPageReport]="true" currentPageReportTemplate="Viendo {first} a {last} de {totalRecords} entradas"
 			[tableStyle]="{ 'min-width': '900px' }" class="rounded-xl">

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { forkJoin } from 'rxjs';
 import { BarberoService, FiltroBarberoBusqueda, DireccionOrden, OrdenarBarberoPor } from '@/app/core/services/gestion/barbero.service';
 import { HeaderBarbero } from "./components/header-barbero/header-barbero.component";
@@ -26,8 +26,10 @@ export class Barberos implements OnInit {
   totalElements: number = 0;
   currentPage: number = 0;
   totalPages: number = 0;
+  cargando = false;
 
   private barberoService = inject(BarberoService);
+  private cd = inject(ChangeDetectorRef);
 
   readonly filtroFields: FilterField[] = [
     {
@@ -110,21 +112,35 @@ export class Barberos implements OnInit {
   }
 
   private aplicarPagina(res: any): void {
-    if (!res || !res.success) return;
+    if (!res || !res.success) {
+      this.cargando = false;
+      this.cd.detectChanges();
+      return;
+    }
     const p = res.data;
     this.barberos      = this.mapBarberos(p.content || []);
     this.totalElements = p.totalElements || 0;
     this.currentPage   = p.pageNumber || 0;
     this.totalPages    = p.totalPages || 0;
+    this.cargando = false;
+    this.cd.detectChanges();
   }
 
   loadPage(page: number = 0, size: number = this.pageSize, filtros: FiltroBarberoBusqueda = this.filtrosActuales): void {
+    this.cargando = true;
     const useFilters = Boolean(filtros.estado || filtros.ordenarPor || filtros.direccion);
     const request$ = useFilters
       ? this.barberoService.buscar(filtros, page, size)
       : this.barberoService.listar(page, size);
 
-    request$.subscribe((res: any) => this.aplicarPagina(res));
+    request$.subscribe({
+      next: (res: any) => this.aplicarPagina(res),
+      error: (error) => {
+        this.cargando = false;
+        console.error('Error al cargar barberos', error);
+        this.cd.detectChanges();
+      },
+    });
   }
 
   onSearch(query: string): void {
@@ -161,10 +177,18 @@ export class Barberos implements OnInit {
   }
 
   onShowInhabilitados(): void {
+    this.cargando = true;
     this.searchTerm = '';
     this.inhabilitadosMode = true;
     this.filtrosActuales = {};
-    this.barberoService.listarInhabilitados(0, this.pageSize).subscribe((res: any) => this.aplicarPagina(res));
+    this.barberoService.listarInhabilitados(0, this.pageSize).subscribe({
+      next: (res: any) => this.aplicarPagina(res),
+      error: (error) => {
+        this.cargando = false;
+        console.error('Error al cargar barberos inhabilitados', error);
+        this.cd.detectChanges();
+      },
+    });
   }
 
   onDisableBarbero(id: number): void {
@@ -182,6 +206,7 @@ export class Barberos implements OnInit {
   }
 
   private buscarBarberosPorNombre(termino: string): void {
+    this.cargando = true;
     forkJoin({
       activos: this.barberoService.buscarPorNombre(termino, 0, this.pageSize),
       inhabilitados: this.barberoService.listarInhabilitados(0, this.pageSize),
@@ -212,7 +237,11 @@ export class Barberos implements OnInit {
           },
         });
       },
-      error: (error) => console.error('Error al buscar barberos', error),
+      error: (error) => {
+        this.cargando = false;
+        console.error('Error al buscar barberos', error);
+        this.cd.detectChanges();
+      },
     });
   }
 
@@ -231,7 +260,15 @@ export class Barberos implements OnInit {
 
   onPageChange(page: number): void {
     if (this.inhabilitadosMode) {
-      this.barberoService.listarInhabilitados(page, this.pageSize).subscribe((res: any) => this.aplicarPagina(res));
+      this.cargando = true;
+      this.barberoService.listarInhabilitados(page, this.pageSize).subscribe({
+        next: (res: any) => this.aplicarPagina(res),
+        error: (error) => {
+          this.cargando = false;
+          console.error('Error al cargar barberos inhabilitados', error);
+          this.cd.detectChanges();
+        },
+      });
       return;
     }
 

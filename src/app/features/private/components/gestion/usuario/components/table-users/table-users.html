@@ -4,7 +4,7 @@
 
     <p-table [value]="usuarios" [lazy]="true" (onLazyLoad)="onLazyLoad($event)"
       [paginator]="true" [rows]="pageSize" [totalRecords]="totalElements"
-      dataKey="usuarioId" [showCurrentPageReport]="true"
+      [loading]="cargando" dataKey="usuarioId" [showCurrentPageReport]="true"
       currentPageReportTemplate="Viendo {first} a {last} de {totalRecords} usuarios"
       [tableStyle]="{ 'min-width': '900px' }" class="rounded-xl">
 

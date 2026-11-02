@@ -29,6 +29,6 @@
   </div>
 
   <div class="section-content">
-    <app-table-barbero [barberos]="barberos" [totalElements]="totalElements" [currentPage]="currentPage" [totalPages]="totalPages" [pageSize]="pageSize" [inhabilitadosMode]="inhabilitadosMode" [isSearchMode]="searchTerm.trim().length > 0" (pageChange)="onPageChange($event)" (delete)="onDisableBarbero($event)" (reactivate)="onReactivateBarbero($event)"/>
+    <app-table-barbero [barberos]="barberos" [totalElements]="totalElements" [currentPage]="currentPage" [totalPages]="totalPages" [pageSize]="pageSize" [cargando]="cargando" [inhabilitadosMode]="inhabilitadosMode" [isSearchMode]="searchTerm.trim().length > 0" (pageChange)="onPageChange($event)" (delete)="onDisableBarbero($event)" (reactivate)="onReactivateBarbero($event)"/>
   </div>
 </section>
