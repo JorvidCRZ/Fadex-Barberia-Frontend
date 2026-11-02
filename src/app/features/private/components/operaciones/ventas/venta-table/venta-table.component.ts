@@ -39,16 +39,24 @@ export class VentaTableComponent {
 
   @Output() lazyLoad = new EventEmitter<TableLazyLoadEvent>();
   @Output() eliminar = new EventEmitter<Venta>();
+  @Output() descargarComprobante = new EventEmitter<Venta>();
 
   mostrarConfirmacion = false;
   mensajeConfirmacion = '';
   ventaAEliminar: Venta | null = null;
   mostrarDetalle = false;
   ventaDetalle: Venta | null = null;
+  mostrarPago = false;
+  ventaPago: Venta | null = null;
 
   verDetalle(venta: Venta): void {
     this.ventaDetalle = venta;
     this.mostrarDetalle = true;
+  }
+
+  verPago(venta: Venta): void {
+    this.ventaPago = venta;
+    this.mostrarPago = true;
   }
 
   subtotalDe(detalle: VentaDetalle): number {
