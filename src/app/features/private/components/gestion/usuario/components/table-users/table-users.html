@@ -2,7 +2,7 @@
 
   <div class="relative w-full overflow-x-auto rounded-xl border border-ui-border bg-brand-black shadow-lg shadow-black/20">
 
-    <p-table [value]="usuarios" [lazy]="true" (onLazyLoad)="onLazyLoad($event)"
+    <p-table [value]="usuarios" [lazy]="true" [lazyLoadOnInit]="false" (onLazyLoad)="onLazyLoad($event)"
       [paginator]="true" [rows]="pageSize" [totalRecords]="totalElements"
       [loading]="cargando" dataKey="usuarioId" [showCurrentPageReport]="true"
       currentPageReportTemplate="Viendo {first} a {last} de {totalRecords} usuarios"

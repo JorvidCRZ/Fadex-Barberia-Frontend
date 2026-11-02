@@ -1,4 +1,3 @@
-
 import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -17,6 +16,7 @@ import { FiltrosComponent } from '@/app/shared/components/filtros/filtros.compon
 
 import { NotificationService } from '@/app/core/services/common/notification.service';
 import { VentaService } from '@/app/core/services/venta/venta.service';
+import { TokenService } from '@/app/core/services/auth/token.service';
 
 import { Venta } from '@/app/core/models/ventas/venta.model';
 import { VentaDetalle } from '@/app/core/models/ventas/detalle.model';
@@ -46,6 +46,7 @@ export class VentasComponent implements OnInit {
   private notify = inject(NotificationService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private tokenService = inject(TokenService);
   private cdr = inject(ChangeDetectorRef);
 
   ventas: Venta[] = [];
@@ -64,21 +65,33 @@ export class VentasComponent implements OnInit {
   filtrosFields = FILTROS_VENTA;
 
   esBarbero = false;
+  userId: number | null = null;
 
   ngOnInit(): void {
     this.esBarbero = this.router.url.includes('/barbero');
+
+    const id = Number(this.tokenService.getUserId());
+    this.userId = isNaN(id) ? null : id;
+
     this.cargarVentas(0, this.rows);
   }
 
-     cargarVentas(page: number, size: number): void {
+  cargarVentas(page: number, size: number): void {
     this.cargado = false;
 
     this.filtro.page = page;
     this.filtro.size = size;
 
-    this.ventaService.obtenerVentas(this.filtro).subscribe({
+    const peticion$ = (this.esBarbero && this.userId)
+      ? this.ventaService.obtenerMisVentas(this.userId)
+      : this.ventaService.obtenerVentas(this.filtro);
+
+    peticion$.subscribe({
       next: (resp) => {
-        this.ventas = resp.data.map((venta: Venta) => {
+        const datos = resp.data as Venta[] | { content?: Venta[]; totalElements?: number };
+        const ventas = Array.isArray(datos) ? datos : (datos.content ?? []);
+
+        this.ventas = ventas.map((venta: Venta) => {
 
           const total = (venta.detalles ?? []).reduce(
             (acc: number, det: VentaDetalle) => acc + (det.subtotal ?? 0),
@@ -91,20 +104,24 @@ export class VentasComponent implements OnInit {
           };
 
         });
-
-        this.totalRecords = this.ventas.length;
+        this.totalRecords = Array.isArray(datos)
+          ? this.ventas.length
+          : (datos.totalElements ?? this.ventas.length);
         this.calcularResumen();
         this.cargado = true;
         this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error cargando ventas:', err);
+        this.notify.showError('No se pudieron cargar las ventas.');
+        this.ventas = [];
+        this.totalRecords = 0;
         this.cargado = true;
         this.cdr.detectChanges();
       }
     });
   }
-  
+
   crearVenta(data: any): void {
     this.ventaService.crearVenta(data).subscribe({
       next: (resp) => {
@@ -112,40 +129,22 @@ export class VentasComponent implements OnInit {
         this.cargarVentas(0, this.rows);
         this.cerrarFormulario();
       },
-      error: () => {
-        console.warn('Backend no conectado, simulando creación en UI...');
-        const idGenerado = Math.floor(Math.random() * 10000);
-        const ventaSimulada: Venta = {
-          ...data,
-          ventaId: idGenerado,
-          numeroCorrelativo: `VEN-SIM-${idGenerado}`,
-          fecha: new Date(),
-          clienteNombre: data.clienteNombre ?? '',
-          barberoNombre: 'Sin asignar',
-          total: (data.detalles ?? []).reduce(
-            (acc: number, det: any) => acc + (det.precioUnitario * det.cantidad), 0
-          )
-        } as unknown as Venta;
-
-        this.ventas = [ventaSimulada, ...this.ventas];
-        this.calcularResumen();
-        this.notify.showSuccess('Venta registrada (Modo Simulación)');
-        this.cerrarFormulario();
+      error: (err) => {
+        console.error('Error creando venta:', err);
+        this.notify.showError('No se pudo registrar la venta.');
       }
     });
   }
 
   eliminarVenta(venta: Venta): void {
-    if (this.esBarbero) return; // el barbero no elimina, solo el administrador
-
     this.ventaService.eliminarVenta(venta.ventaId).subscribe({
       next: (resp) => {
         this.notify.showSuccess(resp.message);
         this.cargarVentas(0, this.rows);
       },
-      error: () => {
-        this.ventas = this.ventas.filter(v => v.ventaId !== venta.ventaId);
-        this.calcularResumen();
+      error: (err) => {
+        console.error('Error eliminando venta:', err);
+        this.notify.showError('No se pudo eliminar la venta.');
       }
     });
   }

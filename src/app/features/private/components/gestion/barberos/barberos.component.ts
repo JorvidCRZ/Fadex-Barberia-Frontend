@@ -26,7 +26,7 @@ export class Barberos implements OnInit {
   totalElements: number = 0;
   currentPage: number = 0;
   totalPages: number = 0;
-  cargando = false;
+  cargando = true;
 
   private barberoService = inject(BarberoService);
   private cd = inject(ChangeDetectorRef);

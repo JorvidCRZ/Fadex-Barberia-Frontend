@@ -35,7 +35,7 @@ export class Usuario implements OnInit {
   totalElements = 0;
   totalPages = 0;
   currentPage = 0;
-  cargando = false;
+  cargando = true;
   errorCarga = '';
   searchTerm = '';
   isSearchMode = false;

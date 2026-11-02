@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -44,6 +44,7 @@ export class PosComponent implements OnInit {
   private clienteService = inject(ClienteService);
   private ventaService = inject(VentaService);
   private tokenService = inject(TokenService);
+  private cdr = inject(ChangeDetectorRef);
 
   // Datos del backend
   productos: ProductoPos[] = [];
@@ -84,22 +85,39 @@ export class PosComponent implements OnInit {
   private cargarCatalogos(): void {
     this.productoService.obtenerProductosActivos().subscribe({
       next: (res: any) => {
-        const lista: any[] = res?.data?.content || res?.data || [];
+        const lista: any[] = this.extraerLista(res);
         this.productos = lista.map(p => this.mapearProducto(p));
+        this.cdr.detectChanges();
       },
-      error: () => this.notify.showError('Error al cargar productos'),
+      error: (err) => {
+        console.error('Error cargando productos para POS:', err);
+        this.notify.showError('No se pudieron cargar los productos.');
+        this.cdr.detectChanges();
+      },
     });
 
     this.clienteService.listar(0, 1000).subscribe({
       next: (res: any) => {
-        const lista: any[] = res?.data?.content || res?.data || [];
+        const lista: any[] = this.extraerLista(res);
         this.clientes = lista.map(c => ({
           label: this.nombreCliente(c),
-          value: c.id,
+          value: c.clienteId ?? c.id,
         }));
+        this.cdr.detectChanges();
       },
-      error: () => this.notify.showError('Error al cargar clientes'),
+      error: (err) => {
+        console.error('Error cargando clientes para POS:', err);
+        this.notify.showError('No se pudieron cargar los clientes.');
+        this.cdr.detectChanges();
+      },
     });
+  }
+
+  private extraerLista(res: any): any[] {
+    const datos = res?.data;
+    if (Array.isArray(datos)) return datos;
+    if (Array.isArray(datos?.content)) return datos.content;
+    return [];
   }
 
   // Ajusta los nombres de campo según tu modelo Producto / Cliente
@@ -115,9 +133,11 @@ export class PosComponent implements OnInit {
   }
 
   private nombreCliente(c: any): string {
-    return c.nombreCompleto
-      ?? [c.nombre ?? c.nombres, c.apellido ?? c.apellidos].filter(Boolean).join(' ')
-      ?? `Cliente ${c.id}`;
+    const nombrePersona = c.persona
+      ? [c.persona.nombre, c.persona.apellido].filter(Boolean).join(' ')
+      : [c.nombre ?? c.nombres, c.apellido ?? c.apellidos].filter(Boolean).join(' ');
+
+    return c.nombreCompleto || nombrePersona || `Cliente ${c.clienteId ?? c.id}`;
   }
 
   private cargarReservaSiExiste(): void {
