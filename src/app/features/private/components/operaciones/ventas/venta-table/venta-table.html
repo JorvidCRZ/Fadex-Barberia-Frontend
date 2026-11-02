@@ -62,6 +62,7 @@
       <td>
         <div class="flex items-center justify-center gap-2">
           <app-button variant="ver-tabla" icon="eye" tooltip="Ver detalle" (clicked)="verDetalle(venta)" />
+          <app-button variant="editar-tabla" icon="wallet" tooltip="Ver información de pago" (clicked)="verPago(venta)" />
           @if (esAdmin) {
             <app-button variant="eliminar-tabla" icon="trash" tooltip="Eliminar" (clicked)="pedirConfirmacion(venta)" />
           }
@@ -168,6 +169,10 @@
             <p class="label-detalle mb-1">Método de pago</p>
             <p class="m-0 font-medium">{{ ventaDetalle.metodoPago || '-' }}</p>
           </div>
+          <div class="card-detalle">
+            <p class="label-detalle mb-1">Barbero</p>
+            <p class="m-0 font-medium">{{ ventaDetalle.barberoId ? (ventaDetalle.barberoNombre || 'Barbero sin nombre') : 'Barbero no registrado' }}</p>
+          </div>
         </div>
 
         <div>
@@ -212,6 +217,79 @@
 
   <ng-template pTemplate="footer">
     <app-button variant="primary" size="sm" label="Cerrar" (clicked)="mostrarDetalle = false" />
+  </ng-template>
+</p-dialog>
+
+<!-- MODAL PAGO -->
+<p-dialog [(visible)]="mostrarPago" [modal]="true" [draggable]="false" [resizable]="false"
+  styleClass="w-11/12 md:w-4/12 shadow-dialog" header="Información de pago" [baseZIndex]="10000">
+
+  <ng-template pTemplate="content">
+    @if (ventaPago) {
+      <div class="space-y-4 p-4">
+        <div class="flex items-center justify-center rounded-xl border border-brand-gold/25 bg-brand-gold/10 p-5">
+          <i class="pi pi-wallet mr-3 text-3xl text-brand-gold"></i>
+          <div>
+            <p class="label-detalle mb-1">Pago de venta</p>
+            <p class="m-0 text-xl font-bold uppercase text-brand-gold">
+              {{ ventaPago.numeroCorrelativo || ('#' + ventaPago.ventaId) }}
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div class="card-detalle">
+            <p class="label-detalle mb-1">Venta</p>
+            <p class="m-0 font-medium">{{ ventaPago.numeroCorrelativo || ('#' + ventaPago.ventaId) }}</p>
+          </div>
+          <div class="card-detalle">
+            <p class="label-detalle mb-1">Cliente</p>
+            <p class="m-0 font-medium">{{ ventaPago.clienteNombre || '-' }}</p>
+          </div>
+          <div class="card-detalle">
+            <p class="label-detalle mb-1">Barbero</p>
+            <p class="m-0 font-medium">{{ ventaPago.barberoId ? (ventaPago.barberoNombre || 'Barbero sin nombre') : 'Barbero no registrado' }}</p>
+          </div>
+        </div>
+
+        <div class="card-detalle flex items-center justify-between">
+          <span class="label-detalle">Tipo de pago</span>
+          <span class="font-semibold uppercase text-brand-gold">
+            {{ ventaPago.metodoPago || 'No especificado' }}
+          </span>
+        </div>
+
+        <div class="card-detalle flex items-center justify-between border-brand-gold/20">
+          <span class="label-detalle">Monto</span>
+          <span class="text-2xl font-bold text-brand-gold">{{ calcularTotal(ventaPago) | moneda }}</span>
+        </div>
+
+        <div class="flex gap-2">
+          @if (ventaPago.tipoComprobante === 'BOLETA') {
+            <button type="button"
+              class="flex w-full items-center justify-center gap-2 rounded-md border border-brand-gold/40 px-3 py-2 text-xs text-brand-gold transition hover:bg-brand-gold/10"
+              (click)="descargarComprobante.emit(ventaPago)">
+              <i class="pi pi-file"></i> Descargar boleta
+            </button>
+          } @else if (ventaPago.tipoComprobante === 'FACTURA') {
+            <button type="button"
+              class="flex w-full items-center justify-center gap-2 rounded-md border border-brand-gold/40 px-3 py-2 text-xs text-brand-gold transition hover:bg-brand-gold/10"
+              (click)="descargarComprobante.emit(ventaPago)">
+              <i class="pi pi-file-pdf"></i> Descargar factura
+            </button>
+          }
+        </div>
+
+        <div class="flex items-center justify-end gap-2 border-t border-ui-border-soft pt-4 text-sm text-green-400">
+          <i class="pi pi-check-circle"></i>
+          Pago registrado al crear la venta
+        </div>
+      </div>
+    }
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <app-button variant="primary" size="sm" label="Cerrar" (clicked)="mostrarPago = false" />
   </ng-template>
 </p-dialog>
 

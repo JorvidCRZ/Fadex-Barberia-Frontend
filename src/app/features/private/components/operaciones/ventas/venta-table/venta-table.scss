@@ -1,4 +1,4 @@
-/* TARJETAS DE ESTADÍSTICAS */
+﻿/* TARJETAS DE ESTADÍSTICAS */
 .ventas-stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -174,6 +174,64 @@
       display: flex;
       flex-direction: column;
       gap: 0.2rem;
+    }
+  }
+
+
+
+  @media (max-width: 560px) {
+    :host ::ng-deep .venta-modal {
+      .venta-modal__info-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .venta-modal__hero,
+      .venta-modal__payment-summary,
+      .venta-modal__total,
+      .venta-modal__item {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .venta-modal__item-price {
+        align-self: flex-end;
+      }
+    }
+
+    :host ::ng-deep .shadow-dialog {
+      color: #ffffff !important;
+
+    .p-dialog-header,
+    .p-dialog-content,
+    .p-dialog-footer,
+    .p-dialog-title,
+    .p-dialog-close-button,
+    p,
+    span,
+    strong,
+    div {
+      opacity: 1 !important;
+      filter: none !important;
+    }
+
+      .label-detalle,
+      .text-text-muted,
+      .text-ui-text-muted,
+      .capitalize,
+      .font-medium,
+      .font-mono,
+      p,
+      span {
+        color: #ffffff !important;
+      }
+
+      .text-brand-gold {
+        color: #f5d477 !important;
+      }
+
+      .text-green-400 {
+        color: #4ade80 !important;
+      }
     }
   }
 
