@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { UsuarioService } from '@/app/core/services/auth/usuario.service';
@@ -17,6 +17,7 @@ export class PerfilUsuario implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly usuarioService = inject(UsuarioService);
   private readonly notificationService = inject(NotificationService);
+  private readonly cd = inject(ChangeDetectorRef);
 
   usuarioNombre = 'Usuario';
   usuarioIniciales = 'US';
@@ -33,11 +34,11 @@ export class PerfilUsuario implements OnInit {
   errorCarga = '';
 
   ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.usuarioId = parseInt(id, 10) || 0;
+    this.route.paramMap.subscribe(params => {
+      const id = Number(params.get('id'));
+      this.usuarioId = Number.isInteger(id) && id > 0 ? id : 0;
       this.cargarUsuario(this.usuarioId);
-    }
+    });
   }
 
   private cargarUsuario(id: number): void {
@@ -67,11 +68,13 @@ export class PerfilUsuario implements OnInit {
         this.usuarioIniciales   = this.getInitials(this.usuarioNombre);
         this.usuarioDescripcion = `ID usuario: ${this.usuarioId}`;
         this.cargando = false;
+        this.cd.detectChanges();
       },
       error: () => {
         this.cargando = false;
         this.errorCarga = 'No se pudo cargar el perfil del usuario.';
         this.notificationService.showError(this.errorCarga);
+        this.cd.detectChanges();
       },
     });
   }

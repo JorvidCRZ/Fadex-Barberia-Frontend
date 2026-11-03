@@ -30,14 +30,14 @@
 					<td class="whitespace-nowrap">
 						<div class="flex items-center justify-center gap-2">
 							@if (isSearchMode) {
-								<p-button icon="pi pi-eye" class="boton-editar-tabla" pTooltip="Ver detalle" tooltipPosition="top" [routerLink]="[c.clienteId]" />
-								<p-button icon="pi pi-user-minus" class="boton-eliminar-tabla" pTooltip="Deshabilitar" tooltipPosition="top" (onClick)="onDelete(c.clienteId)" />
-								<p-button icon="pi pi-user-plus" class="boton-editar-tabla" pTooltip="Reactivar" tooltipPosition="top" (onClick)="onReactivate(c.clienteId)" />
+								<p-button icon="pi pi-eye" class="boton-editar-tabla" pTooltip="Ver detalle" tooltipPosition="top" [routerLink]="[c.clienteId ?? c.idCliente ?? c.id]" />
+								<p-button icon="pi pi-user-minus" class="boton-eliminar-tabla" pTooltip="Deshabilitar" tooltipPosition="top" (onClick)="onDelete(c.clienteId ?? c.idCliente ?? c.id)" />
+								<p-button icon="pi pi-user-plus" class="boton-editar-tabla" pTooltip="Reactivar" tooltipPosition="top" (onClick)="onReactivate(c.clienteId ?? c.idCliente ?? c.id)" />
 							} @else if (activeFilter === 'deshabilitados') {
-								<p-button icon="pi pi-user-plus" class="boton-editar-tabla" pTooltip="Reactivar" tooltipPosition="top" (onClick)="onReactivate(c.clienteId)" />
+								<p-button icon="pi pi-user-plus" class="boton-editar-tabla" pTooltip="Reactivar" tooltipPosition="top" (onClick)="onReactivate(c.clienteId ?? c.idCliente ?? c.id)" />
 							} @else {
-								<p-button icon="pi pi-eye" class="boton-editar-tabla" pTooltip="Ver detalle" tooltipPosition="top" [routerLink]="[c.clienteId]" />
-								<p-button icon="pi pi-user-minus" class="boton-eliminar-tabla" pTooltip="Deshabilitar" tooltipPosition="top" (onClick)="onDelete(c.clienteId)" />
+								<p-button icon="pi pi-eye" class="boton-editar-tabla" pTooltip="Ver detalle" tooltipPosition="top" [routerLink]="[c.clienteId ?? c.idCliente ?? c.id]" />
+								<p-button icon="pi pi-user-minus" class="boton-eliminar-tabla" pTooltip="Deshabilitar" tooltipPosition="top" (onClick)="onDelete(c.clienteId ?? c.idCliente ?? c.id)" />
 							}
 						</div>
 					</td>
