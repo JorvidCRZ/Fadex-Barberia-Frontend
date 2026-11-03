@@ -71,12 +71,12 @@
           <td class="text-center">
             <div class="table-actions">
               <p-button icon="pi pi-eye" class="boton-ver-tabla" pTooltip="Ver detalle" tooltipPosition="top"
-                [routerLink]="['/dashboard/admin/gestion/usuarios', u.usuarioId || u.id]">
+                [routerLink]="['/dashboard/admin/gestion/usuarios', u.usuarioId ?? u.idUsuario ?? u.id]">
               </p-button>
 
               @if (inhabilitadosMode) {
                 <p-button icon="pi pi-user-plus" class="boton-editar-tabla" pTooltip="Reactivar" tooltipPosition="top"
-                  (onClick)="onReactivate(u.usuarioId || u.id)">
+                  (onClick)="onReactivate(u.usuarioId ?? u.idUsuario ?? u.id)">
                 </p-button>
               }
             </div>

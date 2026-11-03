@@ -15,7 +15,8 @@
       <p-autoComplete [(ngModel)]="clienteSeleccionado" [ngModelOptions]="{ standalone: true }"
         [suggestions]="clientesSugeridos" (completeMethod)="buscarCliente($event)"
         (onSelect)="onSeleccionarCliente($event)" (onClear)="onLimpiarCliente()" optionLabel="nombreCompleto"
-        placeholder="Escribe para buscar un cliente..." [minLength]="1" [showClear]="true" [forceSelection]="true"
+        placeholder="Escribe para buscar un cliente..." [minLength]="1" [delay]="0" [completeOnFocus]="true"
+        [showClear]="true" [forceSelection]="true"
         styleClass="w-full" [class.border-danger]="clienteInvalido" [inputStyle]="{ width: '100%' }">
         <ng-template let-cliente pTemplate="item">
           <span class="block truncate">{{ cliente.nombreCompleto }}</span>
@@ -34,7 +35,8 @@
       <p-autoComplete [(ngModel)]="barberoSeleccionado" [ngModelOptions]="{ standalone: true }"
         [suggestions]="barberosSugeridos" (completeMethod)="buscarBarbero($event)"
         (onSelect)="onSeleccionarBarbero($event)" (onClear)="onLimpiarBarbero()" optionLabel="nombreCompleto"
-        placeholder="Escribe para buscar un barbero..." [minLength]="1" [showClear]="true" [forceSelection]="true"
+        placeholder="Escribe para buscar un barbero..." [minLength]="1" [delay]="0" [completeOnFocus]="true"
+        [showClear]="true" [forceSelection]="true"
         styleClass="w-full" [class.border-danger]="barberoInvalido" [inputStyle]="{ width: '100%' }">
         <ng-template let-barbero pTemplate="item">
           <span class="block truncate">{{ barbero.nombreCompleto }}</span>
@@ -53,7 +55,8 @@
       <p-autoComplete [(ngModel)]="servicioSeleccionado" [ngModelOptions]="{ standalone: true }"
         [suggestions]="serviciosSugeridos" (completeMethod)="buscarServicio($event)"
         (onSelect)="onSeleccionarServicio($event)" (onClear)="onLimpiarServicio()" optionLabel="nombre"
-        placeholder="Escribe para buscar un servicio..." [minLength]="1" [showClear]="true" [forceSelection]="true"
+        placeholder="Escribe para buscar un servicio..." [minLength]="1" [delay]="0" [completeOnFocus]="true"
+        [showClear]="true" [forceSelection]="true"
         styleClass="w-full" [class.border-danger]="servicioInvalido" [inputStyle]="{ width: '100%' }">
         <ng-template let-servicio pTemplate="item">
           <span class="block truncate">{{ servicio.nombre }}</span>

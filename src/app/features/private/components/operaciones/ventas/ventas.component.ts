@@ -93,13 +93,17 @@ export class VentasComponent implements OnInit {
 
         this.ventas = ventas.map((venta: Venta) => {
 
-          const total = (venta.detalles ?? []).reduce(
-            (acc: number, det: VentaDetalle) => acc + (det.subtotal ?? 0),
+          const totalDetalles = (venta.detalles ?? []).reduce(
+            (acc: number, det: VentaDetalle) =>
+              acc + Number(det.subtotal ?? (det.precioUnitario ?? 0) * (det.cantidad ?? 0)),
             0
           );
+          const total = Number(venta.total ?? totalDetalles);
 
           return {
             ...venta,
+            subtotal: Number(venta.subtotal ?? (total / 1.18)),
+            igv: Number(venta.igv ?? (total - total / 1.18)),
             total
           };
 

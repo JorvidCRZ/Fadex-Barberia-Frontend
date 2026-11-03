@@ -317,8 +317,9 @@ export class Usuario implements OnInit {
   }
 
   private mapearUsuarioTabla(usuario: UsuarioTablaResponse): any {
+    const usuarioId = Number(usuario.idUsuario ?? (usuario as any).usuarioId ?? (usuario as any).id);
     return {
-      usuarioId: usuario.idUsuario,
+      usuarioId,
       username: usuario.usuario,
       persona: {
         nombre: usuario.nombre,

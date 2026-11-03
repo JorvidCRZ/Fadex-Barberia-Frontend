@@ -79,6 +79,10 @@ export class PosComponent implements OnInit, OnDestroy {
       
       this.reservaIdActiva = reserva.id || reserva.reservaId || reserva.idReserva;
       this.nombreClienteReserva = reserva.clienteNombre || reserva.nombreCliente || 'Cliente';
+      const clienteId = Number(reserva.clienteId ?? reserva.idCliente);
+      if (Number.isInteger(clienteId) && clienteId > 0) {
+        this.ventaForm.get('clienteId')?.setValue(clienteId);
+      }
 
       this.ventaForm.get('clienteId')?.disable();
 
@@ -208,12 +212,15 @@ export class PosComponent implements OnInit, OnDestroy {
     const formValues = this.ventaForm.getRawValue();
 
     const request: any = {
-      clienteId: this.reservaIdActiva ? null : formValues.clienteId,
+      clienteId: formValues.clienteId,
       barberoId: idUsuarioActivo,
       fecha: new Date(),
       tipoComprobante: formValues.tipoComprobante,
       metodoPago: formValues.metodoPago,
       reservaId: this.reservaIdActiva,
+      subtotal: this.subtotalGeneral,
+      igv: this.igv,
+      total: this.totalVenta,
       detalles: detallesRequest
     };
 

@@ -142,73 +142,92 @@
   </ng-template>
 </p-table>
 
-<!-- MODAL DETALLE -->
+<!-- ============ MODAL DETALLE ============ -->
 <p-dialog [(visible)]="mostrarDetalle" [modal]="true" [draggable]="false" [resizable]="false"
-  styleClass="w-11/12 md:w-5/12 shadow-dialog" header="Detalle de Venta" [baseZIndex]="10000">
+  styleClass="modal-venta w-11/12 md:w-5/12" maskStyleClass="mask-venta"
+  header="Detalle de venta" [baseZIndex]="10000">
+
+  <ng-template pTemplate="header">
+    <div class="flex w-full items-center justify-between gap-4">
+      <span class="text-white font-bold uppercase tracking-widest text-sm ml-2">Detalle de venta</span>
+      <app-button variant="cierre" icon="pi-times" tooltip="Cerrar" (clicked)="mostrarDetalle = false" />
+    </div>
+  </ng-template>
 
   <ng-template pTemplate="content">
     @if (ventaDetalle) {
-      <div class="space-y-5 p-4">
+      <div class="mv">
 
-        <div class="flex items-center justify-between border-b border-ui-border-soft pb-4">
-          <div>
-            <p class="label-detalle mb-1">N° de venta</p>
-            <p class="m-0 text-lg font-bold text-brand-gold">
-              {{ ventaDetalle.numeroCorrelativo || ('#' + ventaDetalle.ventaId) }}
-            </p>
+        <div class="mv__hero">
+          <div class="mv__hero-main">
+            <div class="mv__hero-icon"><i class="pi pi-receipt"></i></div>
+            <div>
+              <p class="mv__label">N° de venta</p>
+              <p class="mv__num">{{ ventaDetalle.numeroCorrelativo || ('#' + ventaDetalle.ventaId) }}</p>
+            </div>
           </div>
-          <span class="capitalize">{{ (ventaDetalle.tipoComprobante || '') | lowercase }}</span>
+          <span class="mv__badge">{{ (ventaDetalle.tipoComprobante || '') | lowercase }}</span>
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
-          <div class="card-detalle">
-            <p class="label-detalle mb-1">Cliente</p>
-            <p class="m-0 font-medium">{{ ventaDetalle.clienteNombre }}</p>
+        <div class="mv__grid">
+          <div class="mv__field">
+            <i class="pi pi-user"></i>
+            <div>
+              <p class="mv__label">Cliente</p>
+              <p class="mv__value">{{ ventaDetalle.clienteNombre }}</p>
+            </div>
           </div>
-          <div class="card-detalle">
-            <p class="label-detalle mb-1">Método de pago</p>
-            <p class="m-0 font-medium">{{ ventaDetalle.metodoPago || '-' }}</p>
+          <div class="mv__field">
+            <i class="pi pi-wallet"></i>
+            <div>
+              <p class="mv__label">Método de pago</p>
+              <p class="mv__value mv__value--gold">{{ ventaDetalle.metodoPago || '-' }}</p>
+            </div>
           </div>
-          <div class="card-detalle">
-            <p class="label-detalle mb-1">Barbero</p>
-            <p class="m-0 font-medium">{{ ventaDetalle.barberoId ? (ventaDetalle.barberoNombre || 'Barbero sin nombre') : 'Barbero no registrado' }}</p>
+          <div class="mv__field">
+            <i class="pi pi-id-card"></i>
+            <div>
+              <p class="mv__label">Barbero</p>
+              <p class="mv__value">{{ ventaDetalle.barberoId ? (ventaDetalle.barberoNombre || 'Barbero sin nombre') : 'Barbero no registrado' }}</p>
+            </div>
+          </div>
+          <div class="mv__field">
+            <i class="pi pi-calendar"></i>
+            <div>
+              <p class="mv__label">Fecha</p>
+              <p class="mv__fecha">{{ ventaDetalle.fecha | date:'dd/MM/yyyy HH:mm' }}</p>
+            </div>
           </div>
         </div>
 
-        <div>
-          <p class="label-detalle mb-2">Detalle</p>
-          <div class="flex flex-col gap-2">
-            @for (detalle of ventaDetalle.detalles; track detalle.detalleVentaId) {
-              <div class="card-detalle !p-3 flex items-center justify-between">
-                <div class="flex items-center">
-                  <i class="pi mr-3 text-brand-gold" [class.pi-box]="!!detalle.productoNombre"
+        <p class="mv__section">Detalle</p>
+        <div class="mv__items">
+          @for (detalle of ventaDetalle.detalles; track detalle.detalleVentaId) {
+            <div class="mv__item">
+              <div class="mv__item-left">
+                <div class="mv__item-icon">
+                  <i class="pi" [class.pi-box]="!!detalle.productoNombre"
                     [class.pi-scissors]="!detalle.productoNombre"></i>
-                  <div>
-                    <p class="m-0 text-sm font-medium">{{ detalle.productoNombre || detalle.servicioNombre }}</p>
-                    <p class="m-0 text-xs text-text-muted">
-                      @if (detalle.productoNombre) {
-                        {{ detalle.cantidad }} unid. x {{ detalle.precioUnitario | moneda }}
-                      } @else {
-                        Servicio
-                      }
-                    </p>
-                  </div>
                 </div>
-                <span class="font-bold text-brand-gold">{{ subtotalDe(detalle) | moneda }}</span>
+                <div>
+                  <p class="mv__item-name">{{ detalle.productoNombre || detalle.servicioNombre }}</p>
+                  <p class="mv__item-sub">
+                    @if (detalle.productoNombre) {
+                      {{ detalle.cantidad }} unid. x {{ detalle.precioUnitario | moneda }}
+                    } @else {
+                      Servicio
+                    }
+                  </p>
+                </div>
               </div>
-            }
-          </div>
+              <span class="mv__item-price">{{ subtotalDe(detalle) | moneda }}</span>
+            </div>
+          }
         </div>
 
-        <div class="card-detalle !border-brand-gold/20 mt-4 flex items-center justify-between">
-          <div>
-            <p class="label-detalle mb-1">Fecha</p>
-            <p class="m-0 font-mono">{{ ventaDetalle.fecha | date:'dd/MM/yyyy HH:mm' }}</p>
-          </div>
-          <div class="text-right">
-            <p class="label-detalle mb-1">Total</p>
-            <p class="m-0 text-2xl font-bold text-brand-gold">{{ calcularTotal(ventaDetalle) | moneda }}</p>
-          </div>
+        <div class="mv__total">
+          <span class="mv__total-label">Total</span>
+          <span class="mv__total-value">{{ calcularTotal(ventaDetalle) | moneda }}</span>
         </div>
 
       </div>
@@ -220,70 +239,76 @@
   </ng-template>
 </p-dialog>
 
-<!-- MODAL PAGO -->
+<!-- ============ MODAL PAGO ============ -->
 <p-dialog [(visible)]="mostrarPago" [modal]="true" [draggable]="false" [resizable]="false"
-  styleClass="w-11/12 md:w-4/12 shadow-dialog" header="Información de pago" [baseZIndex]="10000">
+  styleClass="modal-venta w-11/12 md:w-4/12" maskStyleClass="mask-venta"
+  header="Información de pago" [baseZIndex]="10000">
+
+  <ng-template pTemplate="header">
+    <div class="flex w-full items-center justify-between gap-4">
+      <span class="text-white font-bold uppercase tracking-widest text-sm ml-2">Información de pago</span>
+      <app-button variant="cierre" icon="pi-times" tooltip="Cerrar" (clicked)="mostrarPago = false" />
+    </div>
+  </ng-template>
 
   <ng-template pTemplate="content">
     @if (ventaPago) {
-      <div class="space-y-4 p-4">
-        <div class="flex items-center justify-center rounded-xl border border-brand-gold/25 bg-brand-gold/10 p-5">
-          <i class="pi pi-wallet mr-3 text-3xl text-brand-gold"></i>
-          <div>
-            <p class="label-detalle mb-1">Pago de venta</p>
-            <p class="m-0 text-xl font-bold uppercase text-brand-gold">
-              {{ ventaPago.numeroCorrelativo || ('#' + ventaPago.ventaId) }}
-            </p>
+      <div class="mv">
+
+        <div class="mv__hero">
+          <div class="mv__hero-main">
+            <div class="mv__hero-icon"><i class="pi pi-wallet"></i></div>
+            <div>
+              <p class="mv__label">Pago de venta</p>
+              <p class="mv__num">{{ ventaPago.numeroCorrelativo || ('#' + ventaPago.ventaId) }}</p>
+            </div>
           </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
-          <div class="card-detalle">
-            <p class="label-detalle mb-1">Venta</p>
-            <p class="m-0 font-medium">{{ ventaPago.numeroCorrelativo || ('#' + ventaPago.ventaId) }}</p>
+        <div class="mv__grid">
+          <div class="mv__field">
+            <i class="pi pi-user"></i>
+            <div>
+              <p class="mv__label">Cliente</p>
+              <p class="mv__value">{{ ventaPago.clienteNombre || '-' }}</p>
+            </div>
           </div>
-          <div class="card-detalle">
-            <p class="label-detalle mb-1">Cliente</p>
-            <p class="m-0 font-medium">{{ ventaPago.clienteNombre || '-' }}</p>
+          <div class="mv__field">
+            <i class="pi pi-id-card"></i>
+            <div>
+              <p class="mv__label">Barbero</p>
+              <p class="mv__value">{{ ventaPago.barberoId ? (ventaPago.barberoNombre || 'Barbero sin nombre') : 'Barbero no registrado' }}</p>
+            </div>
           </div>
-          <div class="card-detalle">
-            <p class="label-detalle mb-1">Barbero</p>
-            <p class="m-0 font-medium">{{ ventaPago.barberoId ? (ventaPago.barberoNombre || 'Barbero sin nombre') : 'Barbero no registrado' }}</p>
+          <div class="mv__field mv__field--full">
+            <i class="pi pi-credit-card"></i>
+            <div>
+              <p class="mv__label">Tipo de pago</p>
+              <p class="mv__value mv__value--gold">{{ ventaPago.metodoPago || 'No especificado' }}</p>
+            </div>
           </div>
         </div>
 
-        <div class="card-detalle flex items-center justify-between">
-          <span class="label-detalle">Tipo de pago</span>
-          <span class="font-semibold uppercase text-brand-gold">
-            {{ ventaPago.metodoPago || 'No especificado' }}
-          </span>
+        <div class="mv__total">
+          <span class="mv__total-label">Monto</span>
+          <span class="mv__total-value">{{ calcularTotal(ventaPago) | moneda }}</span>
         </div>
 
-        <div class="card-detalle flex items-center justify-between border-brand-gold/20">
-          <span class="label-detalle">Monto</span>
-          <span class="text-2xl font-bold text-brand-gold">{{ calcularTotal(ventaPago) | moneda }}</span>
-        </div>
+        @if (ventaPago.tipoComprobante === 'BOLETA') {
+          <button type="button" class="mv__descarga" (click)="descargarComprobante.emit(ventaPago)">
+            <i class="pi pi-file"></i> Descargar boleta
+          </button>
+        } @else if (ventaPago.tipoComprobante === 'FACTURA') {
+          <button type="button" class="mv__descarga" (click)="descargarComprobante.emit(ventaPago)">
+            <i class="pi pi-file-pdf"></i> Descargar factura
+          </button>
+        }
 
-        <div class="flex gap-2">
-          @if (ventaPago.tipoComprobante === 'BOLETA') {
-            <button type="button"
-              class="flex w-full items-center justify-center gap-2 rounded-md border border-brand-gold/40 px-3 py-2 text-xs text-brand-gold transition hover:bg-brand-gold/10"
-              (click)="descargarComprobante.emit(ventaPago)">
-              <i class="pi pi-file"></i> Descargar boleta
-            </button>
-          } @else if (ventaPago.tipoComprobante === 'FACTURA') {
-            <button type="button"
-              class="flex w-full items-center justify-center gap-2 rounded-md border border-brand-gold/40 px-3 py-2 text-xs text-brand-gold transition hover:bg-brand-gold/10"
-              (click)="descargarComprobante.emit(ventaPago)">
-              <i class="pi pi-file-pdf"></i> Descargar factura
-            </button>
-          }
-        </div>
-
-        <div class="flex items-center justify-end gap-2 border-t border-ui-border-soft pt-4 text-sm text-green-400">
+        <div class="mv__estado">
           <i class="pi pi-check-circle"></i>
           Pago registrado al crear la venta
         </div>
+
       </div>
     }
   </ng-template>

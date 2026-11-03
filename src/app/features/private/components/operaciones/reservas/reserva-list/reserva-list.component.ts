@@ -125,7 +125,13 @@ export class ReservaList implements OnInit {
 
   cobrarReserva(reserva: Reserva): void {
     this.router.navigate(['/dashboard/admin/operaciones/pos'], {
-      state: { reservaCobrar: reserva },
+      state: {
+        reservaCobrar: {
+          ...reserva,
+          reservaId: reserva.reservaId || reserva.id,
+          clienteId: reserva.clienteId,
+        },
+      },
     });
   }
 

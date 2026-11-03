@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { HeaderPerfilClient } from './components/header-perfil-client/header-perfil-client.component';
@@ -25,6 +25,7 @@ import { Cliente } from '@/app/core/models/gestion/cliente/cliente.model';
 export class PerfilClient implements OnInit {
   private route = inject(ActivatedRoute);
   private clienteService = inject(ClienteService);
+  private cd = inject(ChangeDetectorRef);
 
   cliente: Cliente | null = null;
   cargando = true;
@@ -54,14 +55,17 @@ export class PerfilClient implements OnInit {
   clienteIdActual = 0;
 
   ngOnInit(): void {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-    if (!Number.isFinite(id) || id <= 0) {
-      this.errorCarga = 'ID de cliente inválido';
-      this.cargando = false;
-      return;
-    }
+    this.route.paramMap.subscribe(params => {
+      const id = Number(params.get('id'));
+      if (!Number.isInteger(id) || id <= 0) {
+        this.errorCarga = 'ID de cliente inválido';
+        this.cargando = false;
+        this.cd.detectChanges();
+        return;
+      }
 
-    this.cargarCliente(id);
+      this.cargarCliente(id);
+    });
   }
 
   public cargarCliente(id: number): void {
@@ -71,10 +75,12 @@ export class PerfilClient implements OnInit {
         this.clienteIdActual = response.data.clienteId;
         this.actualizarVista();
         this.cargando = false;
+        this.cd.detectChanges();
       },
       error: () => {
         this.errorCarga = 'No se pudo cargar el cliente';
         this.cargando = false;
+        this.cd.detectChanges();
       }
     });
   }
