@@ -4,6 +4,7 @@ import { EstadoReserva } from './EstadoReserva';
 export interface Reserva {
     id: number;
     reservaId: number;
+    clienteId?: number;
     clienteNombre: string;
     barberoNombre: string;
     servicio: string;

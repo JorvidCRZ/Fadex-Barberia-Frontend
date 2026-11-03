@@ -157,17 +157,20 @@ export class CreateReserva implements OnInit, OnDestroy, OnChanges {
 
   private configurarBusquedas(): void {
     this.buscarClienteSubject.pipe(
-      debounceTime(350),
+      debounceTime(150),
       distinctUntilChanged(),
       switchMap(texto => {
         this.buscandoCliente = true;
-        return this.clienteService.buscarPorNombre(texto, 0, 10).pipe(
+        const request$ = texto.trim()
+          ? this.clienteService.buscarPorNombre(texto, 0, 10)
+          : this.clienteService.listar(0, 10);
+        return request$.pipe(
+          finalize(() => this.buscandoCliente = false),
           catchError(() => of(null))
         );
       }),
       takeUntil(this.destroy$)
     ).subscribe(response => {
-      this.buscandoCliente = false;
       this.clientesSugeridos = (response?.data?.content ?? []).map((cliente: Cliente) => ({
         ...cliente,
         nombreCompleto: `${cliente.persona?.nombre ?? ''} ${cliente.persona?.apellido ?? ''}`.trim()
@@ -175,17 +178,20 @@ export class CreateReserva implements OnInit, OnDestroy, OnChanges {
     });
 
     this.buscarBarberoSubject.pipe(
-      debounceTime(350),
+      debounceTime(150),
       distinctUntilChanged(),
       switchMap(texto => {
         this.buscandoBarbero = true;
-        return this.barberoService.buscarPorNombre(texto, 0, 10).pipe(
+        const request$ = texto.trim()
+          ? this.barberoService.buscarPorNombre(texto, 0, 10)
+          : this.barberoService.listar(0, 10);
+        return request$.pipe(
+          finalize(() => this.buscandoBarbero = false),
           catchError(() => of(null))
         );
       }),
       takeUntil(this.destroy$)
     ).subscribe(response => {
-      this.buscandoBarbero = false;
       this.barberosSugeridos = (response?.data?.content ?? []).map((barbero: Barbero) => ({
         ...barbero,
         nombreCompleto: `${barbero.persona?.nombre ?? ''} ${barbero.persona?.apellido ?? ''}`.trim()
@@ -193,18 +199,20 @@ export class CreateReserva implements OnInit, OnDestroy, OnChanges {
     });
 
     this.buscarServicioSubject.pipe(
-      debounceTime(350),
+      debounceTime(150),
       distinctUntilChanged(),
       switchMap(texto => {
         this.buscandoServicio = true;
-        const filtro: Partial<ServicioFiltro> = { page: 0, size: 10, nombre: texto };
+        const filtro: Partial<ServicioFiltro> = texto.trim()
+          ? { page: 0, size: 10, nombre: texto }
+          : { page: 0, size: 10 };
         return this.servicioService.obtenerServiciosConFiltro(filtro).pipe(
+          finalize(() => this.buscandoServicio = false),
           catchError(() => of(null))
         );
       }),
       takeUntil(this.destroy$)
     ).subscribe(response => {
-      this.buscandoServicio = false;
       this.serviciosSugeridos = response?.data?.content ?? [];
     });
   }
