@@ -62,11 +62,11 @@
         <span class="prediccion-badge">IA · gpt-4o-mini</span>
       </div>
 
-      <div *ngIf="!analisis?.clientesEnRiesgo?.length" class="pred-empty">
+      <div *ngIf="!analisis.clientesEnRiesgo.length" class="pred-empty">
         <i class="pi pi-check-circle mr-2"></i> No se detectaron clientes en riesgo.
       </div>
 
-      <div class="citas-table-wrapper" *ngIf="analisis?.clientesEnRiesgo?.length">
+      <div class="citas-table-wrapper" *ngIf="analisis.clientesEnRiesgo.length">
         <table class="citas-table">
           <thead>
             <tr>

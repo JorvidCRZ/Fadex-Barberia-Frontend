@@ -12,7 +12,6 @@ import { CitaBarberoResponseDTO, EstadoCita } from '@/app/core/models/reserva/re
     CommonModule,
     DatePipe,
     TableModule,
-    ButtonComponent,
   ],
   templateUrl: './reserva.html',
   styleUrl: './reserva.scss',

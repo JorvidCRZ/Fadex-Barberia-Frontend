@@ -5,10 +5,11 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { LoadingService } from './core/services/common/loading.service';
 import { ConfiguracionService } from './core/services/common/configuracion.service';
+import { ToastModule } from 'primeng/toast';
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, RouterOutlet, ProgressSpinnerModule],
+  imports: [CommonModule, RouterOutlet, ProgressSpinnerModule, ToastModule ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })

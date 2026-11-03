@@ -19,7 +19,7 @@
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div class="part-form">
           <label for="nombre">Nombre</label>
-          <input pInputText type="text" id="nombre" formControlName="nombre" placeholder="Juan"
+          <input pInputText type="text" id="nombre" formControlName="nombre" placeholder="Ejemplo: Juan"
             class="inputs-text" [class.border-danger]="isInvalid('nombre')" />
           @if (isInvalid('nombre')) {
           @if (registerForm.get('nombre')?.errors?.['required']) {
@@ -34,7 +34,7 @@
 
         <div class="part-form">
           <label for="apellido">Apellido</label>
-          <input pInputText type="text" id="apellido" formControlName="apellido" placeholder="Pérez"
+          <input pInputText type="text" id="apellido" formControlName="apellido" placeholder="Ejemplo: Pérez"
             class="inputs-text" [class.border-danger]="isInvalid('apellido')" />
           @if (isInvalid('apellido')) {
           @if (registerForm.get('apellido')?.errors?.['required']) {
@@ -49,7 +49,7 @@
 
         <div class="part-form">
           <label for="telefono">Teléfono</label>
-          <input pInputText type="tel" id="telefono" formControlName="telefono" placeholder="999 888 777"
+          <input pInputText type="tel" id="telefono" formControlName="telefono" placeholder="Ejemplo: 999 888 777"
             class="inputs-text" [class.border-danger]="isInvalid('telefono')" />
           @if (isInvalid('telefono')) {
           @if (registerForm.get('telefono')?.errors?.['required']) {
@@ -63,7 +63,7 @@
 
         <div class="part-form">
           <label for="email">Correo electrónico</label>
-          <input pInputText id="email" type="email" formControlName="email" placeholder="tucorreo@email.com"
+          <input pInputText id="email" type="email" formControlName="email" placeholder="Ejemplo: tucorreo@email.com"
             class="inputs-text" [class.border-danger]="isInvalid('email')" />
           @if (isInvalid('email')) {
           @if (registerForm.get('email')?.errors?.['required']) {
@@ -90,7 +90,7 @@
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div class="part-form">
           <label for="username">Username</label>
-          <input pInputText id="username" type="text" formControlName="username" placeholder="tuusername"
+          <input pInputText id="username" type="text" formControlName="username" placeholder="Ejemplo: tuusername"
             class="inputs-text" [class.border-danger]="isInvalid('username')" />
           @if (isInvalid('username')) {
           @if (registerForm.get('username')?.errors?.['required']) {
@@ -108,8 +108,8 @@
 
         <div class="part-form">
           <label for="password">Contraseña</label>
-          <p-password 
-          [toggleMask]="true" 
+          <p-password
+          [toggleMask]="true"
           id="password" formControlName="password" autocomplete="off" class="w-full" [feedback]="false"
             [class.border-danger]="isInvalid('password')" />
           @if (isInvalid('password')) {
@@ -119,31 +119,19 @@
           }
           @if (passwordCtrl?.dirty && !passwordCtrl?.valid) {
           <ul class="mt-1 rounded-lg border border-ui-border-soft bg-ui-surface p-3 text-xs text-text-secondary space-y-0.5 pl-1">
-            <li [class.text-success]="!passwordCtrl?.errors?.['minLength']">
-              ✓ Mínimo 8 caracteres
-            </li>
-            <li [class.text-success]="!passwordCtrl?.errors?.['sinMayuscula']">
-              ✓ Al menos una mayúscula
-            </li>
-            <li [class.text-success]="!passwordCtrl?.errors?.['sinNumero']">
-              ✓ Al menos un número
-            </li>
-            <li [class.text-success]="!passwordCtrl?.errors?.['sinSimbolo']">
-              ✓ Al menos un símbolo (@, #, !...)
-            </li>
+            @for (regla of passwordReglas; track regla.texto) {
+              <li [class.text-success]="regla.ok">✓ {{ regla.texto }}</li>
+            }
           </ul>
           }
         </div>
 
         <div class="part-form">
           <label for="passwordConfirm">Confirmar contraseña</label>
-          <p-password 
-          [toggleMask]="true" 
+          <p-password
+          [toggleMask]="true"
           id="passwordConfirm" formControlName="passwordConfirm" autocomplete="off" class="w-full"
-            [feedback]="false" [class.border-danger]="
-              isInvalid('passwordConfirm') ||
-              (submitted && registerForm.errors?.['passwordsNoCoinciden'])
-            " />
+            [feedback]="false" [class.border-danger]="!!confirmError" />
           @if (confirmError) {
           <p-message severity="error" variant="simple" size="small">{{ confirmError }}</p-message>
           }
@@ -173,9 +161,8 @@
         }
 
         <div class="col-span-full flex flex-col gap-4 border-t border-ui-border-soft pt-5 text-center">
-          <button pButton type="submit" icon="pi pi-user-plus" [disabled]="loading" class="w-full boton-primary">
-            {{ loading ? 'Creando cuenta...' : 'Crear cuenta' }}
-          </button>
+          <app-button variant="primary" [disabled]="loading" [label]="loading ? 'Creando cuenta...' : 'Crear cuenta'"
+            icon="pi pi-user-plus" [fullWidth]="true" class="w-full" (clicked)="onSubmit()" />
 
           <div class="flex items-center gap-3">
             <div class="h-px flex-1 bg-ui-border-soft"></div>

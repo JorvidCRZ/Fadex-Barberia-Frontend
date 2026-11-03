@@ -47,16 +47,9 @@ const SOLO_ICONO = new Set<ButtonVariant>([
     '[class.flex]': 'fullWidth',
   },
   template: `
-    <p-button
-      [unstyled]="true"
-      [type]="type"
-      [styleClass]="clases"
-      [disabled]="disabled || loading"
-      [ariaLabel]="tooltip || label || undefined"
-      [pTooltip]="tooltip"
-      [tooltipPosition]="tooltipPosition"
-      [class]="fullWidth ? 'flex w-full' : 'inline-flex'"
-      (onClick)="alHacerClick($event)">
+    <p-button [unstyled]="true" [type]="type" [styleClass]="clases" [disabled]="disabled || loading"
+     [ariaLabel]="tooltip || label || undefined" [pTooltip]="tooltip" [tooltipPosition]="tooltipPosition" 
+     [class]="fullWidth ? 'flex w-full' : 'inline-flex'" (onClick)="alHacerClick($event)">
       @if (loading) {
         <i class="pi pi-spin pi-spinner"></i>
       } @else if (icon) {
@@ -70,10 +63,8 @@ const SOLO_ICONO = new Set<ButtonVariant>([
 })
 export class ButtonComponent {
   @Input() variant: ButtonVariant = 'primary';
-  /** 'pi-save', 'pi pi-save' o 'save' */
   @Input() icon?: string;
   @Input() label?: string;
-  /** Texto mientras loading = true (si no se pasa, se mantiene label) */
   @Input() loadingLabel?: string;
   @Input() loading = false;
   @Input() ariaLabel?: string;
@@ -81,14 +72,9 @@ export class ButtonComponent {
   @Input() type: 'button' | 'submit' = 'button';
   @Input() tooltip?: string;
   @Input() tooltipPosition: 'top' | 'bottom' | 'left' | 'right' = 'top';
-  /** 'sm' = botón compacto (clase boton-sm). No aplica a variantes solo-icono */
   @Input() size: 'md' | 'sm' = 'md';
-  /** Ocupa todo el ancho (y quita el scale del hover para que no se salga del contenedor) */
   @Input() fullWidth = false;
-  /** Clases extra de Tailwind, ej: "mt-2" */
   @Input() styleClass = '';
-
-  /** Se emite solo si el botón no está deshabilitado ni cargando */
   @Output() clicked = new EventEmitter<MouseEvent>();
 
   get soloIcono(): boolean {
