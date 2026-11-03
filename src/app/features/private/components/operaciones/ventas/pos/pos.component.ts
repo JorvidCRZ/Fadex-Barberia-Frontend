@@ -76,6 +76,7 @@ export class PosComponent implements OnInit {
 
   // Cobro de reserva
   reservaIdActiva: number | null = null;
+  clienteReservaId: number | null = null;
   nombreClienteReserva = '';
   private barberoIdActual: number | null = null;
 
@@ -108,6 +109,9 @@ export class PosComponent implements OnInit {
           label: this.nombreCliente(c),
           value: c.clienteId ?? c.id,
         }));
+        if (this.clienteReservaId !== null) {
+          this.cliente = this.clienteReservaId;
+        }
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -166,6 +170,11 @@ export class PosComponent implements OnInit {
     if (!reserva) return;
 
     this.reservaIdActiva = reserva.id || reserva.reservaId || reserva.idReserva;
+    const clienteId = Number(reserva.clienteId ?? reserva.idCliente);
+    if (Number.isInteger(clienteId) && clienteId > 0) {
+      this.clienteReservaId = clienteId;
+      this.cliente = clienteId;
+    }
     this.nombreClienteReserva = reserva.clienteNombre || reserva.nombreCliente || 'Cliente';
 
     const cantidad = reserva.cantidad || 1;
@@ -288,12 +297,15 @@ export class PosComponent implements OnInit {
     }
 
     const request: any = {
-      clienteId: this.reservaIdActiva ? null : this.cliente,
+      clienteId: this.cliente,
       barberoId: esBarbero ? this.barberoIdActual : null,
       fecha: new Date(),
       tipoComprobante: this.comprobante,
       metodoPago: this.metodo,
       reservaId: this.reservaIdActiva,
+      subtotal: this.subtotal,
+      igv: this.igv,
+      total: this.totalVenta,
       detalles,
     };
 
@@ -307,6 +319,7 @@ export class PosComponent implements OnInit {
         const ventaCreada = respuesta.data;
         this.carrito = [];
         this.reservaIdActiva = null;
+        this.clienteReservaId = null;
         this.procesando = false;
 
         if (ventaCreada?.ventaId) {

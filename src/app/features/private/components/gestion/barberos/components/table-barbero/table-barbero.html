@@ -38,14 +38,14 @@
 					<td class="whitespace-nowrap text-center">
 						<div class="flex flex-row justify-center gap-1">
 							@if (isSearchMode) {
-								<p-button icon="pi pi-eye" class="boton-editar-tabla" pTooltip="Ver detalle" tooltipPosition="top" [routerLink]="['/dashboard/admin/gestion/barberos', b.barberoId || b.id]" />
-								<p-button icon="pi pi-user-minus" class="boton-eliminar-tabla" pTooltip="Deshabilitar" tooltipPosition="top" (onClick)="onDelete(b.barberoId || b.id)" />
-								<p-button icon="pi pi-user-plus" class="boton-editar-tabla" pTooltip="Reactivar" tooltipPosition="top" (onClick)="onReactivate(b.barberoId || b.id)" />
+								<p-button icon="pi pi-eye" class="boton-editar-tabla" pTooltip="Ver detalle" tooltipPosition="top" [routerLink]="['/dashboard/admin/gestion/barberos', b.barberoId ?? b.idBarbero ?? b.id]" />
+								<p-button icon="pi pi-user-minus" class="boton-eliminar-tabla" pTooltip="Deshabilitar" tooltipPosition="top" (onClick)="onDelete(b.barberoId ?? b.idBarbero ?? b.id)" />
+								<p-button icon="pi pi-user-plus" class="boton-editar-tabla" pTooltip="Reactivar" tooltipPosition="top" (onClick)="onReactivate(b.barberoId ?? b.idBarbero ?? b.id)" />
 							} @else if (inhabilitadosMode) {
-								<p-button icon="pi pi-user-plus" class="boton-editar-tabla" pTooltip="Reactivar" tooltipPosition="top" (onClick)="onReactivate(b.barberoId || b.id)" />
+								<p-button icon="pi pi-user-plus" class="boton-editar-tabla" pTooltip="Reactivar" tooltipPosition="top" (onClick)="onReactivate(b.barberoId ?? b.idBarbero ?? b.id)" />
 							} @else {
-								<p-button icon="pi pi-eye" class="boton-editar-tabla" pTooltip="Ver detalle" tooltipPosition="top" [routerLink]="['/dashboard/admin/gestion/barberos', b.barberoId || b.id]" />
-								<p-button icon="pi pi-user-minus" class="boton-eliminar-tabla" pTooltip="Deshabilitar" tooltipPosition="top" (onClick)="onDelete(b.barberoId || b.id)" />
+								<p-button icon="pi pi-eye" class="boton-editar-tabla" pTooltip="Ver detalle" tooltipPosition="top" [routerLink]="['/dashboard/admin/gestion/barberos', b.barberoId ?? b.idBarbero ?? b.id]" />
+								<p-button icon="pi pi-user-minus" class="boton-eliminar-tabla" pTooltip="Deshabilitar" tooltipPosition="top" (onClick)="onDelete(b.barberoId ?? b.idBarbero ?? b.id)" />
 							}
 						</div>
 					</td>

@@ -97,7 +97,7 @@ export class Barberos implements OnInit {
     return content.map((b: any) => {
       const p = this.extraerPersona(b);
       return {
-        barberoId: b.barberoId || b.id,
+        barberoId: b.barberoId ?? b.idBarbero ?? b.id,
         persona: p.persona,
         nombre: p.nombre,
         apellido: p.apellido,
