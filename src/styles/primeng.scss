@@ -386,3 +386,201 @@ p-paginator .p-paginator .p-select.p-disabled {
 .modal-estandar .p-dialog-header-actions {
     display: none !important;
 }
+
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Estilos del modal "Agendar una cita": botones de hora y calendario.
+//
+// Los colores usan tus variables si existen (--color-brand-gold, etc.) y,
+// si no, los valores de respaldo. Cambia los respaldos o los nombres de las
+// variables aquí arriba y se actualiza todo.
+// ─────────────────────────────────────────────────────────────────────────────
+
+$oro: var(--color-brand-gold, #d4af37);
+$texto: var(--color-text-primary, #ffffff);
+$texto-suave: var(--color-text-muted, #8f8f8f);
+$borde: var(--color-ui-border, #2e2e2e);
+$fondo: var(--color-ui-card, #141414);
+$sobre-oro: #111111; // texto sobre fondo dorado
+
+// Dorado con transparencia (para fondos, bordes y halos)
+@function oro($porcentaje) {
+  @return color-mix(in srgb, #{$oro} #{$porcentaje}, transparent);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BOTONES DE HORA
+// ─────────────────────────────────────────────────────────────────────────────
+
+.slot-hora {
+  padding: 0.65rem 0.5rem;
+  border: 1px solid $borde;
+  border-radius: 0.65rem;
+  background: $fondo;
+  color: $texto;
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+
+  &:hover:not(:disabled) {
+    border-color: oro(60%);
+    background: oro(10%);
+    color: $oro;
+    transform: translateY(-1px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $oro;
+    outline-offset: 2px;
+  }
+
+  // Hora elegida
+  &--activa,
+  &--activa:hover:not(:disabled) {
+    border-color: $oro;
+    background: $oro;
+    color: $sobre-oro;
+    font-weight: 700;
+    box-shadow: 0 0 0 3px oro(25%);
+    transform: none;
+  }
+
+  // Hora que ya pasó o aún sin día elegido
+  &:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    text-decoration: line-through;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CALENDARIO (p-datepicker inline)
+// ─────────────────────────────────────────────────────────────────────────────
+
+::ng-deep .reservar-datepicker {
+  display: block;
+  width: 100%;
+
+  // Contenedor
+  .p-datepicker-inline {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid $borde;
+    border-radius: 1rem;
+    background: $fondo;
+    font-family: inherit;
+  }
+
+  // Cabecera: "noviembre 2026" y flechas
+  .p-datepicker-header {
+    padding: 0 0 0.6rem;
+    border-bottom: 1px solid $borde;
+    background: transparent;
+  }
+
+  .p-datepicker-title {
+    color: $texto;
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: capitalize;
+  }
+
+  .p-datepicker-select-month,
+  .p-datepicker-select-year {
+    color: $texto;
+    font-weight: 700;
+    text-transform: capitalize;
+    background: transparent;
+
+    &:hover {
+      color: $oro;
+      background: transparent;
+    }
+  }
+
+  .p-datepicker-prev-button,
+  .p-datepicker-next-button {
+    color: $texto-suave;
+    background: transparent;
+    transition: color 0.15s ease, background-color 0.15s ease;
+
+    &:hover {
+      color: $oro;
+      background: oro(12%);
+    }
+  }
+
+  // Letras de los días de la semana: L M X J V S D
+  .p-datepicker-weekday-cell,
+  .p-datepicker-weekday {
+    color: $oro;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  // Números de los días
+  .p-datepicker-day-view {
+    margin-top: 0.4rem;
+
+    td {
+      padding: 2px;
+    }
+  }
+
+  .p-datepicker-day {
+    width: 2.5rem;
+    height: 2.5rem;
+    margin: 0 auto;
+    border-radius: 0.65rem;
+    color: $texto;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: background-color 0.15s ease, color 0.15s ease;
+
+    &:hover {
+      background: oro(12%);
+      color: $oro;
+    }
+  }
+
+  // Días del mes anterior / siguiente
+  .p-datepicker-other-month .p-datepicker-day {
+    color: $texto-suave;
+    opacity: 0.45;
+  }
+
+  // Día de hoy
+  .p-datepicker-today > .p-datepicker-day:not(.p-datepicker-day-selected) {
+    border: 1px solid oro(60%);
+    background: transparent;
+    color: $oro;
+  }
+
+  // Día elegido
+  .p-datepicker-day.p-datepicker-day-selected,
+  .p-datepicker-day.p-datepicker-day-selected:hover {
+    background: $oro;
+    color: $sobre-oro;
+    font-weight: 800;
+  }
+
+  // Días no disponibles (domingos, fechas pasadas)
+  .p-datepicker-day.p-disabled,
+  .p-datepicker-day[data-p-disabled='true'] {
+    opacity: 0.25;
+    cursor: not-allowed;
+    background: transparent;
+    color: $texto-suave;
+  }
+}

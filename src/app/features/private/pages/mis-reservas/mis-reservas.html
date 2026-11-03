@@ -1,152 +1,286 @@
 <div class="flex flex-col gap-6 mt-5">
 
-  <app-page-header titulo="Mis Reservas" icono="calendar" subtitulo="Consulta, paga o cancela tus citas">
+  <app-page-header
+    titulo="Mis Reservas"
+    icono="calendar"
+    subtitulo="Consulta, paga o cancela tus citas y revisa tu historial">
     <app-button variant="secondary" size="sm" icon="refresh" label="Recargar" (clicked)="recargar()" />
     <app-button variant="primary" size="sm" icon="plus" label="Nueva reserva" (clicked)="abrirNuevaReserva()" />
   </app-page-header>
 
-  <!-- Tabla de reservas -->
-  <p-table [value]="reservas()" [loading]="loading()" dataKey="reservaId" [tableStyle]="{ 'min-width': '1000px' }">
+  <!-- Pestañas -->
+  <div class="flex gap-2 border-b border-ui-border-soft" role="tablist">
 
-    <!-- Encabezado -->
-    <ng-template pTemplate="header">
-      <tr>
-        <th>Servicio</th>
-        <th>Barbero</th>
-        <th>Fecha y hora</th>
-        <th>Total</th>
-        <th>Estado</th>
-        <th>Acciones</th>
-      </tr>
-    </ng-template>
+    <button
+      type="button"
+      role="tab"
+      [attr.aria-selected]="tab() === 'reservas'"
+      (click)="cambiarTab('reservas')"
+      class="-mb-px flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-semibold transition-colors"
+      [class]="tab() === 'reservas'
+        ? 'border-brand-gold text-brand-gold'
+        : 'border-transparent text-text-muted hover:text-text-primary'">
+      <i class="pi pi-calendar"></i>
+      Próximas
+    </button>
 
-    <!-- Contenido -->
-    <ng-template pTemplate="body" let-reserva>
-      <tr>
+    <button
+      type="button"
+      role="tab"
+      [attr.aria-selected]="tab() === 'historial'"
+      (click)="cambiarTab('historial')"
+      class="-mb-px flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-semibold transition-colors"
+      [class]="tab() === 'historial'
+        ? 'border-brand-gold text-brand-gold'
+        : 'border-transparent text-text-muted hover:text-text-primary'">
+      <i class="pi pi-history"></i>
+      Historial
+    </button>
 
-        <!-- Servicio -->
-        <td>
-          <p class="font-semibold text-text-primary">
-            {{ reserva.servicio }}
-          </p>
-
-          <p class="mt-1 flex items-center gap-1 text-xs text-text-muted">
-            @if (reserva.tipoReserva === 'RESERVA_VIRTUAL') {
-            <i class="pi pi-globe"></i> Online
-            } @else {
-            <i class="pi pi-map-marker"></i> Presencial
-            }
-          </p>
-        </td>
-
-        <!-- Barbero -->
-        <td>
-          <div class="flex items-center justify-center gap-2">
-            <div
-              class="flex size-8 items-center justify-center rounded-full border border-brand-gold/20 bg-brand-gold/10">
-              <i class="pi pi-user text-sm text-brand-gold"></i>
-            </div>
-
-            <span class="text-sm text-text-primary">
-              {{ reserva.barberoNombre }}
-            </span>
-          </div>
-        </td>
-
-        <!-- Fecha -->
-        <td>
-          <span class="text-sm font-medium text-text-primary">
-            {{ reserva.fecha | dateHelper }}
-          </span>
-        </td>
-
-        <!-- Total -->
-        <td>
-          <span class="font-bold text-brand-gold">
-            {{ reserva.total | moneda }}
-          </span>
-        </td>
-
-        <!-- Estado -->
-        <td>
-          <app-status-badge type="text" [value]="reserva.estadoReserva" />
-        </td>
-
-        <!-- Acciones -->
-        <td>
-          <div class="flex items-center justify-center gap-2">
-
-            @if (puedePagar(reserva)) {
-            <app-button variant="ver-tabla" icon="credit-card" tooltip="Pagar reserva" (clicked)="irAPagar(reserva)" />
-            }
-
-            @if (puedeCancelar(reserva)) {
-            <app-button variant="eliminar-tabla" icon="times" tooltip="Cancelar reserva"
-              (clicked)="cancelarReserva(reserva)" />
-            }
-
-            @if (!puedePagar(reserva) && !puedeCancelar(reserva)) {
-            <span class="text-text-muted">—</span>
-            }
-
-          </div>
-        </td>
-
-      </tr>
-    </ng-template>
-
-    <!-- Sin resultados -->
-    <ng-template pTemplate="emptymessage">
-      <tr>
-        <td colspan="6" class="py-12 text-center">
-          <div class="flex flex-col items-center gap-3">
-
-            <i class="pi pi-calendar-times text-5xl text-text-muted opacity-30"></i>
-
-            <p class="text-lg text-text-muted">
-              No tienes reservas registradas
-            </p>
-
-            <app-button variant="primary" size="sm" icon="plus" label="Agendar primera reserva"
-              (clicked)="abrirNuevaReserva()" />
-
-          </div>
-        </td>
-      </tr>
-    </ng-template>
-
-    <!-- Cargando -->
-    <ng-template pTemplate="loadingbody">
-      <tr>
-        <td colspan="6" class="py-12 text-center">
-          <div class="flex flex-col items-center gap-3">
-
-            <div class="size-10 animate-spin rounded-full border-4 border-brand-gold border-t-transparent"></div>
-
-            <p class="text-text-muted">
-              Cargando tus reservas...
-            </p>
-
-          </div>
-        </td>
-      </tr>
-    </ng-template>
-
-  </p-table>
-
-  <!-- Paginador independiente -->
-  <div class="producto-page-paginator">
-    <p-paginator [first]="first()" [rows]="rows()" [totalRecords]="totalRecords()"
-      [rowsPerPageOptions]="[5, 10, 25, 50]" [showCurrentPageReport]="true"
-      currentPageReportTemplate="Página {currentPage} de {totalPages} · {totalRecords} reserva(s)"
-      (onPageChange)="onPaginatorChange($event)" />
   </div>
+
+  <!-- ===================================================== -->
+  <!-- PESTAÑA: PRÓXIMAS                                      -->
+  <!-- ===================================================== -->
+  @if (tab() === 'reservas') {
+
+    <p-table [value]="reservas()" [loading]="loadingReservas()" dataKey="reservaId"
+      [tableStyle]="{ 'min-width': '1000px' }">
+
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Servicio</th>
+          <th>Barbero</th>
+          <th>Fecha y hora</th>
+          <th>Total</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-reserva>
+        <tr>
+
+          <!-- Servicio -->
+          <td>
+            <p class="font-semibold text-text-primary">{{ reserva.servicio }}</p>
+
+            <p class="mt-1 flex items-center gap-1 text-xs text-text-muted">
+              @if (reserva.tipoReserva === 'RESERVA_VIRTUAL') {
+              <i class="pi pi-globe"></i> Online
+              } @else {
+              <i class="pi pi-map-marker"></i> Presencial
+              }
+            </p>
+          </td>
+
+          <!-- Barbero -->
+          <td>
+            <div class="flex items-center justify-center gap-2">
+              <div
+                class="flex size-8 items-center justify-center rounded-full border border-brand-gold/20 bg-brand-gold/10">
+                <i class="pi pi-user text-sm text-brand-gold"></i>
+              </div>
+              <span class="text-sm text-text-primary">{{ reserva.barberoNombre }}</span>
+            </div>
+          </td>
+
+          <!-- Fecha -->
+          <td>
+            <span class="text-sm font-medium text-text-primary">{{ reserva.fecha | dateHelper }}</span>
+          </td>
+
+          <!-- Total -->
+          <td>
+            <span class="font-bold text-brand-gold">{{ reserva.total | moneda }}</span>
+          </td>
+
+          <!-- Estado -->
+          <td>
+            <app-status-badge type="text" [value]="reserva.estadoReserva" />
+          </td>
+
+          <!-- Acciones -->
+          <td>
+            <div class="flex items-center justify-center gap-2">
+
+              @if (puedePagar(reserva)) {
+              <app-button variant="agregar" icon="credit-card" (clicked)="irAPagar(reserva)" tooltip="Pagar reserva" tooltipPosition="top"/>
+              }
+
+              @if (puedeCancelar(reserva)) {
+              <app-button variant="eliminar-tabla" icon="times" tooltip="Cancelar reserva" tooltipPosition="top" (clicked)="cancelarReserva(reserva)" />
+              }
+
+              @if (!puedePagar(reserva) && !puedeCancelar(reserva)) {
+              <span class="text-text-muted">—</span>
+              }
+
+            </div>
+          </td>
+
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="6" class="py-12 text-center">
+            <div class="flex flex-col items-center gap-3">
+              <i class="pi pi-calendar-times text-5xl text-text-muted opacity-30"></i>
+              <p class="text-lg text-text-muted">No tienes reservas registradas</p>
+              <app-button variant="primary" size="sm" icon="plus" label="Agendar primera reserva" (clicked)="abrirNuevaReserva()" />
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="loadingbody">
+        <tr>
+          <td colspan="6" class="py-12 text-center">
+            <div class="flex flex-col items-center gap-3">
+              <div class="size-10 animate-spin rounded-full border-4 border-brand-gold border-t-transparent"></div>
+              <p class="text-text-muted">Cargando tus reservas...</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+    </p-table>
+
+    <div class="producto-page-paginator">
+      <p-paginator [first]="firstReservas()" [rows]="rowsReservas()" [totalRecords]="totalReservas()"
+        [rowsPerPageOptions]="[5, 10, 25, 50]" [showCurrentPageReport]="true"
+        currentPageReportTemplate="Página {currentPage} de {totalPages} · {totalRecords} reserva(s)"
+        (onPageChange)="onPaginatorReservas($event)" />
+    </div>
+
+  }
+
+  <!-- ===================================================== -->
+  <!-- PESTAÑA: HISTORIAL                                     -->
+  <!-- ===================================================== -->
+  @if (tab() === 'historial') {
+
+    <app-filtros [fields]="filtrosFields" [titulo]="'Historial'" [text]="'Historial de Atenciones'"
+      [acordeon]="true" (buscar)="onBuscar($event)" (limpiar)="onLimpiar()" />
+
+    <p-table [value]="historial()" [loading]="loadingHistorial()" [tableStyle]="{ 'min-width': '1000px' }">
+
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Fecha</th>
+          <th>Barbero</th>
+          <th>Servicio</th>
+          <th>Estado</th>
+          <th>Total</th>
+          <th>Acciones</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-reserva>
+        <tr>
+
+          <!-- Fecha -->
+          <td>
+            <span class="text-sm font-medium text-text-primary">{{ reserva.fecha | dateHelper }}</span>
+          </td>
+
+          <!-- Barbero -->
+          <td>
+            <div class="flex items-center justify-center gap-2">
+              <div
+                class="flex size-8 items-center justify-center rounded-full border border-brand-gold/20 bg-brand-gold/10">
+                <i class="pi pi-user text-sm text-brand-gold"></i>
+              </div>
+              <span class="text-sm text-text-primary">{{ reserva.nombreBarbero }}</span>
+            </div>
+          </td>
+
+          <!-- Servicio -->
+          <td>
+            <p class="font-semibold text-text-primary">{{ reserva.nombreServicio }}</p>
+
+            <p class="mt-1 flex items-center justify-center gap-1 text-xs text-text-muted">
+              @if (reserva.tipoReserva === 'RESERVA_VIRTUAL') {
+              <i class="pi pi-globe"></i> Online
+              } @else {
+              <i class="pi pi-map-marker"></i> Presencial
+              }
+            </p>
+          </td>
+
+          <!-- Estado -->
+          <td>
+            <app-status-badge type="text" [value]="reserva.estadoReserva" />
+          </td>
+
+          <!-- Total -->
+          <td>
+            <span class="font-bold text-brand-gold">{{ reserva.total | moneda }}</span>
+          </td>
+
+          <!-- Acciones -->
+          <td>
+            <div class="flex items-center justify-center gap-2">
+              <app-button variant="ver-tabla" icon="eye" tooltip="Ver detalle" tooltipPosition="top" (clicked)="verDetalle(reserva)" />
+            </div>
+          </td>
+
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="6" class="py-12 text-center">
+            <div class="flex flex-col items-center gap-3">
+
+              <i class="pi pi-calendar-times text-5xl text-text-muted opacity-30"></i>
+
+              <p class="text-lg text-text-muted">
+                @if (hayFiltrosActivos()) {
+                  No se encontraron atenciones para los filtros aplicados
+                } @else {
+                  Aún no tienes atenciones registradas
+                }
+              </p>
+
+              @if (hayFiltrosActivos()) {
+              <app-button variant="limpiar" size="sm" label="Limpiar filtros" (clicked)="onLimpiar()" />
+              }
+
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="loadingbody">
+        <tr>
+          <td colspan="6" class="py-12 text-center">
+            <div class="flex flex-col items-center gap-3">
+              <div class="size-10 animate-spin rounded-full border-4 border-brand-gold border-t-transparent"></div>
+              <p class="text-text-muted">Cargando historial...</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+    </p-table>
+
+    <div class="producto-page-paginator">
+      <p-paginator [first]="firstHistorial()" [rows]="rowsHistorial()" [totalRecords]="totalHistorial()"
+        [rowsPerPageOptions]="[5, 10, 25, 50]" [showCurrentPageReport]="true"
+        currentPageReportTemplate="Página {currentPage} de {totalPages} · {totalRecords} atención(es)"
+        (onPageChange)="onPaginatorHistorial($event)" />
+    </div>
+
+  }
 
 </div>
 
 <!-- Modal: nueva reserva -->
 <app-reservar [(visible)]="dialogNuevaReserva" (creada)="onReservaCreada()" />
 
+<!-- Confirmación: cancelar reserva -->
 <app-confirm-popover
   [visible]="mostrarConfirmacion()"
   mode="anular"
@@ -156,3 +290,64 @@
   cancelText="No"
   (confirm)="confirmarCancelacion()"
   (cancel)="cerrarConfirmacion()" />
+
+<!-- Modal: detalle de la atención -->
+<app-modal
+  [(visible)]="displayModal"
+  titulo="Detalle de Atención"
+  mode="crear"
+  icono="pi-history"
+  maxWidth="40rem">
+
+  @if (reservaSeleccionada(); as reserva) {
+    <div class="space-y-5">
+
+      <div class="flex items-center justify-between border-b border-ui-border-soft pb-4">
+        <div>
+          <p class="mb-1 text-sm text-gray-400">Fecha de reserva</p>
+          <p class="m-0 text-lg font-bold text-brand-gold">{{ reserva.fecha | dateHelper }}</p>
+        </div>
+        <app-status-badge type="text" [value]="reserva.estadoReserva" />
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div class="rounded-xl border border-white/10 bg-black/30 p-4">
+          <p class="mb-1 text-sm text-gray-400">Barbero</p>
+          <p class="m-0 font-semibold text-white">{{ reserva.nombreBarbero }}</p>
+        </div>
+        <div class="rounded-xl border border-white/10 bg-black/30 p-4">
+          <p class="mb-1 text-sm text-gray-400">Tipo</p>
+          <p class="m-0 font-semibold text-white">{{ reserva.tipoReserva }}</p>
+        </div>
+      </div>
+
+      <div>
+        <p class="mb-2 text-sm text-gray-400">Servicio realizado</p>
+        <div class="flex items-center rounded-xl border border-white/10 bg-black/30 p-3">
+          <i class="pi pi-check-circle mr-3 text-brand-gold"></i>
+          <span class="font-semibold text-white">{{ reserva.nombreServicio }}</span>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between rounded-xl border border-brand-gold/20 bg-black/30 p-4">
+        <div>
+          <p class="mb-1 text-sm text-gray-400">Horario</p>
+          <p class="m-0 font-semibold text-white">{{ reserva.horaInicio }} - {{ reserva.horaFin }}</p>
+        </div>
+        <div class="text-right">
+          <p class="mb-1 text-sm text-gray-400">Total pagado</p>
+          <p class="m-0 text-2xl font-bold text-brand-gold">{{ reserva.total | moneda }}</p>
+        </div>
+      </div>
+
+      @if (reserva.observacion) {
+        <div>
+          <p class="mb-2 text-sm text-gray-400">Observaciones</p>
+          <p class="m-0 rounded-xl border border-white/10 bg-black/30 p-4 text-sm italic text-gray-300">
+            {{ reserva.observacion }}
+          </p>
+        </div>
+      }
+    </div>
+  }
+</app-modal>
