@@ -1,18 +1,15 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-// import { ActivatedRoute } from '@angular/router';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
-import { Observable, map, of, switchMap } from 'rxjs';
+import { Observable, map, switchMap, throwError } from 'rxjs';
 import { InputTextModule } from 'primeng/inputtext';
-// import { ToastModule } from 'primeng/toast';
-// import { MessageService } from 'primeng/api';
 import { Persona } from '../../../../core/models/gestion/persona/persona.model';
 import { PersonaUpdateRequest } from '../../../../core/models/gestion/persona/persona-update.model';
 import { AuthService } from '../../../../core/services/auth/auth.service';
 import { BarberoService } from '../../../../core/services/gestion/barbero.service';
+import { ClienteService } from '../../../../core/services/gestion/cliente.service';
 import { PersonaService } from '../../../../core/services/gestion/persona.service';
 import { UsuarioService } from '../../../../core/services/auth/usuario.service';
 import { NotificationService } from '../../../../core/services/common/notification.service';
-// import { ClienteService } from '../../../../core/services/gestion/cliente.service';
 import { TokenService } from '../../../../core/services/auth/token.service';
 
 // ─── Modelo ───────────────────────────────────────────────────────────────────
@@ -55,6 +52,14 @@ const PERMISOS_ADMIN: string[] = [
   'BARBERO_CREATE', 'BARBERO_VIEW', 'BARBERO_UPDATE', 'BARBERO_DELETE',
 ];
 
+const PERFIL_VACIO: PerfilCuenta = {
+  personaId: 0,
+  nombre: '',
+  apellido: '',
+  telefono: '',
+  email: '',
+};
+
 const passwordsCoinciden = (g: AbstractControl): ValidationErrors | null =>
   g.get('passwordNueva')?.value === g.get('confirmarPassword')?.value ? null : { noCoinciden: true };
 
@@ -68,20 +73,6 @@ const desdePersona = (p: Persona): PerfilCuenta => ({
   usuario: p.usuario?.user,
 });
 
-const PERFILES_MEMORIA: Record<RolPerfil, PerfilCuenta> = {
-  ADMIN: { personaId: 1, usuarioId: 1, nombre: 'Administrador', apellido: 'Demo', telefono: '900000000', email: 'admin@gmail.com', usuario: 'admin', permisos: PERMISOS_ADMIN },
-  BARBERO: { personaId: 2, usuarioId: 2, nombre: 'Carlos', apellido: 'Ramírez', telefono: '982321324', email: 'barbero@fadex.com', usuario: 'barbero', descripcion: 'Barbero especializado en cortes clásicos y degradados.' },
-  CLIENTE: { personaId: 3, usuarioId: 3, nombre: 'Juan', apellido: 'Pérez', telefono: '982321324', email: 'jdcruzp11@gmail.com', usuario: 'cliente', fechaRegistro: '2026-01-15' },
-};
-
-const PERFIL_VACIO: PerfilCuenta = {
-  personaId: 0,
-  nombre: '',
-  apellido: '',
-  telefono: '',
-  email: '',
-};
-
 // ─── Componente ───────────────────────────────────────────────────────────────
 
 @Component({
@@ -93,17 +84,14 @@ const PERFIL_VACIO: PerfilCuenta = {
 export class PerfilComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly tokenService = inject(TokenService);
+  private readonly personaService = inject(PersonaService);
+  private readonly authService = inject(AuthService);
+  private readonly barberoService = inject(BarberoService);
+  private readonly clienteService = inject(ClienteService);
+  private readonly usuarioService = inject(UsuarioService);
+  private readonly notify = inject(NotificationService);
 
-  // Backend: dependencias conservadas para cuando se habilite la API.
-  // private readonly toast = inject(MessageService);
-  // private readonly clienteService = inject(ClienteService);
-private readonly personaService = inject(PersonaService);
-private readonly authService = inject(AuthService);
-private readonly barberoService = inject(BarberoService);
-private readonly usuarioService = inject(UsuarioService);
-private readonly notify = inject(NotificationService);
-
-  // El rol viene de la ruta: data: { rol: 'CLIENTE' | 'BARBERO' | 'ADMIN' }
+  // El rol se obtiene del token
   readonly rol: RolPerfil = this.obtenerRol();
   readonly rolLabel = ROL_LABEL[this.rol];
 
@@ -167,108 +155,99 @@ private readonly notify = inject(NotificationService);
     this.cargar();
   }
 
-cargar(): void {
-  if (this.rol === 'ADMIN') {
-    const userId = this.tokenService.getUserId();
-    const idUsuario = typeof userId === 'number' ? userId : Number(userId);
-
+  cargar(): void {
     this.cargando.set(true);
-    const consulta = Number.isInteger(idUsuario) && idUsuario > 0
-      ? this.usuarioService.obtenerPorId(idUsuario)
-      : this.usuarioService.buscar(this.nombreUsuarioToken(), 0, 10).pipe(
-        map((respuesta) => {
-          const usuarios = respuesta.data?.content ?? [];
-          const username = this.nombreUsuarioToken().toLowerCase();
-          const usuario = usuarios.find((item: any) =>
-            String(item.usuario ?? item.username ?? '').toLowerCase() === username
-          );
-          if (!usuario?.idUsuario) {
-            throw new Error('No se encontró el usuario administrador autenticado.');
-          }
-          return this.usuarioService.obtenerPorId(Number(usuario.idUsuario));
-        }),
-        switchMap((peticion) => peticion),
-      );
-
-    consulta.subscribe({
-      next: ({ data }) => {
-        const perfil = this.perfilDesdeUsuario(data, Number(data?.idUsuario ?? idUsuario));
-        this.perfil.set(perfil);
+    this.cargarPerfil$().subscribe({
+      next: (p) => {
+        this.perfil.set(p);
         this.formPerfil.patchValue({
-          nombre: perfil.nombre,
-          apellido: perfil.apellido,
-          telefono: perfil.telefono,
-          email: perfil.email,
+          nombre: p.nombre,
+          apellido: p.apellido,
+          telefono: p.telefono,
+          email: p.email,
         });
         this.cargando.set(false);
       },
       error: (err) => {
-        console.error('Error cargando perfil administrador:', err);
+        console.error(`Error cargando perfil ${this.rol}:`, err);
         this.cargando.set(false);
         this.notify.showHttpError(err);
       },
     });
-    return;
   }
 
-  if (this.rol === 'CLIENTE') {
-    const p = { ...PERFILES_MEMORIA[this.rol] };
-    this.perfil.set(p);
-    this.formPerfil.patchValue({ nombre: p.nombre, apellido: p.apellido, telefono: p.telefono, email: p.email });
-    return;
+  /** Lo único que cambia por rol: de dónde salen los datos. */
+  private cargarPerfil$(): Observable<PerfilCuenta> {
+    switch (this.rol) {
+      case 'CLIENTE':
+        return this.clienteService.obtenerPerfilPropio().pipe(
+          map((r) => this.perfilDesdeApi(r.data)),
+        );
+
+      case 'BARBERO':
+        return this.barberoService.obtenerMiBarberoId().pipe(
+          switchMap((r) => this.barberoService.obtenerPorId(r.data)),
+          map(({ data }) => ({
+            ...desdePersona(data.persona),
+            descripcion: data.descripcion || 'Sin descripción disponible',
+          })),
+        );
+
+      case 'ADMIN': {
+        const id = this.userId();
+        if (id) {
+          return this.usuarioService.obtenerPorId(id).pipe(
+            map((r) => this.perfilDesdeApi(r.data)),
+          );
+        }
+
+        // El token puede traer el username en `sub` en vez de un id numérico:
+        // se busca al usuario por nombre, como hacía el código original.
+        const username = this.nombreUsuarioToken().toLowerCase();
+        return this.usuarioService.buscar(username, 0, 10).pipe(
+          map((r) => (r.data?.content ?? []).find((u) => String(u.usuario ?? '').toLowerCase() === username)),
+          switchMap((u) => u
+            ? this.usuarioService.obtenerPorId(u.idUsuario)
+            : throwError(() => new Error('No se encontró el usuario administrador autenticado.'))),
+          map((r) => this.perfilDesdeApi(r.data)),
+        );
+      }
+    }
   }
 
-  this.cargando.set(true);
-  this.barberoService.obtenerMiBarberoId().pipe(
-    switchMap((r) => this.barberoService.obtenerPorId(r.data)),
-    map(({ data }) => ({ ...desdePersona(data.persona), descripcion: data.descripcion || 'Sin descripción disponible' })),
-  ).subscribe({
-    next: (p) => {
-      this.perfil.set(p);
-      this.formPerfil.patchValue({ nombre: p.nombre, apellido: p.apellido, telefono: p.telefono, email: p.email });
-      this.cargando.set(false);
-    },
-    error: (err) => {
-      console.error('Error cargando perfil barbero:', err);
-      this.cargando.set(false);
-    },
-  });
-}
+  /** Normaliza respuestas planas o con `persona` anidada. */
+  private perfilDesdeApi(data: any): PerfilCuenta {
+    const p = data?.persona ?? data;
+    return {
+      personaId: Number(p?.personaId ?? data?.personaId ?? 0),
+      usuarioId: Number(data?.idUsuario ?? p?.usuario?.idUsuario ?? this.userId() ?? 0) || undefined,
+      nombre: p?.nombre ?? '',
+      apellido: p?.apellido ?? '',
+      telefono: p?.telefono ?? '',
+      email: p?.email ?? '',
+      usuario: data?.username ?? data?.usuario ?? p?.usuario?.user,
+      fechaRegistro: data?.fechaRegistro,
+      descripcion: data?.descripcion,
+      permisos: this.rol === 'ADMIN' ? (data?.permisos ?? PERMISOS_ADMIN) : undefined,
+    };
+  }
 
-private perfilDesdeUsuario(data: any, idUsuario: number): PerfilCuenta {
-  return {
-    personaId: Number(data?.personaId ?? data?.persona?.personaId ?? 0),
-    usuarioId: Number(data?.idUsuario ?? idUsuario),
-    nombre: data?.nombre ?? data?.persona?.nombre ?? '',
-    apellido: data?.apellido ?? data?.persona?.apellido ?? '',
-    telefono: data?.telefono ?? data?.persona?.telefono ?? '',
-    email: data?.email ?? data?.persona?.email ?? '',
-    usuario: data?.username ?? data?.usuario ?? data?.user,
-    permisos: data?.permisos ?? PERMISOS_ADMIN,
-  };
-}
+  private userId(): number | null {
+    const id = Number(this.tokenService.getUserId());
+    return Number.isInteger(id) && id > 0 ? id : null;
+  }
 
-private nombreUsuarioToken(): string {
-  const token = this.tokenService.getDecodedToken();
-  return String(token?.username ?? token?.user ?? token?.sub ?? '').trim();
-}
+  private nombreUsuarioToken(): string {
+    const token = this.tokenService.getDecodedToken();
+    return String(token?.username ?? token?.user ?? token?.sub ?? '').trim();
+  }
+
+  private obtenerRol(): RolPerfil {
+    const role = this.tokenService.getPrimaryRole();
+    return role === 'admin' ? 'ADMIN' : role === 'barbero' ? 'BARBERO' : 'CLIENTE';
+  }
+
   // ── Acciones ──
-
-
-  // Backend: guardado original conservado para reactivar con PersonaService.
-  // const dto: PersonaUpdateRequest = { nombre: nombre!, apellido: apellido!, telefono: telefono ?? '', email: p.email };
-  // const request$: Observable<unknown> = p.personaId
-  //   ? this.personaService.actualizarPersona(p.personaId, dto)
-  //   : this.personaService.actualizarPersonaPorUsuarioId(p.usuarioId!, dto);
-  // request$.subscribe({
-  //   next: () => this.perfil.update((actual) => ({ ...actual, ...dto })),
-  //   error: () => undefined,
-  // });
-
-
-
-
-
   toggleVisible(campo: CampoPassword): void {
     this.visible.update((v) => ({ ...v, [campo]: !v[campo] }));
   }
@@ -278,82 +257,67 @@ private nombreUsuarioToken(): string {
     return !!(c?.invalid && c?.touched);
   }
 
-  private obtenerRol(): RolPerfil {
-    const role = this.tokenService.getPrimaryRole();
-    return role === 'admin' ? 'ADMIN' : role === 'barbero' ? 'BARBERO' : 'CLIENTE';
-  }
-
-  // Notificaciones desactivadas temporalmente; se conserva el contrato anterior.
-  // private notificar(severity: 'success' | 'error', summary: string, detail: string): void {
-  //   this.toast.add({ severity, summary, detail, life: 3000 });
-  // }
-
   guardarPerfil(): void {
-  if (this.formPerfil.invalid) {
-    this.formPerfil.markAllAsTouched();
-    return;
+    if (this.formPerfil.invalid) {
+      this.formPerfil.markAllAsTouched();
+      return;
+    }
+
+    const p = this.perfil();
+    if (!p.usuarioId && !p.personaId) {
+      this.notify.showHttpError(new Error('No se pudo identificar el perfil a actualizar.'));
+      return;
+    }
+
+    const { nombre, apellido, telefono, email } = this.formPerfil.getRawValue();
+    const dto: PersonaUpdateRequest = {
+      nombre: nombre!.trim(),
+      apellido: apellido!.trim(),
+      telefono: (telefono ?? '').trim(),
+      email: (email ?? p.email).trim(),
+    };
+
+    // Igual que el código original: ADMIN actualiza por usuario;
+    // el resto por personaId y, si no hay, por usuario.
+    const request$ = this.rol !== 'ADMIN' && p.personaId
+      ? this.personaService.actualizarPersona(p.personaId, dto)
+      : this.personaService.actualizarPersonaPorUsuarioId(p.usuarioId!, dto);
+
+    this.guardandoPerfil.set(true);
+    request$.subscribe({
+      next: () => {
+        this.perfil.update((actual) => ({ ...actual, ...dto }));
+        this.guardandoPerfil.set(false);
+        this.notify.showSuccess('Los datos del perfil se guardaron correctamente.');
+      },
+      error: (err) => {
+        console.error('Error guardando perfil:', err);
+        this.guardandoPerfil.set(false);
+        this.notify.showHttpError(err);
+      },
+    });
   }
 
-  const { nombre, apellido, telefono, email } = this.formPerfil.getRawValue();
+  cambiarPassword(): void {
+    if (this.formPassword.invalid) {
+      this.formPassword.markAllAsTouched();
+      return;
+    }
 
-  if (this.rol === 'CLIENTE') {
-    this.perfil.update((actual) => ({ ...actual, nombre: nombre!, apellido: apellido!, telefono: telefono ?? '' }));
-    return;
+    const { passwordActual, passwordNueva } = this.formPassword.getRawValue();
+
+    this.guardandoPassword.set(true);
+    this.authService.cambiarPassword(passwordActual!, passwordNueva!).subscribe({
+      next: () => {
+        this.guardandoPassword.set(false);
+        this.formPassword.reset();
+        this.notify.showSuccess('La contraseña se actualizó correctamente.');
+      },
+      error: (err) => {
+        console.error('Error cambiando contraseña:', err);
+        this.guardandoPassword.set(false);
+        this.notify.showHttpError(err);
+      },
+    });
   }
-
-  const p = this.perfil();
-  const dto: PersonaUpdateRequest = {
-    nombre: nombre!.trim(),
-    apellido: apellido!.trim(),
-    telefono: (telefono ?? '').trim(),
-    email: (email ?? p.email).trim(),
-  };
-  const request$ = this.rol === 'ADMIN'
-    ? this.personaService.actualizarPersonaPorUsuarioId(p.usuarioId!, dto)
-    : p.personaId
-    ? this.personaService.actualizarPersona(p.personaId, dto)
-    : this.personaService.actualizarPersonaPorUsuarioId(p.usuarioId!, dto);
-
-  this.guardandoPerfil.set(true);
-  request$.subscribe({
-    next: () => {
-      this.perfil.update((actual) => ({ ...actual, ...dto }));
-      this.guardandoPerfil.set(false);
-      this.notify.showSuccess('Los datos del perfil se guardaron correctamente.');
-    },
-    error: (err) => {
-      console.error('Error guardando perfil:', err);
-      this.guardandoPerfil.set(false);
-      this.notify.showHttpError(err);
-    },
-  });
-}
-
-cambiarPassword(): void {
-  if (this.formPassword.invalid) {
-    this.formPassword.markAllAsTouched();
-    return;
-  }
-
-  const { passwordActual, passwordNueva } = this.formPassword.getRawValue();
-
-  if (this.rol === 'CLIENTE') {
-    this.formPassword.reset();
-    return;
-  }
-
-  this.guardandoPassword.set(true);
-  this.authService.cambiarPassword(passwordActual!, passwordNueva!).subscribe({
-    next: () => {
-      this.guardandoPassword.set(false);
-      this.formPassword.reset();
-      this.notify.showSuccess('La contraseña se actualizó correctamente.');
-    },
-    error: (err) => {
-      console.error(err.error?.message ?? 'La contraseña actual es incorrecta.');
-      this.guardandoPassword.set(false);
-      this.notify.showHttpError(err);
-    },
-  });
-}
 }

@@ -26,8 +26,7 @@ export class ReservaService {
     });
     return this.http.get<ApiResponse<Page<Reserva>>>(this.API, { params });
   }
-
-  /** @deprecated usa obtenerReservas(filtro) para tener filtros server-side */
+  
   getReservas(page: number = 0, size: number = 10): Observable<ApiResponse<Page<Reserva>>> {
     const params = new HttpParams().set('page', page.toString()).set('size', size.toString());
     return this.http.get<ApiResponse<Page<Reserva>>>(this.API, { params });
@@ -73,5 +72,6 @@ export class ReservaService {
   pagarReserva(id: number): Observable<ApiResponse<string>> {
     return this.http.patch<ApiResponse<string>>(`${this.API2}/${id}/pagar`, {});
   }
+
 
 }

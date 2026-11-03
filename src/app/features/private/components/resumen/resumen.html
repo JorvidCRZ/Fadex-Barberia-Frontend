@@ -216,7 +216,7 @@
               </div>
               <p class="font-medium text-white">No tienes citas programadas</p>
               <p class="mt-1 text-sm text-text-muted">Agenda tu próxima visita a Fadex Barber.</p>
-              <a class="boton-ver mt-4 !px-5 !py-2.5" routerLink="/mi-cuenta/reservar/agendar">
+              <a class="boton-ver mt-4 !px-5 !py-2.5" routerLink="/mi-cuenta/reservas/mis-reservas" [queryParams]="{ nueva: 1 }">
                 <i class="pi pi-plus mr-2"></i>Agendar cita
               </a>
             </div>

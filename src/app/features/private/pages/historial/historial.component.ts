@@ -1,119 +1,112 @@
-import { Component, inject } from '@angular/core';
+import { finalize } from 'rxjs';
 import { CommonModule } from '@angular/common';
-import { DialogModule } from 'primeng/dialog';
-import { TableModule, TableLazyLoadEvent } from 'primeng/table';
-import { environment } from '../../../../../environments/environment';
-import { HISTORIAL_MOCK } from '../../../../core/config/privado-mock.config';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { PaginatorModule, PaginatorState } from 'primeng/paginator';
+import { TableModule } from 'primeng/table';
 import { FILTROS_HISTORIAL } from '../../../../core/config/filtros.config';
+import { HistorialClienteFiltro, HistorialClienteModel,} from '../../../../core/models/operaciones/historial-cliente.model';
+import { NotificationService } from '../../../../core/services/common/notification.service';
 import { ReservaService } from '../../../../core/services/operaciones/reserva.service';
-import { FiltrosComponent } from '../../../../shared/components/filtros/filtros.component';
-import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
+import { FiltrosComponent } from '../../../../shared/components/filtros/filtros.component';
+import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
-import { MonedaPipe } from '../../../../shared/pipes/moneda.pipe';
+import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
 import { DateFormatPipe } from '../../../../shared/pipes/dat.pipe';
-import { HistorialClienteModel, HistorialClienteFiltro } from '../../../../core/models/operaciones/historial-cliente.model';
+import { MonedaPipe } from '../../../../shared/pipes/moneda.pipe';
 
 @Component({
   selector: 'app-cliente-historial',
   standalone: true,
-  imports: [
-    CommonModule, TableModule, DialogModule,
-    StatusBadgeComponent, FiltrosComponent, ButtonComponent, PageHeaderComponent,
-    DateFormatPipe, MonedaPipe,
+
+  imports: [CommonModule,TableModule,PaginatorModule,ModalComponent,StatusBadgeComponent,
+    FiltrosComponent,ButtonComponent,PageHeaderComponent,DateFormatPipe,MonedaPipe,
   ],
-  templateUrl: './historial.html'
+
+  templateUrl: './historial.html',
 })
-export class ClienteHistorialComponent {
+export class ClienteHistorialComponent implements OnInit {
 
   private reservaService = inject(ReservaService);
+  private notify = inject(NotificationService);
 
-  historial: HistorialClienteModel[] = [];
-  totalRecords = 0;
-  loading = true;
-
-  currentPage = 0;
-  pageSize = 10;
-
+  historial = signal<HistorialClienteModel[]>([]);
+  loading = signal(false);
+  totalRecords = signal(0);
+  rows = signal(10);
+  first = signal(0);
   filtrosFields = [...FILTROS_HISTORIAL];
-  filtros: HistorialClienteFiltro = {};
+  filtros = signal<HistorialClienteFiltro>({});
 
-  displayModal = false;
-  reservaSeleccionada: HistorialClienteModel | null = null;
+  hayFiltrosActivos = computed(() => {
+    const f = this.filtros();
+    return !!(f.estado || f.desde || f.hasta);
+  });
 
-  // Sin ngOnInit: con [lazy]="true", p-table dispara onLazyLoad al iniciar
-  // y ese evento ya llama a cargarHistorial().
+  displayModal = signal(false);
+  reservaSeleccionada = signal<HistorialClienteModel | null>(null);
 
-  cargarHistorial(): void {
-    this.loading = true;
-
-    if (environment.useMockData) {
-      this.cargarMock();
-      return;
-    }
-
-    this.reservaService.getHistorialCliente(
-      this.currentPage,
-      this.pageSize,
-      this.filtros.estado,
-      this.filtros.desde,
-      this.filtros.hasta
-    ).subscribe({
-      next: (response) => {
-        this.historial = response.data.content;
-        this.totalRecords = response.data.totalElements;
-        this.loading = false;
-      },
-      error: (err) => {
-        console.error('Error al cargar el historial', err);
-        this.loading = false;
-      }
-    });
-  }
-
-  private cargarMock(): void {
-    // Los filtros de fecha llegan como string desde <app-filtros>: se convierten a Date.
-    const desde = this.filtros.desde ? new Date(this.filtros.desde) : null;
-    const hasta = this.filtros.hasta ? new Date(this.filtros.hasta) : null;
-
-    const filtrado = HISTORIAL_MOCK.filter(item => {
-      const fecha = new Date(item.fecha);
-      const estadoValido = !this.filtros.estado || item.estadoReserva === this.filtros.estado;
-      const desdeValido = !desde || fecha >= desde;
-      const hastaValido = !hasta || fecha <= hasta;
-      return estadoValido && desdeValido && hastaValido;
-    });
-
-    const inicio = this.currentPage * this.pageSize;
-    this.historial = filtrado.slice(inicio, inicio + this.pageSize);
-    this.totalRecords = filtrado.length;
-    this.loading = false;
-  }
-
-  get hayFiltrosActivos(): boolean {
-    return !!(this.filtros.estado || this.filtros.desde || this.filtros.hasta);
-  }
-
-  onLazyLoad(event: TableLazyLoadEvent): void {
-    this.pageSize = event.rows ?? 10;
-    this.currentPage = Math.floor((event.first ?? 0) / this.pageSize);
+  ngOnInit(): void {
     this.cargarHistorial();
   }
 
+  cargarHistorial(): void {
+    const size = this.rows();
+    const page = Math.floor(this.first() / size);
+    const { estado, desde, hasta } = this.filtros();
+    this.loading.set(true);
+    this.reservaService.getHistorialCliente(page, size, estado, desde, hasta).pipe(finalize(() => this.loading.set(false))).subscribe({
+
+        next: (response) => {
+          if (response.success && response.data) {
+            this.historial.set(response.data.content);
+            this.totalRecords.set(response.data.totalElements);
+
+          } else {
+            this.historial.set([]);
+            this.totalRecords.set(0);
+          }
+        },
+
+        error: (err) => {
+          console.error('Error cargando el historial:',err);
+          this.historial.set([]);
+          this.totalRecords.set(0);
+          this.notify.showHttpError(err);
+        }
+      });
+  }
+
+ 
+  onPaginatorChange(event: PaginatorState): void {
+    const size = event.rows ?? this.rows();
+    const first = event.first ?? 0;
+    this.rows.set(size);
+    this.first.set(first);
+    this.cargarHistorial();
+  }
+
+
   onBuscar(filtros: HistorialClienteFiltro): void {
-    this.filtros = filtros;
-    this.currentPage = 0;
+    this.filtros.set(filtros);
+    this.first.set(0);
     this.cargarHistorial();
   }
 
   onLimpiar(): void {
-    this.filtros = {};
-    this.currentPage = 0;
+    this.filtros.set({});
+    this.first.set(0);
+    this.cargarHistorial();
+  }
+
+  
+  recargar(): void {
     this.cargarHistorial();
   }
 
   verDetalle(reserva: HistorialClienteModel): void {
-    this.reservaSeleccionada = reserva;
-    this.displayModal = true;
+    this.reservaSeleccionada.set(reserva);
+    this.displayModal.set(true);
   }
+
 }

@@ -10,8 +10,6 @@ import { Servicio } from '../models/catalogos/servicios.model';
 const fechaLocal = (d: Date): string =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
-// Fechas con el constructor local (año, mes 0-11, día, hora, min): sin sorpresas de zona horaria.
-// `fecha` lleva la hora de inicio para que la columna "Fecha y hora" muestre 10/10/2026 10:00.
 export const RESERVAS_MOCK: Reserva[] = [
   {
     id: 1,
@@ -97,9 +95,6 @@ export const HISTORIAL_RECIENTE_MOCK: ReservaDTO[] = [
   },
 ];
 
-// ── Catálogos para el modal "Agendar cita" ──────────────────────────────────
-// Se castean porque desconozco todos los campos obligatorios de tus modelos;
-// el modal solo usa los que aparecen aquí.
 export const BARBEROS_MOCK = [
   { barberoId: 1, persona: { nombre: 'Carlos', apellido: 'Ramírez' }, especialidad: 'Cortes clásicos' },
   { barberoId: 2, persona: { nombre: 'Miguel', apellido: 'Torres' }, especialidad: 'Barba y perfilado' },
@@ -109,5 +104,5 @@ export const BARBEROS_MOCK = [
 export const SERVICIOS_MOCK = [
   { servicioId: 1, nombre: 'Corte clásico', duracion: 60, precio: 35 },
   { servicioId: 2, nombre: 'Arreglo de barba', duracion: 45, precio: 30 },
-  { servicioId: 3, nombre: 'Corte + barba', duracion: 90, precio: 55 },
+  // { servicioId: 3, nombre: 'Corte + barba', duracion: 90, precio: 55 },
 ] as unknown as Servicio[];
