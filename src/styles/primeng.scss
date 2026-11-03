@@ -1051,3 +1051,15 @@ p-paginator .p-paginator .p-select.p-disabled {
     }
   }
 }
+
+
+/* Ocultar botón nativo de PrimeNG en modales de venta */
+.p-dialog.modal-venta {
+    .p-dialog-header-actions {
+        display: none !important;
+    }
+
+    .p-dialog-close-button {
+        display: none !important;
+    }
+}
