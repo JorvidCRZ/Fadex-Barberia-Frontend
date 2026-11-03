@@ -26,6 +26,11 @@ export class VentaService {
     return this.http.get<ApiResponse<Venta[]>>(`${this.apiUrl}/barbero/${barberoId}`);
   }
 
+  /** Compras del cliente con la sesión iniciada: el backend lo identifica por el token */
+  obtenerMisCompras() {
+    return this.http.get<ApiResponse<Venta[]>>(`${this.apiUrl}/mis-compras`);
+  }
+
   buscarVentaPorId(id: number) {
     return this.http.get<ApiResponse<Venta>>(`${this.apiUrl}/${id}`);
   }

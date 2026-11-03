@@ -22,10 +22,10 @@ export const CLIENTE_MENU = [
     },
 
     {
-        label: "Historial",
-        icon: "pi pi-history",
-        routerLink: ["historial"],
-        permission: "HISTORIAL_READ"
+        label: "Mis Compras",
+        icon: "pi pi-shopping-cart",
+        routerLink: ["compras"],
+        permission: "COMPRA_READ_OWN"
     },
 
     {

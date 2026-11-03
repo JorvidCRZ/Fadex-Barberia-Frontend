@@ -4,8 +4,7 @@
   mode="crear"
   icono="pi-calendar-plus"
   maxWidth="72rem"
-  [dismissableMask]="false"
-  (visibleChange)="alCambiarVisible($event)">
+  [dismissableMask]="false">
 
   <div class="overflow-hidden rounded-[1.25rem] border border-brand-gold/80 bg-ui-surface shadow-card">
     <div class="grid lg:grid-cols-[1.7fr_0.95fr]">
@@ -28,59 +27,87 @@
 
         <form [formGroup]="citaForm" class="space-y-6">
 
-          <!-- Barbero: tarjetas -->
+          <!-- Barbero: select con búsqueda -->
           <div>
             <label class="mb-2 block text-sm font-semibold text-text-primary">Barbero <span class="text-brand-amber">*</span></label>
 
-            @if (cargandoBarberos()) {
-              <p class="text-sm text-text-muted">Cargando barberos...</p>
-            } @else if (barberos().length === 0) {
-              <p class="text-sm text-text-muted">No hay barberos disponibles.</p>
-            } @else {
-              <div class="grid gap-3 sm:grid-cols-2">
-                @for (barbero of barberos(); track barbero.barberoId) {
-                  <button
-                    type="button"
-                    (click)="seleccionarBarbero(barbero)"
-                    class="flex items-center gap-3 rounded-xl border p-3 text-left transition-colors"
-                    [class]="esBarberoSel(barbero)
-                      ? 'border-brand-gold bg-brand-gold/10'
-                      : 'border-ui-border bg-ui-card hover:border-brand-gold/60'">
-                    <div class="flex size-11 shrink-0 items-center justify-center rounded-full border border-brand-gold/30 bg-brand-gold/10 text-brand-gold">
-                      <i class="pi pi-user"></i>
-                    </div>
-                    <div class="min-w-0 flex-1">
-                      <div class="truncate font-medium text-text-primary">{{ barbero.nombreCompleto }}</div>
-                      @if (barbero.experiencia) {
-                        <div class="truncate text-xs text-text-muted">{{ barbero.experiencia }}</div>
-                      }
-                    </div>
-                    @if (esBarberoSel(barbero)) {
-                      <i class="pi pi-check-circle text-brand-gold"></i>
+            <p-select
+              formControlName="barberoId"
+              [options]="barberos()"
+              optionLabel="nombreCompleto"
+              optionValue="barberoId"
+              placeholder="Selecciona un barbero"
+              [filter]="true"
+              filterBy="nombreCompleto"
+              filterPlaceholder="Buscar por nombre..."
+              emptyMessage="No hay barberos disponibles"
+              emptyFilterMessage="No se encontraron barberos"
+              [loading]="cargandoBarberos()"
+              [showClear]="true"
+              appendTo="body"
+              styleClass="w-full"
+              (onChange)="onBarberoChange($event.value)">
+
+              <ng-template pTemplate="selectedItem" let-barbero>
+                <div class="flex items-center gap-2">
+                  <div class="flex size-7 items-center justify-center rounded-full border border-brand-gold/30 bg-brand-gold/10 text-brand-gold">
+                    <i class="pi pi-user text-xs"></i>
+                  </div>
+                  <span>{{ barbero.nombreCompleto }}</span>
+                </div>
+              </ng-template>
+
+              <ng-template pTemplate="item" let-barbero>
+                <div class="flex items-center gap-3">
+                  <div class="flex size-9 shrink-0 items-center justify-center rounded-full border border-brand-gold/30 bg-brand-gold/10 text-brand-gold">
+                    <i class="pi pi-user"></i>
+                  </div>
+                  <div class="min-w-0">
+                    <div class="truncate font-medium">{{ barbero.nombreCompleto }}</div>
+                    @if (barbero.experiencia) {
+                      <div class="truncate text-xs text-text-muted">{{ barbero.experiencia }}</div>
                     }
-                  </button>
-                }
-              </div>
-            }
+                  </div>
+                </div>
+              </ng-template>
+            </p-select>
 
             @if (invalido('barberoId')) {
               <span class="mt-2 block text-xs text-danger">Selecciona un barbero</span>
             }
           </div>
 
-          <!-- Servicio: tabla paginada -->
+          <!-- Servicio: tabla con búsqueda y paginación -->
           <div>
             <label class="mb-2 block text-sm font-semibold text-text-primary">Servicio <span class="text-brand-amber">*</span></label>
 
+            <!-- Buscador -->
+            <div class="relative mb-3">
+              <i class="pi pi-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-text-muted"></i>
+              <input
+                type="text"
+                [value]="busquedaServicio()"
+                (input)="onBuscarServicio($any($event.target).value)"
+                placeholder="Buscar servicio por nombre..."
+                class="w-full rounded-xl border border-ui-border bg-ui-card py-2.5 pl-10 pr-4 text-sm text-text-primary outline-none transition placeholder:text-text-subtle focus:border-brand-gold" />
+            </div>
+
             <p-table
-              [value]="servicios()"
+              [value]="serviciosFiltrados()"
               [loading]="cargandoServicios()"
               dataKey="servicioId"
+              [paginator]="true"
+              [rows]="rowsServicios"
+              [first]="firstServicios()"
+              (onPage)="onPageServicios($event)"
+              [showCurrentPageReport]="true"
+              currentPageReportTemplate="{currentPage} de {totalPages} · {totalRecords} servicio(s)"
               [tableStyle]="{ 'min-width': '100%' }">
 
               <ng-template pTemplate="header">
                 <tr>
                   <th class="w-12"></th>
+                  <th class="w-16"></th>
                   <th>Servicio</th>
                   <th>Duración</th>
                   <th class="text-right">Precio</th>
@@ -101,6 +128,16 @@
                       }
                     </div>
                   </td>
+                  <td>
+                    @if (imagenServicio(servicio); as img) {
+                      <img [src]="img" [alt]="servicio.nombre"
+                        class="size-11 rounded-lg object-cover" (error)="ocultarImagen($event)" />
+                    } @else {
+                      <div class="flex size-11 items-center justify-center rounded-lg bg-brand-gold/10 text-brand-gold">
+                        <i class="pi pi-image"></i>
+                      </div>
+                    }
+                  </td>
                   <td class="font-medium text-text-primary">{{ servicio.nombre }}</td>
                   <td class="text-sm text-text-muted">{{ servicio.duracion ? servicio.duracion + ' min' : '—' }}</td>
                   <td class="text-right font-semibold text-brand-gold">{{ servicio.precio | moneda }}</td>
@@ -109,51 +146,79 @@
 
               <ng-template pTemplate="emptymessage">
                 <tr>
-                  <td colspan="4" class="py-8 text-center text-sm text-text-muted">
-                    No hay servicios disponibles.
+                  <td colspan="5" class="py-8 text-center text-sm text-text-muted">
+                    @if (busquedaServicio()) {
+                      No se encontraron servicios para "{{ busquedaServicio() }}"
+                    } @else {
+                      No hay servicios disponibles.
+                    }
                   </td>
                 </tr>
               </ng-template>
 
               <ng-template pTemplate="loadingbody">
                 <tr>
-                  <td colspan="4" class="py-8 text-center text-sm text-text-muted">
+                  <td colspan="5" class="py-8 text-center text-sm text-text-muted">
                     Cargando servicios...
                   </td>
                 </tr>
               </ng-template>
             </p-table>
 
-            <p-paginator
-              [first]="firstServicios()"
-              [rows]="rowsServicios()"
-              [totalRecords]="totalServicios()"
-              [showCurrentPageReport]="true"
-              currentPageReportTemplate="{currentPage} de {totalPages} · {totalRecords} servicio(s)"
-              (onPageChange)="onPaginatorServicios($event)" />
-
             @if (invalido('servicioId')) {
               <span class="mt-2 block text-xs text-danger">Selecciona un servicio</span>
             }
           </div>
 
-          <!-- Fecha y hora: calendario -->
+          <!-- Fecha (calendario) y hora (botones) -->
           <div>
-            <label class="mb-2 block text-sm font-semibold text-text-primary">Fecha y hora <span class="text-brand-amber">*</span></label>
+            <label class="mb-3 block text-sm font-semibold text-text-primary">Fecha y hora <span class="text-brand-amber">*</span></label>
 
-            <p-datepicker
-              formControlName="fechaHora"
-              [inline]="true"
-              [showTime]="true"
-              hourFormat="12"
-              [stepMinute]="30"
-              [minDate]="minDate"
-              [maxDate]="maxDate"
-              [disabledDays]="[0]"
-              (onSelect)="marcarFechaHoraTocada()"
-              styleClass="w-full" />
+            <div class="grid gap-5 lg:grid-cols-[1.1fr_1fr]">
 
-            <p class="mt-2 text-xs text-text-muted">Atendemos de lunes a sábado, de 09:00 AM a 07:00 PM.</p>
+              <!-- Calendario -->
+              <div>
+                <p class="mb-2 text-xs font-medium uppercase tracking-wider text-text-muted">1. Elige el día</p>
+
+                <p-datepicker
+                  [formControl]="fechaCtrl"
+                  [inline]="true"
+                  [minDate]="minDate"
+                  [maxDate]="maxDate"
+                  [disabledDays]="[0]"
+                  (onSelect)="onFechaSelect($event)"
+                  styleClass="reservar-datepicker" />
+              </div>
+
+              <!-- Horarios -->
+              <div>
+                <p class="mb-2 text-xs font-medium uppercase tracking-wider text-text-muted">2. Elige la hora</p>
+
+                @if (!fechaSel()) {
+                  <div class="flex h-[calc(100%-1.75rem)] min-h-40 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-ui-border p-4 text-center">
+                    <i class="pi pi-clock text-2xl text-text-muted opacity-50"></i>
+                    <p class="text-sm text-text-muted">Primero elige un día en el calendario</p>
+                  </div>
+                } @else {
+                  <div class="grid grid-cols-3 gap-2">
+                    @for (h of horarios; track h.valor) {
+                      <button
+                        type="button"
+                        [disabled]="horaDeshabilitada(h.valor)"
+                        (click)="seleccionarHora(h.valor)"
+                        class="rounded-lg border px-2 py-2.5 text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-35"
+                        [class]="horaSel() === h.valor
+                          ? 'border-brand-gold bg-brand-gold font-semibold text-brand-black'
+                          : 'border-ui-border bg-ui-card text-text-primary hover:border-brand-gold/60'">
+                        {{ h.etiqueta }}
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+
+            <p class="mt-3 text-xs text-text-muted">Atendemos de lunes a sábado, de 09:00 AM a 07:00 PM.</p>
 
             @if (invalido('fechaHora')) {
               <span class="mt-1 block text-xs text-danger">{{ errorFechaHora }}</span>
@@ -187,6 +252,20 @@
 
       <aside class="border-t border-ui-border bg-ui-black p-6 md:p-8 lg:border-l lg:border-t-0">
         <h3 class="mb-6 text-xl font-semibold text-text-primary">Resumen de la cita</h3>
+
+        <!-- Imagen del servicio seleccionado -->
+        @if (servicioSel(); as servicio) {
+          <div class="mb-6 overflow-hidden rounded-xl border border-ui-border-soft">
+            @if (imagenServicio(servicio); as img) {
+              <img [src]="img" [alt]="servicio.nombre"
+                class="h-44 w-full object-cover" (error)="ocultarImagen($event)" />
+            } @else {
+              <div class="flex h-44 w-full items-center justify-center bg-brand-gold/5 text-brand-gold/50">
+                <i class="pi pi-image text-4xl"></i>
+              </div>
+            }
+          </div>
+        }
 
         <dl class="space-y-4 text-sm text-text-secondary">
           <div class="flex items-start justify-between gap-4 border-b border-ui-border-soft pb-3">

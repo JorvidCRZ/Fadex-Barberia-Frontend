@@ -68,457 +68,6 @@ p-button .p-button {
 }
 
 
-/* ==========================================================
-   MODALES DE VENTAS (Detalle + Pago) — FadeX Barbería
-   Solo afecta a p-dialog con styleClass="modal-venta" y
-   maskStyleClass="mask-venta". No toca ningún otro modal.
-
-   PEGAR EN EL SCSS GLOBAL (styles.scss), DESPUÉS de la sección
-   "DIALOG". Debe ir global porque el p-dialog se pinta en un
-   overlay fuera del componente.
-   ========================================================== */
-
-/* ---------- Fondo oscuro con desenfoque ---------- */
-.mask-venta {
-  background: rgba(0, 0, 0, 0.72) !important;
-  backdrop-filter: blur(5px);
-}
-
-.modal-venta {
-  /* Tokens (usan tus variables; si faltan, usan el dorado del ticket) */
-  --mv-gold: var(--color-brand-gold, 201 168 76);
-  --mv-text: #ffffff;
-  --mv-text-soft: #e6e6e6;
-  --mv-line: rgba(255, 255, 255, 0.1);
-
-  /* Variables de PrimeNG: fuerzan texto blanco en todo el diálogo */
-  --p-dialog-color: #ffffff;
-  --p-dialog-background: #0f0f0f;
-  --p-dialog-title-font-weight: 700;
-
-  /* ---------- Contenedor ---------- */
-  &.p-dialog {
-    overflow: hidden;
-    border: 1px solid rgb(var(--mv-gold) / 0.5) !important;
-    border-radius: 1.25rem;
-    color: var(--mv-text) !important;
-    background:
-      radial-gradient(120% 70% at 0% 0%, rgb(var(--mv-gold) / 0.12), transparent 55%),
-      #0f0f0f !important;
-    box-shadow:
-      0 30px 80px rgba(0, 0, 0, 0.75),
-      0 0 40px rgb(var(--mv-gold) / 0.1);
-  }
-
-  /* ---------- Cabecera ---------- */
-  .p-dialog-header {
-    padding: 1.15rem 1.5rem;
-    border-radius: 0;
-    border-bottom: 1px solid rgb(var(--mv-gold) / 0.35);
-    color: var(--mv-text) !important;
-    background: linear-gradient(
-      90deg,
-      rgb(var(--mv-gold) / 0.16),
-      rgba(12, 12, 12, 0.95) 60%
-    ) !important;
-  }
-
-  .p-dialog-title {
-    display: flex;
-    align-items: center;
-    gap: 0.7rem;
-    font-size: 0.95rem;
-    font-weight: 700;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--mv-text) !important;
-
-    &::before {
-      content: '';
-      width: 4px;
-      height: 1.1rem;
-      border-radius: 2px;
-      background: rgb(var(--mv-gold));
-    }
-  }
-
-  .p-dialog-header-actions .p-dialog-close-button {
-    width: 2.1rem;
-    height: 2.1rem;
-    border: 1px solid rgb(var(--mv-gold) / 0.4);
-    border-radius: 0.6rem;
-    background: rgb(var(--mv-gold) / 0.1);
-    color: var(--mv-text) !important;
-    transition: background 0.2s ease, transform 0.2s ease;
-
-    svg,
-    .p-icon {
-      color: var(--mv-text) !important;
-    }
-
-    &:hover {
-      background: rgb(var(--mv-gold));
-      transform: rotate(90deg);
-
-      svg,
-      .p-icon {
-        color: #0c0c0c !important;
-      }
-    }
-  }
-
-  /* ---------- Contenido ---------- */
-  .p-dialog-content {
-    padding: 0 !important;
-    border: 0 !important;
-    color: var(--mv-text) !important;
-    background: transparent !important;
-  }
-
-  /* ---------- Pie ---------- */
-  .p-dialog-footer {
-    padding: 0.95rem 1.5rem;
-    border-radius: 0;
-    border-top: 1px solid var(--mv-line);
-    background: rgba(0, 0, 0, 0.35) !important;
-  }
-
-  /* ==========================================================
-     Contenido interno (clases mv__*)
-     ========================================================== */
-  .mv {
-    display: flex;
-    flex-direction: column;
-    gap: 1.15rem;
-    padding: 1.5rem;
-    color: var(--mv-text);
-
-    p,
-    span,
-    i {
-      color: inherit;
-    }
-  }
-
-  /* Bloque principal */
-  .mv__hero {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 1.05rem 1.15rem;
-    border: 1px solid rgb(var(--mv-gold) / 0.3);
-    border-radius: 1rem;
-    background: linear-gradient(
-      135deg,
-      rgb(var(--mv-gold) / 0.18),
-      rgb(var(--mv-gold) / 0.04)
-    );
-  }
-
-  .mv__hero-main {
-    display: flex;
-    align-items: center;
-    gap: 0.9rem;
-    min-width: 0;
-  }
-
-  .mv__hero-icon {
-    display: flex;
-    flex: none;
-    align-items: center;
-    justify-content: center;
-    width: 2.9rem;
-    height: 2.9rem;
-    border-radius: 0.85rem;
-    background: rgb(var(--mv-gold));
-    color: #0c0c0c !important;
-    font-size: 1.25rem;
-    box-shadow: 0 6px 20px rgb(var(--mv-gold) / 0.35);
-
-    i {
-      color: #0c0c0c !important;
-    }
-  }
-
-  .mv__label {
-    margin: 0 0 0.25rem;
-    font-size: 0.66rem;
-    font-weight: 600;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--mv-text-soft) !important;
-    opacity: 0.8;
-  }
-
-  .mv__num {
-    margin: 0;
-    overflow-wrap: anywhere;
-    font-size: 1.15rem;
-    font-weight: 800;
-    letter-spacing: 0.05em;
-    color: var(--mv-text) !important;
-  }
-
-  .mv__badge {
-    flex: none;
-    padding: 0.35rem 0.9rem;
-    border-radius: 9999px;
-    background: rgb(var(--mv-gold));
-    font-size: 0.68rem;
-    font-weight: 800;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: #0c0c0c !important;
-  }
-
-  /* Datos */
-  .mv__grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.75rem;
-  }
-
-  .mv__field {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    min-width: 0;
-    padding: 0.8rem 0.95rem;
-    border: 1px solid var(--mv-line);
-    border-radius: 0.85rem;
-    background: rgba(255, 255, 255, 0.04);
-    transition: border-color 0.2s ease, background 0.2s ease;
-
-    &:hover {
-      border-color: rgb(var(--mv-gold) / 0.45);
-      background: rgba(255, 255, 255, 0.06);
-    }
-
-    > i {
-      flex: none;
-      font-size: 1rem;
-      color: rgb(var(--mv-gold)) !important;
-    }
-
-    > div {
-      min-width: 0;
-    }
-  }
-
-  .mv__field--full {
-    grid-column: 1 / -1;
-  }
-
-  .mv__value {
-    margin: 0;
-    overflow-wrap: anywhere;
-    font-size: 0.92rem;
-    font-weight: 600;
-    color: var(--mv-text) !important;
-  }
-
-  .mv__value--gold {
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: rgb(var(--mv-gold)) !important;
-  }
-
-  .mv__fecha {
-    margin: 0;
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--mv-text) !important;
-  }
-
-  /* Título de sección */
-  .mv__section {
-    display: flex;
-    align-items: center;
-    gap: 0.7rem;
-    margin: 0.25rem 0 0;
-    font-size: 0.68rem;
-    font-weight: 700;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--mv-text) !important;
-
-    &::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: linear-gradient(90deg, rgb(var(--mv-gold) / 0.5), transparent);
-    }
-  }
-
-  /* Ítems */
-  .mv__items {
-    display: flex;
-    flex-direction: column;
-    gap: 0.55rem;
-  }
-
-  .mv__item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 0.8rem 0.95rem;
-    border: 1px solid var(--mv-line);
-    border-radius: 0.85rem;
-    background: rgba(255, 255, 255, 0.04);
-    transition: border-color 0.2s ease, transform 0.2s ease;
-
-    &:hover {
-      border-color: rgb(var(--mv-gold) / 0.5);
-      transform: translateX(3px);
-    }
-  }
-
-  .mv__item-left {
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-    min-width: 0;
-  }
-
-  .mv__item-icon {
-    display: flex;
-    flex: none;
-    align-items: center;
-    justify-content: center;
-    width: 2.2rem;
-    height: 2.2rem;
-    border-radius: 0.6rem;
-    background: rgb(var(--mv-gold) / 0.16);
-    font-size: 0.9rem;
-
-    i {
-      color: rgb(var(--mv-gold)) !important;
-    }
-  }
-
-  .mv__item-name {
-    margin: 0;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--mv-text) !important;
-  }
-
-  .mv__item-sub {
-    margin: 0.15rem 0 0;
-    font-size: 0.74rem;
-    color: var(--mv-text-soft) !important;
-    opacity: 0.8;
-  }
-
-  .mv__item-price {
-    flex: none;
-    font-size: 0.95rem;
-    font-weight: 700;
-    white-space: nowrap;
-    color: rgb(var(--mv-gold)) !important;
-  }
-
-  /* Total — misma identidad que el ticket */
-  .mv__total {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 1rem 1.2rem;
-    border: 1px solid rgb(var(--mv-gold) / 0.3);
-    border-left: 5px solid rgb(var(--mv-gold));
-    border-radius: 0.75rem;
-    background: linear-gradient(90deg, #000000, #141414);
-  }
-
-  .mv__total-label {
-    font-size: 0.75rem;
-    font-weight: 800;
-    letter-spacing: 0.24em;
-    text-transform: uppercase;
-    color: var(--mv-text) !important;
-  }
-
-  .mv__total-value {
-    font-size: 1.6rem;
-    font-weight: 800;
-    color: rgb(var(--mv-gold)) !important;
-  }
-
-  /* Botón de descarga */
-  .mv__descarga {
-    display: flex;
-    width: 100%;
-    align-items: center;
-    justify-content: center;
-    gap: 0.6rem;
-    padding: 0.8rem 1rem;
-    border: 1px solid rgb(var(--mv-gold) / 0.6);
-    border-radius: 0.8rem;
-    background: rgb(var(--mv-gold) / 0.1);
-    font-size: 0.78rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--mv-text);
-    cursor: pointer;
-    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
-
-    i {
-      color: inherit;
-    }
-
-    &:hover {
-      background: rgb(var(--mv-gold));
-      color: #0c0c0c;
-      transform: translateY(-1px);
-    }
-  }
-
-  /* Estado */
-  .mv__estado {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding-top: 1rem;
-    border-top: 1px dashed rgba(255, 255, 255, 0.18);
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: #4ade80 !important;
-
-    i {
-      color: #4ade80 !important;
-    }
-  }
-}
-
-/* ---------- Móvil ---------- */
-@media (max-width: 560px) {
-  .modal-venta {
-    .mv {
-      padding: 1rem;
-    }
-
-    .mv__grid {
-      grid-template-columns: 1fr;
-    }
-
-    .mv__hero {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-
-    .mv__total-value {
-      font-size: 1.3rem;
-    }
-  }
-}
-
-
 /* ========================================
    AVATAR
    ======================================== */
@@ -838,228 +387,200 @@ p-paginator .p-paginator .p-select.p-disabled {
     display: none !important;
 }
 
-/* ==========================================================
-   MODAL ESTÁNDAR (app-modal) — identidad FadeX Barbería  v3
-   Basado en el ticket y el dashboard:
-   negro #0c0c0c + dorado #C9A84C, franja dorada bajo la cabecera,
-   líneas punteadas, caja de total negra con borde dorado y
-   barra inferior "FADEX · BARBERÍA".
 
-   Solo SCSS: no requiere cambiar HTML ni TS.
-   Va en prime.scss, después de la regla
-   ".modal-estandar .p-dialog-header-actions { display: none }".
-   ========================================================== */
 
-/* ---------- Fondo detrás del modal ---------- */
-.p-dialog-mask:has(.modal-estandar) {
-  background: rgba(0, 0, 0, 0.78) !important;
-  backdrop-filter: blur(4px);
+// ─────────────────────────────────────────────────────────────────────────────
+// Estilos del modal "Agendar una cita": botones de hora y calendario.
+//
+// Los colores usan tus variables si existen (--color-brand-gold, etc.) y,
+// si no, los valores de respaldo. Cambia los respaldos o los nombres de las
+// variables aquí arriba y se actualiza todo.
+// ─────────────────────────────────────────────────────────────────────────────
+
+$oro: var(--color-brand-gold, #d4af37);
+$texto: var(--color-text-primary, #ffffff);
+$texto-suave: var(--color-text-muted, #8f8f8f);
+$borde: var(--color-ui-border, #2e2e2e);
+$fondo: var(--color-ui-card, #141414);
+$sobre-oro: #111111; // texto sobre fondo dorado
+
+// Dorado con transparencia (para fondos, bordes y halos)
+@function oro($porcentaje) {
+  @return color-mix(in srgb, #{$oro} #{$porcentaje}, transparent);
 }
 
-.modal-estandar {
-  --me-gold: var(--color-brand-gold, 201 168 76);
-  --me-black: #0c0c0c;
-  --me-text: #ffffff;
-  --me-text-soft: #e6e6e6;
-  --me-line: rgba(255, 255, 255, 0.14);
+// ─────────────────────────────────────────────────────────────────────────────
+// BOTONES DE HORA
+// ─────────────────────────────────────────────────────────────────────────────
 
-  --p-dialog-color: #ffffff;
-  --p-dialog-background: #121212;
+.slot-hora {
+  padding: 0.65rem 0.5rem;
+  border: 1px solid $borde;
+  border-radius: 0.65rem;
+  background: $fondo;
+  color: $texto;
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
 
-  /* ---------- Contenedor (plano, sobrio) ----------
-     overflow visible: los desplegables del formulario no se recortan. */
-  &.p-dialog {
-    overflow: visible;
-    border: 1px solid rgb(var(--me-gold) / 0.5) !important;
+  &:hover:not(:disabled) {
+    border-color: oro(60%);
+    background: oro(10%);
+    color: $oro;
+    transform: translateY(-1px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $oro;
+    outline-offset: 2px;
+  }
+
+  // Hora elegida
+  &--activa,
+  &--activa:hover:not(:disabled) {
+    border-color: $oro;
+    background: $oro;
+    color: $sobre-oro;
+    font-weight: 700;
+    box-shadow: 0 0 0 3px oro(25%);
+    transform: none;
+  }
+
+  // Hora que ya pasó o aún sin día elegido
+  &:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    text-decoration: line-through;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CALENDARIO (p-datepicker inline)
+// ─────────────────────────────────────────────────────────────────────────────
+
+::ng-deep .reservar-datepicker {
+  display: block;
+  width: 100%;
+
+  // Contenedor
+  .p-datepicker-inline {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid $borde;
     border-radius: 1rem;
-    color: var(--me-text) !important;
-    background: rgb(var(--color-ui-card, 18 18 18)) !important;
-    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.75);
+    background: $fondo;
+    font-family: inherit;
+  }
 
-    /* Barra inferior de marca, como la base del ticket */
-    &::after {
-      content: 'FADEX  ·  BARBERÍA';
-      flex: none;
-      display: block;
-      padding: 0.6rem 1rem;
-      border-top: 1px solid rgb(var(--me-gold) / 0.25);
-      border-radius: 0 0 calc(1rem - 1px) calc(1rem - 1px);
-      background: var(--me-black);
-      text-align: center;
-      font-size: 0.6rem;
-      font-weight: 700;
-      letter-spacing: 0.32em;
-      color: rgb(var(--me-gold));
+  // Cabecera: "noviembre 2026" y flechas
+  .p-datepicker-header {
+    padding: 0 0 0.6rem;
+    border-bottom: 1px solid $borde;
+    background: transparent;
+  }
+
+  .p-datepicker-title {
+    color: $texto;
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: capitalize;
+  }
+
+  .p-datepicker-select-month,
+  .p-datepicker-select-year {
+    color: $texto;
+    font-weight: 700;
+    text-transform: capitalize;
+    background: transparent;
+
+    &:hover {
+      color: $oro;
+      background: transparent;
     }
   }
 
-  /* ---------- Cabecera negra + franja dorada (como el ticket) ---------- */
-  .p-dialog-header {
-    padding: 1.1rem 1.5rem;
-    border-radius: calc(1rem - 1px) calc(1rem - 1px) 0 0;
-    border-bottom: 4px solid rgb(var(--me-gold));
-    color: var(--me-text) !important;
-    background: var(--me-black) !important;
+  .p-datepicker-prev-button,
+  .p-datepicker-next-button {
+    color: $texto-suave;
+    background: transparent;
+    transition: color 0.15s ease, background-color 0.15s ease;
+
+    &:hover {
+      color: $oro;
+      background: oro(12%);
+    }
+  }
+
+  // Letras de los días de la semana: L M X J V S D
+  .p-datepicker-weekday-cell,
+  .p-datepicker-weekday {
+    color: $oro;
+    font-size: 0.7rem;
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }
 
-  /* ---------- Contenido ----------
-     No se toca el padding: los formularios (Nueva Reserva) tienen
-     bandas de borde a borde que dependen del padding actual. */
-  .p-dialog-content {
-    border: 0 !important;
-    color: var(--me-text) !important;
-    background: transparent !important;
+  // Números de los días
+  .p-datepicker-day-view {
+    margin-top: 0.4rem;
 
-    scrollbar-width: thin;
-    scrollbar-color: rgb(var(--me-gold) / 0.5) transparent;
-
-    &::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      border-radius: 9999px;
-      background: rgb(var(--me-gold) / 0.5);
+    td {
+      padding: 2px;
     }
   }
 
-  /* ---------- Pie (si algún modal lo usa) ---------- */
-  .p-dialog-footer {
-    padding: 0.95rem 1.5rem;
-    border-radius: 0;
-    border-top: 1px dashed var(--me-line);
-    background: var(--me-black) !important;
+  .p-datepicker-day {
+    width: 2.5rem;
+    height: 2.5rem;
+    margin: 0 auto;
+    border-radius: 0.65rem;
+    color: $texto;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: background-color 0.15s ease, color 0.15s ease;
+
+    &:hover {
+      background: oro(12%);
+      color: $oro;
+    }
   }
 
-  /* ==========================================================
-     DETALLE / CONFIRMACIÓN — como el cuerpo del ticket
-       <div class="flex flex-col gap-3 ...">
-         <div class="flex justify-between ..."> etiqueta + valor
-     ========================================================== */
-
-  /* Sin caja: el cuerpo respira como en el ticket */
-  .p-dialog-content .flex.flex-col.gap-3 {
-    gap: 0;
-    padding: 0.25rem 0.25rem 0.5rem !important;
+  // Días del mes anterior / siguiente
+  .p-datepicker-other-month .p-datepicker-day {
+    color: $texto-suave;
+    opacity: 0.45;
   }
 
-  /* Filas: etiqueta pequeña a la izquierda, valor en negrita a la derecha,
-     separadas por línea punteada (igual que el ticket) */
-  .p-dialog-content .flex.flex-col.gap-3 > .flex.justify-between {
-    align-items: center;
-    gap: 1rem;
-    padding: 0.85rem 0 !important;
-    border: 0 !important;
-    border-bottom: 1px dashed var(--me-line) !important;
+  // Día de hoy
+  .p-datepicker-today > .p-datepicker-day:not(.p-datepicker-day-selected) {
+    border: 1px solid oro(60%);
     background: transparent;
-
-    &:last-child {
-      border-bottom: 0 !important;
-    }
-
-    /* etiqueta */
-    > span:first-child {
-      font-size: 0.68rem;
-      font-weight: 600;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--me-text-soft) !important;
-      opacity: 0.8;
-    }
-
-    /* valor */
-    > span:last-child,
-    > app-status-badge {
-      font-size: 0.95rem;
-      font-weight: 700;
-      text-align: right;
-      color: var(--me-text) !important;
-    }
-
-    /* primer dato (Cliente) un poco más grande */
-    &:first-child > span:last-child {
-      font-size: 1.1rem;
-      font-weight: 800;
-    }
-
-    /* Total / Hora: caja negra con borde dorado a la izquierda (total-box del ticket) */
-    &:has(> span.text-brand-gold) {
-      margin: 0.8rem 0 0.4rem;
-      padding: 0.95rem 1.1rem !important;
-      border: 0 !important;
-      border-left: 6px solid rgb(var(--me-gold)) !important;
-      border-radius: 0.25rem;
-      background: var(--me-black);
-
-      > span:first-child {
-        font-size: 0.78rem;
-        font-weight: 800;
-        letter-spacing: 0.22em;
-        color: var(--me-text) !important;
-        opacity: 1;
-      }
-
-      > span.text-brand-gold {
-        font-size: 1.6rem;
-        font-weight: 800;
-        color: rgb(var(--me-gold)) !important;
-      }
-    }
+    color: $oro;
   }
 
-  /* Botones del pie de "Confirmar Reserva" */
-  .p-dialog-content > .flex.justify-end.border-t {
-    margin-top: 1.2rem !important;
-    padding-top: 1.1rem !important;
-    border-top: 1px dashed var(--me-line) !important;
+  // Día elegido
+  .p-datepicker-day.p-datepicker-day-selected,
+  .p-datepicker-day.p-datepicker-day-selected:hover {
+    background: $oro;
+    color: $sobre-oro;
+    font-weight: 800;
   }
 
-  /* ==========================================================
-     FORMULARIO "Nueva Reserva" (create-reserva)
-     ========================================================== */
-
-  /* Banda "Información de la reserva" */
-  .p-dialog-content form > .flex.items-center.gap-2.border-b {
-    border-bottom: 1px dashed var(--me-line) !important;
-    background: rgb(var(--me-gold) / 0.1) !important;
-    box-shadow: inset 5px 0 0 rgb(var(--me-gold));
+  // Días no disponibles (domingos, fechas pasadas)
+  .p-datepicker-day.p-disabled,
+  .p-datepicker-day[data-p-disabled='true'] {
+    opacity: 0.25;
+    cursor: not-allowed;
+    background: transparent;
+    color: $texto-suave;
   }
-
-  /* Pie con Cancelar / Guardar */
-  .p-dialog-content form > .flex.justify-end.border-t {
-    border-top: 1px dashed var(--me-line) !important;
-    background: var(--me-black) !important;
-  }
-}
-
-/* ---------- Móvil ---------- */
-@media (max-width: 640px) {
-  .modal-estandar {
-    &.p-dialog {
-      max-width: calc(100vw - 1.5rem) !important;
-    }
-
-    .p-dialog-header {
-      padding: 0.95rem 1rem;
-    }
-
-    .p-dialog-content .flex.flex-col.gap-3 > .flex.justify-between:has(> span.text-brand-gold) > span.text-brand-gold {
-      font-size: 1.3rem;
-    }
-  }
-}
-
-
-/* Ocultar botón nativo de PrimeNG en modales de venta */
-.p-dialog.modal-venta {
-    .p-dialog-header-actions {
-        display: none !important;
-    }
-
-    .p-dialog-close-button {
-        display: none !important;
-    }
 }
