@@ -44,19 +44,15 @@ import { DialogHeaderComponent, DialogHeaderMode } from '../dialog-header/dialog
   `,
 })
 export class ModalComponent {
-  /** Soporta [(visible)]="mostrar" */
   visible = model(false);
-  /** Se emite cuando el modal termina de cerrarse (X, máscara o Esc) */
   cerrado = output<void>();
   @Input() cerrable = true;
   @Input() titulo = '';
   @Input() mode: DialogHeaderMode = 'crear';
-  /** Si no se pasa, se usa el icono del modo */
   @Input() icono = '';
   @Input() maxWidth = '40rem';
   @Input() dismissableMask = true;
-
-  /** Misma regla que ConfirmPopover */
+  
   get varianteCierre(): ButtonVariant {
     return this.mode === 'eliminar' ? 'close-tabla' : 'cierre';
   }

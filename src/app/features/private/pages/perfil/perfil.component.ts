@@ -195,10 +195,20 @@ export class PerfilComponent implements OnInit {
 
       case 'ADMIN': {
         const id = this.userId();
-        if (!id) {
-          return throwError(() => new Error('No se pudo identificar al usuario autenticado.'));
+        if (id) {
+          return this.usuarioService.obtenerPorId(id).pipe(
+            map((r) => this.perfilDesdeApi(r.data)),
+          );
         }
-        return this.usuarioService.obtenerPorId(id).pipe(
+
+        // El token puede traer el username en `sub` en vez de un id numérico:
+        // se busca al usuario por nombre, como hacía el código original.
+        const username = this.nombreUsuarioToken().toLowerCase();
+        return this.usuarioService.buscar(username, 0, 10).pipe(
+          map((r) => (r.data?.content ?? []).find((u) => String(u.usuario ?? '').toLowerCase() === username)),
+          switchMap((u) => u
+            ? this.usuarioService.obtenerPorId(u.idUsuario)
+            : throwError(() => new Error('No se encontró el usuario administrador autenticado.'))),
           map((r) => this.perfilDesdeApi(r.data)),
         );
       }
@@ -225,6 +235,11 @@ export class PerfilComponent implements OnInit {
   private userId(): number | null {
     const id = Number(this.tokenService.getUserId());
     return Number.isInteger(id) && id > 0 ? id : null;
+  }
+
+  private nombreUsuarioToken(): string {
+    const token = this.tokenService.getDecodedToken();
+    return String(token?.username ?? token?.user ?? token?.sub ?? '').trim();
   }
 
   private obtenerRol(): RolPerfil {
@@ -262,9 +277,11 @@ export class PerfilComponent implements OnInit {
       email: (email ?? p.email).trim(),
     };
 
-    const request$ = p.usuarioId
-      ? this.personaService.actualizarPersonaPorUsuarioId(p.usuarioId, dto)
-      : this.personaService.actualizarPersona(p.personaId, dto);
+    // Igual que el código original: ADMIN actualiza por usuario;
+    // el resto por personaId y, si no hay, por usuario.
+    const request$ = this.rol !== 'ADMIN' && p.personaId
+      ? this.personaService.actualizarPersona(p.personaId, dto)
+      : this.personaService.actualizarPersonaPorUsuarioId(p.usuarioId!, dto);
 
     this.guardandoPerfil.set(true);
     request$.subscribe({

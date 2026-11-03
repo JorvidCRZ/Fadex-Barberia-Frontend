@@ -1,250 +1,258 @@
+
 import { finalize } from 'rxjs';
-import { TagModule } from 'primeng/tag';
+
 import { ActivatedRoute, Router } from '@angular/router';
-import { ToastModule } from 'primeng/toast';
-import { FormsModule } from '@angular/forms';
-import { MessageService } from 'primeng/api';
-import { ButtonModule } from 'primeng/button';
-import { CommonModule } from '@angular/common';
-import { ConfirmationService } from 'primeng/api';
-import { TooltipModule } from 'primeng/tooltip';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { Component, inject, OnInit, ViewChild } from '@angular/core';
-import { Table, TableLazyLoadEvent, TableModule } from 'primeng/table';
-import { ApiResponse, Page } from '../../../../core/models/common/index.model';
+
+import { PaginatorModule, PaginatorState } from 'primeng/paginator';
+import { TableModule } from 'primeng/table';
+
+import {
+  Component,
+  inject,
+  OnInit,
+  signal
+} from '@angular/core';
+
 import { Reserva } from '../../../../core/models/operaciones/Reserva.model';
+
 import { ReservaService } from '../../../../core/services/operaciones/reserva.service';
-import { environment } from '../../../../../environments/environment';
-import { RESERVAS_MOCK } from '../../../../core/config/privado-mock.config';
+import { NotificationService } from '../../../../core/services/common/notification.service';
+
 import { ReservarComponent } from '../reservar/reservar.component';
+
 import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
 import { MonedaPipe } from '../../../../shared/pipes/moneda.pipe';
 import { DateFormatPipe } from '../../../../shared/pipes/dat.pipe';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
-
-type Severidad = 'success' | 'info' | 'warn' | 'danger' | 'secondary';
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
+import { ConfirmPopoverComponent } from '../../../../shared/components/confirm-popover/confirm-popover.component';
 
 @Component({
   selector: 'app-mis-reservas',
   standalone: true,
-  imports: [CommonModule,FormsModule,TableModule,ButtonModule,TagModule,ToastModule,TooltipModule,ConfirmDialogModule,
-    ReservarComponent,StatusBadgeComponent,DateFormatPipe, MonedaPipe,ButtonComponent
+
+  imports: [
+    TableModule,
+    PaginatorModule,
+    ReservarComponent,
+    StatusBadgeComponent,
+    DateFormatPipe,
+    MonedaPipe,
+    ButtonComponent,
+    PageHeaderComponent,
+    ConfirmPopoverComponent,
   ],
-  providers: [MessageService, ConfirmationService],
+
   templateUrl: './mis-reservas.html',
 })
 export class MisReservasComponent implements OnInit {
 
   private reservaService = inject(ReservaService);
-  private messageService = inject(MessageService);
-  private confirmationService = inject(ConfirmationService);
+  private notify = inject(NotificationService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
-  @ViewChild('dt') table: Table | undefined;
+  // =====================================================
+  // ESTADOS
+  // =====================================================
 
-  reservas: Reserva[] = [];
-  loading = false;
-  totalRecords = 0;
-  rows = 10;
-  currentPage = 0;
+  reservas = signal<Reserva[]>([]);
 
-  /** Controla el modal de nueva reserva */
-  dialogNuevaReserva = false;
+  loading = signal(false);
+
+  totalRecords = signal(0);
+
+  rows = signal(10);
+
+  first = signal(0);
+
+  dialogNuevaReserva = signal(false);
+
+  mostrarConfirmacion = signal(false);
+  reservaPorCancelar: Reserva | null = null;
+  mensajeConfirmacion = '';
+
+  // =====================================================
+  // INICIALIZACIÓN
+  // =====================================================
 
   ngOnInit(): void {
+
     this.cargarMisReservas();
 
     // Permite abrir el modal desde otras pantallas:
     // /mi-cuenta/reservas/mis-reservas?nueva=1
+
     if (this.route.snapshot.queryParamMap.has('nueva')) {
-      this.dialogNuevaReserva = true;
+      this.dialogNuevaReserva.set(true);
     }
   }
 
-  // ── Carga ──────────────────────────────────────────────────────────────────
+  // =====================================================
+  // CARGA DE RESERVAS
+  // =====================================================
 
-  cargarMisReservas(event?: TableLazyLoadEvent): void {
-    this.loading = true;
+  cargarMisReservas(): void {
 
-    const size = event?.rows || this.rows;
-    const page = event ? Math.floor((event.first || 0) / size) : this.currentPage;
+    const size = this.rows();
 
-    this.currentPage = page;
-    this.rows = size;
+    const page = Math.floor(this.first() / size);
 
-    if (environment.useMockData) {
-      this.reservaService.getMisReservas(page, size)
-        .pipe(finalize(() => (this.loading = false)))
-        .subscribe({
-          next: (response: ApiResponse<Page<Reserva>>) => {
-            if (response.success && response.data) {
-              this.reservas = response.data.content;
-              this.totalRecords = response.data.totalElements;
-              this.rows = response.data.pageSize || size;
-            } else {
-              this.reservas = [];
-              this.totalRecords = 0;
-            }
-          },
-          error: () => {
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Error',
-              detail: 'No se pudieron cargar tus reservas',
-            });
-            this.reservas = [];
-            this.totalRecords = 0;
-          },
-        });
-      return;
-    }
+    this.loading.set(true);
 
     this.reservaService.getMisReservas(page, size)
-      .pipe(finalize(() => (this.loading = false)))
+      .pipe(
+        finalize(() => this.loading.set(false))
+      )
       .subscribe({
-        next: (response: ApiResponse<Page<Reserva>>) => {
+
+        next: (response) => {
+
           if (response.success && response.data) {
-            this.reservas = response.data.content;
-            this.totalRecords = response.data.totalElements;
-            this.rows = response.data.pageSize || size;
+
+            this.reservas.set(response.data.content);
+
+            this.totalRecords.set(
+              response.data.totalElements
+            );
+
           } else {
-            this.reservas = [];
-            this.totalRecords = 0;
+
+            this.reservas.set([]);
+
+            this.totalRecords.set(0);
           }
         },
-        error: () => {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'No se pudieron cargar tus reservas',
-          });
-          this.reservas = [];
-          this.totalRecords = 0;
-        },
+
+        error: (err) => {
+
+          console.error(
+            'Error cargando mis reservas:',
+            err
+          );
+
+          this.reservas.set([]);
+
+          this.totalRecords.set(0);
+
+          this.notify.showHttpError(err);
+        }
       });
   }
 
-  onLazyLoad(event: TableLazyLoadEvent): void {
-    this.cargarMisReservas(event);
-  }
+  // =====================================================
+  // PAGINACIÓN
+  // =====================================================
 
-  recargar(): void {
+  onPaginatorChange(event: PaginatorState): void {
+
+    const size = event.rows ?? this.rows();
+
+    const first = event.first ?? 0;
+
+    this.rows.set(size);
+
+    this.first.set(first);
+
     this.cargarMisReservas();
   }
 
-  private getReservasMockLocales(): Reserva[] {
-    try {
-      const raw = localStorage.getItem('fadex_mock_reservas');
-      if (!raw) {
-        return [];
-      }
+  // =====================================================
+  // RECARGAR
+  // =====================================================
 
-      const parsed = JSON.parse(raw) as Reserva[];
-      if (!Array.isArray(parsed) || parsed.length === 0) {
-        return [];
-      }
+  recargar(): void {
 
-      return [...parsed]
-        .sort((a, b) => Number(b.reservaId || b.id || 0) - Number(a.reservaId || a.id || 0))
-        .map((reserva) => ({
-          ...reserva,
-          fecha: new Date(reserva.fecha),
-          horaInicio: new Date(reserva.horaInicio),
-          horaFin: new Date(reserva.horaFin),
-        }));
-    } catch {
-      return RESERVAS_MOCK;
-    }
+    this.cargarMisReservas();
   }
 
-  // ── Nueva reserva (modal) ──────────────────────────────────────────────────
+  // =====================================================
+  // NUEVA RESERVA
+  // =====================================================
 
   abrirNuevaReserva(): void {
-    this.dialogNuevaReserva = true;
+
+    this.dialogNuevaReserva.set(true);
   }
 
   onReservaCreada(): void {
-    this.currentPage = 0;
+
+    this.first.set(0);
+
     this.cargarMisReservas();
   }
 
-  // ── Cancelar ───────────────────────────────────────────────────────────────
+  // =====================================================
+  // CANCELAR RESERVA
+  // =====================================================
 
   cancelarReserva(reserva: Reserva): void {
-    const id = reserva.reservaId || reserva.id;
-
-    this.confirmationService.confirm({
-      message: `¿Cancelar la reserva del servicio "${reserva.servicio}"?`,
-      header: 'Confirmar cancelación',
-      icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'Sí, cancelar',
-      rejectLabel: 'No',
-      accept: () => {
-        if (environment.useMockData) {
-          this.reservas = this.reservas.filter((item) => (item.reservaId || item.id) !== id);
-          this.totalRecords = Math.max(0, this.totalRecords - 1);
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Reserva cancelada',
-            detail: 'La reserva simulada ha sido cancelada',
-          });
-          return;
-        }
-
-        this.loading = true;
-        this.reservaService.cancelarReserva(id)
-          .pipe(finalize(() => (this.loading = false)))
-          .subscribe({
-            next: (response) => {
-              if (response.success) {
-                this.messageService.add({
-                  severity: 'success',
-                  summary: 'Reserva cancelada',
-                  detail: 'Tu reserva ha sido cancelada exitosamente',
-                });
-                this.cargarMisReservas();
-              }
-            },
-            error: () => {
-              this.messageService.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'No se pudo cancelar la reserva',
-              });
-            },
-          });
-      },
-    });
+    this.reservaPorCancelar = reserva;
+    this.mensajeConfirmacion = `¿Cancelar la reserva del servicio "${reserva.servicio}"?`;
+    this.mostrarConfirmacion.set(true);
   }
 
-  // ── Pagar ──────────────────────────────────────────────────────────────────
+  cerrarConfirmacion(): void {
+    this.mostrarConfirmacion.set(false);
+    this.reservaPorCancelar = null;
+  }
+
+  confirmarCancelacion(): void {
+    const reserva = this.reservaPorCancelar;
+    if (!reserva) return;
+
+    const id = reserva.reservaId || reserva.id;
+    this.cerrarConfirmacion();
+    this.loading.set(true);
+
+    this.reservaService.cancelarReserva(id)
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (response) => {
+          if (!response.success) return;
+
+          this.notify.showSuccess(
+            'Tu reserva ha sido cancelada exitosamente',
+            'Reserva cancelada'
+          );
+
+          if (this.reservas().length === 1 && this.first() > 0) {
+            this.first.set(Math.max(0, this.first() - this.rows()));
+          }
+
+          this.cargarMisReservas();
+        },
+        error: (err) => {
+          console.error('Error cancelando reserva:', err);
+          this.notify.showHttpError(err);
+        }
+      });
+  }
+
+  // =====================================================
+  // PAGAR RESERVA
+  // =====================================================
 
   irAPagar(reserva: Reserva): void {
-    this.router.navigate(['/mi-cuenta/checkout', reserva.reservaId]);
+
+    this.router.navigate([
+      '/mi-cuenta/checkout',
+      reserva.reservaId
+    ]);
   }
 
-  // ── Reglas de UI ───────────────────────────────────────────────────────────
+  // =====================================================
+  // REGLAS DE INTERFAZ
+  // =====================================================
 
   puedePagar(reserva: Reserva): boolean {
+
     return reserva.estadoReserva === 'PENDIENTE_PAGO';
   }
 
   puedeCancelar(reserva: Reserva): boolean {
+
     return reserva.estadoReserva === 'PENDIENTE_PAGO';
   }
 
-  /** Acepta '09:30:00', [9, 30] o { hour: 9, minute: 30 } y devuelve 'HH:mm' */
-
-  getSeverity(estado: string): Severidad {
-    const severities: Record<string, Severidad> = {
-      CONFIRMADA: 'success',
-      FINALIZADA: 'success',
-      EN_PROCESO: 'info',
-      PENDIENTE: 'info',
-      PENDIENTE_PAGO: 'warn',
-      CANCELADA: 'danger',
-    };
-    return severities[estado] ?? 'secondary';
-  }
 }

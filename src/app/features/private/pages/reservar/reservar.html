@@ -1,207 +1,239 @@
-<p-dialog
+<app-modal
   [(visible)]="visible"
-  [modal]="true"
-  [draggable]="false"
-  [resizable]="false"
-  [style]="{ width: '72rem', maxWidth: '95vw' }"
-  [breakpoints]="{ '1199px': '90vw' }"
-  [showHeader]="false"
+  titulo="Agendar una cita"
+  mode="crear"
+  icono="pi-calendar-plus"
+  maxWidth="72rem"
   [dismissableMask]="false"
-  [closeOnEscape]="false"
-  (onShow)="alAbrir()">
+  (visibleChange)="alCambiarVisible($event)">
 
-  <div class="overflow-hidden rounded-[1.25rem] border border-[#c79627]/80 bg-[#0c0b0a] shadow-[0_0_0_1px_rgba(199,150,39,0.25)]">
+  <div class="overflow-hidden rounded-[1.25rem] border border-brand-gold/80 bg-ui-surface shadow-card">
     <div class="grid lg:grid-cols-[1.7fr_0.95fr]">
       <div class="p-6 md:p-8">
         <div class="mb-8">
-          <p class="mb-2 text-[11px] font-semibold uppercase tracking-[0.35em] text-[#d9ae4c]">RESERVA</p>
-          <h2 class="text-3xl font-bold text-white">Agendar una cita</h2>
-          <p class="mt-2 text-sm text-[#a9a29d]">Completa el formulario para programar tu próxima visita.</p>
+          <p class="mb-2 text-[11px] font-semibold uppercase tracking-[0.35em] text-brand-gold">RESERVA</p>
+          <h2 class="text-3xl font-bold text-text-primary">Agendar una cita</h2>
+          <p class="mt-2 text-sm text-text-muted">Completa el formulario para programar tu próxima visita.</p>
         </div>
 
         <div class="mb-6 flex items-center gap-3">
-          <div class="flex h-12 w-12 items-center justify-center rounded-full bg-[#d9ae4c]/15 text-[#d9ae4c] ring-1 ring-[#d9ae4c]/30">
+          <div class="flex size-12 items-center justify-center rounded-full bg-brand-gold/15 text-brand-gold ring-1 ring-brand-gold/30">
             <i class="pi pi-user text-xl"></i>
           </div>
           <div>
-            <div class="text-xl font-semibold text-white">{{ usuarioNombre || 'Jorvix' }}</div>
-            <div class="text-sm text-[#9ca3af]">Cliente</div>
+            <div class="text-xl font-semibold text-text-primary">{{ usuarioNombre }}</div>
+            <div class="text-sm text-text-muted">Cliente</div>
           </div>
         </div>
 
-        <form [formGroup]="citaForm" class="space-y-5">
+        <form [formGroup]="citaForm" class="space-y-6">
+
+          <!-- Barbero: tarjetas -->
           <div>
-            <label class="mb-2 block text-sm font-semibold text-white">Barbero <span class="text-[#f4b942]">*</span></label>
-            <p-select
-              formControlName="barberoId"
-              [options]="(barberos$ | async) || []"
-              optionLabel="nombreCompleto"
-              optionValue="barberoId"
-              placeholder="Selecciona un barbero"
-              appendTo="body"
-              styleClass="w-full rounded-xl border border-[#2c2a29] bg-[#1b1a19] text-white"
-              panelStyleClass="bg-[#1b1a19] border border-[#3a342f] text-white">
-              <ng-template let-barbero pTemplate="item">
-                <div class="flex items-center gap-3 py-1">
-                  <div class="flex h-9 w-9 items-center justify-center rounded-full border border-[#d9ae4c]/30 bg-[#d9ae4c]/10 text-[#d9ae4c]">
-                    <i class="pi pi-user text-sm"></i>
-                  </div>
-                  <div>
-                    <div class="font-medium text-white">{{ barbero.nombreCompleto }}</div>
-                    <div class="text-xs text-[#a9a29d]">{{ barbero.especialidad || 'Barbero' }}</div>
-                  </div>
-                </div>
-              </ng-template>
-            </p-select>
+            <label class="mb-2 block text-sm font-semibold text-text-primary">Barbero <span class="text-brand-amber">*</span></label>
+
+            @if (cargandoBarberos()) {
+              <p class="text-sm text-text-muted">Cargando barberos...</p>
+            } @else if (barberos().length === 0) {
+              <p class="text-sm text-text-muted">No hay barberos disponibles.</p>
+            } @else {
+              <div class="grid gap-3 sm:grid-cols-2">
+                @for (barbero of barberos(); track barbero.barberoId) {
+                  <button
+                    type="button"
+                    (click)="seleccionarBarbero(barbero)"
+                    class="flex items-center gap-3 rounded-xl border p-3 text-left transition-colors"
+                    [class]="esBarberoSel(barbero)
+                      ? 'border-brand-gold bg-brand-gold/10'
+                      : 'border-ui-border bg-ui-card hover:border-brand-gold/60'">
+                    <div class="flex size-11 shrink-0 items-center justify-center rounded-full border border-brand-gold/30 bg-brand-gold/10 text-brand-gold">
+                      <i class="pi pi-user"></i>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                      <div class="truncate font-medium text-text-primary">{{ barbero.nombreCompleto }}</div>
+                      @if (barbero.experiencia) {
+                        <div class="truncate text-xs text-text-muted">{{ barbero.experiencia }}</div>
+                      }
+                    </div>
+                    @if (esBarberoSel(barbero)) {
+                      <i class="pi pi-check-circle text-brand-gold"></i>
+                    }
+                  </button>
+                }
+              </div>
+            }
+
             @if (invalido('barberoId')) {
-              <span class="mt-2 block text-xs text-[#ffb4b4]">Selecciona un barbero</span>
+              <span class="mt-2 block text-xs text-danger">Selecciona un barbero</span>
             }
           </div>
 
+          <!-- Servicio: tabla paginada -->
           <div>
-            <div class="mb-2 flex items-center justify-between">
-              <label class="text-sm font-semibold text-white">Disponibilidad</label>
-              @if (citaForm.controls.fecha.value) {
-                <span class="text-xs text-[#d9ae4c]">{{ citaForm.controls.fecha.value | date:'EEEE' }}</span>
-              }
-            </div>
-            <div class="flex flex-wrap gap-2">
-              @for (dia of diasDisponibles; track dia.valor) {
-                <button
-                  type="button"
-                  (click)="elegirDia(dia)"
-                  [class]="chipClass(esDiaActivo(dia))">
-                  {{ dia.label }}
-                </button>
-              }
-            </div>
-          </div>
+            <label class="mb-2 block text-sm font-semibold text-text-primary">Servicio <span class="text-brand-amber">*</span></label>
 
-          <div>
-            <label class="mb-2 block text-sm font-semibold text-white">Hora</label>
-            <div class="flex flex-wrap gap-2">
-              @for (horario of horariosDisponibles; track horario.value) {
-                <button
-                  type="button"
-                  (click)="elegirHora(horario.value)"
-                  [class]="citaForm.controls.hora.value === horario.value
-                    ? 'rounded-lg border border-[#d9ae4c] bg-[#d9ae4c] px-3 py-2 text-sm font-semibold text-black'
-                    : 'rounded-lg border border-[#2c2a29] bg-[#1a1a1a] px-3 py-2 text-sm font-semibold text-[#f3f4f6] transition-colors hover:border-[#d9ae4c]/60 hover:text-[#d9ae4c]'">
-                  {{ horario.label }}
-                </button>
-              }
-            </div>
-            @if (invalido('hora')) {
-              <span class="mt-2 block text-xs text-[#ffb4b4]">Selecciona una hora</span>
-            }
-          </div>
+            <p-table
+              [value]="servicios()"
+              [loading]="cargandoServicios()"
+              dataKey="servicioId"
+              [tableStyle]="{ 'min-width': '100%' }">
 
-          <div>
-            <label class="mb-2 block text-sm font-semibold text-white">Servicio <span class="text-[#f4b942]">*</span></label>
-            <p-select
-              formControlName="servicioId"
-              [options]="(servicios$ | async) || []"
-              optionLabel="nombre"
-              optionValue="servicioId"
-              placeholder="Selecciona un servicio"
-              appendTo="body"
-              styleClass="w-full rounded-xl border border-[#2c2a29] bg-[#1b1a19] text-white"
-              panelStyleClass="bg-[#1b1a19] border border-[#3a342f] text-white">
-              <ng-template let-servicio pTemplate="item">
-                <div class="flex w-full items-center justify-between gap-4 py-1">
-                  <div>
-                    <div class="font-medium text-white">{{ servicio.nombre }}</div>
-                    <div class="text-xs text-[#a9a29d]">{{ servicio.duracion || 30 }} min</div>
-                  </div>
-                  <span class="font-semibold text-[#d9ae4c]">{{ servicio.precio | currency:'PEN ' }}</span>
-                </div>
+              <ng-template pTemplate="header">
+                <tr>
+                  <th class="w-12"></th>
+                  <th>Servicio</th>
+                  <th>Duración</th>
+                  <th class="text-right">Precio</th>
+                </tr>
               </ng-template>
-            </p-select>
+
+              <ng-template pTemplate="body" let-servicio>
+                <tr
+                  (click)="seleccionarServicio(servicio)"
+                  class="cursor-pointer transition-colors"
+                  [class]="esServicioSel(servicio) ? 'bg-brand-gold/10' : 'hover:bg-ui-elevated'">
+                  <td>
+                    <div
+                      class="flex size-5 items-center justify-center rounded-full border"
+                      [class]="esServicioSel(servicio) ? 'border-brand-gold bg-brand-gold' : 'border-ui-border'">
+                      @if (esServicioSel(servicio)) {
+                        <i class="pi pi-check text-[10px] text-brand-black"></i>
+                      }
+                    </div>
+                  </td>
+                  <td class="font-medium text-text-primary">{{ servicio.nombre }}</td>
+                  <td class="text-sm text-text-muted">{{ servicio.duracion ? servicio.duracion + ' min' : '—' }}</td>
+                  <td class="text-right font-semibold text-brand-gold">{{ servicio.precio | moneda }}</td>
+                </tr>
+              </ng-template>
+
+              <ng-template pTemplate="emptymessage">
+                <tr>
+                  <td colspan="4" class="py-8 text-center text-sm text-text-muted">
+                    No hay servicios disponibles.
+                  </td>
+                </tr>
+              </ng-template>
+
+              <ng-template pTemplate="loadingbody">
+                <tr>
+                  <td colspan="4" class="py-8 text-center text-sm text-text-muted">
+                    Cargando servicios...
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+
+            <p-paginator
+              [first]="firstServicios()"
+              [rows]="rowsServicios()"
+              [totalRecords]="totalServicios()"
+              [showCurrentPageReport]="true"
+              currentPageReportTemplate="{currentPage} de {totalPages} · {totalRecords} servicio(s)"
+              (onPageChange)="onPaginatorServicios($event)" />
+
             @if (invalido('servicioId')) {
-              <span class="mt-2 block text-xs text-[#ffb4b4]">Selecciona un servicio</span>
+              <span class="mt-2 block text-xs text-danger">Selecciona un servicio</span>
+            }
+          </div>
+
+          <!-- Fecha y hora: calendario -->
+          <div>
+            <label class="mb-2 block text-sm font-semibold text-text-primary">Fecha y hora <span class="text-brand-amber">*</span></label>
+
+            <p-datepicker
+              formControlName="fechaHora"
+              [inline]="true"
+              [showTime]="true"
+              hourFormat="12"
+              [stepMinute]="30"
+              [minDate]="minDate"
+              [maxDate]="maxDate"
+              [disabledDays]="[0]"
+              (onSelect)="marcarFechaHoraTocada()"
+              styleClass="w-full" />
+
+            <p class="mt-2 text-xs text-text-muted">Atendemos de lunes a sábado, de 09:00 AM a 07:00 PM.</p>
+
+            @if (invalido('fechaHora')) {
+              <span class="mt-1 block text-xs text-danger">{{ errorFechaHora }}</span>
             }
           </div>
 
           <div>
             <div class="mb-2 flex items-center justify-between">
-              <label class="text-sm font-semibold text-white">Notas adicionales</label>
-              <span class="text-xs text-[#a9a29d]">{{ citaForm.controls.notas.value?.length || 0 }}/300</span>
+              <label class="text-sm font-semibold text-text-primary">Notas adicionales</label>
+              <span class="text-xs text-text-muted">{{ citaForm.controls.notas.value?.length || 0 }}/300</span>
             </div>
             <textarea
               rows="3"
               formControlName="notas"
-              class="w-full resize-none rounded-xl border border-[#2c2a29] bg-[#1b1a19] px-4 py-3 text-sm text-white placeholder-[#7a7673] outline-none transition focus:border-[#d9ae4c]"
+              class="w-full resize-none rounded-xl border border-ui-border bg-ui-card px-4 py-3 text-sm text-text-primary outline-none transition placeholder:text-text-subtle focus:border-brand-gold"
               placeholder="Cuéntanos alguna indicación...">
             </textarea>
           </div>
 
           <div class="flex items-center gap-3">
             <p-checkbox formControlName="aceptaTerminos" inputId="terminos" [binary]="true" />
-            <label for="terminos" class="cursor-pointer select-none text-sm text-[#e5e7eb]">
+            <label for="terminos" class="cursor-pointer select-none text-sm text-text-secondary">
               Acepto los términos y condiciones de reserva
             </label>
           </div>
           @if (invalido('aceptaTerminos')) {
-            <span class="block text-xs text-[#ffb4b4]">Debes aceptar los términos para continuar</span>
+            <span class="block text-xs text-danger">Debes aceptar los términos para continuar</span>
           }
         </form>
       </div>
 
-      <aside class="border-t border-[#3a342f] bg-[#0b0b0b] p-6 md:p-8 lg:border-l lg:border-t-0">
-        <h3 class="mb-6 text-xl font-semibold text-white">Resumen de la cita</h3>
+      <aside class="border-t border-ui-border bg-ui-black p-6 md:p-8 lg:border-l lg:border-t-0">
+        <h3 class="mb-6 text-xl font-semibold text-text-primary">Resumen de la cita</h3>
 
-        <dl class="space-y-4 text-sm text-[#d1d5db]">
-          <div class="flex items-start justify-between gap-4 border-b border-[#2a2725] pb-3">
-            <dt class="text-[#a9a29d]">Barbero</dt>
-            <dd class="font-medium text-white">{{ barberoSel?.nombreCompleto || '—' }}</dd>
+        <dl class="space-y-4 text-sm text-text-secondary">
+          <div class="flex items-start justify-between gap-4 border-b border-ui-border-soft pb-3">
+            <dt class="text-text-muted">Barbero</dt>
+            <dd class="font-medium text-text-primary">{{ barberoSel()?.nombreCompleto || '—' }}</dd>
           </div>
 
-          <div class="flex items-start justify-between gap-4 border-b border-[#2a2725] pb-3">
-            <dt class="text-[#a9a29d]">Servicio</dt>
-            <dd class="font-medium text-white">{{ servicioSel?.nombre || '—' }}</dd>
+          <div class="flex items-start justify-between gap-4 border-b border-ui-border-soft pb-3">
+            <dt class="text-text-muted">Servicio</dt>
+            <dd class="font-medium text-text-primary">{{ servicioSel()?.nombre || '—' }}</dd>
           </div>
 
-          <div class="flex items-start justify-between gap-4 border-b border-[#2a2725] pb-3">
-            <dt class="text-[#a9a29d]">Duración</dt>
-            <dd class="font-medium text-white">{{ servicioSel?.duracion || 30 }} min</dd>
+          <div class="flex items-start justify-between gap-4 border-b border-ui-border-soft pb-3">
+            <dt class="text-text-muted">Duración</dt>
+            <dd class="font-medium text-text-primary">{{ servicioSel()?.duracion ? servicioSel()?.duracion + ' min' : '—' }}</dd>
           </div>
 
-          <div class="flex items-start justify-between gap-4 border-b border-[#2a2725] pb-3">
-            <dt class="text-[#a9a29d]">Fecha</dt>
-            <dd class="font-medium text-white">{{ citaForm.controls.fecha.value ? (citaForm.controls.fecha.value | date:'dd/MM/yyyy') : '—' }}</dd>
+          <div class="flex items-start justify-between gap-4 border-b border-ui-border-soft pb-3">
+            <dt class="text-text-muted">Fecha</dt>
+            <dd class="font-medium text-text-primary">{{ citaForm.controls.fechaHora.value ? (citaForm.controls.fechaHora.value | dateHelper) : '—' }}</dd>
           </div>
 
           <div class="flex items-start justify-between gap-4 pb-3">
-            <dt class="text-[#a9a29d]">Hora</dt>
-            <dd class="font-medium text-white">{{ citaForm.controls.hora.value || '—' }}</dd>
+            <dt class="text-text-muted">Hora</dt>
+            <dd class="font-medium text-text-primary">{{ citaForm.controls.fechaHora.value ? (citaForm.controls.fechaHora.value | date:'hh:mm a') : '—' }}</dd>
           </div>
         </dl>
 
-        <div class="mt-6 border-t border-[#2a2725] pt-4">
-          <div class="flex items-center justify-between text-base font-semibold text-white">
+        <div class="mt-6 border-t border-ui-border-soft pt-4">
+          <div class="flex items-center justify-between text-base font-semibold text-text-primary">
             <span>Total a pagar</span>
-            <span class="text-[#d9ae4c]">{{ (servicioSel?.precio || 0) | currency:'PEN ' }}</span>
+            <span class="text-brand-gold">{{ (servicioSel()?.precio || 0) | moneda }}</span>
           </div>
         </div>
 
-        <ul class="mt-6 space-y-2 text-sm text-[#c7c7c7]">
-          <li class="flex items-start gap-2"><i class="pi pi-check-circle mt-0.5 text-[#d9ae4c]"></i> Pago contra entrega en el local</li>
-          <li class="flex items-start gap-2"><i class="pi pi-clock mt-0.5 text-[#d9ae4c]"></i> Llegar 10 minutos antes de tu cita</li>
-          <li class="flex items-start gap-2"><i class="pi pi-info-circle mt-0.5 text-[#d9ae4c]"></i> Cancelación con 2 horas de anticipación</li>
+        <ul class="mt-6 space-y-2 text-sm text-text-secondary">
+          <li class="flex items-start gap-2"><i class="pi pi-check-circle mt-0.5 text-brand-gold"></i> Pago contra entrega en el local</li>
+          <li class="flex items-start gap-2"><i class="pi pi-clock mt-0.5 text-brand-gold"></i> Llegar 10 minutos antes de tu cita</li>
+          <li class="flex items-start gap-2"><i class="pi pi-info-circle mt-0.5 text-brand-gold"></i> Cancelación con 2 horas de anticipación</li>
         </ul>
 
         <div class="mt-8 space-y-3">
-          <button type="button" class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#d9ae4c] px-4 py-3 text-base font-bold text-black transition hover:bg-[#e7bc5e]" (click)="guardar()" [disabled]="citaForm.invalid || guardando()">
-            <i class="pi pi-calendar-plus"></i>
-            {{ guardando() ? 'Agendando...' : 'Agendar cita' }}
-          </button>
-
-          <button type="button" class="flex w-full items-center justify-center gap-2 rounded-xl border border-[#3a342f] bg-[#2a2725] px-4 py-3 text-base font-semibold text-white transition hover:border-[#d9ae4c]/60 hover:text-[#f3d38b]" (click)="cerrar()">
-            <i class="pi pi-times"></i>
-            Cancelar
-          </button>
+          <app-button variant="primary" icon="calendar-plus" label="Agendar cita" loadingLabel="Agendando..."
+            [loading]="guardando()" [disabled]="citaForm.invalid" [fullWidth]="true" (clicked)="guardar()" />
+          <app-button variant="cancel" icon="times" label="Cancelar" [fullWidth]="true" (clicked)="cerrar()" />
         </div>
       </aside>
     </div>
   </div>
-</p-dialog>
+</app-modal>
