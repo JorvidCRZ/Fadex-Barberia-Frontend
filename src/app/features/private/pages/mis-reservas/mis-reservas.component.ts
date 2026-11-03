@@ -6,19 +6,15 @@ import { PaginatorModule, PaginatorState } from 'primeng/paginator';
 import { TableModule } from 'primeng/table';
 
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
-
 import { FILTROS_HISTORIAL } from '../../../../core/config/filtros.config';
 import { Reserva } from '../../../../core/models/operaciones/Reserva.model';
 import {
   HistorialClienteFiltro,
   HistorialClienteModel,
 } from '../../../../core/models/operaciones/historial-cliente.model';
-
 import { ReservaService } from '../../../../core/services/operaciones/reserva.service';
 import { NotificationService } from '../../../../core/services/common/notification.service';
-
 import { ReservarComponent } from '../reservar/reservar.component';
-
 import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
 import { MonedaPipe } from '../../../../shared/pipes/moneda.pipe';
 import { DateFormatPipe } from '../../../../shared/pipes/dat.pipe';
@@ -56,25 +52,15 @@ export class MisReservasComponent implements OnInit {
   private notify = inject(NotificationService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
-
-  // Estados que se muestran en la pestaña "Próximas"
   private readonly ESTADOS_ACTIVOS: EstadoReserva[] = [
     EstadoReserva.PENDIENTE_PAGO,
     EstadoReserva.CONFIRMADA,
     EstadoReserva.EN_PROCESO,
   ];
 
-  // =====================================================
-  // PESTAÑA ACTIVA
-  // =====================================================
-
   tab = signal<TabReservas>('reservas');
 
   private historialCargado = false;
-
-  // =====================================================
-  // ESTADO: RESERVAS
-  // =====================================================
 
   reservas = signal<Reserva[]>([]);
   loadingReservas = signal(false);
@@ -84,13 +70,12 @@ export class MisReservasComponent implements OnInit {
 
   dialogNuevaReserva = signal(false);
 
+  /** Servicio que llega preseleccionado desde el detalle (?servicioId=X). null = sin preselección */
+  servicioIdInicial = signal<number | null>(null);
+
   mostrarConfirmacion = signal(false);
   reservaPorCancelar: Reserva | null = null;
   mensajeConfirmacion = '';
-
-  // =====================================================
-  // ESTADO: HISTORIAL
-  // =====================================================
 
   historial = signal<HistorialClienteModel[]>([]);
   loadingHistorial = signal(false);
@@ -109,34 +94,34 @@ export class MisReservasComponent implements OnInit {
   displayModal = signal(false);
   reservaSeleccionada = signal<HistorialClienteModel | null>(null);
 
-  // =====================================================
-  // INICIALIZACIÓN
-  // =====================================================
-
   ngOnInit(): void {
     this.cargarMisReservas();
 
-    // Permite abrir el modal desde otras pantallas:
-    // /mi-cuenta/reservas/mis-reservas?nueva=1
-    if (this.route.snapshot.queryParamMap.has('nueva')) {
+    const params = this.route.snapshot.queryParamMap;
+
+    // /mi-cuenta/reservas/mis-reservas?nueva=1&servicioId=5
+    const servicioId = params.get('servicioId');
+    if (servicioId) {
+      this.servicioIdInicial.set(Number(servicioId));
+    }
+
+    if (params.has('nueva')) {
       this.dialogNuevaReserva.set(true);
     }
 
-    // Permite abrir directo el historial:
-    // /mi-cuenta/reservas/mis-reservas?tab=historial
-    if (this.route.snapshot.queryParamMap.get('tab') === 'historial') {
+    if (params.get('tab') === 'historial') {
       this.cambiarTab('historial');
+    }
+
+    // Limpia la URL para que un F5 no vuelva a abrir el modal
+    if (params.has('nueva') || servicioId) {
+      this.router.navigate([], { relativeTo: this.route, queryParams: {}, replaceUrl: true });
     }
   }
 
-  // =====================================================
-  // TABS
-  // =====================================================
 
   cambiarTab(tab: TabReservas): void {
     this.tab.set(tab);
-
-    // El historial se carga la primera vez que se abre la pestaña
     if (tab === 'historial' && !this.historialCargado) {
       this.cargarHistorial();
     }
@@ -187,10 +172,12 @@ export class MisReservasComponent implements OnInit {
   // =====================================================
 
   abrirNuevaReserva(): void {
+    this.servicioIdInicial.set(null); // apertura manual: sin servicio preseleccionado
     this.dialogNuevaReserva.set(true);
   }
 
   onReservaCreada(): void {
+    this.servicioIdInicial.set(null);
     this.firstReservas.set(0);
     this.cambiarTab('reservas');
     this.cargarMisReservas();
@@ -252,10 +239,6 @@ export class MisReservasComponent implements OnInit {
     this.router.navigate(['/mi-cuenta/pago', reserva.reservaId]);
   }
 
-  // =====================================================
-  // RESERVAS: REGLAS DE INTERFAZ
-  // =====================================================
-
   puedePagar(reserva: Reserva): boolean {
     return reserva.estadoReserva === EstadoReserva.PENDIENTE_PAGO;
   }
@@ -264,9 +247,6 @@ export class MisReservasComponent implements OnInit {
     return reserva.estadoReserva === EstadoReserva.PENDIENTE_PAGO;
   }
 
-  // =====================================================
-  // HISTORIAL: CARGA
-  // =====================================================
 
   cargarHistorial(): void {
     const size = this.rowsHistorial();
@@ -304,10 +284,6 @@ export class MisReservasComponent implements OnInit {
     this.firstHistorial.set(event.first ?? 0);
     this.cargarHistorial();
   }
-
-  // =====================================================
-  // HISTORIAL: FILTROS Y DETALLE
-  // =====================================================
 
   onBuscar(filtros: HistorialClienteFiltro): void {
     this.filtros.set(filtros);

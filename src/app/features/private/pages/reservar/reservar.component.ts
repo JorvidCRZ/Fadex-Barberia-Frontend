@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, model, output, signal, untracked } from '@angular/core';
+import { Component, computed, effect, inject, input, model, output, signal, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AbstractControl, FormBuilder, FormControl, ReactiveFormsModule, ValidationErrors, Validators, } from '@angular/forms';
@@ -102,6 +102,9 @@ export class ReservarComponent {
   visible = model(false);
   creada = output<void>();
   guardando = signal(false);
+
+  /** Servicio que se preselecciona al abrir (viene desde el detalle del servicio). null = ninguno */
+  servicioIdInicial = input<number | null>(null);
 
   readonly usuarioNombre = this.tokenService.getUserDisplayName();
 
@@ -239,7 +242,19 @@ export class ReservarComponent {
       .pipe(finalize(() => this.cargandoServicios.set(false)))
       .subscribe({
         next: (res) => {
-          this.servicios.set(res?.data?.content ?? []);
+          const lista = res?.data?.content ?? [];
+          this.servicios.set(lista);
+
+          // Preselecciona el servicio si venimos desde el detalle
+          const idInicial = this.servicioIdInicial();
+          if (idInicial && !this.servicioSel()) {
+            const index = lista.findIndex((s) => s.servicioId === idInicial);
+            if (index >= 0) {
+              this.seleccionarServicio(lista[index]);
+              // muestra la página de la tabla donde está el servicio
+              this.firstServicios.set(Math.floor(index / this.rowsServicios) * this.rowsServicios);
+            }
+          }
         },
         error: (error) => {
           console.error('Error cargando servicios:', error);
@@ -269,11 +284,7 @@ export class ReservarComponent {
     return this.servicioSel()?.servicioId === servicio.servicioId;
   }
 
-  /**
-   * URL de la imagen de un servicio.
-   * AJUSTAR: cambia esta línea por el campo real de tu modelo Servicio
-   * (por ejemplo `servicio.imagenUrl` o `servicio.imagenes?.[0]?.url`).
-   */
+
   imagenServicio(servicio: Servicio | null): string | null {
     if (!servicio) return null;
     const s = servicio as any;
@@ -281,17 +292,14 @@ export class ReservarComponent {
     return typeof url === 'string' && url.length > 0 ? url : null;
   }
 
-  /** Si la imagen no carga, se oculta en vez de mostrar el icono roto */
   ocultarImagen(event: Event): void {
     (event.target as HTMLImageElement).style.display = 'none';
   }
 
-  // ── Fecha (calendario) y hora (botones) ────────────────────────────────────
 
   onFechaSelect(fecha: Date | null): void {
     this.fechaSel.set(fecha);
 
-    // Si la hora elegida ya pasó en el nuevo día (por ejemplo, hoy), se descarta
     const hora = this.horaSel();
     if (hora && this.horaDeshabilitada(hora)) {
       this.horaSel.set(null);
@@ -306,7 +314,6 @@ export class ReservarComponent {
     this.actualizarFechaHora();
   }
 
-  /** Una hora no se puede elegir si aún no hay fecha, o si es hoy y ya pasó */
   horaDeshabilitada(valor: string): boolean {
     const fecha = this.fechaSel();
     if (!fecha) return true;
