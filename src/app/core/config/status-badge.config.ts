@@ -18,6 +18,7 @@ export const TONO_POR_ESTADO: Record<string, BadgeTone> = {
   pendiente_pago: 'warning',
   en_proceso: 'info',
   finalizada: 'info',
+  pagada: 'success',
   cancelada: 'danger',
   no_asistio: 'neutral',
 

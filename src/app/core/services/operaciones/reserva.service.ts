@@ -54,20 +54,24 @@ export class ReservaService {
     return this.http.get<ApiResponse<Reserva>>(`${this.API2}/${id}`);
   }
 
-  getHistorialCliente(page: number = 0, size: number = 10, estado?: EstadoReserva, desde?: Date, hasta?: Date): Observable<ApiResponse<Page<HistorialClienteModel>>> {
+  getHistorialCliente(page: number = 0, size: number = 10, estado?: string | EstadoReserva, desde?: Date | string, hasta?: Date | string): Observable<ApiResponse<Page<HistorialClienteModel>>> {
     let params = new HttpParams().set('page', page.toString()).set('size', size.toString());
     if (estado) {
       params = params.set('estado', estado);
     }
     if (desde) {
       const fechaDesde = desde instanceof Date ? desde : new Date(desde);
-      params = params.set('desde', fechaDesde.toISOString().split('T')[0]);
+      if (!Number.isNaN(fechaDesde.getTime())) {
+        params = params.set('desde', fechaDesde.toISOString().split('T')[0]);
+      }
     }
     if (hasta) {
       const fechaHasta = hasta instanceof Date ? hasta : new Date(hasta);
-      params = params.set('hasta', fechaHasta.toISOString().split('T')[0]);
+      if (!Number.isNaN(fechaHasta.getTime())) {
+        params = params.set('hasta', fechaHasta.toISOString().split('T')[0]);
+      }
     }
-    return this.http.get<ApiResponse<Page<HistorialClienteModel>>>(`${this.API2}/historial`, { params });
+    return this.http.get<ApiResponse<Page<HistorialClienteModel>>>(`${environment.apiUrl}/historial`, { params });
   }
 
   pagarReserva(id: number): Observable<ApiResponse<string>> {

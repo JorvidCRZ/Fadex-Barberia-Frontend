@@ -37,14 +37,14 @@ export class CarritoComponent {
     return item.cantidad * obtenerPrecio(item.producto);
   }
 
-  procesarCompra(): void {
-    if (!this.tokenService.isLogged()) {
-      this.notify.showError('Debes iniciar sesión para continuar con la compra');
-      this.router.navigate(['/productos']);
-      return;
-    }
-    this.router.navigate(['/checkout']);
+procesarCompra(): void {
+  if (!this.tokenService.isLogged()) {
+    this.notify.showError('Debes iniciar sesión para continuar con la compra');
+    this.router.navigate(['/login'], { queryParams: { returnUrl: '/checkout' } });
+    return;
   }
+  this.router.navigate(['/checkout']);
+}
 
   actualizarCantidad(index: number, cantidad: number): void {
     this.carritoService.actualizarCantidad(index, cantidad);

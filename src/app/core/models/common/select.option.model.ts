@@ -153,11 +153,12 @@ export const ESTADO_RECOMPENSA_OPTIONS: SelectOption<EstadoRecompensa>[] = [
     { label: 'Anulado', value: EstadoRecompensa.ANULADO },
 ];
 
-export const ESTADO_RESERVA_OPTIONS: SelectOption<EstadoReserva>[] = [
+export const ESTADO_RESERVA_OPTIONS: SelectOption<string>[] = [
     { label: 'Pendiente de pago', value: EstadoReserva.PENDIENTE_PAGO },
     { label: 'Confirmada', value: EstadoReserva.CONFIRMADA },
     { label: 'En proceso', value: EstadoReserva.EN_PROCESO },
     { label: 'Finalizada', value: EstadoReserva.FINALIZADA },
+    { label: 'Pagada', value: 'PAGADA' },
     { label: 'Cancelada', value: EstadoReserva.CANCELADA },
     { label: 'Cancelada automática', value: EstadoReserva.CANCELADA_AUTOMATICA },
     { label: 'No asistió', value: EstadoReserva.NO_ASISTIO },

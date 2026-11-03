@@ -11,9 +11,9 @@
       </section>
     } @else {
       <div class="mb-8 text-center">
-        <p class="text-sm font-semibold uppercase tracking-[0.2em] text-text-secondary">Pago simulado</p>
+        <p class="text-sm font-semibold uppercase tracking-[0.2em] text-text-secondary">Pago seguro</p>
         <h1 class="mt-2 text-3xl font-bold text-text-primary">Finaliza tu transacción</h1>
-        <p class="mt-2 text-text-secondary">Selecciona un método de pago para simular la venta.</p>
+        <p class="mt-2 text-text-secondary">Selecciona un método de pago para completar tu compra.</p>
       </div>
 
       <section class="grid overflow-hidden rounded-3xl border border-ui-border bg-ui-card shadow-card lg:grid-cols-[260px_1fr]">
@@ -43,21 +43,69 @@
               <div class="mt-6 space-y-4">
                 <div>
                   <label class="label-form" for="numeroTarjeta">Número de tarjeta</label>
-                  <input id="numeroTarjeta" class="inputs-text w-full" placeholder="#### #### #### ####" />
+                  <input
+                    id="numeroTarjeta"
+                    [(ngModel)]="form.numeroTarjeta"
+                    name="numeroTarjeta"
+                    class="inputs-text w-full transition-colors"
+                    [class.border-red-500]="mostrarErrorCampo('numeroTarjeta')"
+                    [class.border-brand-gold]="!mostrarErrorCampo('numeroTarjeta')"
+                    placeholder="#### #### #### ####"
+                    (input)="formatearNumeroTarjeta()"
+                    (blur)="camposTocados.numeroTarjeta = true" />
+                  @if (mostrarErrorCampo('numeroTarjeta')) {
+                    <small class="mt-1 block text-xs text-red-400">Número de tarjeta inválido</small>
+                  }
                 </div>
                 <div class="grid gap-4 sm:grid-cols-2">
                   <div>
                     <label class="label-form" for="vencimiento">Vencimiento</label>
-                    <input id="vencimiento" class="inputs-text w-full" placeholder="MM/AA" />
+                    <input
+                      id="vencimiento"
+                      [(ngModel)]="form.vencimiento"
+                      name="vencimiento"
+                      class="inputs-text w-full transition-colors"
+                      [class.border-red-500]="mostrarErrorCampo('vencimiento')"
+                      [class.border-brand-gold]="!mostrarErrorCampo('vencimiento')"
+                      placeholder="MM/AA"
+                      (input)="formatearVencimiento()"
+                      (blur)="camposTocados.vencimiento = true" />
+                    @if (mostrarErrorCampo('vencimiento')) {
+                      <small class="mt-1 block text-xs text-red-400">Vencimiento inválido o vencido</small>
+                    }
                   </div>
                   <div>
                     <label class="label-form" for="cvv">Código de seguridad</label>
-                    <input id="cvv" class="inputs-text w-full" placeholder="CVV" />
+                    <input
+                      id="cvv"
+                      [(ngModel)]="form.cvv"
+                      name="cvv"
+                      class="inputs-text w-full transition-colors"
+                      [class.border-red-500]="mostrarErrorCampo('cvv')"
+                      [class.border-brand-gold]="!mostrarErrorCampo('cvv')"
+                      placeholder="CVV"
+                      (input)="form.cvv = form.cvv.replace(/\D/g, '').slice(0, 4)"
+                      (blur)="camposTocados.cvv = true" />
+                    @if (mostrarErrorCampo('cvv')) {
+                      <small class="mt-1 block text-xs text-red-400">CVV inválido</small>
+                    }
                   </div>
                 </div>
                 <div>
                   <label class="label-form" for="correoPago">Correo electrónico</label>
-                  <input id="correoPago" type="email" class="inputs-text w-full" placeholder="correo@ejemplo.com" />
+                  <input
+                    id="correoPago"
+                    type="email"
+                    [(ngModel)]="form.correoPago"
+                    name="correoPago"
+                    class="inputs-text w-full transition-colors"
+                    [class.border-red-500]="mostrarErrorCampo('correoPago')"
+                    [class.border-brand-gold]="!mostrarErrorCampo('correoPago')"
+                    placeholder="correo@ejemplo.com"
+                    (blur)="camposTocados.correoPago = true" />
+                  @if (mostrarErrorCampo('correoPago')) {
+                    <small class="mt-1 block text-xs text-red-400">Correo electrónico inválido</small>
+                  }
                 </div>
               </div>
             }
@@ -79,7 +127,13 @@
 
           <div class="mt-8 flex flex-col-reverse justify-between gap-3 border-t border-ui-border-soft pt-5 sm:flex-row">
             <p-button label="Volver al checkout" icon="pi pi-arrow-left" styleClass="boton-secondary" (onClick)="volverAlCheckout()" />
-            <p-button label="Simular pago" icon="pi pi-check" styleClass="boton-primary" [loading]="procesando()" (onClick)="simularPago()" />
+            <p-button
+              label="Procesar cobro"
+              icon="pi pi-check"
+              styleClass="boton-primary"
+              [loading]="procesando()"
+              [disabled]="procesando() || carrito.items().length === 0"
+              (onClick)="simularPago()" />
           </div>
         </div>
       </section>
