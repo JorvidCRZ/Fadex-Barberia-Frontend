@@ -1,15 +1,20 @@
 import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { SelectModule } from 'primeng/select';
-import { DialogModule } from 'primeng/dialog';
 import { ProductoService } from '@/app/core/services/catalogos/producto.service';
 import { ClienteService } from '@/app/core/services/gestion/cliente.service';
 import { VentaService } from '@/app/core/services/venta/venta.service';
 import { NotificationService } from '@/app/core/services/common/notification.service';
 import { BarberoService } from '@/app/core/services/gestion/barbero.service';
 import { Venta } from '@/app/core/models/ventas/venta.model';
+import { ProductoMultimedia, TipoMultimedia } from '@/app/core/models/catalogos/productos.model';
+import { ButtonComponent } from '@/app/shared/components/button/button.component';
+import { ModalComponent } from '@/app/shared/components/modal/modal.component';
+import { PageHeaderComponent } from '@/app/shared/components/page-header/page-header.component';
+import { MonedaPipe } from '@/app/shared/pipes/moneda.pipe';
+import { SafeImageUrlPipe } from '@/app/shared/pipes/safe-image-url.pipe';
+import { Image } from 'primeng/image';
 
 interface ProductoPos {
   id: number;
@@ -34,7 +39,16 @@ interface Opcion<T = string> {
 @Component({
   selector: 'app-pos',
   standalone: true,
-  imports: [CommonModule, FormsModule, SelectModule, DialogModule],
+  imports: [
+    FormsModule,
+    SelectModule,
+    MonedaPipe,
+    SafeImageUrlPipe,
+    ButtonComponent,
+    ModalComponent,
+    PageHeaderComponent,
+    Image
+],
   templateUrl: './pos.html',
 })
 export class PosComponent implements OnInit {
@@ -145,16 +159,24 @@ export class PosComponent implements OnInit {
     return [];
   }
 
-  // Ajusta los nombres de campo según tu modelo Producto / Cliente
   private mapearProducto(p: any): ProductoPos {
     return {
       id: p.id,
       nombre: p.nombre,
-      categoria: p.categoria?.nombre ?? p.categoriaNombre ?? p.categoria ?? '',
+      categoria: p.nombreCategoria ?? p.categoria?.nombre ?? p.categoriaNombre ?? '',
       precio: Number(p.precio ?? p.precioVenta ?? 0),
       stock: Number(p.stock ?? 0),
-      imagen: p.imagen ?? p.imagenUrl ?? '',
+      imagen: this.imagenPrincipal(p),
     };
+  }
+
+  /** Primera imagen por ordenDisplay; si no hay `multimedia`, la primera de `urlsMultimedia`. */
+  private imagenPrincipal(p: any): string {
+    const imagenes: ProductoMultimedia[] = (p.multimedia ?? [])
+      .filter((m: ProductoMultimedia) => m.tipo === TipoMultimedia.IMAGEN)
+      .sort((a: ProductoMultimedia, b: ProductoMultimedia) => a.ordenDisplay - b.ordenDisplay);
+
+    return imagenes[0]?.url ?? p.urlsMultimedia?.[0] ?? '';
   }
 
   private nombreCliente(c: any): string {

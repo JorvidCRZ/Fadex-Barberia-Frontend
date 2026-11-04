@@ -19,6 +19,7 @@ import { ModalComponent } from '../../../../shared/components/modal/modal.compon
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { MonedaPipe } from '../../../../shared/pipes/moneda.pipe';
 import { DateFormatPipe } from '../../../../shared/pipes/dat.pipe';
+import { SafeImageUrlPipe } from '../../../../shared/pipes/safe-image-url.pipe';
 import { NotificationService } from '@/app/core/services/common/notification.service';
 
 type BarberoVista = Barbero & { nombreCompleto: string };
@@ -80,7 +81,7 @@ const esMismoDia = (a: Date, b: Date): boolean => a.toDateString() === b.toDateS
   standalone: true,
   imports: [
     CommonModule, ReactiveFormsModule, DatePickerModule, CheckboxModule, SelectModule, TableModule,
-    ModalComponent, ButtonComponent, MonedaPipe, DateFormatPipe
+    ModalComponent, ButtonComponent, MonedaPipe, DateFormatPipe, SafeImageUrlPipe
   ],
   templateUrl: './reservar.html',
   styles: [`
@@ -284,12 +285,10 @@ export class ReservarComponent {
     return this.servicioSel()?.servicioId === servicio.servicioId;
   }
 
-
+  /** Primera imagen del servicio (urlsMultimedia). El template la pasa por safeImageUrl. */
   imagenServicio(servicio: Servicio | null): string | null {
-    if (!servicio) return null;
-    const s = servicio as any;
-    const url = s.imagenUrl ?? s.imagen ?? s.urlImagen ?? s.imagenes?.[0]?.url ?? s.imagenes?.[0] ?? null;
-    return typeof url === 'string' && url.length > 0 ? url : null;
+    const url = servicio?.urlsMultimedia?.[0];
+    return typeof url === 'string' && url.trim().length > 0 ? url : null;
   }
 
   ocultarImagen(event: Event): void {

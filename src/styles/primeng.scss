@@ -101,6 +101,10 @@ p-button .p-button {
     @apply rounded-xl border border-ui-border bg-ui-card shadow-lg;
 }
 
+.p-select span{
+  padding: 0 !important;
+}
+
 .p-select-option,
 .p-select-label,
 .p-treeselect-label {

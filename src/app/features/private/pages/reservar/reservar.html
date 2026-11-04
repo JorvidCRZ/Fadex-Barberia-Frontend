@@ -130,7 +130,7 @@
                   </td>
                   <td>
                     @if (imagenServicio(servicio); as img) {
-                      <img [src]="img" [alt]="servicio.nombre"
+                      <img [src]="img | safeImageUrl" [alt]="servicio.nombre"
                         class="size-11 rounded-lg object-cover" (error)="ocultarImagen($event)" />
                     } @else {
                       <div class="flex size-11 items-center justify-center rounded-lg bg-brand-gold/10 text-brand-gold">
@@ -257,7 +257,7 @@
         @if (servicioSel(); as servicio) {
           <div class="mb-6 overflow-hidden rounded-xl border border-ui-border-soft">
             @if (imagenServicio(servicio); as img) {
-              <img [src]="img" [alt]="servicio.nombre"
+              <img [src]="img | safeImageUrl" [alt]="servicio.nombre"
                 class="h-44 w-full object-cover" (error)="ocultarImagen($event)" />
             } @else {
               <div class="flex h-44 w-full items-center justify-center bg-brand-gold/5 text-brand-gold/50">

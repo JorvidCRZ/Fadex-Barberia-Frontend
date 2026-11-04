@@ -1,126 +1,106 @@
-<form [formGroup]="ventaForm"
-    class="grid grid-cols-1 xl:grid-cols-3 gap-6 md:p-6 p-4 rounded-xl bg-neutral-primary-soft border border-default shadow-xs">
+<form [formGroup]="ventaForm" class="form-base grid grid-cols-1 gap-6 xl:grid-cols-3">
 
     @if (isEditMode) {
-    <div
-        class="xl:col-span-3 flex items-start gap-4 p-4 rounded-xl border border-amber-200 bg-amber-50 dark:border-amber-900/40 dark:bg-amber-950/20">
-        <span class="pi pi-lock text-amber-500 text-lg mt-0.5 shrink-0"></span>
-        <div class="flex flex-col gap-0.5">
-            <div class="flex items-center gap-2 flex-wrap">
-                <span class="text-sm font-semibold text-amber-800 dark:text-amber-300">
-                    Registro de venta — Solo lectura
-                </span>
-                <p-tag value="Administrador" severity="warn" [rounded]="true"
-                    styleClass="text-[10px] font-semibold px-2 py-0.5">
-                </p-tag>
-            </div>
+    <div class="flex items-start gap-4 rounded-xl border border-warning/30 bg-warning/10 p-4 xl:col-span-3">
+        <i class="pi pi-lock mt-0.5 shrink-0 text-lg text-warning"></i>
+        <div class="flex flex-wrap items-center gap-2">
+            <span class="text-sm font-semibold text-warning">Registro de venta — Solo lectura</span>
+            <app-status-badge type="text" tone="warning" value="Administrador" />
         </div>
     </div>
     }
 
-    <div class="xl:col-span-2 flex flex-col gap-8">
+    <div class="flex flex-col gap-8 xl:col-span-2">
 
         <div class="flex flex-col gap-6">
             <div class="flex items-center justify-between">
                 <h1 class="subtitle-form">Datos de la venta</h1>
                 @if (isEditMode) {
-                <div class="flex items-center gap-1.5 text-xs text-text-tertiary">
-                    <span class="pi pi-eye text-[11px]"></span>
+                <div class="flex items-center gap-1.5 text-xs text-text-muted">
+                    <i class="pi pi-eye text-[11px]"></i>
                     <span>Modo visualización</span>
                 </div>
                 }
             </div>
 
             <div class="grid grid-cols-12 gap-6">
-                <div class="col-span-12 md:col-span-8 part-form">
-                    <label class="flex items-center gap-2">Cliente *</label>
+                <div class="part-form col-span-12 md:col-span-8">
+                    <label>Cliente *</label>
                     @if (!isEditMode) {
                     <p-select formControlName="clienteId" [options]="clientes" optionValue="clienteId" [filter]="true"
-                        filterBy="persona.nombre,persona.apellido" placeholder="Seleccione un cliente" class="w-full"
-                        [style]="{ width: '100%' }">
+                        filterBy="persona.nombre,persona.apellido" placeholder="Seleccione un cliente">
                         <ng-template pTemplate="selectedItem" let-selectedOption>
-                            <div class="flex items-center gap-2" *ngIf="selectedOption">
-                                <span class="text-sm font-medium text-text-primary">
-                                    {{ selectedOption.persona.nombre }} {{ selectedOption.persona.apellido }}
-                                </span>
-                            </div>
+                            @if (selectedOption) {
+                            <span class="text-sm font-medium text-text-primary">
+                                {{ selectedOption.persona.nombre }} {{ selectedOption.persona.apellido }}
+                            </span>
+                            }
                         </ng-template>
                         <ng-template pTemplate="item" let-cliente>
-                            <div class="flex flex-col py-1">
-                                <span class="text-sm font-medium text-text-primary">
-                                    {{ cliente.persona.nombre }} {{ cliente.persona.apellido }}
-                                </span>
-                            </div>
+                            <span class="text-sm font-medium text-text-primary">
+                                {{ cliente.persona.nombre }} {{ cliente.persona.apellido }}
+                            </span>
                         </ng-template>
                     </p-select>
-                    }
-                    @if (isEditMode) {
-                    <div
-                        class="h-[42px] px-4 rounded-xl border border-default bg-neutral-primary-lighter flex items-center gap-2">
-                        <span class="pi pi-user text-[12px] text-text-tertiary"></span>
-                        <span class="text-sm text-text-primary font-medium">{{ getNombreCliente() }}</span>
+                    } @else {
+                    <div class="flex h-[42px] items-center gap-2 rounded-xl border border-ui-border bg-ui-black px-4">
+                        <i class="pi pi-user text-xs text-text-muted"></i>
+                        <span class="text-sm font-medium text-text-primary">{{ getNombreCliente() }}</span>
                     </div>
                     }
                 </div>
 
-                <div class="col-span-12 md:col-span-4 part-form">
-                    <label class="flex items-center gap-2">Comprobante</label>
+                <div class="part-form col-span-12 md:col-span-4">
+                    <label>Comprobante</label>
                     @if (!isEditMode) {
                     <p-select formControlName="tipoComprobante" [options]="tiposComprobante" optionLabel="label"
-                        optionValue="value" class="w-full" [style]="{ width: '100%' }">
-                    </p-select>
-                    }
-                    @if (isEditMode) {
-                    <div
-                        class="h-[42px] px-4 rounded-xl border border-default bg-neutral-primary-lighter flex items-center gap-2">
-                        <span class="pi pi-file text-[12px] text-text-tertiary"></span>
-                        <span class="text-sm text-text-primary font-medium">{{ getLabelComprobante() }}</span>
+                        optionValue="value" />
+                    } @else {
+                    <div class="flex h-[42px] items-center gap-2 rounded-xl border border-ui-border bg-ui-black px-4">
+                        <i class="pi pi-file text-xs text-text-muted"></i>
+                        <span class="text-sm font-medium text-text-primary">{{ getLabelComprobante() }}</span>
                     </div>
                     }
                 </div>
             </div>
         </div>
 
-        <hr class="border-t border-default opacity-50">
+        <hr class="border-t border-ui-border-soft">
 
         <div formArrayName="productosDetalles" class="flex flex-col gap-4">
             <div class="flex items-center justify-between">
-                <h1 class="text-lg font-semibold text-text-primary flex items-center gap-2">
+                <h2 class="m-0 flex items-center gap-2 text-lg font-semibold text-text-primary">
                     <i class="pi pi-box text-brand-gold"></i> Productos Físicos
-                </h1>
+                </h2>
                 @if (!isEditMode) {
-                <button pButton type="button" icon="pi pi-plus" label="Añadir" class="p-button-sm boton-submit"
-                    (click)="agregarProductoVacio()"></button>
+                <app-button variant="primary" size="sm" icon="plus" label="Añadir" (clicked)="agregarProductoVacio()" />
                 }
             </div>
 
             @if (productosDetalles.length === 0) {
-            <p class="text-sm text-text-tertiary italic">No se han agregado productos a la venta.</p>
+            <p class="m-0 text-sm italic text-text-muted">No se han agregado productos a la venta.</p>
             }
 
             @for (detalle of productosDetalles.controls; track $index) {
             <div [formGroupName]="$index"
-                class="grid grid-cols-12 gap-5 p-5 rounded-xl border border-default bg-neutral-primary-lighter shadow-xs">
+                class="grid grid-cols-12 gap-5 rounded-xl border border-ui-border-soft bg-ui-black p-5">
 
-                <div class="col-span-12 lg:col-span-5 part-form">
+                <div class="part-form col-span-12 lg:col-span-5">
                     <label>Producto</label>
                     @if (!isEditMode) {
                     <p-select formControlName="itemId" [options]="productos" optionLabel="nombre" optionValue="id"
                         [filter]="true" filterBy="nombre" placeholder="Seleccione producto"
-                        (onChange)="actualizarPrecioProducto($index)" class="w-full" [style]="{ width: '100%' }">
+                        (onChange)="actualizarPrecioProducto($index)">
                         <ng-template let-producto pTemplate="item">
                             <div class="flex flex-col py-1">
                                 <span class="text-sm font-medium text-text-primary">{{ producto.nombre }}</span>
-                                <span class="text-[11px] text-brand-gold font-medium">Stock disponible: {{
-                                    producto.stock }}</span>
+                                <span class="text-xs font-medium text-brand-gold">Stock disponible: {{ producto.stock }}</span>
                             </div>
                         </ng-template>
                     </p-select>
-                    }
-                    @if (isEditMode) {
-                    <div
-                        class="h-[42px] px-4 rounded-xl border border-default bg-neutral-primary-soft flex items-center">
-                        <span class="text-sm text-text-primary font-medium">{{ getNombreProducto($index) }}</span>
+                    } @else {
+                    <div class="flex h-[42px] items-center rounded-xl border border-ui-border bg-ui-card px-4">
+                        <span class="text-sm font-medium text-text-primary">{{ getNombreProducto($index) }}</span>
                     </div>
                     }
                 </div>
@@ -130,113 +110,91 @@
                     @if (!isEditMode) {
                     <p-inputNumber formControlName="cantidad" [showButtons]="true" [min]="1"
                         [max]="getMaxStockProducto($index)" styleClass="w-full"
-                        inputStyleClass="w-full text-center font-bold" onkeydown="return false;">
-                    </p-inputNumber>
-                    }
-                    @if (isEditMode) {
-                    <div
-                        class="h-[42px] px-4 rounded-xl border border-default bg-neutral-primary-soft flex items-center justify-center">
-                        <span class="text-sm font-bold text-text-primary">{{
-                            productosDetalles.at($index).get('cantidad')?.value }}</span>
+                        inputStyleClass="w-full text-center font-bold" onkeydown="return false;" />
+                    } @else {
+                    <div class="flex h-[42px] items-center justify-center rounded-xl border border-ui-border bg-ui-card px-4">
+                        <span class="text-sm font-bold text-text-primary">{{ productosDetalles.at($index).get('cantidad')?.value }}</span>
                     </div>
                     }
                 </div>
 
-                <div class="col-span-12 sm:col-span-4 lg:col-span-2 part-form">
+                <div class="part-form col-span-12 sm:col-span-4 lg:col-span-2">
                     <label>Precio unit.</label>
                     @if (!isEditMode) {
                     <p-inputNumber formControlName="precioUnitario" mode="currency" currency="PEN" locale="es-PE"
-                        [min]="0" styleClass="w-full"></p-inputNumber>
-                    }
-                    @if (isEditMode) {
-                    <div
-                        class="h-[42px] px-4 rounded-xl border border-default bg-neutral-primary-soft flex items-center">
-                        <span class="text-sm font-bold text-text-primary">S/ {{
-                            productosDetalles.at($index).get('precioUnitario')?.value | number:'1.2-2' }}</span>
+                        [min]="0" styleClass="w-full" />
+                    } @else {
+                    <div class="flex h-[42px] items-center rounded-xl border border-ui-border bg-ui-card px-4">
+                        <span class="text-sm font-bold text-text-primary">S/ {{ productosDetalles.at($index).get('precioUnitario')?.value | number:'1.2-2' }}</span>
                     </div>
                     }
                 </div>
 
-                <div class="col-span-12 sm:col-span-4 lg:col-span-3 flex flex-col justify-end gap-3">
-                    <div class="part-form">
+                <div class="col-span-12 flex items-end gap-3 sm:col-span-4 lg:col-span-3">
+                    <div class="part-form !mb-0 flex-1">
                         <label>Subtotal</label>
-                        <div
-                            class="h-[42px] px-4 rounded-xl border border-default bg-neutral-primary-soft flex items-center justify-between">
-                            <span class="font-bold text-green-600 text-sm">S/ {{ getSubtotalLineaProducto($index) |
-                                number:'1.2-2' }}</span>
+                        <div class="flex h-[42px] items-center rounded-xl border border-ui-border bg-ui-card px-4">
+                            <span class="text-sm font-bold text-success">S/ {{ getSubtotalLineaProducto($index) | number:'1.2-2' }}</span>
                         </div>
                     </div>
                     @if (!isEditMode) {
-                    <button pButton type="button" icon="pi pi-trash" class="boton-cancel p-button-sm"
-                        (click)="eliminarProducto($index)"></button>
+                    <app-button variant="eliminar-tabla" icon="trash" tooltip="Quitar" (clicked)="eliminarProducto($index)" />
                     }
                 </div>
             </div>
             }
         </div>
 
-        <div formArrayName="serviciosDetalles" class="flex flex-col gap-4 mb-4">
+        <div formArrayName="serviciosDetalles" class="mb-4 flex flex-col gap-4">
             <div class="flex items-center justify-between">
-                <h1 class="text-lg font-semibold text-text-primary flex items-center gap-2">
+                <h2 class="m-0 flex items-center gap-2 text-lg font-semibold text-text-primary">
                     <i class="pi pi-scissors text-brand-gold"></i> Servicios Realizados
-                </h1>
+                </h2>
                 @if (!isEditMode) {
-                <button pButton type="button" icon="pi pi-plus" label="Añadir" class="p-button-sm boton-submit"
-                    (click)="agregarServicioVacio()"></button>
+                <app-button variant="primary" size="sm" icon="plus" label="Añadir" (clicked)="agregarServicioVacio()" />
                 }
             </div>
 
             @if (serviciosDetalles.length === 0) {
-            <p class="text-sm text-text-tertiary italic">No se han agregado servicios a la venta.</p>
+            <p class="m-0 text-sm italic text-text-muted">No se han agregado servicios a la venta.</p>
             }
 
             @for (detalle of serviciosDetalles.controls; track $index) {
             <div [formGroupName]="$index"
-                class="grid grid-cols-12 gap-5 p-5 rounded-xl border border-default bg-neutral-primary-lighter shadow-xs">
+                class="grid grid-cols-12 gap-5 rounded-xl border border-ui-border-soft bg-ui-black p-5">
 
-                <div class="col-span-12 lg:col-span-6 part-form">
+                <div class="part-form col-span-12 lg:col-span-6">
                     <label>Servicio realizado</label>
                     @if (!isEditMode) {
                     <p-select formControlName="itemId" [options]="servicios" optionLabel="nombre"
                         optionValue="servicioId" [filter]="true" filterBy="nombre"
-                        placeholder="Seleccione servicio realizado" (onChange)="actualizarPrecioServicio($index)"
-                        class="w-full" [style]="{ width: '100%' }">
-                    </p-select>
-                    }
-                    @if (isEditMode) {
-                    <div
-                        class="h-[42px] px-4 rounded-xl border border-default bg-neutral-primary-soft flex items-center">
-                        <span class="text-sm text-text-primary font-medium">{{ getNombreServicio($index) }}</span>
+                        placeholder="Seleccione servicio realizado" (onChange)="actualizarPrecioServicio($index)" />
+                    } @else {
+                    <div class="flex h-[42px] items-center rounded-xl border border-ui-border bg-ui-card px-4">
+                        <span class="text-sm font-medium text-text-primary">{{ getNombreServicio($index) }}</span>
                     </div>
                     }
                 </div>
 
-                <div class="col-span-12 sm:col-span-6 lg:col-span-3 part-form">
+                <div class="part-form col-span-12 sm:col-span-6 lg:col-span-3">
                     <label>Precio del servicio</label>
                     @if (!isEditMode) {
                     <p-inputNumber formControlName="precio" mode="currency" currency="PEN" locale="es-PE" [min]="0"
-                        styleClass="w-full"></p-inputNumber>
-                    }
-                    @if (isEditMode) {
-                    <div
-                        class="h-[42px] px-4 rounded-xl border border-default bg-neutral-primary-soft flex items-center">
-                        <span class="text-sm font-bold text-text-primary">S/ {{
-                            serviciosDetalles.at($index).get('precio')?.value | number:'1.2-2' }}</span>
+                        styleClass="w-full" />
+                    } @else {
+                    <div class="flex h-[42px] items-center rounded-xl border border-ui-border bg-ui-card px-4">
+                        <span class="text-sm font-bold text-text-primary">S/ {{ serviciosDetalles.at($index).get('precio')?.value | number:'1.2-2' }}</span>
                     </div>
                     }
                 </div>
 
-                <div class="col-span-12 sm:col-span-6 lg:col-span-3 flex flex-col justify-end">
+                <div class="col-span-12 flex items-end sm:col-span-6 lg:col-span-3">
                     @if (!isEditMode) {
-                    <button pButton type="button" icon="pi pi-trash" label="Quitar"
-                        class="boton-cancel p-button-sm h-[42px]" (click)="eliminarServicio($index)"></button>
-                    }
-                    @if (isEditMode) {
-                    <div
-                        class="h-[42px] flex items-center justify-center rounded-lg border border-default bg-neutral-primary-soft text-xs text-text-tertiary gap-1">
-                        <span class="pi pi-check-circle text-green-500"></span>
-                        <span>Cobrado</span>
-                    </div>
+                    <app-button variant="eliminar-tabla" icon="trash" tooltip="Quitar" (clicked)="eliminarServicio($index)" />
+                    } @else {
+                    <span class="flex h-[42px] items-center gap-1 text-xs text-text-muted">
+                        <i class="pi pi-check-circle text-success"></i> Cobrado
+                    </span>
                     }
                 </div>
             </div>
@@ -246,46 +204,37 @@
     </div>
 
     <div class="flex flex-col gap-6">
-        <div
-            class="flex flex-col gap-6 p-6 rounded-xl bg-neutral-primary-lighter border border-default shadow-xs sticky top-4">
-            <div class="flex items-center justify-between">
-                <h1 class="subtitle-form">Resumen de venta</h1>
-            </div>
+        <div class="sticky top-4 flex flex-col gap-6 rounded-xl border border-ui-border bg-ui-elevated p-6">
+            <h2 class="subtitle-form !mb-0">Resumen de venta</h2>
 
-            <div class="flex justify-between items-center p-4 rounded-xl bg-neutral-primary-soft border border-default">
+            <div class="flex items-center justify-between rounded-xl border border-ui-border-soft bg-ui-card p-4">
                 <div class="flex flex-col">
                     <span class="text-sm text-text-secondary">Subtotal</span>
-                    <span class="text-xs text-text-tertiary">Bienes y Servicios</span>
+                    <span class="text-xs text-text-muted">Bienes y Servicios</span>
                 </div>
                 <span class="font-bold text-text-primary">S/ {{ subtotalGeneral | number:'1.2-2' }}</span>
             </div>
 
-            <div class="flex justify-between items-center p-4 rounded-xl bg-neutral-primary-soft border border-default">
+            <div class="flex items-center justify-between rounded-xl border border-ui-border-soft bg-ui-card p-4">
                 <div class="flex flex-col">
                     <span class="text-sm text-text-secondary">IGV (18%)</span>
-                    <span class="text-xs text-text-tertiary">Impuesto aplicado</span>
+                    <span class="text-xs text-text-muted">Impuesto aplicado</span>
                 </div>
                 <span class="font-bold text-text-primary">S/ {{ igv | number:'1.2-2' }}</span>
             </div>
 
-            <div class="p-5 rounded-xl border border-primary/20 bg-primary/5 flex flex-col gap-2">
+            <div class="flex flex-col gap-2 rounded-xl border border-brand-gold/20 bg-brand-gold/10 p-5">
                 <span class="text-sm uppercase tracking-wide text-text-secondary">Total a pagar</span>
-                <span class="text-4xl font-black text-primary">S/ {{ total | number:'1.2-2' }}</span>
+                <span class="text-4xl font-black text-brand-gold">S/ {{ total | number:'1.2-2' }}</span>
             </div>
 
             @if (!isEditMode) {
-            <button pButton type="button" label="Guardar Venta"
-                [disabled]="ventaForm.invalid || (productosDetalles.length === 0 &&  serviciosDetalles.length === 0)"
-                class="boton-submit w-full" (click)="guardarVenta()">
-            </button>
-            }
-
-            @if (isEditMode) {
-            <div class="flex flex-col gap-3">
-                <button pButton type="button" icon="pi pi-times" label="Cerrar" class="boton-cancel w-full"
-                    (click)="cancelarEvento.emit()">
-                </button>
-            </div>
+            <app-button variant="submit" icon="check" label="Guardar Venta" [fullWidth]="true"
+                [disabled]="ventaForm.invalid || (productosDetalles.length === 0 && serviciosDetalles.length === 0)"
+                (clicked)="guardarVenta()" />
+            } @else {
+            <app-button variant="cancel" icon="times" label="Cerrar" [fullWidth]="true"
+                (clicked)="cancelarEvento.emit()" />
             }
         </div>
     </div>

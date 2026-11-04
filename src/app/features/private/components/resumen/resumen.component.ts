@@ -519,7 +519,7 @@ export class ResumenComponent implements OnInit, OnDestroy {
         title: 'Cortes hoy',
         value: this.cortesHoy,
         description: `Meta: ${this.metaCortes} cortes`,
-        icon: 'pi pi-scissors',
+        icon: 'pi pi-sparkles',
       },
       {
         title: 'Ingresos hoy',

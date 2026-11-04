@@ -1,6 +1,5 @@
 <div class="flex flex-col gap-6 mt-5">
-  <app-page-header titulo="Mis Reservas" icono="calendar"
-    subtitulo="Consulta, paga o cancela tus citas y revisa tu historial">
+  <app-page-header titulo="Mis Reservas" icono="calendar" subtitulo="Consulta, paga o cancela tus citas y revisa tu historial">
     <app-button variant="secondary" size="sm" icon="refresh" label="Recargar" (clicked)="recargar()" />
     <app-button variant="primary" size="sm" icon="plus" label="Nueva reserva" (clicked)="abrirNuevaReserva()" />
   </app-page-header>
@@ -149,7 +148,6 @@
 
     <ng-template pTemplate="body" let-reserva>
       <tr>
-        <!-- Fecha y hora -->
         <td>
           <span class="text-sm font-medium text-text-primary">
             {{ reserva.fecha | dateHelper }}
@@ -192,8 +190,7 @@
         </td>
         <td>
           <div class="flex items-center justify-center gap-2">
-            <app-button variant="ver-tabla" icon="eye" tooltip="Ver detalle" tooltipPosition="top"
-              (clicked)="verDetalle(reserva)" />
+            <app-button variant="ver-tabla" icon="eye" tooltip="Ver detalle" tooltipPosition="top" (clicked)="verDetalle(reserva)" />
           </div>
         </td>
       </tr>
@@ -244,9 +241,7 @@
 
 <app-reservar [(visible)]="dialogNuevaReserva" [servicioIdInicial]="servicioIdInicial()" (creada)="onReservaCreada()" />
 
-<app-confirm-popover [visible]="mostrarConfirmacion()" mode="anular" titulo="Confirmar cancelación"
-  [mensaje]="mensajeConfirmacion" confirmText="Sí, cancelar" cancelText="No" (confirm)="confirmarCancelacion()"
-  (cancel)="cerrarConfirmacion()" />
+<app-confirm-popover [visible]="mostrarConfirmacion()" mode="anular" titulo="Confirmar cancelación" [mensaje]="mensajeConfirmacion" confirmText="Sí, cancelar" cancelText="No" (confirm)="confirmarCancelacion()" (cancel)="cerrarConfirmacion()" />
 <app-modal [(visible)]="displayModal" titulo="Detalle de Atención" mode="crear" icono="pi-history" maxWidth="40rem">
   @if (reservaSeleccionada(); as reserva) {
   <div class="space-y-5">

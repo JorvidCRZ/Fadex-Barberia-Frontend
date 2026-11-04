@@ -1,205 +1,170 @@
 <div class="flex flex-col gap-6 mt-5">
 
-    <header class="flex items-start justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-bold text-white m-0">Crear Venta</h1>
-            <p class="text-xs text-gray-500 mt-1">Selecciona productos y procesa el cobro</p>
-        </div>
+    <app-page-header titulo="Crear Venta" icono="shopping-cart" subtitulo="Selecciona productos y procesa el cobro">
+        <app-button variant="secondary" size="sm" icon="angle-left" label="Regresar a ventas"
+            (clicked)="regresarAlHistorial()" />
+    </app-page-header>
 
-        <p-dialog
-            [(visible)]="mostrarModalPago"
-            [modal]="true"
-            [draggable]="false"
-            [resizable]="false"
-            [closable]="!procesando"
-            [dismissableMask]="!procesando"
-            header="Confirmar Pago"
-            styleClass="pos-pago-dialog"
-            [style]="{ width: 'min(450px, calc(100vw - 2rem))' }">
-            <div class="flex flex-col gap-5 pt-2">
-                <div class="flex flex-col items-center justify-center rounded-xl border border-[#C9A84C]/30 bg-[#C9A84C]/10 p-4">
-                    <span class="mb-1 text-sm font-medium uppercase tracking-widest text-[#C9A84C]">Monto a cobrar</span>
-                    <span class="text-4xl font-black text-white">S/ {{ totalVenta | number:'1.2-2' }}</span>
-                </div>
-
-                @switch (metodo) {
-                    @case ('EFECTIVO') {
-                        <div class="flex flex-col items-center justify-center rounded-xl border border-green-500/30 bg-green-500/5 px-4 py-6 text-center">
-                            <i class="pi pi-money-bill mb-4 text-5xl text-green-500"></i>
-                            <h3 class="mb-2 text-lg font-bold text-white">Pago en Efectivo</h3>
-                            <p class="text-sm leading-relaxed text-gray-400">Recibe el efectivo del cliente y verifica el vuelto antes de confirmar.</p>
-                        </div>
-                    }
-                    @case ('YAPE') {
-                        <div class="flex flex-col items-center justify-center rounded-xl border border-purple-500/30 bg-purple-500/5 px-4 py-6 text-center">
-                            <i class="pi pi-qrcode mb-4 text-5xl text-purple-400"></i>
-                            <h3 class="mb-2 text-lg font-bold text-white">Pago por Yape</h3>
-                            <p class="text-sm leading-relaxed text-gray-400">Confirma que el pago haya sido recibido antes de continuar.</p>
-                        </div>
-                    }
-                    @case ('PLIN') {
-                        <div class="flex flex-col items-center justify-center rounded-xl border border-cyan-500/30 bg-cyan-500/5 px-4 py-6 text-center">
-                            <i class="pi pi-qrcode mb-4 text-5xl text-cyan-400"></i>
-                            <h3 class="mb-2 text-lg font-bold text-white">Pago por Plin</h3>
-                            <p class="text-sm leading-relaxed text-gray-400">Confirma que el pago haya sido recibido antes de continuar.</p>
-                        </div>
-                    }
-                    @case ('TARJETA') {
-                        <div class="flex flex-col items-center justify-center rounded-xl border border-blue-500/30 bg-blue-500/5 px-4 py-6 text-center">
-                            <i class="pi pi-credit-card mb-4 text-5xl text-blue-400"></i>
-                            <h3 class="mb-2 text-lg font-bold text-white">Pago con Tarjeta</h3>
-                            <p class="text-sm leading-relaxed text-gray-400">Verifica la aprobación en el POS antes de confirmar.</p>
-                        </div>
-                    }
-                    @case ('TRANSFERENCIA') {
-                        <div class="flex flex-col items-center justify-center rounded-xl border border-blue-500/30 bg-blue-500/5 px-4 py-6 text-center">
-                            <i class="pi pi-building mb-4 text-5xl text-blue-400"></i>
-                            <h3 class="mb-2 text-lg font-bold text-white">Transferencia bancaria</h3>
-                            <p class="text-sm leading-relaxed text-gray-400">Verifica la transferencia antes de confirmar la venta.</p>
-                        </div>
-                    }
-                }
-
-                <div class="flex gap-3 pt-1">
-                    <button type="button" [disabled]="procesando" (click)="mostrarModalPago = false"
-                        class="w-full rounded-md border border-white/20 bg-black py-2.5 text-sm text-white transition-colors hover:border-[#C9A84C]">
-                        <i class="pi pi-times mr-2"></i>Cancelar
-                    </button>
-                    <button type="button" [disabled]="procesando" (click)="confirmarYProcesarCobro()"
-                        class="w-full rounded-md bg-[#C9A84C] py-2.5 text-sm font-medium text-black transition-colors hover:bg-[#E2B95A] disabled:opacity-60">
-                        <i class="pi pi-check mr-2"></i>{{ procesando ? 'Procesando...' : 'Confirmar Pago' }}
-                    </button>
-                </div>
-            </div>
-        </p-dialog>
-        <button type="button" (click)="regresarAlHistorial()"
-            class="border border-[#C9A84C] ring-1 ring-[#C9A84C]/40 text-white text-sm rounded-md px-4 py-2 flex items-center gap-2 hover:bg-[#C9A84C]/10 transition-colors">
-            <i class="pi pi-angle-left text-xs"></i> Regresar a ventas
-        </button>
-    </header>
-
-    <div class="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-5 items-start">
+    <div class="grid grid-cols-1 items-start gap-5 lg:grid-cols-[1fr_340px]">
 
         <!-- Catálogo -->
-        <section class="rounded-xl border border-[#C9A84C]/25 bg-[#0f0f0f] min-h-[460px]">
-            <div class="p-3 border-b border-white/10">
+        <section class="min-h-[460px] rounded-xl border border-brand-gold-soft bg-ui-surface">
+            <div class="border-b border-ui-border-soft p-3">
                 <div class="relative">
-                    <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
-                    <input type="text" [(ngModel)]="textoBusqueda" placeholder="Buscar en el catálogo..."
-                        class="w-full bg-[#1a1a1a] border border-white/10 text-white text-sm rounded-md py-2 pl-9 pr-3 outline-none focus:border-[#C9A84C] placeholder-gray-500 transition-colors">
+                    <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-sm text-text-muted"></i>
+                    <input type="text" [(ngModel)]="textoBusqueda" placeholder="Buscar en el catálogo..." class="pl-10">
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 p-3">
+            <div class="grid grid-cols-1 gap-3 p-3 md:grid-cols-2">
                 @for (p of productosFiltrados; track p.id) {
-                <div class="flex items-start gap-3 rounded-lg border border-white/10 bg-[#0c0c0c] p-2.5">
-                    <div class="w-[52px] h-[52px] rounded-md bg-white/5 overflow-hidden flex items-center justify-center shrink-0">
+                <div class="flex items-center gap-3 rounded-xl border border-ui-border-soft bg-ui-black p-3">
+                    <div class="flex size-[52px] shrink-0 items-center justify-center overflow-hidden rounded-lg bg-ui-elevated">
                         @if (p.imagen) {
-                        <img [src]="p.imagen" [alt]="p.nombre" class="w-full h-full object-cover">
+                        <img [src]="p.imagen | safeImageUrl" [alt]="p.nombre" class="h-full w-full object-cover">
                         } @else {
-                        <i class="pi pi-image text-gray-600"></i>
+                        <i class="pi pi-image text-text-subtle"></i>
                         }
                     </div>
-                    <div class="flex flex-col flex-1 min-w-0">
-                        <span class="text-sm text-white truncate">{{ p.nombre }}</span>
-                        <span class="text-[11px] text-gray-500">{{ p.categoria }}</span>
-                        <span class="text-sm font-bold text-[#C9A84C] mt-1">S/ {{ p.precio | number:'1.2-2' }}</span>
+                    <div class="flex min-w-0 flex-1 flex-col">
+                        <span class="truncate text-sm font-semibold text-text-primary">{{ p.nombre }}</span>
+                        <span class="text-xs text-text-muted">{{ p.categoria }}</span>
+                        <span class="mt-1 text-sm font-bold text-brand-gold">{{ p.stock }} en stock</span>
+                        <span class="mt-1 text-sm font-bold text-brand-gold">{{ p.precio | moneda }}</span>
                     </div>
-                    <button type="button" (click)="agregarProducto(p)" [attr.aria-label]="'Agregar ' + p.nombre"
-                        class="w-7 h-7 rounded bg-[#C9A84C] hover:bg-[#E2B95A] text-black flex items-center justify-center shrink-0 transition-colors">
-                        <i class="pi pi-plus text-xs"></i>
-                    </button>
+                    <app-button variant="agregar" icon="plus" [tooltip]="'Agregar ' + p.nombre"
+                        (clicked)="agregarProducto(p)" />
                 </div>
                 }
                 @empty {
-                <p class="col-span-full text-center text-sm text-gray-500 py-8">No se encontraron productos.</p>
+                <p class="col-span-full py-8 text-center text-sm text-text-muted">No se encontraron productos.</p>
                 }
             </div>
         </section>
 
         <!-- Detalle de cobro -->
-        <aside class="rounded-xl border border-[#C9A84C]/25 bg-[#0f0f0f]">
-            <h2 class="text-sm text-[#C9A84C] font-normal px-4 py-4 border-b border-white/10 m-0">Detalle de Cobro</h2>
+        <aside class="rounded-xl border border-brand-gold-soft bg-ui-surface">
+            <h2 class="m-0 border-b border-ui-border-soft px-4 py-4 text-sm font-semibold text-brand-gold">Detalle de Cobro</h2>
 
-            <div class="p-4 flex flex-col gap-4">
-                <div class="flex flex-col gap-1.5">
-                    <label class="text-xs text-gray-400">Cliente</label>
+            <div class="flex flex-col gap-4 p-4">
+                <div class="flex flex-col gap-1">
+                    <label class="label-form">Cliente</label>
                     @if (reservaIdActiva && clienteReservaId) {
-                    <div class="flex items-center justify-between rounded-md border border-[#C9A84C]/40 bg-black px-3 py-2.5">
-                        <span class="truncate text-sm font-medium text-white">{{ nombreClienteReserva }}</span>
-                        <span class="ml-2 shrink-0 text-[10px] font-bold uppercase tracking-wide text-[#C9A84C]">Reserva</span>
+                    <div class="flex items-center justify-between rounded-xl border border-brand-gold/40 bg-ui-black px-3 py-3">
+                        <span class="truncate text-sm font-semibold text-text-primary">{{ nombreClienteReserva }}</span>
+                        <span class="ml-2 shrink-0 text-[10px] font-bold uppercase tracking-wide text-brand-gold">Reserva</span>
                     </div>
                     } @else {
-                    <p-select
-                        [options]="clientes"
-                        [(ngModel)]="cliente"
-                        [filter]="true"
-                        filterBy="label"
-                        optionLabel="label"
-                        optionValue="value"
-                        placeholder="Buscar cliente..."
-                        emptyMessage="No se encontraron clientes"
-                        emptyFilterMessage="No se encontraron clientes"
-                        styleClass="w-full" />
+                    <p-select [options]="clientes" [(ngModel)]="cliente" [filter]="true" filterBy="label"
+                        optionLabel="label" optionValue="value" placeholder="Buscar cliente..."
+                        emptyMessage="No se encontraron clientes" emptyFilterMessage="No se encontraron clientes" />
                     }
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
-                    <div class="flex flex-col gap-1.5">
-                        <label class="text-xs text-gray-400">Comprobante</label>
-                        <p-select [options]="comprobantes" [(ngModel)]="comprobante" styleClass="w-full" />
+                    <div class="flex flex-col gap-1">
+                        <label class="label-form">Comprobante</label>
+                        <p-select [options]="comprobantes" [(ngModel)]="comprobante" />
                     </div>
-                    <div class="flex flex-col gap-1.5">
-                        <label class="text-xs text-gray-400">Método</label>
-                        <p-select [options]="metodos" [(ngModel)]="metodo" styleClass="w-full" />
+                    <div class="flex flex-col gap-1">
+                        <label class="label-form">Método</label>
+                        <p-select [options]="metodos" [(ngModel)]="metodo" />
                     </div>
                 </div>
 
-                <div class="flex flex-col gap-2 border-t border-white/10 pt-4">
+                <div class="flex flex-col gap-2 border-t border-ui-border-soft pt-4">
                     @for (linea of carrito; track linea.producto.id) {
                     <div class="flex items-center justify-between gap-2 text-sm">
-                        <span class="text-white truncate">{{ linea.producto.nombre }}</span>
-                        <div class="flex items-center gap-2 shrink-0">
-                            <button type="button" (click)="cambiarCantidad(linea, linea.cantidad - 1)" aria-label="Quitar uno"
-                                class="w-6 h-6 rounded border border-white/10 bg-black text-white flex items-center justify-center hover:border-[#C9A84C]">
-                                <i class="pi pi-minus text-[9px]"></i>
-                            </button>
-                            <span class="w-4 text-center text-white text-xs">{{ linea.cantidad }}</span>
-                            <button type="button" (click)="cambiarCantidad(linea, linea.cantidad + 1)" aria-label="Agregar uno"
-                                class="w-6 h-6 rounded border border-white/10 bg-black text-white flex items-center justify-center hover:border-[#C9A84C]">
-                                <i class="pi pi-plus text-[9px]"></i>
-                            </button>
+                        <span class="truncate text-text-primary">{{ linea.producto.nombre }}</span>
+                        <div class="flex shrink-0 items-center">
+                            <app-button variant="eliminar-tabla" icon="minus" tooltip="Quitar uno"
+                                (clicked)="cambiarCantidad(linea, linea.cantidad - 1)" />
+                            <span class="w-5 text-center text-xs font-semibold text-text-primary">{{ linea.cantidad }}</span>
+                            <app-button variant="agregar" icon="plus" tooltip="Agregar uno"
+                                (clicked)="cambiarCantidad(linea, linea.cantidad + 1)" />
                         </div>
                     </div>
                     }
                     @empty {
-                    <p class="text-xs text-gray-500 italic m-0">Aún no hay ítems en el carrito.</p>
+                    <p class="m-0 text-xs italic text-text-muted">Aún no hay ítems en el carrito.</p>
                     }
                 </div>
 
-                <div class="flex flex-col gap-1.5 border-t border-white/10 pt-4 text-sm">
-                    <div class="flex justify-between text-gray-500">
-                        <span>Subtotal</span><span>S/ {{ subtotal | number:'1.2-2' }}</span>
+                <div class="flex flex-col gap-1.5 border-t border-ui-border-soft pt-4 text-sm text-text-muted">
+                    <div class="flex justify-between">
+                        <span>Subtotal</span><span>{{ subtotal | moneda }}</span>
                     </div>
-                    <div class="flex justify-between text-gray-500">
-                        <span>IGV (18%)</span><span>S/ {{ igv | number:'1.2-2' }}</span>
+                    <div class="flex justify-between">
+                        <span>IGV (18%)</span><span>{{ igv | moneda }}</span>
                     </div>
                 </div>
 
-                <div class="flex justify-between items-center border-t border-white/10 pt-4">
-                    <span class="text-sm font-bold text-white uppercase">Total a cobrar</span>
-                    <span class="text-lg font-bold text-[#C9A84C]">S/ {{ totalVenta | number:'1.2-2' }}</span>
+                <div class="flex items-center justify-between border-t border-ui-border-soft pt-4">
+                    <span class="text-sm font-bold uppercase text-text-primary">Total a cobrar</span>
+                    <span class="text-lg font-bold text-brand-gold">{{ totalVenta | moneda }}</span>
                 </div>
 
-                <button type="button" (click)="procesarCobro()"
-                    class="w-full bg-[#C9A84C] hover:bg-[#E2B95A] text-black text-sm font-medium rounded-md py-2.5 flex items-center justify-center gap-2 transition-colors">
-                    <i class="pi pi-qrcode"></i> Procesar Cobro
-                </button>
-                <button type="button" (click)="regresarAlHistorial()"
-                    class="w-full bg-black border border-white/10 hover:border-[#C9A84C] text-white text-sm rounded-md py-2.5 transition-colors">
-                    Regresar a ventas
-                </button>
+                <app-button variant="primary" icon="qrcode" label="Procesar Cobro" [fullWidth]="true"
+                    (clicked)="procesarCobro()" />
+                <app-button variant="secondary" label="Regresar a ventas" [fullWidth]="true"
+                    (clicked)="regresarAlHistorial()" />
             </div>
         </aside>
     </div>
 </div>
+
+<!-- Confirmar pago -->
+<app-modal [(visible)]="mostrarModalPago" [cerrable]="!procesando" titulo="Confirmar Pago" mode="crear"
+    icono="pi-wallet" maxWidth="28rem">
+    <div class="flex flex-col gap-5">
+        <div class="flex flex-col items-center justify-center rounded-xl border border-brand-gold/30 bg-brand-gold/10 p-4">
+            <span class="mb-1 text-sm font-medium uppercase tracking-widest text-brand-gold">Monto a cobrar</span>
+            <span class="text-4xl font-black text-text-primary">{{ totalVenta | moneda }}</span>
+        </div>
+
+        @switch (metodo) {
+        @case ('EFECTIVO') {
+        <div class="flex flex-col items-center rounded-xl border border-emerald-500/30 bg-emerald-500/5 px-4 py-6 text-center">
+            <i class="pi pi-money-bill mb-4 text-5xl text-emerald-400"></i>
+            <h3 class="mb-2 text-lg font-bold text-text-primary">Pago en Efectivo</h3>
+            <p class="m-0 text-sm leading-relaxed text-text-secondary">Recibe el efectivo del cliente y verifica el vuelto antes de confirmar.</p>
+        </div>
+        }
+        @case ('YAPE') {
+        <div class="flex flex-col items-center rounded-xl border border-violet-500/30 bg-violet-500/5 px-4 py-6 text-center">
+            <i class="pi pi-qrcode mb-4 text-5xl text-violet-400"></i>
+            <h3 class="mb-2 text-lg font-bold text-text-primary">Pago por Yape</h3>
+            <p class="m-0 text-sm leading-relaxed text-text-secondary">Confirma que el pago haya sido recibido antes de continuar.</p>
+        </div>
+        }
+        @case ('PLIN') {
+        <div class="flex flex-col items-center rounded-xl border border-cyan-500/30 bg-cyan-500/5 px-4 py-6 text-center">
+            <i class="pi pi-qrcode mb-4 text-5xl text-cyan-400"></i>
+            <h3 class="mb-2 text-lg font-bold text-text-primary">Pago por Plin</h3>
+            <p class="m-0 text-sm leading-relaxed text-text-secondary">Confirma que el pago haya sido recibido antes de continuar.</p>
+        </div>
+        }
+        @case ('TARJETA') {
+        <div class="flex flex-col items-center rounded-xl border border-indigo-500/30 bg-indigo-500/5 px-4 py-6 text-center">
+            <i class="pi pi-credit-card mb-4 text-5xl text-indigo-400"></i>
+            <h3 class="mb-2 text-lg font-bold text-text-primary">Pago con Tarjeta</h3>
+            <p class="m-0 text-sm leading-relaxed text-text-secondary">Verifica la aprobación en el POS antes de confirmar.</p>
+        </div>
+        }
+        @case ('TRANSFERENCIA') {
+        <div class="flex flex-col items-center rounded-xl border border-blue-500/30 bg-blue-500/5 px-4 py-6 text-center">
+            <i class="pi pi-building mb-4 text-5xl text-blue-400"></i>
+            <h3 class="mb-2 text-lg font-bold text-text-primary">Transferencia bancaria</h3>
+            <p class="m-0 text-sm leading-relaxed text-text-secondary">Verifica la transferencia antes de confirmar la venta.</p>
+        </div>
+        }
+        }
+
+        <div class="flex flex-col gap-2 sm:flex-row">
+            <app-button variant="cancel" icon="times" label="Cancelar" [fullWidth]="true" [disabled]="procesando"
+                (clicked)="mostrarModalPago = false" />
+            <app-button variant="primary" icon="check" label="Confirmar Pago" loadingLabel="Procesando..."
+                [loading]="procesando" [fullWidth]="true" (clicked)="confirmarYProcesarCobro()" />
+        </div>
+    </div>
+</app-modal>
