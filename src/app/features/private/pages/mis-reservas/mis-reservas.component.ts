@@ -149,13 +149,16 @@ export class MisReservasComponent implements OnInit {
               .sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime());
 
             this.reservas.set(activas);
+            this.totalReservas.set(activas.length);
           } else {
             this.reservas.set([]);
+            this.totalReservas.set(0);
           }
         },
         error: (err) => {
           console.error('Error cargando mis reservas:', err);
           this.reservas.set([]);
+          this.totalReservas.set(0);
           this.notify.showHttpError(err);
         },
       });
@@ -300,5 +303,12 @@ export class MisReservasComponent implements OnInit {
   verDetalle(reserva: HistorialClienteModel): void {
     this.reservaSeleccionada.set(reserva);
     this.displayModal.set(true);
+  }
+
+  /** Acepta "09:00:00", "09:00" o Date y devuelve "09:00". */
+  horaCorta(valor: unknown): string {
+    if (!valor) return '';
+    if (valor instanceof Date) return valor.toTimeString().slice(0, 5);
+    return String(valor).slice(0, 5);
   }
 }

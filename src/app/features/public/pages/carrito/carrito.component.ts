@@ -37,14 +37,23 @@ export class CarritoComponent {
     return item.cantidad * obtenerPrecio(item.producto);
   }
 
-  procesarCompra(): void {
-    if (!this.tokenService.isLogged()) {
-      this.notify.showError('Debes iniciar sesión para continuar con la compra');
-      this.router.navigate(['/productos']);
-      return;
-    }
-    this.router.navigate(['/checkout']);
+procesarCompra(): void {
+  if (!this.tokenService.isLogged()) {
+    this.router.navigate(['/login'], { queryParams: { returnUrl: '/checkout' } });
+    return;
   }
+
+  const esCliente = this.tokenService
+    .getRoles()
+    .some((r) => r.toLowerCase().replace('role_', '') === 'cliente');
+
+  if (!esCliente) {
+    this.notify.showWarn('Solo los clientes pueden comprar');
+    return;
+  }
+
+  this.router.navigate(['/checkout']);
+}
 
   actualizarCantidad(index: number, cantidad: number): void {
     this.carritoService.actualizarCantidad(index, cantidad);
