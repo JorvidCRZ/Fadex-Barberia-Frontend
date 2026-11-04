@@ -290,6 +290,26 @@
       </div>
     </div>
 
+    <div class="flex items-center justify-between rounded-xl border border-brand-gold/20 bg-black/30 p-4">
+      <div>
+        <p class="mb-1 text-sm text-gray-400">Total pagado</p>
+        <p class="m-0 text-2xl font-bold text-brand-gold">{{ reserva.total | moneda }}</p>
+      </div>
+    </div>
+
+    @if (puedeDescargarBoleta(reserva)) {
+      <div class="pt-2">
+        <app-button
+          variant="secondary"
+          size="sm"
+          icon="download"
+          label="Descargar boleta"
+          [fullWidth]="true"
+          [loading]="descargandoBoleta() === reserva.ventaId"
+          (clicked)="descargarBoleta(reserva)" />
+      </div>
+    }
+
     @if (reserva.observacion) {
     <div>
       <p class="mb-2 text-sm text-gray-400">Observaciones</p>

@@ -13,11 +13,21 @@
             ? 'El pago de tu reserva fue procesado correctamente. Tu cita quedó confirmada.'
             : 'Tu compra fue procesada correctamente.' }}
         </p>
-        <p-button
-          [label]="esReserva ? 'Ir a mis reservas' : 'Volver al inicio'"
-          [icon]="esReserva ? 'pi pi-calendar' : 'pi pi-home'"
-          styleClass="boton-primary mt-6"
-          (onClick)="volverAInicio()" />
+        <div class="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+          @if (esReserva && reservaComprobante(); as comprobante) {
+            <p-button
+              label="Descargar boleta"
+              icon="pi pi-download"
+              styleClass="boton-secondary"
+              [loading]="descargandoBoleta()"
+              (onClick)="descargarBoletaReserva()" />
+          }
+          <p-button
+            [label]="esReserva ? 'Ir a mis reservas' : 'Volver al inicio'"
+            [icon]="esReserva ? 'pi pi-calendar' : 'pi pi-home'"
+            styleClass="boton-primary"
+            (onClick)="volverAInicio()" />
+        </div>
       </section>
     } @else {
       <div class="mb-8 text-center">

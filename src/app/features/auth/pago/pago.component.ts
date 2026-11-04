@@ -7,6 +7,7 @@ import { ButtonModule } from 'primeng/button';
 import { finalize } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
+import { ApiResponse } from '../../../core/models/common/index.model';
 import { Reserva } from '../../../core/models/operaciones/Reserva.model';
 import { CarritoService } from '../../../core/services/catalogos/carrito.service';
 import { NotificationService } from '../../../core/services/common/notification.service';
@@ -35,6 +36,8 @@ export class PagoComponent implements OnInit {
   readonly metodoSeleccionado = signal<MetodoPago>('TARJETA');
   readonly procesando = signal(false);
   readonly compraCompletada = signal(false);
+  readonly reservaComprobante = signal<{ ventaId: number; serieComprobante?: string; numeroComprobante?: string } | null>(null);
+  readonly descargandoBoleta = signal(false);
 
   // Datos de la reserva a pagar
   readonly reserva = signal<Reserva | null>(null);
@@ -235,10 +238,17 @@ export class PagoComponent implements OnInit {
 
     this.procesando.set(true);
     this.http
-      .post(`${environment.apiUrl}/checkout/reserva`, payload)
+      .post<ApiResponse<{ ventaId: number; serieComprobante?: string; numeroComprobante?: string }>>(
+        `${environment.apiUrl}/checkout/reserva`,
+        payload,
+      )
       .pipe(finalize(() => this.procesando.set(false)))
       .subscribe({
-        next: () => {
+        next: (response) => {
+          const comprobante = response?.data ?? null;
+          if (comprobante?.ventaId) {
+            this.reservaComprobante.set(comprobante);
+          }
           this.compraCompletada.set(true);
           this.notify.showSuccess('Reserva pagada correctamente');
         },
@@ -252,6 +262,34 @@ export class PagoComponent implements OnInit {
       });
   }
 
+  descargarBoletaReserva(): void {
+    const comprobante = this.reservaComprobante();
+    if (!comprobante?.ventaId) {
+      this.notify.showWarn('La boleta de esta reserva aún no está disponible.');
+      return;
+    }
+
+    this.descargandoBoleta.set(true);
+
+    this.reservaService
+      .descargarBoleta(comprobante.ventaId, comprobante.serieComprobante, comprobante.numeroComprobante)
+      .pipe(finalize(() => this.descargandoBoleta.set(false)))
+      .subscribe({
+        next: (blob) => {
+          this.reservaService.iniciarDescargaBoleta(
+            blob,
+            comprobante.ventaId,
+            comprobante.serieComprobante,
+            comprobante.numeroComprobante,
+          );
+        },
+        error: (err) => {
+          console.error('Error descargando la boleta de la reserva pagada:', err);
+          this.notify.showError('No se pudo descargar la boleta. Inténtalo nuevamente.');
+        },
+      });
+  }
+
   volverAlCheckout(): void {
     this.router.navigate(
       this.esReserva ? ['/mi-cuenta/reservas/mis-reservas'] : ['/checkout'],
@@ -261,6 +299,6 @@ export class PagoComponent implements OnInit {
   volverAInicio(): void {
     this.router.navigate(
       this.esReserva ? ['/mi-cuenta/reservas/mis-reservas'] : ['/'],
-    );
+    ); 
   }
 }
