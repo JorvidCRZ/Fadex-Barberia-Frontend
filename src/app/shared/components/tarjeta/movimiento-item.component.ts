@@ -4,14 +4,6 @@ import { Movimiento, Origen } from '../../../core/models/fidelizacion/movimiento
 import { StatusBadgeComponent } from '../status-badge/status-badge.component';
 import { DateFormatPipe } from '../../pipes/dat.pipe';
 
-/**
- * Una fila del historial de movimientos (icono de origen + descripción + puntos).
- * Reemplaza las 3 copias que había en tarjeta-grafico (dashboard, admin y cliente).
- *
- * Uso:
- *   <app-movimiento-item [movimiento]="m" />
- *   <app-movimiento-item [movimiento]="m" formatoFecha="hora" fondo="oscuro" />
- */
 @Component({
   standalone: true,
   selector: 'app-movimiento-item',
@@ -53,9 +45,7 @@ import { DateFormatPipe } from '../../pipes/dat.pipe';
 })
 export class MovimientoItemComponent {
   @Input({ required: true }) movimiento!: Movimiento;
-  /** 'hora' = solo HH:mm (cuando ya hay un encabezado por día) · 'completa' = dd/MM/yyyy HH:mm */
   @Input() formatoFecha: 'hora' | 'completa' = 'completa';
-  /** 'card' si el contenedor es oscuro, 'oscuro' si el contenedor es ui-card */
   @Input() fondo: 'card' | 'oscuro' = 'card';
 
   get esPositivo(): boolean {

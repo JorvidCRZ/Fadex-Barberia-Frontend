@@ -459,7 +459,11 @@ export class ResumenComponent implements OnInit, OnDestroy {
    onVerDetalle(id: number): void {
   this.router.navigate(['/mi-cuenta/reservas/mis-reservas'], { queryParams: { reservaId: id } });
 }
-  onVerHistorial(): void { this.router.navigate(['/mi-cuenta/historial']); }
+  onVerHistorial(): void {
+  this.router.navigate(['/mi-cuenta/reservas/mis-reservas'], {
+    queryParams: { tab: 'historial' },
+  });
+}
 
   get statsCliente(): StatsCard[] {
     if (!this.kpis) return [];

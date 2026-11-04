@@ -1,73 +1,37 @@
-import { FormsModule } from '@angular/forms';
-import { SliderModule } from 'primeng/slider';
 import { NgClass } from '@angular/common';
-import { SafeImageUrlPipe } from '../../pipes/safe-image-url.pipe';
-import { ButtonComponent } from '../button/button.component';
-import { AudioService } from '../../../core/services/common/audio.service';
-import { TipoPremio } from '../../../core/models/ruleta/ruleta-item.model';
-import { RuletaSegmento } from '../../../core/models/ruleta/ruleta-grafico.model';
-import { Component, EventEmitter, Input, Output, signal, inject, OnDestroy, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
+import { ButtonComponent } from '@/app/shared/components/button/button.component';
+import { TipoPremio } from '@/app/core/models/ruleta/ruleta-item.model';
+import { RuletaSegmento } from '@/app/core/models/ruleta/ruleta-grafico.model';
+import { RuletaAudioComponent } from './ruleta-audio.component';
+import { PremioGanadoComponent } from './premio-ganado.component';
 
 @Component({
   selector: 'app-ruleta-grafico',
   standalone: true,
-  imports: [NgClass, SliderModule, FormsModule, SafeImageUrlPipe, ButtonComponent],
+  imports: [NgClass, ButtonComponent, RuletaAudioComponent, PremioGanadoComponent],
   templateUrl: './ruleta-grafico.html',
-  styleUrls: ['./ruleta-grafico.scss']
+  styleUrl: './ruleta-grafico.scss',
 })
-export class RuletaGraficoComponent implements OnChanges, OnDestroy {
+export class RuletaGraficoComponent {
   @Input({ required: true }) premios: RuletaSegmento[] = [];
   @Input() interactiva = true;
   @Input() reproducirMusica = false;
   @Input() textoBoton = 'Girar la ruleta';
-  /** true = el backend decide el premio (mi-ruleta real); false = sorteo local (preview de admin) */
   @Input() modoServidor = false;
   @Output() premioGanado = new EventEmitter<RuletaSegmento>();
-  /** Se emite cuando el usuario pulsa girar en modoServidor; el padre debe resolver el premio y llamar a girarHaciaResultado() */
   @Output() girarSolicitado = new EventEmitter<void>();
-  readonly audioService = inject(AudioService);
 
-  /** 24 bombillas del anillo (antes: [].constructor(24) en el template) */
+  readonly TipoPremio = TipoPremio;
   readonly bulbos = Array.from({ length: 24 }, (_, i) => i);
 
   girando = signal(false);
   rotacionActual = signal(0);
   premioGanador = signal<RuletaSegmento | null>(null);
   mostrarResultado = signal(false);
-  volumen = 50;
 
-  cambiarVolumen(valor: number | undefined) {
-    if (valor === undefined) return;
-    this.volumen = valor;
-    this.audioService.setVolume(valor / 100);
-  }
-
-  get iconoVolumen(): string {
-    if (!this.audioService.enabled) return 'pi pi-volume-off';
-    if (this.volumen <= 20) return 'pi pi-volume-down';
-    return 'pi pi-volume-up';
-  }
-
-  get mostrarControlesAudio(): boolean {
-    return this.reproducirMusica;
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['reproducirMusica']) {
-      if (this.reproducirMusica) {
-        this.audioService.play();
-      } else {
-        this.audioService.stop();
-      }
-    }
-  }
-
-  ngOnDestroy() {
-    this.audioService.stop();
-  }
-
-  toggleMusica() {
-    this.audioService.toggle();
+  get codigoGanador(): string | undefined {
+    return (this.premioGanador() as any)?.data?.codigoCanje;
   }
 
   get segmentos(): number {
@@ -92,17 +56,12 @@ export class RuletaGraficoComponent implements OnChanges, OnDestroy {
     const r = 149;
     const start = i * this.gradosPorSegmento;
     const end = (i + 1) * this.gradosPorSegmento;
-    const toRad = (deg: number) => (deg - 90) * Math.PI / 180;
+    const toRad = (deg: number) => ((deg - 90) * Math.PI) / 180;
     const x1 = cx + r * Math.cos(toRad(start));
     const y1 = cy + r * Math.sin(toRad(start));
     const x2 = cx + r * Math.cos(toRad(end));
     const y2 = cy + r * Math.sin(toRad(end));
-    return `
-      M ${cx} ${cy}
-      L ${x1} ${y1}
-      A ${r} ${r} 0 0 1 ${x2} ${y2}
-      Z
-    `;
+    return `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2} Z`;
   }
 
   private elegirPremio(): { premio: RuletaSegmento; index: number } {
@@ -110,22 +69,18 @@ export class RuletaGraficoComponent implements OnChanges, OnDestroy {
     let r = Math.random() * total;
     for (let i = 0; i < this.premios.length; i++) {
       r -= this.premios[i].peso;
-      if (r <= 0) {
-        return { premio: this.premios[i], index: i };
-      }
+      if (r <= 0) return { premio: this.premios[i], index: i };
     }
     return { premio: this.premios[this.premios.length - 1], index: this.premios.length - 1 };
   }
 
   private animarHacia(index: number): void {
     const centro = this.anguloSegmento(index) + this.gradosPorSegmento / 2;
-    const offset = (Math.random() - 0.5) * this.gradosPorSegmento * 0.30;
+    const offset = (Math.random() - 0.5) * this.gradosPorSegmento * 0.3;
     const vueltas = 5;
-    const nuevaRotacion = this.rotacionActual() + vueltas * 360 - centro - offset;
-    this.rotacionActual.set(nuevaRotacion);
+    this.rotacionActual.set(this.rotacionActual() + vueltas * 360 - centro - offset);
   }
 
-  /** Click del botón: en modoServidor solo avisa al padre; si no, sortea localmente (preview) */
   onClickGirar(): void {
     if (this.girando() || !this.interactiva || !this.premios.length) return;
 
@@ -139,7 +94,20 @@ export class RuletaGraficoComponent implements OnChanges, OnDestroy {
 
     const { premio, index } = this.elegirPremio();
     this.animarHacia(index);
+    this.terminarGiro(premio);
+  }
 
+  girarHaciaResultado(segmentoGanador: RuletaSegmento): void {
+    const index = this.premios.findIndex((p) => p.id === segmentoGanador.id);
+    this.animarHacia(index >= 0 ? index : 0);
+    this.terminarGiro(segmentoGanador);
+  }
+
+  cancelarGiro(): void {
+    this.girando.set(false);
+  }
+
+  private terminarGiro(premio: RuletaSegmento): void {
     setTimeout(() => {
       this.girando.set(false);
       this.premioGanador.set(premio);
@@ -148,31 +116,9 @@ export class RuletaGraficoComponent implements OnChanges, OnDestroy {
     }, 4200);
   }
 
-  /** Llamado por el padre (modoServidor) una vez el backend ya resolvió el premio real */
-  girarHaciaResultado(segmentoGanador: RuletaSegmento): void {
-    const index = this.premios.findIndex(p => p.id === segmentoGanador.id);
-    this.animarHacia(index >= 0 ? index : 0);
-
-    setTimeout(() => {
-      this.girando.set(false);
-      this.premioGanador.set(segmentoGanador);
-      this.mostrarResultado.set(true);
-      this.premioGanado.emit(segmentoGanador);
-    }, 4200);
-  }
-
-  /** Llamado por el padre si el backend falla, para reactivar el botón */
-  cancelarGiro(): void {
-    this.girando.set(false);
-  }
-
-  cerrarResultado() {
-    this.mostrarResultado.set(false);
-  }
-
   obtenerColorTexto(color: string): string {
     const hex = color.replace('#', '');
-    if (hex.length !== 6) { return '#171412'; }
+    if (hex.length !== 6) return '#171412';
     const r = parseInt(hex.substring(0, 2), 16);
     const g = parseInt(hex.substring(2, 4), 16);
     const b = parseInt(hex.substring(4, 6), 16);

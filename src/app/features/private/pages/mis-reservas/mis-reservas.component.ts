@@ -31,18 +31,8 @@ type TabReservas = 'reservas' | 'historial';
   selector: 'app-mis-reservas',
   standalone: true,
 
-  imports: [
-    TableModule,
-    PaginatorModule,
-    ReservarComponent,
-    StatusBadgeComponent,
-    DateFormatPipe,
-    MonedaPipe,
-    ButtonComponent,
-    PageHeaderComponent,
-    ConfirmPopoverComponent,
-    FiltrosComponent,
-    ModalComponent,
+  imports: [ TableModule, PaginatorModule, ReservarComponent, StatusBadgeComponent, DateFormatPipe,
+     MonedaPipe, ButtonComponent, PageHeaderComponent, ConfirmPopoverComponent, FiltrosComponent, ModalComponent,
   ],
 
   templateUrl: './mis-reservas.html',
@@ -70,7 +60,6 @@ export class MisReservasComponent implements OnInit {
 
   dialogNuevaReserva = signal(false);
 
-  /** Servicio que llega preseleccionado desde el detalle (?servicioId=X). null = sin preselección */
   servicioIdInicial = signal<number | null>(null);
 
   mostrarConfirmacion = signal(false);
@@ -99,8 +88,8 @@ export class MisReservasComponent implements OnInit {
 
     const params = this.route.snapshot.queryParamMap;
 
-    // /mi-cuenta/reservas/mis-reservas?nueva=1&servicioId=5
     const servicioId = params.get('servicioId');
+
     if (servicioId) {
       this.servicioIdInicial.set(Number(servicioId));
     }
@@ -113,12 +102,14 @@ export class MisReservasComponent implements OnInit {
       this.cambiarTab('historial');
     }
 
-    // Limpia la URL para que un F5 no vuelva a abrir el modal
     if (params.has('nueva') || servicioId) {
-      this.router.navigate([], { relativeTo: this.route, queryParams: {}, replaceUrl: true });
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { tab: params.get('tab') },
+        replaceUrl: true
+      });
     }
   }
-
 
   cambiarTab(tab: TabReservas): void {
     this.tab.set(tab);

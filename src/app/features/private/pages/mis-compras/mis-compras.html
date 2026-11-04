@@ -68,14 +68,10 @@
         <!-- Acciones -->
         <td>
           <div class="flex items-center justify-center gap-2">
-            <app-button variant="ver-tabla" icon="eye" tooltip="Ver detalle" tooltipPosition="top"
-              (clicked)="verDetalle(compra)" />
-            <app-button variant="secondary" size="sm" icon="download" tooltip="Descargar comprobante"
-              tooltipPosition="top" [loading]="descargandoId() === compra.ventaId"
-              (clicked)="descargarComprobante(compra)" />
+            <app-button variant="ver-tabla" icon="eye" tooltip="Ver detalle" tooltipPosition="top" (clicked)="verDetalle(compra)" />
+            <app-button variant="accion-cita" icon="download" tooltip="Descargar comprobante" tooltipPosition="top" [loading]="descargandoId() === compra.ventaId" (clicked)="descargarComprobante(compra)" />
           </div>
         </td>
-
       </tr>
     </ng-template>
 
@@ -86,8 +82,7 @@
           <div class="flex flex-col items-center gap-3">
             <i class="pi pi-shopping-bag text-5xl text-text-muted opacity-30"></i>
             <p class="text-lg text-text-muted">Aún no has comprado productos</p>
-            <app-button variant="primary" size="sm" icon="shopping-cart" label="Ver productos"
-              (clicked)="irAProductos()" />
+            <app-button variant="primary" size="sm" icon="shopping-cart" label="Ver productos" (clicked)="irAProductos()" />
           </div>
         </td>
       </tr>
@@ -184,8 +179,7 @@
         </div>
       </div>
 
-      <app-button variant="secondary" icon="download" label="Descargar comprobante" [fullWidth]="true"
-        [loading]="descargandoId() === compra.ventaId" (clicked)="descargarComprobante(compra)" />
+      <app-button variant="secondary" icon="download" label="Descargar comprobante" [fullWidth]="true" [loading]="descargandoId() === compra.ventaId" (clicked)="descargarComprobante(compra)" />
     </div>
   }
 </app-modal>

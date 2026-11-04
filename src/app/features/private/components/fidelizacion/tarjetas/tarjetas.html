@@ -17,14 +17,23 @@
     }
 </p-dialog>
 
-<p-dialog [(visible)]="mostrarPreview" [modal]="true" [dismissableMask]="true" [closable]="true" [style]="{ width: '100vw', maxWidth: '80rem' }">
+<p-dialog [(visible)]="mostrarPreview" [modal]="true" [dismissableMask]="true" [closable]="true" [style]="{ width: '100vw', maxWidth: '48rem' }">
     <ng-template pTemplate="header">
-        <div class="flex items-center justify-between w-full pr-2">
+        <div class="flex w-full items-center justify-between pr-2">
             <app-dialog-header icono="pi-id-card" title="Vista previa de la tarjeta" mode="ver" />
-            <button pButton [label]="variantePreview === 'admin' ? 'Ver como cliente' : 'Ver como admin'" icon="pi pi-eye" class="boton-ver"(click)="cambiarVariantePreview()"></button>
+            <button pButton [label]="variantePreview === 'admin' ? 'Ver como cliente' : 'Ver como admin'" icon="pi pi-eye" class="boton-ver" (click)="cambiarVariantePreview()"></button>
         </div>
     </ng-template>
+
     @if (tarjetaSeleccionada) {
-        <app-tarjeta-grafico [variante]="variantePreview" [clienteNombre]="clienteNombrePreview" [tarjetas]="tarjetasPreview" />
+        @if (variantePreview === 'admin') {
+        <app-tarjeta-admin [tarjetas]="tarjetasPreview" [clienteNombre]="clienteNombrePreview" />
+        } @else {
+        <div class="flex flex-col gap-4">
+            @for (t of tarjetasPreview; track t.id) {
+            <app-tarjeta-cliente [tarjeta]="t" [soloLectura]="true" />
+            }
+        </div>
+        }
     }
 </p-dialog>

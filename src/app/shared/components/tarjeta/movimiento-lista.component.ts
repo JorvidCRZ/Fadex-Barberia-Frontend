@@ -3,13 +3,6 @@ import { NgClass } from '@angular/common';
 import { Movimiento } from '../../../core/models/fidelizacion/movimiento.model';
 import { MovimientoItemComponent } from './movimiento-item.component';
 
-/**
- * Timeline de movimientos con estados de carga / vacío.
- *
- * Uso:
- *   <app-movimientos-lista [movimientos]="movimientosDe(t)" [cargando]="estaCargando(t)" />
- *   <app-movimientos-lista [movimientos]="grupo.items" formatoFecha="hora" fondo="oscuro" scrollClass="" />
- */
 @Component({
   standalone: true,
   selector: 'app-movimientos-lista',
@@ -37,6 +30,5 @@ export class MovimientosListaComponent {
   @Input() textoVacio = 'Sin movimientos registrados.';
   @Input() formatoFecha: 'hora' | 'completa' = 'completa';
   @Input() fondo: 'card' | 'oscuro' = 'card';
-  /** Clases del contenedor con scroll. Pasar '' para desactivarlo */
   @Input() scrollClass = 'max-h-72 overflow-y-auto pr-1';
 }

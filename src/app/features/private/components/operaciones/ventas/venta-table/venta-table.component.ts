@@ -10,7 +10,6 @@ import { VentaDetalle } from '@/app/core/models/ventas/detalle.model';
 import { ConfirmPopoverComponent } from '@/app/shared/components/confirm-popover/confirm-popover.component';
 import { ButtonComponent } from '@/app/shared/components/button/button.component';
 import { MonedaPipe } from '@/app/shared/pipes/moneda.pipe';
-import { ModalComponent } from '@/app/shared/components/modal/modal.component';
 
 @Component({
   selector: 'app-venta-table',
@@ -24,8 +23,7 @@ import { ModalComponent } from '@/app/shared/components/modal/modal.component';
     TooltipModule,
     ConfirmPopoverComponent,
     ButtonComponent,
-    MonedaPipe,
-    ModalComponent
+    MonedaPipe
 ],
   templateUrl: './venta-table.html',
   styleUrls: ['./venta-table.scss'],
