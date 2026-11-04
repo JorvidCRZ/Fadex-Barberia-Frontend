@@ -72,15 +72,11 @@ export class ReservaService {
     }
     if (desde) {
       const fechaDesde = desde instanceof Date ? desde : new Date(desde);
-      if (!Number.isNaN(fechaDesde.getTime())) {
-        params = params.set('desde', fechaDesde.toISOString().split('T')[0]);
-      }
+      params = params.set('desde', fechaDesde.toISOString().split('T')[0]);
     }
     if (hasta) {
       const fechaHasta = hasta instanceof Date ? hasta : new Date(hasta);
-      if (!Number.isNaN(fechaHasta.getTime())) {
-        params = params.set('hasta', fechaHasta.toISOString().split('T')[0]);
-      }
+      params = params.set('hasta', fechaHasta.toISOString().split('T')[0]);
     }
     return this.http.get<ApiResponse<Page<HistorialClienteModel>>>(`${this.API2}/historial`, {
       params,

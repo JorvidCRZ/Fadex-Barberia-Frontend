@@ -2,24 +2,21 @@ import { EstadoReserva } from './EstadoReserva';
 import { TipoReserva } from './TipoRserva';
 
 export interface HistorialClienteModel {
-  tipo?: 'RESERVA' | 'COMPRA' | null;
   id: number;
-  fecha: string;
-  horaInicio?: string | null;
-  horaFin?: string | null;
-  estadoReserva?: string | null;
-  tipoReserva?: TipoReserva | string | null;
-  nombreBarbero?: string | null;
-  nombreServicio?: string | null;
+  fecha: string;        
+  horaInicio: string;   
+  horaFin: string;      
+  estadoReserva: EstadoReserva;
+  tipoReserva: TipoReserva;
+  nombreBarbero: string;
+  nombreServicio: string;
   total: number;
-  observacion?: string | null;
+  observacion: string;
   tipoComprobante?: 'BOLETA' | 'FACTURA';
   numeroComprobante?: string;
   metodoPago?: string;
   razonSocial?: string;
   ruc?: string;
-  items?: Array<{ nombre: string; cantidad: number; precio?: number; total?: number }>;
-  ventaId?: number | null;
 }
 
 
@@ -38,7 +35,7 @@ export interface ApiResponse<T> {
 }
 
 export interface HistorialClienteFiltro {
-    estado?: string;
-    desde?: Date | string;
-    hasta?: Date | string;
+    estado?: EstadoReserva;
+    desde?: Date;
+    hasta?: Date;
 }

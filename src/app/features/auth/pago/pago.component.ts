@@ -1,4 +1,3 @@
-import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -12,15 +11,7 @@ import { NotificationService } from '../../../core/services/common/notification.
 import { ReservaService } from '../../../core/services/operaciones/reserva.service';
 import { SolesPipe } from '../../../shared/pipes/moneda.pipe';
 
-type MetodoPago = 'TARJETA' | 'YAPE' | 'TRANSFERENCIA';
-type CampoPago = 'numeroTarjeta' | 'vencimiento' | 'cvv' | 'correoPago';
-
-interface PagoForm {
-  numeroTarjeta: string;
-  vencimiento: string;
-  cvv: string;
-  correoPago: string;
-}
+type MetodoPago = 'TARJETA' | 'YAPE' | 'BANCA';
 
 @Component({
   selector: 'app-pago',
