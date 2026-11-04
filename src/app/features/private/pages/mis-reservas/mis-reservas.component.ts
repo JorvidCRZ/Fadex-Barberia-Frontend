@@ -1,250 +1,304 @@
 import { finalize } from 'rxjs';
-import { TagModule } from 'primeng/tag';
+
 import { ActivatedRoute, Router } from '@angular/router';
-import { ToastModule } from 'primeng/toast';
-import { FormsModule } from '@angular/forms';
-import { MessageService } from 'primeng/api';
-import { ButtonModule } from 'primeng/button';
-import { CommonModule } from '@angular/common';
-import { ConfirmationService } from 'primeng/api';
-import { TooltipModule } from 'primeng/tooltip';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { Component, inject, OnInit, ViewChild } from '@angular/core';
-import { Table, TableLazyLoadEvent, TableModule } from 'primeng/table';
-import { ApiResponse, Page } from '../../../../core/models/common/index.model';
+
+import { PaginatorModule, PaginatorState } from 'primeng/paginator';
+import { TableModule } from 'primeng/table';
+
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { FILTROS_HISTORIAL } from '../../../../core/config/filtros.config';
 import { Reserva } from '../../../../core/models/operaciones/Reserva.model';
+import {
+  HistorialClienteFiltro,
+  HistorialClienteModel,
+} from '../../../../core/models/operaciones/historial-cliente.model';
 import { ReservaService } from '../../../../core/services/operaciones/reserva.service';
-import { environment } from '../../../../../environments/environment';
-import { RESERVAS_MOCK } from '../../../../core/config/privado-mock.config';
+import { NotificationService } from '../../../../core/services/common/notification.service';
 import { ReservarComponent } from '../reservar/reservar.component';
 import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
 import { MonedaPipe } from '../../../../shared/pipes/moneda.pipe';
 import { DateFormatPipe } from '../../../../shared/pipes/dat.pipe';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
+import { ConfirmPopoverComponent } from '../../../../shared/components/confirm-popover/confirm-popover.component';
+import { FiltrosComponent } from '../../../../shared/components/filtros/filtros.component';
+import { ModalComponent } from '../../../../shared/components/modal/modal.component';
+import { EstadoReserva } from '@/app/core/models/operaciones/EstadoReserva';
 
-type Severidad = 'success' | 'info' | 'warn' | 'danger' | 'secondary';
+type TabReservas = 'reservas' | 'historial';
 
 @Component({
   selector: 'app-mis-reservas',
   standalone: true,
-  imports: [CommonModule,FormsModule,TableModule,ButtonModule,TagModule,ToastModule,TooltipModule,ConfirmDialogModule,
-    ReservarComponent,StatusBadgeComponent,DateFormatPipe, MonedaPipe,ButtonComponent
+
+  imports: [
+    TableModule,
+    PaginatorModule,
+    ReservarComponent,
+    StatusBadgeComponent,
+    DateFormatPipe,
+    MonedaPipe,
+    ButtonComponent,
+    PageHeaderComponent,
+    ConfirmPopoverComponent,
+    FiltrosComponent,
+    ModalComponent,
   ],
-  providers: [MessageService, ConfirmationService],
+
   templateUrl: './mis-reservas.html',
 })
 export class MisReservasComponent implements OnInit {
-
   private reservaService = inject(ReservaService);
-  private messageService = inject(MessageService);
-  private confirmationService = inject(ConfirmationService);
+  private notify = inject(NotificationService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private readonly ESTADOS_ACTIVOS: EstadoReserva[] = [
+    EstadoReserva.PENDIENTE_PAGO,
+    EstadoReserva.CONFIRMADA,
+    EstadoReserva.EN_PROCESO,
+  ];
 
-  @ViewChild('dt') table: Table | undefined;
+  tab = signal<TabReservas>('reservas');
 
-  reservas: Reserva[] = [];
-  loading = false;
-  totalRecords = 0;
-  rows = 10;
-  currentPage = 0;
+  private historialCargado = false;
 
-  /** Controla el modal de nueva reserva */
-  dialogNuevaReserva = false;
+  reservas = signal<Reserva[]>([]);
+  loadingReservas = signal(false);
+  totalReservas = signal(0);
+  rowsReservas = signal(10);
+  firstReservas = signal(0);
+
+  dialogNuevaReserva = signal(false);
+
+  /** Servicio que llega preseleccionado desde el detalle (?servicioId=X). null = sin preselección */
+  servicioIdInicial = signal<number | null>(null);
+
+  mostrarConfirmacion = signal(false);
+  reservaPorCancelar: Reserva | null = null;
+  mensajeConfirmacion = '';
+
+  historial = signal<HistorialClienteModel[]>([]);
+  loadingHistorial = signal(false);
+  totalHistorial = signal(0);
+  rowsHistorial = signal(10);
+  firstHistorial = signal(0);
+
+  filtrosFields = [...FILTROS_HISTORIAL];
+  filtros = signal<HistorialClienteFiltro>({});
+
+  hayFiltrosActivos = computed(() => {
+    const f = this.filtros();
+    return !!(f.estado || f.desde || f.hasta);
+  });
+
+  displayModal = signal(false);
+  reservaSeleccionada = signal<HistorialClienteModel | null>(null);
 
   ngOnInit(): void {
     this.cargarMisReservas();
 
-    // Permite abrir el modal desde otras pantallas:
-    // /mi-cuenta/reservas/mis-reservas?nueva=1
-    if (this.route.snapshot.queryParamMap.has('nueva')) {
-      this.dialogNuevaReserva = true;
+    const params = this.route.snapshot.queryParamMap;
+
+    // /mi-cuenta/reservas/mis-reservas?nueva=1&servicioId=5
+    const servicioId = params.get('servicioId');
+    if (servicioId) {
+      this.servicioIdInicial.set(Number(servicioId));
+    }
+
+    if (params.has('nueva')) {
+      this.dialogNuevaReserva.set(true);
+    }
+
+    if (params.get('tab') === 'historial') {
+      this.cambiarTab('historial');
+    }
+
+    // Limpia la URL para que un F5 no vuelva a abrir el modal
+    if (params.has('nueva') || servicioId) {
+      this.router.navigate([], { relativeTo: this.route, queryParams: {}, replaceUrl: true });
     }
   }
 
-  // ── Carga ──────────────────────────────────────────────────────────────────
 
-  cargarMisReservas(event?: TableLazyLoadEvent): void {
-    this.loading = true;
-
-    const size = event?.rows || this.rows;
-    const page = event ? Math.floor((event.first || 0) / size) : this.currentPage;
-
-    this.currentPage = page;
-    this.rows = size;
-
-    if (environment.useMockData) {
-      this.reservaService.getMisReservas(page, size)
-        .pipe(finalize(() => (this.loading = false)))
-        .subscribe({
-          next: (response: ApiResponse<Page<Reserva>>) => {
-            if (response.success && response.data) {
-              this.reservas = response.data.content;
-              this.totalRecords = response.data.totalElements;
-              this.rows = response.data.pageSize || size;
-            } else {
-              this.reservas = [];
-              this.totalRecords = 0;
-            }
-          },
-          error: () => {
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Error',
-              detail: 'No se pudieron cargar tus reservas',
-            });
-            this.reservas = [];
-            this.totalRecords = 0;
-          },
-        });
-      return;
+  cambiarTab(tab: TabReservas): void {
+    this.tab.set(tab);
+    if (tab === 'historial' && !this.historialCargado) {
+      this.cargarHistorial();
     }
+  }
 
-    this.reservaService.getMisReservas(page, size)
-      .pipe(finalize(() => (this.loading = false)))
+  recargar(): void {
+    if (this.tab() === 'reservas') {
+      this.cargarMisReservas();
+    } else {
+      this.cargarHistorial();
+    }
+  }
+
+  cargarMisReservas(): void {
+    this.loadingReservas.set(true);
+
+    this.reservaService
+      .getMisReservas(0, 200)
+      .pipe(finalize(() => this.loadingReservas.set(false)))
       .subscribe({
-        next: (response: ApiResponse<Page<Reserva>>) => {
+        next: (response) => {
           if (response.success && response.data) {
-            this.reservas = response.data.content;
-            this.totalRecords = response.data.totalElements;
-            this.rows = response.data.pageSize || size;
+            const activas = response.data.content
+              .filter(r => this.ESTADOS_ACTIVOS.includes(r.estadoReserva))
+              .sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime());
+
+            this.reservas.set(activas);
           } else {
-            this.reservas = [];
-            this.totalRecords = 0;
+            this.reservas.set([]);
           }
         },
-        error: () => {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'No se pudieron cargar tus reservas',
-          });
-          this.reservas = [];
-          this.totalRecords = 0;
+        error: (err) => {
+          console.error('Error cargando mis reservas:', err);
+          this.reservas.set([]);
+          this.notify.showHttpError(err);
         },
       });
   }
 
-  onLazyLoad(event: TableLazyLoadEvent): void {
-    this.cargarMisReservas(event);
-  }
-
-  recargar(): void {
+  onPaginatorReservas(event: PaginatorState): void {
+    this.rowsReservas.set(event.rows ?? this.rowsReservas());
+    this.firstReservas.set(event.first ?? 0);
     this.cargarMisReservas();
   }
 
-  private getReservasMockLocales(): Reserva[] {
-    try {
-      const raw = localStorage.getItem('fadex_mock_reservas');
-      if (!raw) {
-        return [];
-      }
-
-      const parsed = JSON.parse(raw) as Reserva[];
-      if (!Array.isArray(parsed) || parsed.length === 0) {
-        return [];
-      }
-
-      return [...parsed]
-        .sort((a, b) => Number(b.reservaId || b.id || 0) - Number(a.reservaId || a.id || 0))
-        .map((reserva) => ({
-          ...reserva,
-          fecha: new Date(reserva.fecha),
-          horaInicio: new Date(reserva.horaInicio),
-          horaFin: new Date(reserva.horaFin),
-        }));
-    } catch {
-      return RESERVAS_MOCK;
-    }
-  }
-
-  // ── Nueva reserva (modal) ──────────────────────────────────────────────────
+  // =====================================================
+  // RESERVAS: NUEVA
+  // =====================================================
 
   abrirNuevaReserva(): void {
-    this.dialogNuevaReserva = true;
+    this.servicioIdInicial.set(null); // apertura manual: sin servicio preseleccionado
+    this.dialogNuevaReserva.set(true);
   }
 
   onReservaCreada(): void {
-    this.currentPage = 0;
+    this.servicioIdInicial.set(null);
+    this.firstReservas.set(0);
+    this.cambiarTab('reservas');
     this.cargarMisReservas();
   }
 
-  // ── Cancelar ───────────────────────────────────────────────────────────────
+  // =====================================================
+  // RESERVAS: CANCELAR
+  // =====================================================
 
   cancelarReserva(reserva: Reserva): void {
-    const id = reserva.reservaId || reserva.id;
-
-    this.confirmationService.confirm({
-      message: `¿Cancelar la reserva del servicio "${reserva.servicio}"?`,
-      header: 'Confirmar cancelación',
-      icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'Sí, cancelar',
-      rejectLabel: 'No',
-      accept: () => {
-        if (environment.useMockData) {
-          this.reservas = this.reservas.filter((item) => (item.reservaId || item.id) !== id);
-          this.totalRecords = Math.max(0, this.totalRecords - 1);
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Reserva cancelada',
-            detail: 'La reserva simulada ha sido cancelada',
-          });
-          return;
-        }
-
-        this.loading = true;
-        this.reservaService.cancelarReserva(id)
-          .pipe(finalize(() => (this.loading = false)))
-          .subscribe({
-            next: (response) => {
-              if (response.success) {
-                this.messageService.add({
-                  severity: 'success',
-                  summary: 'Reserva cancelada',
-                  detail: 'Tu reserva ha sido cancelada exitosamente',
-                });
-                this.cargarMisReservas();
-              }
-            },
-            error: () => {
-              this.messageService.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'No se pudo cancelar la reserva',
-              });
-            },
-          });
-      },
-    });
+    this.reservaPorCancelar = reserva;
+    this.mensajeConfirmacion = `¿Cancelar la reserva del servicio "${reserva.servicio}"?`;
+    this.mostrarConfirmacion.set(true);
   }
 
-  // ── Pagar ──────────────────────────────────────────────────────────────────
+  cerrarConfirmacion(): void {
+    this.mostrarConfirmacion.set(false);
+    this.reservaPorCancelar = null;
+  }
+
+  confirmarCancelacion(): void {
+    const reserva = this.reservaPorCancelar;
+    if (!reserva) return;
+
+    const id = reserva.reservaId || reserva.id;
+    this.cerrarConfirmacion();
+    this.loadingReservas.set(true);
+
+    this.reservaService
+      .cancelarReserva(id)
+      .pipe(finalize(() => this.loadingReservas.set(false)))
+      .subscribe({
+        next: (response) => {
+          if (!response.success) return;
+
+          this.notify.showSuccess('Tu reserva ha sido cancelada exitosamente', 'Reserva cancelada');
+
+          if (this.reservas().length === 1 && this.firstReservas() > 0) {
+            this.firstReservas.set(Math.max(0, this.firstReservas() - this.rowsReservas()));
+          }
+
+          this.cargarMisReservas();
+
+          // La reserva cancelada pasa al historial: forzar recarga la próxima vez
+          this.historialCargado = false;
+        },
+        error: (err) => {
+          console.error('Error cancelando reserva:', err);
+          this.notify.showHttpError(err);
+        },
+      });
+  }
+
+  // =====================================================
+  // RESERVAS: PAGAR
+  // =====================================================
 
   irAPagar(reserva: Reserva): void {
-    this.router.navigate(['/mi-cuenta/checkout', reserva.reservaId]);
+    this.router.navigate(['/mi-cuenta/pago', reserva.reservaId]);
   }
 
-  // ── Reglas de UI ───────────────────────────────────────────────────────────
-
   puedePagar(reserva: Reserva): boolean {
-    return reserva.estadoReserva === 'PENDIENTE_PAGO';
+    return reserva.estadoReserva === EstadoReserva.PENDIENTE_PAGO;
   }
 
   puedeCancelar(reserva: Reserva): boolean {
-    return reserva.estadoReserva === 'PENDIENTE_PAGO';
+    return reserva.estadoReserva === EstadoReserva.PENDIENTE_PAGO;
   }
 
-  /** Acepta '09:30:00', [9, 30] o { hour: 9, minute: 30 } y devuelve 'HH:mm' */
 
-  getSeverity(estado: string): Severidad {
-    const severities: Record<string, Severidad> = {
-      CONFIRMADA: 'success',
-      FINALIZADA: 'success',
-      EN_PROCESO: 'info',
-      PENDIENTE: 'info',
-      PENDIENTE_PAGO: 'warn',
-      CANCELADA: 'danger',
-    };
-    return severities[estado] ?? 'secondary';
+  cargarHistorial(): void {
+    const size = this.rowsHistorial();
+    const page = Math.floor(this.firstHistorial() / size);
+    const { estado, desde, hasta } = this.filtros();
+
+    this.loadingHistorial.set(true);
+
+    this.reservaService
+      .getHistorialCliente(page, size, estado, desde, hasta)
+      .pipe(finalize(() => this.loadingHistorial.set(false)))
+      .subscribe({
+        next: (response) => {
+          this.historialCargado = true;
+
+          if (response.success && response.data) {
+            this.historial.set(response.data.content);
+            this.totalHistorial.set(response.data.totalElements);
+          } else {
+            this.historial.set([]);
+            this.totalHistorial.set(0);
+          }
+        },
+        error: (err) => {
+          console.error('Error cargando el historial:', err);
+          this.historial.set([]);
+          this.totalHistorial.set(0);
+          this.notify.showHttpError(err);
+        },
+      });
+  }
+
+  onPaginatorHistorial(event: PaginatorState): void {
+    this.rowsHistorial.set(event.rows ?? this.rowsHistorial());
+    this.firstHistorial.set(event.first ?? 0);
+    this.cargarHistorial();
+  }
+
+  onBuscar(filtros: HistorialClienteFiltro): void {
+    this.filtros.set(filtros);
+    this.firstHistorial.set(0);
+    this.cargarHistorial();
+  }
+
+  onLimpiar(): void {
+    this.filtros.set({});
+    this.firstHistorial.set(0);
+    this.cargarHistorial();
+  }
+
+  verDetalle(reserva: HistorialClienteModel): void {
+    this.reservaSeleccionada.set(reserva);
+    this.displayModal.set(true);
   }
 }

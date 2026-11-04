@@ -456,7 +456,9 @@ export class ResumenComponent implements OnInit, OnDestroy {
   seleccionar(cita: CitaResumen): void { this.seleccionada = cita; }
 
   // Rutas que existen en app.routes.ts
-  onVerDetalle(id: number): void { this.router.navigate(['/mi-cuenta/reservas/mis-reservas'], { queryParams: { reservaId: id } }); }
+   onVerDetalle(id: number): void {
+  this.router.navigate(['/mi-cuenta/reservas/mis-reservas'], { queryParams: { reservaId: id } });
+}
   onVerHistorial(): void { this.router.navigate(['/mi-cuenta/historial']); }
 
   get statsCliente(): StatsCard[] {

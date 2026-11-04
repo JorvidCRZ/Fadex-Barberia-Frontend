@@ -1,194 +1,96 @@
 /* ========================================
    DATATABLE
+   Estilo único para todos los p-table.
+   Las plantillas usan <th> y <td> sin clases de padding,
+   tipografía, color ni borde.
    ======================================== */
-p-table{
-.p-datatable {
+
+p-table {
+  .p-datatable {
     overflow: auto;
     border: 1px solid rgb(var(--color-brand-gold-soft)) !important;
     border-radius: 12px !important;
-}
+  }
 
-.p-datatable-thead {
-    background: rgb(var(--color-ui-card));
-    color: rgb(var(--color-text-table-sub));
-    font-weight: 600;
-    text-align: center !important;
-}
-
-.p-datatable-thead>tr>th {
+  /* Cabecera */
+  .p-datatable-thead > tr > th {
+    padding: 1rem 1.5rem;
     background: rgb(var(--color-brand-dark)) !important;
     border-bottom: 2px solid rgb(var(--color-brand-gold-soft)) !important;
     color: rgb(var(--color-text-table-sub)) !important;
-    text-align: center !important;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
     white-space: nowrap;
-}
-
-.p-datatable-tbody>tr {
     text-align: center !important;
+  }
+
+  /* Filas */
+  .p-datatable-tbody > tr {
     background: rgb(var(--color-ui-card)) !important;
     color: rgb(var(--color-text-table-sub));
-}
+    transition: background-color 0.2s ease;
 
-.p-datatable-tbody>tr:hover {
-    background: rgb(var(--color-brand-black)) !important;
-}
+    &:hover {
+      background: rgb(var(--color-brand-black)) !important;
+    }
 
-.p-datatable-tbody>tr>td {
-    border-bottom: 1px solid rgb(var(--color-ui-border));
-    color: rgb(var(--color-text-table-sub));
-}
+    > td {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid rgb(var(--color-ui-border));
+      color: rgb(var(--color-text-table-sub));
+      text-align: center !important;
+    }
+  }
 
-.p-datatable-tbody>tr>td:first-child {
+  /* Primera columna a la izquierda (cabecera y celdas) */
+  .p-datatable-thead > tr > th:first-child,
+  .p-datatable-tbody > tr > td:first-child {
     text-align: left !important;
-    padding-left: 1.5rem !important;
-}
+  }
 
-.p-datatable-tbody>tr>td:not(:first-child) {
-    text-align: center !important;
-}
+  /* Alineación por columna: <th class="text-left"> / <td class="text-right"> */
+  .p-datatable-thead > tr > th.text-left,
+  .p-datatable-tbody > tr > td.text-left {
+    text-align: left !important;
+  }
 
+  .p-datatable-thead > tr > th.text-right,
+  .p-datatable-tbody > tr > td.text-right {
+    text-align: right !important;
+  }
 
-/* ========================================
-   PAGINATOR
-   ======================================== */
-
-.p-datatable .p-paginator {
+  /* Paginador */
+  .p-datatable .p-paginator {
     padding: 1rem;
     border-top: 1px solid rgb(var(--color-brand-gold));
     background: rgb(var(--color-brand-dark));
+  }
 }
 
-.p-paginator-page.p-paginator-page-selected {
-    background: rgb(var(--color-brand-gold)) !important;
-    color: black !important;
+/* Paginador: página activa y hover (global, una sola vez) */
+.p-paginator-page.p-paginator-page-selected,
+.p-paginator-page:not(.p-disabled):not(.p-paginator-page-selected):hover,
+.p-paginator-first:not(.p-disabled):hover,
+.p-paginator-prev:not(.p-disabled):hover,
+.p-paginator-next:not(.p-disabled):hover,
+.p-paginator-last:not(.p-disabled):hover {
+  background: rgb(var(--color-brand-gold)) !important;
+  color: black !important;
 }
 
-
-/* ========================================
-   BOTÓN EXPANDIR
-   ======================================== */
 
 .boton-expandir-tabla .p-button {
-    @apply mr-2 inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-brand-gold/30 bg-brand-gold-soft text-brand-gold transition-all duration-200;
-}
+  @apply mr-2 inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-brand-gold/30 bg-brand-gold-soft text-brand-gold transition-all duration-200;
 
-.boton-expandir-tabla .p-button:hover {
+  &:hover {
     @apply scale-110 border-brand-gold bg-brand-gold text-black;
-}
+  }
 
-.boton-expandir-tabla .p-button:focus,
-.boton-expandir-tabla .p-button:focus-visible {
+  &:focus,
+  &:focus-visible {
     outline: none !important;
     box-shadow: none !important;
-}
-
-
-/* ========================================
-   TABLE ACTIONS
-   ======================================== */
-
-/* El host (p-button) no pinta nada */
-.boton-ver-tabla:not(.p-button),
-.boton-editar-tabla:not(.p-button),
-.boton-eliminar-tabla:not(.p-button),
-.boton-agregar:not(.p-button) {
-    display: inline-flex;
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-}
-
-/* Solo el <button> real se estiliza (base común) */
-.boton-ver-tabla.p-button,
-.boton-ver-tabla > .p-button,
-.boton-editar-tabla.p-button,
-.boton-editar-tabla > .p-button,
-.boton-eliminar-tabla.p-button,
-.boton-eliminar-tabla > .p-button,
-.boton-agregar.p-button,
-.boton-agregar > .p-button {
-    width: 2rem !important;
-    height: 2rem !important;
-    min-width: 0 !important;
-    padding: 0 !important;
-    border-radius: 8px !important;
-    box-shadow: none !important;
-    transition: all 0.2s ease;
-}
-
-/* Ver: dorado */
-.boton-ver-tabla.p-button,
-.boton-ver-tabla > .p-button {
-    color: rgb(var(--color-brand-gold)) !important;
-    border: 1px solid rgb(var(--color-brand-gold) / 0.3) !important;
-    background: rgb(var(--color-brand-gold) / 0.08) !important;
-}
-.boton-ver-tabla.p-button:hover,
-.boton-ver-tabla > .p-button:hover {
-    background: rgb(var(--color-brand-gold)) !important;
-    color: #000 !important;
-    transform: translateY(-1px);
-}
-
-/* Agregar: dorado */
-.boton-agregar.p-button,
-.boton-agregar > .p-button {
-    color: rgb(var(--color-brand-gold)) !important;
-    border: 1px solid rgb(var(--color-brand-gold) / 0.3) !important;
-    background: rgb(var(--color-brand-gold) / 0.08) !important;
-}
-.boton-agregar.p-button:hover,
-.boton-agregar > .p-button:hover {
-    background: rgb(var(--color-brand-gold)) !important;
-    color: #000 !important;
-    transform: translateY(-1px);
-}
-
-/* Editar: azul */
-.boton-editar-tabla.p-button,
-.boton-editar-tabla > .p-button {
-    color: #60a5fa !important;
-    border: 1px solid rgb(96 165 250 / 0.3) !important;
-    background: rgb(96 165 250 / 0.08) !important;
-}
-.boton-editar-tabla.p-button:hover,
-.boton-editar-tabla > .p-button:hover {
-    background: #60a5fa !important;
-    color: #000 !important;
-    transform: translateY(-1px);
-}
-
-/* Eliminar: rojo */
-.boton-eliminar-tabla.p-button,
-.boton-eliminar-tabla > .p-button {
-    color: #f87171 !important;
-    border: 1px solid rgb(248 113 113 / 0.3) !important;
-    background: rgb(248 113 113 / 0.08) !important;
-}
-.boton-eliminar-tabla.p-button:hover,
-.boton-eliminar-tabla > .p-button:hover {
-    background: #ef4444 !important;
-    color: #fff !important;
-    transform: translateY(-1px);
-}
-
-/* Sin outline al enfocar */
-.boton-ver-tabla.p-button:focus-visible,
-.boton-ver-tabla > .p-button:focus-visible,
-.boton-editar-tabla.p-button:focus-visible,
-.boton-editar-tabla > .p-button:focus-visible,
-.boton-eliminar-tabla.p-button:focus-visible,
-.boton-eliminar-tabla > .p-button:focus-visible,
-.boton-agregar.p-button:focus-visible,
-.boton-agregar > .p-button:focus-visible {
-    outline: none !important;
-    box-shadow: 0 0 0 2px rgb(var(--color-brand-gold) / 0.4) !important;
-}
-}
-
-
-.p-paginator-page.p-paginator-page-selected,.p-paginator-page:not(.p-disabled):not(.p-paginator-page-selected):hover, .p-paginator-first:not(.p-disabled):hover, .p-paginator-prev:not(.p-disabled):hover, .p-paginator-next:not(.p-disabled):hover, .p-paginator-last:not(.p-disabled):hover {
-    background: rgb(var(--color-brand-gold)) !important;
-    color: black !important;
+  }
 }

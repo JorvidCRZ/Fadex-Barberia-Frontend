@@ -1,0 +1,191 @@
+<div class="flex flex-col gap-6 mt-5">
+
+  <app-page-header titulo="Mis Productos" icono="shopping-bag" subtitulo="Revisa los productos que has comprado">
+    <app-button variant="secondary" size="sm" icon="refresh" label="Recargar" (clicked)="recargar()" />
+    <app-button variant="primary" size="sm" icon="shopping-cart" label="Ir a la tienda" (clicked)="irAProductos()" />
+  </app-page-header>
+
+  <!-- Tabla de compras -->
+  <p-table [value]="paginaActual()" [loading]="loading()" dataKey="ventaId" [tableStyle]="{ 'min-width': '1000px' }">
+
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Compra</th>
+        <th>Fecha</th>
+        <th>Productos</th>
+        <th>Método de pago</th>
+        <th>Total</th>
+        <th>Acciones</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-compra>
+      <tr>
+
+        <!-- Compra -->
+        <td>
+          <p class="font-semibold text-text-primary">
+            {{ compra.numeroCorrelativo || ('Venta #' + compra.ventaId) }}
+          </p>
+          @if (compra.tipoComprobante) {
+          <p class="mt-1 flex items-center justify-center gap-1 text-xs text-text-muted">
+            <i class="pi pi-file"></i> {{ compra.tipoComprobante }}
+          </p>
+          }
+        </td>
+
+        <!-- Fecha -->
+        <td>
+          <span class="text-sm font-medium text-text-primary">
+            {{ fechaCompra(compra) | dateHelper }}
+          </span>
+        </td>
+
+        <!-- Productos -->
+        <td>
+          <div class="flex items-center justify-center gap-2">
+            <div
+              class="flex size-8 items-center justify-center rounded-full border border-brand-gold/20 bg-brand-gold/10">
+              <i class="pi pi-box text-sm text-brand-gold"></i>
+            </div>
+            <div class="text-left">
+              <p class="text-sm font-semibold text-text-primary">{{ resumenProductos(compra) }}</p>
+              <p class="text-xs text-text-muted">{{ cantidadProductos(compra) }} unidad(es)</p>
+            </div>
+          </div>
+        </td>
+
+        <!-- Método de pago -->
+        <td>
+          <span class="text-sm text-text-primary">{{ compra.metodoPago || '—' }}</span>
+        </td>
+
+        <!-- Total -->
+        <td>
+          <span class="font-bold text-brand-gold">{{ compra.total | moneda }}</span>
+        </td>
+
+        <!-- Acciones -->
+        <td>
+          <div class="flex items-center justify-center gap-2">
+            <app-button variant="ver-tabla" icon="eye" tooltip="Ver detalle" tooltipPosition="top"
+              (clicked)="verDetalle(compra)" />
+            <app-button variant="secondary" size="sm" icon="download" tooltip="Descargar comprobante"
+              tooltipPosition="top" [loading]="descargandoId() === compra.ventaId"
+              (clicked)="descargarComprobante(compra)" />
+          </div>
+        </td>
+
+      </tr>
+    </ng-template>
+
+    <!-- Sin compras -->
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="6" class="py-12 text-center">
+          <div class="flex flex-col items-center gap-3">
+            <i class="pi pi-shopping-bag text-5xl text-text-muted opacity-30"></i>
+            <p class="text-lg text-text-muted">Aún no has comprado productos</p>
+            <app-button variant="primary" size="sm" icon="shopping-cart" label="Ver productos"
+              (clicked)="irAProductos()" />
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <!-- Cargando -->
+    <ng-template pTemplate="loadingbody">
+      <tr>
+        <td colspan="6" class="py-12 text-center">
+          <div class="flex flex-col items-center gap-3">
+            <div class="size-10 animate-spin rounded-full border-4 border-brand-gold border-t-transparent"></div>
+            <p class="text-text-muted">Cargando tus compras...</p>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+  </p-table>
+
+  <div class="producto-page-paginator">
+    <p-paginator [first]="first()" [rows]="rows()" [totalRecords]="totalRecords()"
+      [rowsPerPageOptions]="[5, 10, 25, 50]" [showCurrentPageReport]="true"
+      currentPageReportTemplate="Página {currentPage} de {totalPages} · {totalRecords} compra(s)"
+      (onPageChange)="onPaginatorChange($event)" />
+  </div>
+
+</div>
+
+<!-- Modal: detalle de la compra -->
+<app-modal [(visible)]="displayModal" titulo="Detalle de Compra" mode="crear" icono="pi-shopping-bag" maxWidth="40rem">
+
+  @if (compraSeleccionada(); as compra) {
+    <div class="space-y-5">
+
+      <div class="flex items-center justify-between border-b border-ui-border-soft pb-4">
+        <div>
+          <p class="mb-1 text-sm text-gray-400">Fecha de compra</p>
+          <p class="m-0 text-lg font-bold text-brand-gold">{{ fechaCompra(compra) | dateHelper }}</p>
+        </div>
+        @if (compra.tipoComprobante) {
+          <app-status-badge type="text" [value]="compra.tipoComprobante" />
+        }
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div class="rounded-xl border border-white/10 bg-black/30 p-4">
+          <p class="mb-1 text-sm text-gray-400">Comprobante</p>
+          <p class="m-0 font-semibold text-white">
+            {{ compra.serieComprobante && compra.numeroComprobante
+              ? compra.serieComprobante + '-' + compra.numeroComprobante
+              : (compra.numeroCorrelativo || '—') }}
+          </p>
+        </div>
+        <div class="rounded-xl border border-white/10 bg-black/30 p-4">
+          <p class="mb-1 text-sm text-gray-400">Método de pago</p>
+          <p class="m-0 font-semibold text-white">{{ compra.metodoPago || '—' }}</p>
+        </div>
+      </div>
+
+      <div>
+        <p class="mb-2 text-sm text-gray-400">Productos comprados</p>
+        <div class="space-y-2">
+          @for (item of productosDe(compra); track $index) {
+            <div class="flex items-center justify-between rounded-xl border border-white/10 bg-black/30 p-3">
+              <div class="flex items-center">
+                <i class="pi pi-box mr-3 text-brand-gold"></i>
+                <div>
+                  <p class="m-0 font-semibold text-white">{{ item.productoNombre || 'Producto' }}</p>
+                  <p class="m-0 text-xs text-gray-400">{{ item.cantidad }} × {{ item.precioUnitario | moneda }}</p>
+                </div>
+              </div>
+              <span class="font-semibold text-brand-gold">
+                {{ (item.subtotal ?? item.cantidad * item.precioUnitario) | moneda }}
+              </span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="space-y-2 rounded-xl border border-brand-gold/20 bg-black/30 p-4">
+        @if (compra.subtotal !== undefined && compra.igv !== undefined) {
+          <div class="flex items-center justify-between text-sm text-gray-300">
+            <span>Subtotal</span>
+            <span>{{ compra.subtotal | moneda }}</span>
+          </div>
+          <div class="flex items-center justify-between text-sm text-gray-300">
+            <span>IGV</span>
+            <span>{{ compra.igv | moneda }}</span>
+          </div>
+        }
+        <div class="flex items-center justify-between">
+          <span class="text-sm text-gray-400">Total pagado</span>
+          <span class="text-2xl font-bold text-brand-gold">{{ compra.total | moneda }}</span>
+        </div>
+      </div>
+
+      <app-button variant="secondary" icon="download" label="Descargar comprobante" [fullWidth]="true"
+        [loading]="descargandoId() === compra.ventaId" (clicked)="descargarComprobante(compra)" />
+    </div>
+  }
+</app-modal>
