@@ -87,46 +87,95 @@
 </div>
 
 <!-- Detalle -->
-<app-modal [(visible)]="showDetalle" titulo="Detalle de Reserva" mode="ver" maxWidth="28rem">
-    @if (reservaSeleccionada) {
-        <div class="flex flex-col gap-3 py-2 text-sm text-text-primary">
-            <div class="flex justify-between border-b border-ui-border pb-2">
-                <span class="text-text-secondary">Cliente</span>
-                <span class="font-semibold">{{ reservaSeleccionada.clienteNombre }}</span>
-            </div>
-            <div class="flex justify-between border-b border-ui-border pb-2">
-                <span class="text-text-secondary">Barbero</span>
-                <span class="font-semibold">{{ reservaSeleccionada.barberoNombre || 'N/A' }}</span>
-            </div>
-            <div class="flex justify-between border-b border-ui-border pb-2">
-                <span class="text-text-secondary">Servicio</span>
-                <span class="font-semibold">{{ reservaSeleccionada.servicio || 'N/A' }}</span>
-            </div>
-            <div class="flex justify-between border-b border-ui-border pb-2">
-                <span class="text-text-secondary">Fecha</span>
-                <span class="font-semibold">{{ reservaSeleccionada.fecha | date: 'dd/MM/yyyy' }}</span>
-            </div>
-            <div class="flex justify-between border-b border-ui-border pb-2">
-                <span class="text-text-secondary">Hora</span>
-                <span class="font-semibold">{{ reservaSeleccionada.horaInicio }} - {{ reservaSeleccionada.horaFin }}</span>
-            </div>
-            <div class="flex items-center justify-between border-b border-ui-border pb-2">
-                <span class="text-text-secondary">Tipo</span>
-                <app-status-badge type="text" tone="info"
-                    [value]="reservaSeleccionada.tipoReserva === 'RESERVA_VIRTUAL' ? 'Virtual' : 'Gratis'" />
-            </div>
-            <div class="flex justify-between border-b border-ui-border pb-2">
-                <span class="text-text-secondary">Total</span>
-                <span class="font-semibold text-brand-gold">{{ reservaSeleccionada.total | moneda }}</span>
-            </div>
-            <div class="flex items-center justify-between">
-                <span class="text-text-secondary">Estado</span>
-                <app-status-badge type="text" [value]="reservaSeleccionada.estadoReserva || 'Sin estado'" />
-            </div>
-        </div>
-    }
-</app-modal>
+<p-dialog [(visible)]="showDetalle" [modal]="true" [draggable]="false" [resizable]="false"
+  [closable]="false" styleClass="modal-venta w-11/12 md:w-5/12" maskStyleClass="mask-venta"
+  header="Detalle de reserva" [baseZIndex]="10000">
 
+  <ng-template pTemplate="header">
+    <div class="flex w-full items-center justify-between gap-4">
+      <span class="text-white font-bold uppercase tracking-widest text-sm ml-2">Detalle de reserva</span>
+      <app-button variant="cierre" icon="pi-times" tooltip="Cerrar" (clicked)="showDetalle = false" />
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="content">
+    @if (reservaSeleccionada) {
+      <div class="mv">
+
+        <div class="mv__hero">
+          <div class="mv__hero-main">
+            <div class="mv__hero-icon"><i class="pi pi-calendar"></i></div>
+            <div>
+              <p class="mv__label">Fecha de reserva</p>
+              <p class="mv__num">{{ reservaSeleccionada.fecha | date:'dd/MM/yyyy' }}</p>
+            </div>
+          </div>
+          <app-status-badge type="text" [value]="reservaSeleccionada.estadoReserva || 'Sin estado'" />
+        </div>
+
+        <div class="mv__grid">
+          <div class="mv__field">
+            <i class="pi pi-user"></i>
+            <div>
+              <p class="mv__label">Cliente</p>
+              <p class="mv__value">{{ reservaSeleccionada.clienteNombre || 'N/A' }}</p>
+            </div>
+          </div>
+          <div class="mv__field">
+            <i class="pi pi-id-card"></i>
+            <div>
+              <p class="mv__label">Barbero</p>
+              <p class="mv__value">{{ reservaSeleccionada.barberoNombre || 'N/A' }}</p>
+            </div>
+          </div>
+          <div class="mv__field">
+            <i class="pi pi-clock"></i>
+            <div>
+              <p class="mv__label">Horario</p>
+              <p class="mv__fecha">{{ reservaSeleccionada.horaInicio }} - {{ reservaSeleccionada.horaFin }}</p>
+            </div>
+          </div>
+          <div class="mv__field">
+            <i [class]="reservaSeleccionada.tipoReserva === 'RESERVA_VIRTUAL' ? 'pi pi-globe' : 'pi pi-map-marker'"></i>
+            <div>
+              <p class="mv__label">Tipo</p>
+              <p class="mv__value mv__value--gold">
+                {{ reservaSeleccionada.tipoReserva === 'RESERVA_VIRTUAL' ? 'Virtual' : 'Gratis' }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <p class="mv__section">Detalle</p>
+        <div class="mv__items">
+          <div class="mv__item">
+            <div class="mv__item-left">
+              <div class="mv__item-icon"><i class="pi pi-scissors"></i></div>
+              <div>
+                <p class="mv__item-name">{{ reservaSeleccionada.servicio || 'N/A' }}</p>
+                <p class="mv__item-sub">Servicio</p>
+              </div>
+            </div>
+            <span class="mv__item-price">{{ reservaSeleccionada.total | moneda }}</span>
+          </div>
+        </div>
+
+        @if (reservaSeleccionada.recordatorioEnviado) {
+          <div class="mv__estado">
+            <i class="pi pi-whatsapp"></i>
+            Recordatorio enviado por WhatsApp
+          </div>
+        }
+
+        <div class="mv__total">
+          <span class="mv__total-label">Total</span>
+          <span class="mv__total-value">{{ reservaSeleccionada.total | moneda }}</span>
+        </div>
+
+      </div>
+    }
+  </ng-template>
+</p-dialog>
 <!-- Nueva reserva -->
 <app-modal [(visible)]="mostrarFormulario" titulo="Nueva Reserva" mode="crear" [icono]="icono" maxWidth="50rem">
     <app-create-reserva [resetTrigger]="resetFormTrigger" (guardar)="onReservaGuardada()"

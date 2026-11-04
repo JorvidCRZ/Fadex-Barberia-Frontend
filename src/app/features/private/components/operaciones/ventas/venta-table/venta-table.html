@@ -144,7 +144,7 @@
 
 <!-- ============ MODAL DETALLE ============ -->
 <p-dialog [(visible)]="mostrarDetalle" [modal]="true" [draggable]="false" [resizable]="false"
-  styleClass="modal-venta w-11/12 md:w-5/12" maskStyleClass="mask-venta"
+  [closable]="false" styleClass="modal-venta w-11/12 md:w-5/12" maskStyleClass="mask-venta"
   header="Detalle de venta" [baseZIndex]="10000">
 
   <ng-template pTemplate="header">
@@ -233,15 +233,11 @@
       </div>
     }
   </ng-template>
-
-  <ng-template pTemplate="footer">
-    <app-button variant="primary" size="sm" label="Cerrar" (clicked)="mostrarDetalle = false" />
-  </ng-template>
 </p-dialog>
 
 <!-- ============ MODAL PAGO ============ -->
 <p-dialog [(visible)]="mostrarPago" [modal]="true" [draggable]="false" [resizable]="false"
-  styleClass="modal-venta w-11/12 md:w-4/12" maskStyleClass="mask-venta"
+  [closable]="false" styleClass="modal-venta w-11/12 md:w-4/12" maskStyleClass="mask-venta"
   header="Información de pago" [baseZIndex]="10000">
 
   <ng-template pTemplate="header">
@@ -311,10 +307,6 @@
 
       </div>
     }
-  </ng-template>
-
-  <ng-template pTemplate="footer">
-    <app-button variant="primary" size="sm" label="Cerrar" (clicked)="mostrarPago = false" />
   </ng-template>
 </p-dialog>
 
