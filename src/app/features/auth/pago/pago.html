@@ -6,12 +6,12 @@
           <i class="pi pi-check text-3xl" aria-hidden="true"></i>
         </div>
         <h1 class="mt-5 text-2xl font-bold text-text-primary">
-          {{ esReserva ? '¡Reserva pagada!' : '¡Compra simulada realizada!' }}
+          {{ esReserva ? '¡Reserva pagada!' : '¡Compra realizada!' }}
         </h1>
         <p class="mt-2 text-text-secondary">
           {{ esReserva
-            ? 'El pago de tu reserva fue procesado correctamente en modo frontend.'
-            : 'Tu venta fue procesada correctamente en modo frontend.' }}
+            ? 'El pago de tu reserva fue procesado correctamente. Tu cita quedó confirmada.'
+            : 'Tu compra fue procesada correctamente.' }}
         </p>
         <p-button
           [label]="esReserva ? 'Ir a mis reservas' : 'Volver al inicio'"
@@ -21,14 +21,14 @@
       </section>
     } @else {
       <div class="mb-8 text-center">
-        <p class="text-sm font-semibold uppercase tracking-[0.2em] text-text-secondary">Pago simulado</p>
+        <p class="text-sm font-semibold uppercase tracking-[0.2em] text-text-secondary">Pago</p>
         <h1 class="mt-2 text-3xl font-bold text-text-primary">
-          {{ esReserva ? 'Paga tu reserva' : 'Finaliza tu transacción' }}
+          {{ esReserva ? 'Paga tu reserva' : 'Finaliza tu compra' }}
         </h1>
         <p class="mt-2 text-text-secondary">
           {{ esReserva
             ? 'Selecciona un método de pago para confirmar tu reserva.'
-            : 'Selecciona un método de pago para simular la venta.' }}
+            : 'Selecciona un método de pago para completar tu compra.' }}
         </p>
       </div>
 
@@ -76,36 +76,89 @@
               <div class="mt-6 space-y-4">
                 <div>
                   <label class="label-form" for="numeroTarjeta">Número de tarjeta</label>
-                  <input id="numeroTarjeta" class="inputs-text w-full" placeholder="#### #### #### ####" />
+                  <input
+                    id="numeroTarjeta"
+                    class="inputs-text w-full"
+                    placeholder="#### #### #### ####"
+                    inputmode="numeric"
+                    autocomplete="cc-number"
+                    maxlength="19"
+                    [value]="numeroTarjeta()"
+                    [style.border-color]="mostrarErrores() && errores().numero ? '#ef4444' : null"
+                    [attr.aria-invalid]="mostrarErrores() && !!errores().numero"
+                    (input)="onNumeroTarjeta($event)" />
+                  @if (mostrarErrores() && errores().numero; as e) {
+                    <p class="mt-1 text-xs text-red-400">{{ e }}</p>
+                  }
                 </div>
+
                 <div class="grid gap-4 sm:grid-cols-2">
                   <div>
                     <label class="label-form" for="vencimiento">Vencimiento</label>
-                    <input id="vencimiento" class="inputs-text w-full" placeholder="MM/AA" />
+                    <input
+                      id="vencimiento"
+                      class="inputs-text w-full"
+                      placeholder="MM/AA"
+                      inputmode="numeric"
+                      autocomplete="cc-exp"
+                      maxlength="5"
+                      [value]="vencimiento()"
+                      [style.border-color]="mostrarErrores() && errores().vencimiento ? '#ef4444' : null"
+                      [attr.aria-invalid]="mostrarErrores() && !!errores().vencimiento"
+                      (input)="onVencimiento($event)" />
+                    @if (mostrarErrores() && errores().vencimiento; as e) {
+                      <p class="mt-1 text-xs text-red-400">{{ e }}</p>
+                    }
                   </div>
                   <div>
                     <label class="label-form" for="cvv">Código de seguridad</label>
-                    <input id="cvv" class="inputs-text w-full" placeholder="CVV" />
+                    <input
+                      id="cvv"
+                      class="inputs-text w-full"
+                      placeholder="CVV"
+                      inputmode="numeric"
+                      autocomplete="cc-csc"
+                      maxlength="4"
+                      [value]="cvv()"
+                      [style.border-color]="mostrarErrores() && errores().cvv ? '#ef4444' : null"
+                      [attr.aria-invalid]="mostrarErrores() && !!errores().cvv"
+                      (input)="onCvv($event)" />
+                    @if (mostrarErrores() && errores().cvv; as e) {
+                      <p class="mt-1 text-xs text-red-400">{{ e }}</p>
+                    }
                   </div>
                 </div>
+
                 <div>
                   <label class="label-form" for="correoPago">Correo electrónico</label>
-                  <input id="correoPago" type="email" class="inputs-text w-full" placeholder="correo@ejemplo.com" />
+                  <input
+                    id="correoPago"
+                    type="email"
+                    class="inputs-text w-full"
+                    placeholder="correo@ejemplo.com"
+                    autocomplete="email"
+                    [value]="correo()"
+                    [style.border-color]="mostrarErrores() && errores().correo ? '#ef4444' : null"
+                    [attr.aria-invalid]="mostrarErrores() && !!errores().correo"
+                    (input)="onCorreo($event)" />
+                  @if (mostrarErrores() && errores().correo; as e) {
+                    <p class="mt-1 text-xs text-red-400">{{ e }}</p>
+                  }
                 </div>
               </div>
             }
             @case ('YAPE') {
               <div class="mt-8 text-center">
                 <i class="pi pi-mobile text-5xl text-fuchsia-400" aria-hidden="true"></i>
-                <h2 class="mt-4 text-xl font-bold">Aprueba tu compra con Yape</h2>
-                <p class="mx-auto mt-2 max-w-md text-sm text-text-secondary">Esta es una simulación. No se realizará ningún cobro real.</p>
+                <h2 class="mt-4 text-xl font-bold">Paga con Yape</h2>
+                <p class="mx-auto mt-2 max-w-md text-sm text-text-secondary">Confirma el pago para completar tu operación.</p>
               </div>
             }
             @case ('BANCA') {
               <div class="mt-8 text-center">
                 <i class="pi pi-building text-5xl text-brand-gold" aria-hidden="true"></i>
                 <h2 class="mt-4 text-xl font-bold">Pago por banca móvil o internet</h2>
-                <p class="mx-auto mt-2 max-w-md text-sm text-text-secondary">Generaremos un código de pago simulado para continuar.</p>
+                <p class="mx-auto mt-2 max-w-md text-sm text-text-secondary">Confirma el pago para continuar con tu operación.</p>
               </div>
             }
           }
@@ -117,12 +170,12 @@
               styleClass="boton-secondary"
               (onClick)="volverAlCheckout()" />
             <p-button
-              label="Simular pago"
+              label="Pagar"
               icon="pi pi-check"
               styleClass="boton-primary"
               [loading]="procesando()"
               [disabled]="esReserva && !reserva()"
-              (onClick)="simularPago()" />
+              (onClick)="pagar()" />
           </div>
         </div>
       </section>

@@ -63,9 +63,14 @@
           </div>
         </td>
         <td>
-          <span class="text-sm font-medium text-text-primary">{{
-            reserva.fecha | dateHelper
-            }}</span>
+          <span class="text-sm font-medium text-text-primary">
+            {{ reserva.fecha | dateHelper }}
+            @if (horaCorta(reserva.horaInicio)) {
+              <span class="text-text-muted">
+                {{ ' ' + horaCorta(reserva.horaInicio) }}@if (horaCorta(reserva.horaFin)) { - {{ horaCorta(reserva.horaFin) }} }
+              </span>
+            }
+          </span>
         </td>
         <td>
           <span class="font-bold text-brand-gold">{{ reserva.total | moneda }}</span>
@@ -133,7 +138,7 @@
   <p-table [value]="historial()" [loading]="loadingHistorial()" [tableStyle]="{ 'min-width': '1000px' }">
     <ng-template pTemplate="header">
       <tr>
-        <th>Fecha</th>
+        <th>Fecha y hora</th>
         <th>Barbero</th>
         <th>Servicio</th>
         <th>Estado</th>
@@ -144,11 +149,16 @@
 
     <ng-template pTemplate="body" let-reserva>
       <tr>
-        <!-- Fecha -->
+        <!-- Fecha y hora -->
         <td>
-          <span class="text-sm font-medium text-text-primary">{{
-            reserva.fecha | dateHelper
-            }}</span>
+          <span class="text-sm font-medium text-text-primary">
+            {{ reserva.fecha | dateHelper }}
+            @if (horaCorta(reserva.horaInicio)) {
+              <span class="text-text-muted">
+                {{ ' ' + horaCorta(reserva.horaInicio) }}@if (horaCorta(reserva.horaFin)) { - {{ horaCorta(reserva.horaFin) }} }
+              </span>
+            }
+          </span>
         </td>
 
         <td>
@@ -271,7 +281,7 @@
       <div>
         <p class="mb-1 text-sm text-gray-400">Horario</p>
         <p class="m-0 font-semibold text-white">
-          {{ reserva.horaInicio }} - {{ reserva.horaFin }}
+          {{ horaCorta(reserva.horaInicio) }} - {{ horaCorta(reserva.horaFin) }}
         </p>
       </div>
       <div class="text-right">
