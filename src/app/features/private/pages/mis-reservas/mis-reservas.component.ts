@@ -82,6 +82,7 @@ export class MisReservasComponent implements OnInit {
 
   displayModal = signal(false);
   reservaSeleccionada = signal<HistorialClienteModel | null>(null);
+  descargandoBoleta = signal<number | null>(null);
 
   ngOnInit(): void {
     this.cargarMisReservas();
@@ -241,7 +242,9 @@ export class MisReservasComponent implements OnInit {
     return reserva.estadoReserva === EstadoReserva.PENDIENTE_PAGO;
   }
 
-
+puedeDescargarBoleta(reserva: HistorialClienteModel): boolean {
+  return reserva.ventaId != null;
+}
   cargarHistorial(): void {
     const size = this.rowsHistorial();
     const page = Math.floor(this.firstHistorial() / size);
@@ -294,6 +297,34 @@ export class MisReservasComponent implements OnInit {
   verDetalle(reserva: HistorialClienteModel): void {
     this.reservaSeleccionada.set(reserva);
     this.displayModal.set(true);
+  }
+
+  descargarBoleta(reserva: HistorialClienteModel): void {
+    const ventaId = reserva.ventaId;
+if (ventaId == null) {
+  this.notify.showError('Esta reserva aún no tiene boleta. La boleta se genera al pagar la reserva.');
+  return;
+}
+
+    this.descargandoBoleta.set(ventaId);
+
+    this.reservaService
+      .descargarBoleta(ventaId, reserva.serieComprobante, reserva.numeroComprobante)
+      .pipe(finalize(() => this.descargandoBoleta.set(null)))
+      .subscribe({
+        next: (blob) => {
+          this.reservaService.iniciarDescargaBoleta(
+            blob,
+            ventaId,
+            reserva.serieComprobante,
+            reserva.numeroComprobante,
+          );
+        },
+        error: (err) => {
+          console.error('Error descargando la boleta de la reserva:', err);
+          this.notify.showError('No se pudo descargar la boleta de esta reserva. Inténtalo nuevamente.');
+        },
+      });
   }
 
   /** Acepta "09:00:00", "09:00" o Date y devuelve "09:00". */

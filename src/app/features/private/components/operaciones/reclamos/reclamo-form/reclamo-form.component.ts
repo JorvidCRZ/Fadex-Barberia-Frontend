@@ -24,6 +24,7 @@ import { DatePickerModule } from 'primeng/datepicker';
     InputNumberModule, DatePickerModule,
   ],
   templateUrl: './reclamo-form.html',
+  styleUrl: './reclamo-form.scss',
 })
 
 export class ReclamoFormComponent implements OnInit {

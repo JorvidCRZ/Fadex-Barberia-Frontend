@@ -3,9 +3,9 @@ import { TipoReserva } from './TipoRserva';
 
 export interface HistorialClienteModel {
   id: number;
-  fecha: string;        
-  horaInicio: string;   
-  horaFin: string;      
+  fecha: string;
+  horaInicio: string;
+  horaFin: string;
   estadoReserva: EstadoReserva;
   tipoReserva: TipoReserva;
   nombreBarbero: string;
@@ -13,7 +13,9 @@ export interface HistorialClienteModel {
   total: number;
   observacion: string;
   tipoComprobante?: 'BOLETA' | 'FACTURA';
+  serieComprobante?: string;
   numeroComprobante?: string;
+  ventaId?: number | null;
   metodoPago?: string;
   razonSocial?: string;
   ruc?: string;

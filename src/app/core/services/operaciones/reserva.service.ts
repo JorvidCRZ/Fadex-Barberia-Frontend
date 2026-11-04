@@ -14,6 +14,7 @@ import { EstadoReserva } from '../../models/operaciones/EstadoReserva';
 export class ReservaService {
   private API = `${environment.apiUrl}/admin/reservas`;
   private API2 = `${environment.apiUrl}/reservas`;
+  private HISTORIAL_API = `${environment.apiUrl}/historial`;
   private http = inject(HttpClient);
 
   obtenerReservas(
@@ -85,5 +86,33 @@ export class ReservaService {
 
   pagarReserva(id: number): Observable<ApiResponse<string>> {
     return this.http.patch<ApiResponse<string>>(`${this.API2}/${id}/pagar`, {});
+  }
+
+  descargarBoleta(ventaId: number, serie?: string, numero?: string): Observable<Blob> {
+    return this.http.get(`${this.HISTORIAL_API}/compras/${ventaId}/comprobante/pdf`, {
+      responseType: 'blob',
+    });
+  }
+
+  generarNombreBoleta(ventaId: number, serie?: string, numero?: string): string {
+    if (serie && numero) {
+      return `boleta-${serie}-${numero}.pdf`;
+    }
+    return `boleta-${ventaId}.pdf`;
+  }
+
+  iniciarDescargaBoleta(blob: Blob, ventaId: number, serie?: string, numero?: string): void {
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = this.generarNombreBoleta(ventaId, serie, numero);
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+    URL.revokeObjectURL(url);
+  }
+
+  descargarComprobantePdf(ventaId: number): Observable<Blob> {
+    return this.descargarBoleta(ventaId);
   }
 }
