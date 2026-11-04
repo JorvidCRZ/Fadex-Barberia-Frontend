@@ -5,24 +5,25 @@ import { DialogModule } from 'primeng/dialog';
 import { TableLazyLoadEvent } from 'primeng/table';
 import { ReclamoTableComponent } from './reclamo-table/reclamo-table.component';
 import { ReclamoFormComponent } from './reclamo-form/reclamo-form.component';
-//import { ReclamoActualizarComponent } from './reclamo-actualizar/reclamo-actualizar.component';
-//import { SearchBarComponent } from '@/app/shared/components/search-bar/search-bar.component';
+import { ReclamoActualizarComponent } from './reclamo-actualizar/reclamo-actualizar.component';
+import { SearchBarComponent } from '@/app/shared/components/search-bar/search-bar.component';
 import { DialogHeaderComponent } from '@/app/shared/components/dialog-header/dialog-header.component';
 import { ReclamoService } from '@/app/core/services/operaciones/reclamo.service';
 import { NotificationService } from '@/app/core/services/common/notification.service';
 import { ReclamoFiltro } from '@/app/core/models/operaciones/reclamos-model/reclamo.filtro.model';
 import { ReclamoRequest, ReclamoResponse, ReclamoSolucionRequest } from '@/app/core/models/operaciones/reclamos-model/reclamo.model';
 import { FILTROS_RECLAMO } from '@/app/core/config/filtros.config';
-//import { FiltrosComponent } from '@/app/shared/components/filtros/filtros.component';
-//import { StatsComponent } from '@/app/shared/components/stats/stats.component';
+import { FiltrosComponent } from '@/app/shared/components/filtros/filtros.component';
+import { StatsComponent } from '@/app/shared/components/stats/stats.component';
 import { RECLAMOS_STATS_CONFIG, StatsCard } from '@/app/core/models/common/card.model';
 import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-reclamos',
   imports: [CommonModule, ButtonModule, DialogModule,
-    DialogHeaderComponent,
-    ReclamoTableComponent, ReclamoFormComponent, 
+    StatsComponent, FiltrosComponent,
+    SearchBarComponent, DialogHeaderComponent,
+    ReclamoTableComponent, ReclamoFormComponent, ReclamoActualizarComponent,
   ],
   templateUrl: './reclamos.html',
   styleUrl: './reclamos.scss',
