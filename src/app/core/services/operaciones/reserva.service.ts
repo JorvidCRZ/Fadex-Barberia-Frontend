@@ -74,6 +74,12 @@ export class ReservaService {
     return this.http.get<ApiResponse<Page<HistorialClienteModel>>>(`${environment.apiUrl}/historial`, { params });
   }
 
+  descargarBoleta(id: number): Observable<Blob> {
+    return this.http.get(`${environment.apiUrl}/historial/compras/${id}/comprobante/pdf`, {
+      responseType: 'blob'
+    });
+  }
+
   pagarReserva(id: number): Observable<ApiResponse<string>> {
     return this.http.patch<ApiResponse<string>>(`${this.API2}/${id}/pagar`, {});
   }

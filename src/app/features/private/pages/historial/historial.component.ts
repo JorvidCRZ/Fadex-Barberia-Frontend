@@ -10,6 +10,7 @@ import { ButtonComponent } from '../../../../shared/components/button/button.com
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { MonedaPipe } from '../../../../shared/pipes/moneda.pipe';
 import { HistorialClienteModel, HistorialClienteFiltro } from '../../../../core/models/operaciones/historial-cliente.model';
+import { NotificationService } from '../../../../core/services/common/notification.service';
 
 @Component({
   selector: 'app-cliente-historial',
@@ -23,10 +24,12 @@ import { HistorialClienteModel, HistorialClienteFiltro } from '../../../../core/
 })
 export class ClienteHistorialComponent {
   private reservaService = inject(ReservaService);
+  private notify = inject(NotificationService);
 
   historial: HistorialClienteModel[] = [];
   totalRecords = 0;
   loading = true;
+  descargandoBoletaId: number | null = null;
 
   currentPage = 0;
   pageSize = 10;
@@ -35,7 +38,9 @@ export class ClienteHistorialComponent {
   filtros: HistorialClienteFiltro = {};
 
   displayModal = false;
+  displayPago = false;
   reservaSeleccionada: HistorialClienteModel | null = null;
+  pagoSeleccionado: HistorialClienteModel | null = null;
 
   trackByHistorial = (_index: number, item: HistorialClienteModel) => `${item.tipo ?? 'RESERVA'}-${item.id}`;
 
@@ -105,6 +110,15 @@ export class ClienteHistorialComponent {
     const fin = this.formatearHora(item.horaFin);
     return fin === '--:--' ? inicio : `${inicio} - ${fin}`;
   }
+  getProductos(item: HistorialClienteModel): { nombre: string; cantidad: number | null }[] {
+  return (item.nombreServicio ?? '')
+    .split(', ')
+    .filter((p) => p.trim())
+    .map((p) => {
+      const m = p.match(/^(.*) x(\d+)$/);
+      return m ? { nombre: m[1], cantidad: Number(m[2]) } : { nombre: p, cantidad: null };
+    });
+}
 
   formatearFechaHora(fecha?: string | null, horaInicio?: string | null): string {
     if (!fecha) return '—';
@@ -153,6 +167,60 @@ export class ClienteHistorialComponent {
     this.reservaSeleccionada = reserva;
     this.displayModal = true;
   }
+
+  verPago(item: HistorialClienteModel): void {
+    this.pagoSeleccionado = item;
+    this.displayPago = true;
+  }
+
+  cerrarPago(): void {
+    this.displayPago = false;
+    this.pagoSeleccionado = null;
+  }
+
+  get pagoClienteNombre(): string | null {
+    const valor = (this.pagoSeleccionado as any)?.clienteNombre ?? null;
+    return valor ? String(valor) : null;
+  }
+
+  get pagoBarberoNombre(): string | null {
+    const valor = (this.pagoSeleccionado as any)?.nombreBarbero ?? (this.pagoSeleccionado as any)?.barberoNombre ?? null;
+    return valor ? String(valor) : null;
+  }
+
+  get pagoMetodoPago(): string | null {
+    const valor = (this.pagoSeleccionado as any)?.metodoPago ?? null;
+    return valor ? String(valor) : null;
+  }
+
+  isDescargandoBoleta(id?: number | null): boolean {
+    return this.descargandoBoletaId !== null && id !== undefined && id !== null && this.descargandoBoletaId === id;
+  }
+
+descargarBoleta(item: HistorialClienteModel): void {
+  const ventaId = item.tipo === 'COMPRA' ? item.id : item.ventaId;
+  if (!ventaId) {
+    return;
+  }
+
+  this.descargandoBoletaId = item.id;
+
+  this.reservaService.descargarBoleta(ventaId).subscribe({
+    next: (blob: Blob) => {
+      const url = URL.createObjectURL(blob);
+      const enlace = document.createElement('a');
+      enlace.href = url;
+      enlace.download = `boleta-${ventaId}.pdf`;
+      enlace.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      this.descargandoBoletaId = null;
+    },
+    error: () => {
+      this.descargandoBoletaId = null;
+      this.notify.showError('No se pudo descargar la boleta');
+    }
+  });
+}
 
   esCompra(item: HistorialClienteModel): boolean {
     return item.tipo === 'COMPRA';

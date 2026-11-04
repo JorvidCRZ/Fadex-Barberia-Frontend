@@ -39,10 +39,19 @@ export class CarritoComponent {
 
 procesarCompra(): void {
   if (!this.tokenService.isLogged()) {
-    this.notify.showError('Debes iniciar sesión para continuar con la compra');
     this.router.navigate(['/login'], { queryParams: { returnUrl: '/checkout' } });
     return;
   }
+
+  const esCliente = this.tokenService
+    .getRoles()
+    .some((r) => r.toLowerCase().replace('role_', '') === 'cliente');
+
+  if (!esCliente) {
+    this.notify.showWarn('Solo los clientes pueden comprar');
+    return;
+  }
+
   this.router.navigate(['/checkout']);
 }
 

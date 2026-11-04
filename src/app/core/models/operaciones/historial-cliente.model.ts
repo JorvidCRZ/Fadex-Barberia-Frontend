@@ -19,6 +19,7 @@ export interface HistorialClienteModel {
   razonSocial?: string;
   ruc?: string;
   items?: Array<{ nombre: string; cantidad: number; precio?: number; total?: number }>;
+  ventaId?: number | null;
 }
 
 

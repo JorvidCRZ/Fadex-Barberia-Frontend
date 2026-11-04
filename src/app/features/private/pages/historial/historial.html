@@ -39,8 +39,16 @@
           <td><app-status-badge type="text" [value]="reserva.estadoReserva || 'PENDIENTE'"></app-status-badge></td>
           <td><span class="font-bold text-brand-gold">{{ reserva.total | moneda }}</span></td>
           <td>
-            <div class="flex items-center justify-center">
+            <div class="flex items-center justify-center gap-2">
               <app-button variant="ver-tabla" icon="eye" tooltip="Ver detalle" (clicked)="verDetalle(reserva)" />
+              @if (reserva.tipo === 'COMPRA' || reserva.estadoReserva === 'FINALIZADA') {
+                <app-button
+                  variant="editar-tabla"
+                  icon="wallet"
+                  tooltip="Ver pago"
+                  [disabled]="false"
+                  (clicked)="verPago(reserva)" />
+              }
             </div>
           </td>
         </tr>
@@ -74,91 +82,235 @@
   </div>
 </div>
 
-<!-- MODAL DETALLE (estilos de .p-dialog en primeng.scss) -->
+
+<!-- MODAL DETALLE -->
 <p-dialog [(visible)]="displayModal" [modal]="true" [draggable]="false" [resizable]="false"
-  styleClass="w-11/12 md:w-5/12 shadow-dialog" header="Detalle de Atención" [baseZIndex]="10000">
+  styleClass="modal-venta w-11/12 md:w-5/12" maskStyleClass="mask-venta"
+  header="Detalle" [baseZIndex]="10000">
+
+  <ng-template pTemplate="header">
+    <div class="flex w-full items-center justify-between gap-4">
+      <span class="text-white font-bold uppercase tracking-widest text-sm ml-2">
+        {{ reservaSeleccionada?.tipo === 'COMPRA' ? 'Detalle de venta' : 'Detalle de atención' }}
+      </span>
+      <app-button variant="cierre" icon="pi-times" tooltip="Cerrar" (clicked)="displayModal = false" />
+    </div>
+  </ng-template>
 
   <ng-template pTemplate="content">
     @if (reservaSeleccionada) {
-      <div class="space-y-5 p-4">
+      <div class="mv">
 
-        <div class="flex items-center justify-between border-b border-ui-border-soft pb-4">
-          <div>
-            <p class="label-detalle mb-1">{{ reservaSeleccionada.tipo === 'COMPRA' ? 'Compra' : 'Reserva' }}</p>
-            <p class="m-0 text-lg font-bold text-brand-gold">{{ formatearFechaHora(reservaSeleccionada.fecha, reservaSeleccionada.horaInicio) }}</p>
+        <div class="mv__hero">
+          <div class="mv__hero-main">
+            <div class="mv__hero-icon">
+              <i class="pi" [class.pi-receipt]="reservaSeleccionada.tipo === 'COMPRA'"
+                [class.pi-calendar]="reservaSeleccionada.tipo !== 'COMPRA'"></i>
+            </div>
+            <div>
+              <p class="mv__label">{{ reservaSeleccionada.tipo === 'COMPRA' ? 'N° de venta' : 'N° de reserva' }}</p>
+              <p class="mv__num">#{{ reservaSeleccionada.id }}</p>
+            </div>
           </div>
-          <app-status-badge type="text" [value]="reservaSeleccionada.estadoReserva || 'PENDIENTE'"></app-status-badge>
+          <span class="mv__badge">{{ reservaSeleccionada.tipo === 'COMPRA' ? 'compra' : 'reserva' }}</span>
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
-          <div class="card-detalle">
-            <p class="label-detalle mb-1">Barbero</p>
-            <p class="m-0 font-medium">{{ reservaSeleccionada.tipo === 'COMPRA' ? 'Tienda' : (reservaSeleccionada.nombreBarbero || '—') }}</p>
+        <div class="mv__grid">
+          @if (reservaSeleccionada.tipo === 'COMPRA') {
+            <div class="mv__field">
+              <i class="pi pi-shop"></i>
+              <div>
+                <p class="mv__label">Origen</p>
+                <p class="mv__value">Tienda</p>
+              </div>
+            </div>
+          } @else {
+            <div class="mv__field">
+              <i class="pi pi-id-card"></i>
+              <div>
+                <p class="mv__label">Barbero</p>
+                <p class="mv__value">{{ reservaSeleccionada.nombreBarbero || '—' }}</p>
+              </div>
+            </div>
+          }
+
+          <div class="mv__field">
+            <i class="pi pi-check-circle"></i>
+            <div>
+              <p class="mv__label">Estado</p>
+              <p class="mv__value mv__value--gold">{{ reservaSeleccionada.estadoReserva || 'PENDIENTE' }}</p>
+            </div>
           </div>
-          <div class="card-detalle">
-            <p class="label-detalle mb-1">Tipo</p>
-            <p class="m-0 font-medium">{{ getTipoReservaTexto(reservaSeleccionada) }}</p>
+
+          @if (reservaSeleccionada.tipo !== 'COMPRA') {
+            <div class="mv__field">
+              <i class="pi pi-tag"></i>
+              <div>
+                <p class="mv__label">Tipo</p>
+                <p class="mv__value">{{ getTipoReservaTexto(reservaSeleccionada) }}</p>
+              </div>
+            </div>
+            <div class="mv__field">
+              <i class="pi pi-clock"></i>
+              <div>
+                <p class="mv__label">Horario</p>
+                <p class="mv__fecha">{{ getHorarioTexto(reservaSeleccionada) }}</p>
+              </div>
+            </div>
+          }
+
+          <div class="mv__field mv__field--full">
+            <i class="pi pi-calendar"></i>
+            <div>
+              <p class="mv__label">Fecha</p>
+              <p class="mv__fecha">{{ formatearFechaHora(reservaSeleccionada.fecha, reservaSeleccionada.horaInicio) }}</p>
+            </div>
           </div>
         </div>
 
-        <div>
-          <p class="label-detalle mb-2">{{ reservaSeleccionada.tipo === 'COMPRA' ? 'Productos' : 'Servicio realizado' }}</p>
-          <div class="card-detalle !p-3 flex items-center">
-            <i class="pi pi-check-circle mr-3 text-brand-gold"></i>
-            <span>{{ reservaSeleccionada.nombreServicio }}</span>
-          </div>
-        </div>
-
-        @if (reservaSeleccionada.tipo === 'COMPRA') {
-          <div class="space-y-2">
-            @if (reservaSeleccionada.items?.length) {
-              @for (item of reservaSeleccionada.items; track item.nombre) {
-                <div class="card-detalle !p-3 flex items-center justify-between gap-3">
-                  <span>{{ item.nombre }}</span>
-                  <span class="text-text-secondary">x{{ item.cantidad }}</span>
+        <p class="mv__section">Detalle</p>
+        <div class="mv__items">
+          @if (reservaSeleccionada.tipo === 'COMPRA') {
+            @for (producto of getProductos(reservaSeleccionada); track $index) {
+              <div class="mv__item">
+                <div class="mv__item-left">
+                  <div class="mv__item-icon"><i class="pi pi-box"></i></div>
+                  <div>
+                    <p class="mv__item-name">{{ producto.nombre }}</p>
+                    @if (producto.cantidad) {
+                      <p class="mv__item-sub">{{ producto.cantidad }} unid.</p>
+                    }
+                  </div>
                 </div>
-              }
+              </div>
             }
-          </div>
-        } @else {
-          <div class="card-detalle !border-brand-gold/20 mt-4 flex items-center justify-between">
-            <div>
-              <p class="label-detalle mb-1">Horario</p>
-              <p class="m-0 font-mono">{{ getHorarioTexto(reservaSeleccionada) }}</p>
+          } @else {
+            <div class="mv__item">
+              <div class="mv__item-left">
+                <div class="mv__item-icon"><i class="pi pi-scissors"></i></div>
+                <div>
+                  <p class="mv__item-name">{{ reservaSeleccionada.nombreServicio }}</p>
+                  <p class="mv__item-sub">Servicio</p>
+                </div>
+              </div>
             </div>
-            <div class="text-right">
-              <p class="label-detalle mb-1">Total pagado</p>
-              <p class="m-0 text-2xl font-bold text-brand-gold">{{ reservaSeleccionada.total | moneda }}</p>
-            </div>
-          </div>
-        }
-
-        @if (reservaSeleccionada.tipo === 'COMPRA') {
-          <div class="card-detalle !border-brand-gold/20 mt-4 flex items-center justify-between">
-            <div>
-              <p class="label-detalle mb-1">Detalle</p>
-              <p class="m-0 text-sm text-text-secondary">Compra realizada</p>
-            </div>
-            <div class="text-right">
-              <p class="label-detalle mb-1">Total</p>
-              <p class="m-0 text-2xl font-bold text-brand-gold">{{ reservaSeleccionada.total | moneda }}</p>
-            </div>
-          </div>
-        }
+          }
+        </div>
 
         @if (reservaSeleccionada.observacion) {
-          <div class="mt-4">
-            <p class="label-detalle mb-2">Observaciones</p>
-            <p class="card-detalle m-0 text-sm italic text-text-secondary">
-              {{ reservaSeleccionada.observacion }}
-            </p>
+          <p class="mv__section">Observaciones</p>
+          <div class="mv__item">
+            <p class="mv__item-name">{{ reservaSeleccionada.observacion }}</p>
           </div>
         }
+
+        <div class="mv__total">
+          <span class="mv__total-label">{{ reservaSeleccionada.tipo === 'COMPRA' ? 'Total' : 'Total pagado' }}</span>
+          <span class="mv__total-value">{{ reservaSeleccionada.total | moneda }}</span>
+        </div>
+
       </div>
     }
   </ng-template>
 
   <ng-template pTemplate="footer">
     <app-button variant="primary" size="sm" label="Cerrar" (clicked)="displayModal = false" />
+  </ng-template>
+</p-dialog>
+
+<!-- MODAL PAGO -->
+<p-dialog [(visible)]="displayPago" [modal]="true" [draggable]="false" [resizable]="false"
+  styleClass="modal-venta w-11/12 md:w-4/12" maskStyleClass="mask-venta"
+  header="Información de pago" [baseZIndex]="10000">
+
+  <ng-template pTemplate="header">
+    <div class="flex w-full items-center justify-between gap-4">
+      <span class="text-white font-bold uppercase tracking-widest text-sm ml-2">Información de pago</span>
+      <app-button variant="cierre" icon="pi-times" tooltip="Cerrar" (clicked)="cerrarPago()" />
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="content">
+    @if (pagoSeleccionado) {
+      <div class="mv">
+        <div class="mv__hero">
+          <div class="mv__hero-main">
+            <div class="mv__hero-icon"><i class="pi pi-wallet"></i></div>
+            <div>
+              <p class="mv__label">{{ pagoSeleccionado.tipo === 'COMPRA' ? 'Pago de compra' : 'Pago de reserva' }}</p>
+              <p class="mv__num">{{ pagoSeleccionado.tipo === 'COMPRA' ? 'Compra' : 'Reserva' }} #{{ pagoSeleccionado.id }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mv__grid">
+          @if (pagoClienteNombre) {
+            <div class="mv__field">
+              <i class="pi pi-user"></i>
+              <div>
+                <p class="mv__label">Cliente</p>
+                <p class="mv__value">{{ pagoClienteNombre }}</p>
+              </div>
+            </div>
+          }
+
+          @if (pagoBarberoNombre) {
+            <div class="mv__field">
+              <i class="pi pi-id-card"></i>
+              <div>
+                <p class="mv__label">Barbero</p>
+                <p class="mv__value">{{ pagoBarberoNombre }}</p>
+              </div>
+            </div>
+          }
+
+          @if (pagoMetodoPago) {
+            <div class="mv__field mv__field--full">
+              <i class="pi pi-credit-card"></i>
+              <div>
+                <p class="mv__label">Tipo de pago</p>
+                <p class="mv__value mv__value--gold">{{ pagoMetodoPago }}</p>
+              </div>
+            </div>
+          }
+
+          <div class="mv__field mv__field--full">
+            <i class="pi pi-calendar"></i>
+            <div>
+              <p class="mv__label">Fecha</p>
+              <p class="mv__value">{{ formatearFechaHora(pagoSeleccionado.fecha, pagoSeleccionado.horaInicio) }}</p>
+            </div>
+          </div>
+
+          <div class="mv__field mv__field--full">
+            <i class="pi pi-box"></i>
+            <div>
+              <p class="mv__label">{{ pagoSeleccionado.tipo === 'COMPRA' ? 'Productos' : 'Servicio' }}</p>
+              <p class="mv__value">{{ pagoSeleccionado.nombreServicio || 'Sin detalle' }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mv__total">
+          <span class="mv__total-label">Monto</span>
+          <span class="mv__total-value">{{ pagoSeleccionado.total | moneda }}</span>
+        </div>
+
+@if (pagoSeleccionado.tipo === 'COMPRA' || pagoSeleccionado.ventaId) {
+  <button
+    type="button"
+    class="mv__descarga"
+    [disabled]="isDescargandoBoleta(pagoSeleccionado.id)"
+    (click)="descargarBoleta(pagoSeleccionado)">
+    <i class="pi" [class.pi-spin]="isDescargandoBoleta(pagoSeleccionado.id)" [class.pi-spinner]="isDescargandoBoleta(pagoSeleccionado.id)" [class.pi-file]="!isDescargandoBoleta(pagoSeleccionado.id)"></i>
+    {{ isDescargandoBoleta(pagoSeleccionado.id) ? 'Descargando...' : 'Descargar boleta' }}
+  </button>
+}
+      </div>
+    }
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <app-button variant="primary" size="sm" label="Cerrar" (clicked)="cerrarPago()" />
   </ng-template>
 </p-dialog>
