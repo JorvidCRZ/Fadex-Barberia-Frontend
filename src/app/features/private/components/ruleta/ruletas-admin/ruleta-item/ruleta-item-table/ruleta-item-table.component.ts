@@ -17,7 +17,7 @@ import { RuletaCategoriasComponent } from '../../ruleta-categoria/ruleta-categor
   selector: 'app-ruleta-item-table',
   imports: [ButtonModule, CommonModule, TableModule, ConfirmPopoverComponent, FormsModule, StatusBadgeComponent, ImageModule, ToggleSwitchModule, SafeImageUrlPipe,RuletaCategoriasComponent],
   templateUrl: './ruleta-item-table.html',
-  styleUrl: './ruleta-item-table.css',
+  styleUrl: './ruleta-item-table.scss',
 })
 export class RuletaItemTableComponent {
   @Output() editar = new EventEmitter<RuletaItemResponse>();

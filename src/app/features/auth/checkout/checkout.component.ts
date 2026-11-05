@@ -11,6 +11,7 @@ import { VentaService } from '../../../core/services/venta/venta.service';
 import { SafeImageUrlPipe } from '../../../shared/pipes/safe-image-url.pipe';
 import { CarritoService } from '../../../core/services/catalogos/carrito.service';
 import { obtenerPrecio } from '../../../core/services/catalogos/carrito.service';
+import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import { NotificationService } from '../../../core/services/common/notification.service';
 
@@ -18,7 +19,8 @@ import { NotificationService } from '../../../core/services/common/notification.
 @Component({
   standalone: true,
   selector: 'app-checkout',
-  imports: [ CommonModule, ReactiveFormsModule, ButtonModule, SelectModule, MessageModule, TextareaModule, SolesPipe, SafeImageUrlPipe ],
+  imports: [ CommonModule, ReactiveFormsModule, ButtonModule, SelectModule, MessageModule, TextareaModule,
+     SolesPipe, SafeImageUrlPipe, ButtonComponent ],
   templateUrl: './checkout.html'
 })
 export class CheckoutComponent implements OnInit {

@@ -1,23 +1,33 @@
 import { Injectable, signal } from '@angular/core';
-import { jwtDecode } from "jwt-decode";
+import { jwtDecode } from 'jwt-decode';
 import { BehaviorSubject } from 'rxjs';
+import { ROL_NAME } from '../../config/sites.config'; // ajusta la ruta
 
 @Injectable({
   providedIn: 'root',
 })
 export class TokenService {
 
-  private ACCESS_TOKEN = 'access_token';
-  private REFRESH_TOKEN = 'refresh_token';
-  private PermisosSubject = new BehaviorSubject<string[]>([]);
+  private readonly ACCESS_TOKEN = 'access_token';
+  private readonly REFRESH_TOKEN = 'refresh_token';
   readonly isAuthenticated = signal(!!this.getAccessToken());
-  permisos$ = this.PermisosSubject.asObservable();
+  private permisosSubject = new BehaviorSubject<string[]>(this.getPermisos());
+  permisos$ = this.permisosSubject.asObservable();
+
+  constructor() {
+    // Sincroniza el estado cuando otra pestaña inicia o cierra sesión
+    window.addEventListener('storage', (e) => {
+      if (e.key === this.ACCESS_TOKEN) {
+        this.isAuthenticated.set(!!e.newValue);
+        this.permisosSubject.next(this.getPermisos());
+      }
+    });
+  }
 
   saveAccessToken(token: string) {
     localStorage.setItem(this.ACCESS_TOKEN, token);
     this.isAuthenticated.set(true);
-    const permisos = this.getPermisos();
-    this.PermisosSubject.next(permisos);
+    this.permisosSubject.next(this.getPermisos());
   }
 
   getAccessToken(): string | null {
@@ -36,11 +46,18 @@ export class TokenService {
     localStorage.removeItem(this.ACCESS_TOKEN);
     localStorage.removeItem(this.REFRESH_TOKEN);
     this.isAuthenticated.set(false);
-    this.PermisosSubject.next([]);
+    this.permisosSubject.next([]);
   }
 
   isLogged(): boolean {
-    return !!this.getAccessToken();
+    const decoded = this.getDecodedToken();
+    if (!decoded) return false;
+
+    // Si el token trae exp y ya venció, solo es válido si hay refresh token para renovarlo
+    if (decoded.exp && decoded.exp * 1000 < Date.now()) {
+      return !!this.getRefreshToken();
+    }
+    return true;
   }
 
   getDecodedToken(): any | null {
@@ -66,11 +83,13 @@ export class TokenService {
   }
 
   getRoles(): string[] {
-    return this.getDecodedToken()?.roles || [];
+    const roles = this.getDecodedToken()?.roles;
+    return Array.isArray(roles) ? roles : roles ? [roles] : [];
   }
 
   getPermisos(): string[] {
-    return this.getDecodedToken()?.permisos || [];
+    const permisos = this.getDecodedToken()?.permisos;
+    return Array.isArray(permisos) ? permisos : [];
   }
 
   getUserDisplayName(): string {
@@ -79,43 +98,22 @@ export class TokenService {
     return decoded.fullName || decoded.nombreCompleto || decoded.name || decoded.sub || '';
   }
 
-  initPermisos() {
-    const permisos = this.getPermisos();
-    this.PermisosSubject.next(permisos);
-  }
-
   getHomeByRole(): string {
-
     const roles = this.getRoles();
 
-    if (roles.includes('ROLE_admin')) {
-      return '/dashboard/admin';
-    }
-
-    if (roles.includes('ROLE_barbero')) {
-      return '/dashboard/barbero';
-    }
-
-    if (roles.includes('ROLE_cliente')) {
-      return '/mi-cuenta';
-    }
+    if (roles.includes(ROL_NAME.ADMIN)) return '/dashboard/admin';
+    if (roles.includes(ROL_NAME.BARBERO)) return '/dashboard/barbero';
+    if (roles.includes(ROL_NAME.CLIENTE)) return '/mi-cuenta';
 
     return '/login';
   }
 
   getPrimaryRole(): string {
     const roles = this.getRoles();
-    if (roles.includes('ROLE_admin')) {
-      return 'admin';
-    }
 
-    if (roles.includes('ROLE_barbero')) {
-      return 'barbero';
-    }
-
-    if (roles.includes('ROLE_cliente')) {
-      return 'cliente';
-    }
+    if (roles.includes(ROL_NAME.ADMIN)) return 'admin';
+    if (roles.includes(ROL_NAME.BARBERO)) return 'barbero';
+    if (roles.includes(ROL_NAME.CLIENTE)) return 'cliente';
 
     return '';
   }

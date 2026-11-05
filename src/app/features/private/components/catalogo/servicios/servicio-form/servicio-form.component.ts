@@ -25,7 +25,6 @@ import { campoInvalido, marcarFormulario } from '@/app/shared/utils/form-utils.c
     MessageModule, ImageModule, FileUploadModule, InputNumberModule, SafeImageUrlPipe
   ],
   templateUrl: './servicio-form.html',
-  styleUrl: './servicio-form.css',
 })
 export class ServicioFormComponent implements OnInit, OnChanges {
   @Output() guardar = new EventEmitter<{ data: ServicioRequest, imagenes?: File[] }>();

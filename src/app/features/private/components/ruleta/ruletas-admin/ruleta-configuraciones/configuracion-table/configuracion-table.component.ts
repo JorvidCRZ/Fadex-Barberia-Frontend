@@ -1,18 +1,18 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TableModule, TableLazyLoadEvent } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
+import { CommonModule } from '@angular/common';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
-import { ConfirmPopoverComponent } from '@/app/shared/components/confirm-popover/confirm-popover.component';
-import { StatusBadgeComponent } from '@/app/shared/components/status-badge/status-badge.component';
+import { TableModule, TableLazyLoadEvent } from 'primeng/table';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { ConfiguracionResponse } from '@/app/core/models/ruleta/ruleta-configuracion.model';
+import { StatusBadgeComponent } from '@/app/shared/components/status-badge/status-badge.component';
+import { ConfirmPopoverComponent } from '@/app/shared/components/confirm-popover/confirm-popover.component';
 
 @Component({
   selector: 'app-configuracion-table',
-  imports: [ButtonModule, CommonModule, TableModule, ConfirmPopoverComponent, ToggleSwitchModule, FormsModule, StatusBadgeComponent],
+  imports: [ButtonModule, CommonModule, TableModule, ConfirmPopoverComponent, ToggleSwitchModule, FormsModule , StatusBadgeComponent],
   templateUrl: './configuracion-table.html',
-  styleUrl: './configuracion-table.css',
+  styleUrl: './configuracion-table.scss',
 })
 export class ConfiguracionTableComponent {
   @Output() lazyLoad = new EventEmitter<TableLazyLoadEvent>();

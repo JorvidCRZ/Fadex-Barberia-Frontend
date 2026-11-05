@@ -3,9 +3,7 @@
     <header class="mb-10 text-center">
       <p class="mb-3 text-sm font-semibold uppercase tracking-widest text-brand-gold">Ayuda</p>
       <h1 class="text-3xl font-bold uppercase tracking-wide sm:text-4xl">Preguntas frecuentes</h1>
-      <p class="mx-auto mt-4 max-w-2xl text-text-secondary">
-        Encuentra respuestas rápidas sobre reservas, servicios, productos y tu cuenta.
-      </p>
+      <p class="mx-auto mt-4 max-w-2xl text-text-secondary">Encuentra respuestas rápidas sobre reservas, servicios, productos y tu cuenta.</p>
     </header>
 
     <section class="space-y-3" aria-label="Preguntas frecuentes">
@@ -15,9 +13,7 @@
             <span>{{ pregunta.pregunta }}</span>
             <i class="pi pi-plus text-brand-gold transition-transform group-open:rotate-45" aria-hidden="true"></i>
           </summary>
-          <p class="border-t border-ui-border px-5 pb-5 pt-4 leading-relaxed text-text-secondary">
-            {{ pregunta.respuesta }}
-          </p>
+          <p class="border-t border-ui-border px-5 pb-5 pt-4 leading-relaxed text-text-secondary">{{ pregunta.respuesta }}</p>
         </details>
       }
     </section>

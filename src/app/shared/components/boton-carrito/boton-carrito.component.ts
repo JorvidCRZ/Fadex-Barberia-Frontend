@@ -13,12 +13,25 @@ import { SafeImageUrlPipe } from '../../pipes/safe-image-url.pipe';
 import { CarritoItem } from '../../../core/models/catalogos/carrito.model';
 import { CarritoService, obtenerPrecio } from '../../../core/services/catalogos/carrito.service';
 import { TipoMultimedia } from '../../../core/models/catalogos/productos.model';
+import { ButtonComponent } from '../button/button.component';
+import { StatusBadgeComponent } from '../status-badge/status-badge.component';
 
 @Component({
   selector: 'app-boton-carrito',
   standalone: true,
-  imports: [ CommonModule, FormsModule, ButtonModule, InputNumberModule, DrawerModule, MonedaPipe,
-    SafeImageUrlPipe, CheckboxModule, RouterLink,],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ButtonModule,
+    InputNumberModule,
+    DrawerModule,
+    MonedaPipe,
+    SafeImageUrlPipe,
+    CheckboxModule,
+    // RouterLink,
+    ButtonComponent,
+    StatusBadgeComponent,
+  ],
   templateUrl: './boton-carrito.html',
   styleUrl: './boton-carrito.scss',
 })
@@ -37,12 +50,14 @@ export class BotonCarritoComponent {
   incluirEnvio = false;
 
   constructor() {
-    this.router.events
-      .pipe(
+    this.router.events.pipe(
         filter((event): event is NavigationEnd => event instanceof NavigationEnd),
-        takeUntilDestroyed(this.destroyRef)
-      )
-      .subscribe((event) => this.rutaActual.set(event.urlAfterRedirects));
+        takeUntilDestroyed(this.destroyRef),
+      ).subscribe((event) => this.rutaActual.set(event.urlAfterRedirects));
+  }
+
+  precioItem(item: CarritoItem): number {
+    return obtenerPrecio(item.producto);
   }
 
   eliminarProducto(index: number): void {
@@ -63,14 +78,21 @@ export class BotonCarritoComponent {
     document.body.style.removeProperty('overflow');
   }
 
+  irAlCarrito(): void {
+    this.cerrarCarrito();
+    void this.router.navigate(['/carrito']);
+  }
+
   obtenerSubtotalItem(item: CarritoItem): number {
     return item.cantidad * obtenerPrecio(item.producto);
   }
 
   obtenerImagen(item: CarritoItem): string | undefined {
-    return item.producto.multimedia?.find((media) => media.tipo === TipoMultimedia.IMAGEN)?.url
-      ?? item.producto.multimedia?.[0]?.url
-      ?? item.producto.urlsMultimedia?.[0];
+    return (
+      item.producto.multimedia?.find((media) => media.tipo === TipoMultimedia.IMAGEN)?.url ??
+      item.producto.multimedia?.[0]?.url ??
+      item.producto.urlsMultimedia?.[0]
+    );
   }
 
   get costoEnvio(): number {

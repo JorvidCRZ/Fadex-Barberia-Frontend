@@ -25,7 +25,6 @@ import { SafeImageUrlPipe } from '@/app/shared/pipes/safe-image-url.pipe';
     ButtonModule, MessageModule, ImageModule, FileUploadModule, InputNumberModule, TreeSelectModule],
 
   templateUrl: './producto-form.html',
-  styleUrl: './producto-form.css',
 })
 export class ProductoFormComponent implements OnChanges, OnInit {
   @Output() guardar = new EventEmitter<{ data: ProductoRequest, imagenes?: File[] | null }>();

@@ -24,22 +24,16 @@ export class SidebarComponent {
   private notify = inject(NotificationService);
   private sidebarItemsService = inject(SidebarItemsService);
 
-  constructor() {
-    this.tokenService.initPermisos();
-  }
-
-  menu$ = this.tokenService.permisos$.pipe( map((permisos) => {
+  menu$ = this.tokenService.permisos$.pipe(map((permisos) => {
       const role = this.tokenService.getPrimaryRole();
       const items = this.sidebarItemsService.getSidebarItems(permisos, role);
-      return this.addClickHandlers(items);
-    })
+      return this.addClickHandlers(items);})
   );
 
-  private addClickHandlers(items: MenuItem[]): MenuItem[] {
-    return items.map((item) => ({...item,command: (event: any) => {this.handleMenuItemClick(event);
-        if (item.command) {
-          item.command(event);
-        }
+   private addClickHandlers(items: MenuItem[]): MenuItem[] {
+    return items.map((item) => ({...item, command: (event: any) => {
+        this.handleMenuItemClick(event);
+        if (item.command) {item.command(event);}
       },
       items: item.items ? this.addClickHandlers(item.items) : undefined
     }));

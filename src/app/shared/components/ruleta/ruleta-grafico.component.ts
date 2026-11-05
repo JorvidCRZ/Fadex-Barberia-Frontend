@@ -1,8 +1,8 @@
 import { FormsModule } from '@angular/forms';
 import { SliderModule } from 'primeng/slider';
-import { ButtonModule } from 'primeng/button';
-import { CommonModule } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { SafeImageUrlPipe } from '../../pipes/safe-image-url.pipe';
+import { ButtonComponent } from '../button/button.component';
 import { AudioService } from '../../../core/services/common/audio.service';
 import { TipoPremio } from '../../../core/models/ruleta/ruleta-item.model';
 import { RuletaSegmento } from '../../../core/models/ruleta/ruleta-grafico.model';
@@ -11,7 +11,7 @@ import { Component, EventEmitter, Input, Output, signal, inject, OnDestroy, OnCh
 @Component({
   selector: 'app-ruleta-grafico',
   standalone: true,
-  imports: [CommonModule, ButtonModule, SliderModule, FormsModule, SafeImageUrlPipe],
+  imports: [NgClass, SliderModule, FormsModule, SafeImageUrlPipe, ButtonComponent],
   templateUrl: './ruleta-grafico.html',
   styleUrls: ['./ruleta-grafico.scss']
 })
@@ -26,6 +26,9 @@ export class RuletaGraficoComponent implements OnChanges, OnDestroy {
   /** Se emite cuando el usuario pulsa girar en modoServidor; el padre debe resolver el premio y llamar a girarHaciaResultado() */
   @Output() girarSolicitado = new EventEmitter<void>();
   readonly audioService = inject(AudioService);
+
+  /** 24 bombillas del anillo (antes: [].constructor(24) en el template) */
+  readonly bulbos = Array.from({ length: 24 }, (_, i) => i);
 
   girando = signal(false);
   rotacionActual = signal(0);

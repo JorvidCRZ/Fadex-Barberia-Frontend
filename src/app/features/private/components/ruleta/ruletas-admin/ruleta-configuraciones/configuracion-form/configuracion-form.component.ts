@@ -16,7 +16,7 @@ import { RuletaResponse } from '@/app/core/models/ruleta/ruleta.model';
   selector: 'app-configuracion-form',
   imports: [ReactiveFormsModule, SelectModule, CheckboxModule, TreeSelectModule, ButtonModule, MessageModule, InputNumberModule],
   templateUrl: './configuracion-form.html',
-  styleUrl: './configuracion-form.css',
+  styleUrl: './configuracion-form.scss',
 })
 export class ConfiguracionFormComponent implements OnChanges, OnInit {
   @Output() guardar = new EventEmitter<ConfiguracionRequest>();

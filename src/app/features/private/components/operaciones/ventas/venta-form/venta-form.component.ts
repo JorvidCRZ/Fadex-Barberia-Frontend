@@ -27,6 +27,7 @@ import { TagModule } from 'primeng/tag';
 import { ClienteService } from '@/app/core/services/gestion/cliente.service';
 import { ProductoService } from '@/app/core/services/catalogos/producto.service';
 import { ServicioService } from '@/app/core/services/catalogos/servicio.service';
+import { NotificationService } from '@/app/core/services/common/notification.service';
 
 interface DetalleProductoValue {
   itemId: number;
@@ -66,6 +67,7 @@ export class VentaFormComponent implements OnInit, OnChanges {
   private clienteService = inject(ClienteService);
   private productoService = inject(ProductoService);
   private servicioService = inject(ServicioService);
+  private notify = inject(NotificationService);
 
   clientes: any[] = [];
   productos: any[] = [];
@@ -98,18 +100,30 @@ export class VentaFormComponent implements OnInit, OnChanges {
 
   cargarDatosIniciales(): void {
     this.clienteService.listar(0, 100).subscribe({
-      next: (resp) => { this.clientes = resp.data.content || []; },
-      error: () => { this.clientes = []; }
+      next: (resp) => { this.clientes = resp.data?.content ?? []; },
+      error: (err) => {
+        console.error('Error cargando clientes para venta:', err);
+        this.clientes = [];
+        this.notify.showError('No se pudieron cargar los clientes.');
+      }
     });
 
-    this.productoService.obtenerProductos(0, 100).subscribe({
-      next: (resp: any) => { this.productos = resp.data.content || []; },
-      error: () => { this.productos = []; }
+    this.productoService.obtenerProductosActivos().subscribe({
+      next: (resp) => { this.productos = resp.data?.content ?? []; },
+      error: (err) => {
+        console.error('Error cargando productos para venta:', err);
+        this.productos = [];
+        this.notify.showError('No se pudieron cargar los productos.');
+      }
     });
 
     this.servicioService.obtenerServiciosConFiltro({ page: 0, size: 100 } as any).subscribe({
-      next: (resp: any) => { this.servicios = resp.data.content || []; },
-      error: () => { this.servicios = []; }
+      next: (resp) => { this.servicios = resp.data?.content ?? []; },
+      error: (err) => {
+        console.error('Error cargando servicios para venta:', err);
+        this.servicios = [];
+        this.notify.showError('No se pudieron cargar los servicios.');
+      }
     });
 
     if (!this.isEditMode) {
@@ -185,7 +199,7 @@ export class VentaFormComponent implements OnInit, OnChanges {
 
   getNombreCliente(): string {
     const clienteId = this.ventaForm.getRawValue().clienteId;
-    const cliente = this.clientes.find(c => c.clienteId === clienteId);
+    const cliente = this.clientes.find(c => Number(c.clienteId) === Number(clienteId));
     if (!cliente) return '—';
     const { nombre = '', apellido = '' } = cliente.persona ?? {};
     return `${nombre} ${apellido}`.trim() || '—';
@@ -284,7 +298,7 @@ export class VentaFormComponent implements OnInit, OnChanges {
     if (this.isEditMode) return;
     const detalle = this.serviciosDetalles.at(index);
     const itemId = detalle.get('itemId')?.value;
-    const servicio = this.servicios.find(s => Number(s.servicioId) === Number(itemId)); // <-- CAMBIO AQUÍ
+    const servicio = this.servicios.find(s => Number(s.servicioId) === Number(itemId));
     detalle.patchValue({ precio: servicio ? Number(servicio.precio || 0) : 0 }, { emitEvent: false });
   }
 

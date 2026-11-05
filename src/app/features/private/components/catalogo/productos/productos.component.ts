@@ -24,7 +24,6 @@ import { buildCategoryTree } from '@/app/shared/utils/buildCategoryTree.componen
   imports: [ProductoFormComponent, ProductoTableComponent, DialogModule, ButtonModule,
     CommonModule, FormsModule, SearchBarComponent, DialogHeaderComponent, FiltrosComponent],
   templateUrl: './productos.html',
-  styleUrl: './productos.css',
 })
 export class ProductosComponent implements OnInit {
 

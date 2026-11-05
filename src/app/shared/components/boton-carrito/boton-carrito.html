@@ -2,14 +2,11 @@
   <ng-template pTemplate="header">
     <div class="flex w-full items-center justify-between gap-3 pr-3">
       <div>
-        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-text-muted">Resumen</p>
-        <h2 class="mt-1 text-xl font-bold text-text-primary">Resumen del carrito</h2>
+          <h2 class="m-0 whitespace-nowrap text-xl font-bold text-text-primary">Tu carrito</h2>
       </div>
       <div class="flex items-center gap-3">
-        <div class="rounded-full bg-ui-elevated px-3 py-1 text-sm font-semibold text-text-secondary">{{ cantidad() }} item(s)</div>
-        <button type="button" class="boton-cierre" aria-label="Cerrar carrito" (click)="cerrarCarrito()">
-          <i class="pi pi-times" aria-hidden="true"></i>
-        </button>
+         <app-status-badge type="text" tone="neutral" [humanize]="false" [value]="cantidad() + ' unidades'" />
+        <app-button variant="cierre" icon="pi-times" tooltip="Cerrar carrito" (clicked)="cerrarCarrito()" />
       </div>
     </div>
   </ng-template>
@@ -30,9 +27,7 @@
 
               <div class="min-w-0 flex-1">
                 <div class="min-w-0">
-                  <button type="button" (click)="irDetalleProducto(item)" class="block w-full cursor-pointer truncate text-left text-base font-semibold text-text-primary transition-colors hover:text-brand-gold">
-                    {{ item.producto.nombre }}
-                  </button>
+                  <button type="button" (click)="irDetalleProducto(item)" class="block w-full cursor-pointer truncate text-left text-base font-semibold text-text-primary transition-colors hover:text-brand-gold">{{ item.producto.nombre }}</button>
                 </div>
 
                 <div class="mt-2 flex items-center justify-between gap-3">
@@ -40,7 +35,7 @@
                     <p class="text-[11px] uppercase tracking-wide text-text-muted">Precio</p>
                     <span class="mr-2 font-semibold text-text-primary">{{ (item.producto.precioPromo ?? item.producto.precioVenta ?? item.producto.precio) | moneda }}</span>
                   </div>
-                  <p-button icon="pi pi-trash" severity="danger" [text]="true" styleClass="boton-delete boton-eliminar-carrito" (click)="eliminarProducto(i)" />
+                  <app-button variant="eliminar-tabla" icon="pi-trash" tooltip="Eliminar producto" (clicked)="eliminarProducto(i)" />
                 </div>
               </div>
             </div>
@@ -75,7 +70,7 @@
             <label for="envio" class="cursor-pointer text-text-secondary">Envío</label>
           </div>
           @if (!incluirEnvio || costoEnvio === 0) {
-            <span class="font-semibold text-green-400">Gratis</span>
+            <span class="font-semibold text-success">Gratis</span>
           } @else {
             <span class="font-semibold text-text-primary">{{ costoEnvio | moneda }}</span>
           }
@@ -88,10 +83,10 @@
           </div>
         </div>
 
-        <div class="flex flex-col gap-2">
-          <p-button label="Proceder al pago" routerLink="/carrito" icon="pi pi-credit-card" class="boton-submit" />
-          <p-button label="Vaciar carrito" icon="pi pi-times" class="boton-danger" (click)="vaciarCarrito()" />
-        </div>
+         <div class="flex flex-col gap-2">
+            <app-button variant="submit" icon="pi-credit-card" label="Proceder al pago" [fullWidth]="true" (clicked)="irAlCarrito()" />
+            <app-button variant="danger" icon="pi-times" label="Vaciar carrito" [fullWidth]="true" (clicked)="vaciarCarrito()" />
+          </div>
       </div>
     </div>
   } @else {

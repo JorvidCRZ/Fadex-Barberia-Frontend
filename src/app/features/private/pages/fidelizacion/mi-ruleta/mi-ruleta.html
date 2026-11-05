@@ -1,14 +1,12 @@
 <div class="flex flex-col items-center gap-3">
-    <p class="text-brand-gold text-sm font-medium">{{ ruletaNombre }}</p>
+    <p class="m-0 text-sm font-medium text-brand-gold">{{ ruletaNombre }}</p>
 
     @if (cargando) {
-    <div class="flex items-center justify-center gap-2 py-10 text-xs text-text-tertiary">
-        <i class="pi pi-spin pi-spinner"></i> Cargando ruleta...
-    </div>
+    <app-empty-state tipo="cargando" mensaje="Cargando ruleta..." />
     } @else if (error) {
-    <p class="text-xs text-text-tertiary py-6 text-center">{{ error }}</p>
+    <app-empty-state tipo="error" [mensaje]="error" />
     } @else if (!segmentos.length) {
-    <p class="text-xs text-text-tertiary py-6 text-center">Esta ruleta aún no tiene premios configurados.</p>
+    <app-empty-state icono="star" mensaje="Esta ruleta aún no tiene premios configurados." />
     } @else {
     <app-ruleta-grafico [premios]="segmentos" [interactiva]="interactiva" [reproducirMusica]="musicaActiva" [textoBoton]="textoBoton" [modoServidor]="true" (girarSolicitado)="onGirarSolicitado()" />
     }

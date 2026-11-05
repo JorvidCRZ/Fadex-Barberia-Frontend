@@ -15,7 +15,19 @@ export class ServicioCardComponent {
   @Input() servicio!: Servicio;
   @Output() seleccionado = new EventEmitter<number>();
 
+  readonly imagenPorDefecto = '/assets/servicio.jpg';
+
   onSeleccionar(): void {
     this.seleccionado.emit(this.servicio.servicioId);
+  }
+
+  getImagen(): string {
+    return this.servicio.urlsMultimedia?.length ? this.servicio.urlsMultimedia[0] : this.imagenPorDefecto;
+  }
+
+  onImgError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    if (img.src.endsWith(this.imagenPorDefecto)) { return; } // evita bucle si el fallback también falla
+    img.src = this.imagenPorDefecto;
   }
 }

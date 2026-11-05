@@ -1,6 +1,6 @@
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { PaginatorModule, PaginatorState } from 'primeng/paginator';
 import { TokenService } from '../../../../core/services/auth/token.service';
 import { FILTROS_SERVICIO_PUBLICO } from '../../../../core/config/filtros.config';
@@ -19,7 +19,7 @@ import { SERVICIOS_BANNERS } from '../../../../core/config/banner.config';
 @Component({
   standalone: true,
   selector: 'app-servicios',
-  imports: [CommonModule, PaginatorModule, ServicioListaComponent, ServicioDetalleComponent, FiltrosComponent,BannerComponent],
+  imports: [CommonModule, PaginatorModule, ServicioListaComponent, ServicioDetalleComponent, FiltrosComponent, BannerComponent],
   templateUrl: './servicios.html'
 })
 export class ServiciosComponent implements OnInit {
@@ -30,18 +30,18 @@ export class ServiciosComponent implements OnInit {
   private readonly notify = inject(NotificationService);
 
   banners = [...SERVICIOS_BANNERS];
-  servicios: Servicio[] = [];
-  cargando = true;
-  servicioSeleccionado: Servicio | null = null;
-  mostrarModal = false;
-  cargandoDetalle = false;
+  servicios = signal<Servicio[]>([]);
+  cargando = signal(true);
+  servicioSeleccionado = signal<Servicio | null>(null);
+  mostrarModal = signal(false);
+  cargandoDetalle = signal(false);
 
-  page = 0;
-  size = 10;
-  totalRecords = 0;
+  page = signal(0);
+  size = signal(10);
+  totalRecords = signal(0);
 
   filtros: ServicioFiltro = {};
-  filtrosFields = [...FILTROS_SERVICIO_PUBLICO];
+  filtrosFields = signal([...FILTROS_SERVICIO_PUBLICO]);
 
   ngOnInit(): void {
     this.cargarCategorias();
@@ -52,61 +52,66 @@ export class ServiciosComponent implements OnInit {
     this.categoriaService.obtenerCategoriasPorTipo(CategoriaTipo.SERVICIO).subscribe({
       next: (resp) => {
         const nodos = buildCategoryTree(resp.data?.content ?? []);
-        this.filtrosFields = this.filtrosFields.map(filtro => filtro.key === 'categoriaId' ? { ...filtro, treeOptions: nodos } : filtro);
+        this.filtrosFields.update(fields =>
+          fields.map(f => f.key === 'categoriaId' ? { ...f, treeOptions: nodos } : f));
       },
-      error: (error) => {
-        this.notify.showHttpError(error.message);
-      }
+      error: (error) => this.notify.showHttpError(error.message),
     });
   }
 
   cargarServicios(): void {
-    this.cargando = true;
-    this.servicioService.obtenerServicioPublicos({ ...this.filtros, page: this.page, size: this.size }).subscribe({
-      next: (resp) => {
-        this.servicios = resp.data.content;
-        this.totalRecords = resp.data.totalElements ?? this.servicios.length;
-        this.cargando = false;
-      },
-      error: (error) => {
-        this.notify.showHttpError(error.message);
-        this.servicios = [];
-        this.cargando = false;
-      }
-    });
+    this.cargando.set(true);
+    this.servicioService
+      .obtenerServicioPublicos({ ...this.filtros, page: this.page(), size: this.size() })
+      .subscribe({
+        next: (resp) => {
+          this.servicios.set(resp.data.content);
+          this.totalRecords.set(resp.data.totalElements ?? resp.data.content.length);
+          this.cargando.set(false);
+        },
+        error: (error) => {
+          this.notify.showHttpError(error.message);
+          this.servicios.set([]);
+          this.cargando.set(false);
+        },
+      });
   }
 
   onPaginatorChange(event: PaginatorState): void {
     const first = event.first ?? 0;
-    const rows = event.rows ?? this.size;
-    this.page = Math.floor(first / rows);
-    this.size = rows;
+    const rows = event.rows ?? this.size();
+    const page = Math.floor(first / rows);
+    // Evita recargar si el paginator emite al inicializarse
+    if (page === this.page() && rows === this.size()) { return; }
+    this.page.set(page);
+    this.size.set(rows);
     this.cargarServicios();
   }
 
   abrirDetalle(id: number): void {
-    this.mostrarModal = true;
-    this.cargandoDetalle = true;
+    this.mostrarModal.set(true);
+    this.cargandoDetalle.set(true);
     this.servicioService.obtenerServicioPublicosId(id).subscribe({
       next: (resp) => {
-        this.servicioSeleccionado = resp.data;
-        this.cargandoDetalle = false;
+        this.servicioSeleccionado.set(resp.data);
+        this.cargandoDetalle.set(false);
       },
       error: (error) => {
-        this.cargandoDetalle = false;
+        this.cargandoDetalle.set(false);
         this.notify.showHttpError(error.message);
-      }
+      },
     });
   }
 
   cerrarModal(): void {
-    this.mostrarModal = false;
-    setTimeout(() => (this.servicioSeleccionado = null), 300);
+    this.mostrarModal.set(false);
+    setTimeout(() => this.servicioSeleccionado.set(null), 300);
   }
 
   irAReservar(): void {
-    if (!this.servicioSeleccionado) return;
-    const idServicio = this.servicioSeleccionado.servicioId;
+    const servicio = this.servicioSeleccionado();
+    if (!servicio) return;
+    const idServicio = servicio.servicioId;
     this.cerrarModal();
 
     if (this.tokenService.isLogged()) {
@@ -128,13 +133,13 @@ export class ServiciosComponent implements OnInit {
       valores.categoriaId = Number(nodo.key ?? nodo.data?.id) || undefined;
     }
     this.filtros = { ...valores };
-    this.page = 0;
+    this.page.set(0);
     this.cargarServicios();
   }
 
   onLimpiar(): void {
     this.filtros = {};
-    this.page = 0;
+    this.page.set(0);
     this.cargarServicios();
   }
 }

@@ -1,52 +1,52 @@
-import { PanelModule } from 'primeng/panel';
-import { ButtonModule } from 'primeng/button';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { ButtonComponent } from '../button/button.component';
 import { DialogHeaderComponent } from '../dialog-header/dialog-header.component';
 
 @Component({
   selector: 'app-confirm-popover',
-  imports: [ButtonModule, PanelModule, DialogHeaderComponent],
+  standalone: true,
+  imports: [ButtonComponent, DialogHeaderComponent],
   template: `
-  @if(visible){
-     <div class="fixed inset-0 bg-black/60 backdrop-blur-[2px] z-[90]" (click)="onCancel()"></div>
-     <div class="fixed z-[100] bg-ui-card border border-brand-gold-hover rounded-2xl shadow-2xl p-5 flex flex-col gap-4 inset-x-4 top-1/2 -translate-y-1/2 max-w-sm mx-auto">
-         <div class="flex justify-between w-full px-2 p-0">
-             <app-dialog-header [icono]="obtenerIcono()" [title]="obtenerTitulo()" [mode]="mode" />
-             <button type="button" class="btn btn-outline-secondary p-0" (click)="onCancel()">
-                 @if (mode == 'eliminar') {
-                 <span
-                     class="p-button-icon pi pi-times text-xl p-2 xs:px-6  rounded-lg transition-all duration-300 transform hover:scale-105 cursor-pointer text-red-500 border border-red-500/30 bg-red-500/10 hover:bg-red-500 hover:text-white hover:border-red-500/30"></span>
-                 }
-                 @if (mode == 'anular') {
-                 <span
-                     class="p-button-icon pi pi-time text-xl p-2 xs:px-6  rounded-lg transition-all duration-300 transform hover:scale-105 cursor-pointer text-amber-500 border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500 hover:text-white hover:border-amber-500/30"></span>
-                 }
-             </button>
-         </div>
-         <span class="text-sm text-text-secondary text-center mb-4 w-full flex justify-center">{{mensaje}}</span>
-         <div class="flex sm:justify-around sm:flex-row flex-col gap-2 w-full ">
-             @if (mode =='eliminar') {
-             <p-button type="button" class="boton-delete px-3 py-1 text-xs transition-all" (click)="onConfirm()" icon="pi pi-trash" [label]="confirmText"></p-button>
-             }
-             @if (mode =='anular') {
-             <button pButton type="button" class="boton-anular px-3 py-1 text-xs transition-all" (click)="onConfirm()" icon="pi pi-ban" [label]="confirmText"></button>
-             }
-             <button pButton type="button" class="boton-cancel px-3 py-1 text-xs transition-all" (click)="onCancel()" icon="pi pi-times" [label]="cancelText"></button>
-         </div>
-     </div>
-    }`
+    @if (visible) {
+      <div class="fixed inset-0 z-[90] bg-black/60 backdrop-blur-[2px]" (click)="onCancel()"></div>
+
+      <div class="fixed inset-x-4 top-1/2 z-[100] mx-auto flex max-w-sm -translate-y-1/2 flex-col gap-4 rounded-2xl border border-brand-gold-hover bg-ui-card p-5 shadow-2xl">
+        <div class="flex w-full items-center justify-between px-2">
+          <app-dialog-header [icono]="obtenerIcono()" [title]="obtenerTitulo()" [mode]="mode" />
+          <app-button
+            [variant]="mode === 'eliminar' ? 'close-tabla' : 'cierre'"
+            icon="pi-times"
+            tooltip="Cerrar"
+            (clicked)="onCancel()" />
+        </div>
+
+        <span class="mb-4 flex w-full justify-center text-center text-sm text-text-secondary">{{ mensaje }}</span>
+
+        <div class="flex w-full flex-col gap-2 sm:flex-row sm:justify-around">
+          <app-button
+            [variant]="mode === 'eliminar' ? 'delete' : 'anular'"
+            [icon]="mode === 'eliminar' ? 'pi-trash' : 'pi-ban'"
+            [label]="confirmText"
+            size="sm"
+            (clicked)="onConfirm()" />
+          <app-button variant="cancel" icon="pi-times" [label]="cancelText" size="sm" (clicked)="onCancel()" />
+        </div>
+      </div>
+    }
+  `,
 })
 export class ConfirmPopoverComponent {
-
   @Input() visible = false;
-  @Input() mensaje: string = '';
-  @Input() confirmText: string = 'Eliminar';
-  @Input() cancelText: string = 'Cancelar';
-  @Input() titulo: string = '';
-  @Input() icono: string = 'pi-trash';
+  @Input() mensaje = '';
+  @Input() confirmText = 'Eliminar';
+  @Input() cancelText = 'Cancelar';
+  @Input() titulo = '';
+  /** Si no se pasa: 'pi-trash' en modo eliminar, 'pi-ban' en modo anular */
+  @Input() icono = '';
   @Input() mode: 'eliminar' | 'anular' = 'eliminar';
   @Output() confirm = new EventEmitter<void>();
   @Output() cancel = new EventEmitter<void>();
+  /** Sin uso dentro del componente; se deja por compatibilidad con los padres que ya lo enlazan */
   @Output() anular = new EventEmitter<void>();
 
   onConfirm(): void {
@@ -57,13 +57,11 @@ export class ConfirmPopoverComponent {
     this.cancel.emit();
   }
 
-  obtenerIcono() {
-    return this.icono?.trim() || 'pi-trash';
+  obtenerIcono(): string {
+    return this.icono?.trim() || (this.mode === 'anular' ? 'pi-ban' : 'pi-trash');
   }
 
-  obtenerTitulo() {
-    if (this.titulo)
-      return this.titulo;
-    return 'Eliminar';
+  obtenerTitulo(): string {
+    return this.titulo || (this.mode === 'anular' ? 'Anular' : 'Eliminar');
   }
 }

@@ -24,7 +24,6 @@ import { SolesPipe } from '@/app/shared/pipes/moneda.pipe';
     ImageModule, IconFieldModule, InputIconModule, StatusBadgeComponent, GalleriaModule, FormsModule, SafeImageUrlPipe
   ],
   templateUrl: './producto-table.html',
-  styleUrl: './producto-table.css',
 })
 export class ProductoTableComponent {
   @Output() lazyLoad = new EventEmitter<TableLazyLoadEvent>();

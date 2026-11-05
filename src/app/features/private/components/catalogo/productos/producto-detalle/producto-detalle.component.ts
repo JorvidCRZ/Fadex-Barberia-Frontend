@@ -15,7 +15,6 @@ import { NotificationService } from '@/app/core/services/common/notification.ser
   selector: 'app-producto-detalle',
   imports: [ButtonModule, ImageModule, CommonModule, StatusBadgeComponent, SafeImageUrlPipe],
   templateUrl: './producto-detalle.html',
-  styleUrl: './producto-detalle.css',
 })
 export class ProductoDetalleComponent implements OnInit {
 

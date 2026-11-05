@@ -11,7 +11,6 @@ import { Movimiento, Origen } from '@/app/core/models/fidelizacion/movimiento.mo
     standalone: true,
     imports: [ButtonModule, CommonModule, TableModule, ConfirmPopoverComponent, StatusBadgeComponent],
     templateUrl: './movimiento-table.html',
-    styleUrl: './movimiento-table.css',
 })
 export class MovimientoTableComponent {
     @Output() lazyLoad = new EventEmitter<TableLazyLoadEvent>();

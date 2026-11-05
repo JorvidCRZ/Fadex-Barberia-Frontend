@@ -1,12 +1,12 @@
 /* PANEL */
 :host {
   display: block;
-  background: #0c0c0c;
+  background: rgb(var(--color-ui-black));
 }
 
 .sidebar-shell {
   position: relative;
-  background: #0c0c0c;
+  background: rgb(var(--color-ui-black));
 }
 
 .sidebar-menu {
@@ -30,7 +30,7 @@
   line-height: 1;
   display: block;
   margin-top: -0.35rem;
-  text-shadow: 0 0 0.5rem rgba(212, 175, 55, 0.22);
+  text-shadow: 0 0 0.5rem rgb(var(--color-brand-gold) / 0.22);
 }
 
 /* ── COLLAPSED ───────────────────────────────────────────── */
@@ -157,7 +157,7 @@
 :host ::ng-deep .custom-panelmenu .p-panelmenu-item-icon,
 :host ::ng-deep .custom-panelmenu .p-panelmenu-submenu-icon,
 :host ::ng-deep .custom-panelmenu .p-icon {
-  color: var(--color-brand-gold) !important;
+  color: rgb(var(--color-brand-gold)) !important;
   font-size: .875rem;
 }
 
@@ -169,8 +169,8 @@
 /* ── HOVER ───────────────────────────────────────────────── */
 :host ::ng-deep .custom-panelmenu .p-panelmenu-header-link:hover,
 :host ::ng-deep .custom-panelmenu .p-panelmenu-item-content:hover {
-  background: rgba(212, 175, 55, 0.08) !important;
-  border-color: rgba(212, 175, 55, 0.2) !important;
+  background: rgb(var(--color-brand-gold) / 0.08) !important;
+  border-color: rgb(var(--color-brand-gold) / 0.2) !important;
   color: #ffffff !important;
   transform: translateX(3px);
 }
@@ -179,9 +179,9 @@
 :host ::ng-deep .custom-panelmenu .p-menuitem-link-active,
 :host ::ng-deep .custom-panelmenu .p-menuitem-link.router-link-active,
 :host ::ng-deep .custom-panelmenu .p-menuitem-active>.p-panelmenu-header>.p-panelmenu-header-content {
-  background: rgba(212, 175, 55, 0.1) !important;
-  border-color: rgba(212, 175, 55, 0.35) !important;
-  color: var(--color-brand-gold) !important;
+  background: rgb(var(--color-brand-gold) / 0.1) !important;
+  border-color: rgb(var(--color-brand-gold) / 0.35) !important;
+  color: rgb(var(--color-brand-gold)) !important;
 }
 
 /* ── CONTENEDOR HEADER/ITEM ──────────────────────────────── */

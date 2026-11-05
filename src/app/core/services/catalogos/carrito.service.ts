@@ -33,7 +33,9 @@ export class CarritoService {
     }
 
     private guardarCarritoEnStorage(): void {
-        localStorage.setItem('carrito', JSON.stringify(this._items()));
+        try {
+            localStorage.setItem('carrito', JSON.stringify(this._items()));
+        } catch (e) { console.warn('No se pudo guardar el carrito:', e); }
     }
 
     // =========================
@@ -71,11 +73,7 @@ export class CarritoService {
         const items = [...this._items()];
 
         if (items[index]) {
-            items[index] = {
-                ...items[index],
-                cantidad: Math.min(cantidad, items[index].producto.stock)
-            };
-
+            items[index] = { ...items[index], cantidad: Math.min(cantidad, items[index].producto.stock) };
             this._items.set(items);
             this.guardarCarritoEnStorage();
         }
@@ -91,7 +89,9 @@ export class CarritoService {
 
     vaciarCarrito(): void {
         this._items.set([]);
-        localStorage.removeItem('carrito');
+        try {
+            localStorage.removeItem('carrito');
+        } catch (e) { console.warn('No se pudo vaciar el carrito guardado:', e); }
     }
 
     obtenerCarrito(): CarritoItem[] {

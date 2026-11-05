@@ -14,7 +14,6 @@ import { TooltipModule } from 'primeng/tooltip';
   selector: 'app-regla-table',
   imports: [ButtonModule, CommonModule, TableModule, ConfirmPopoverComponent, ToggleSwitchModule, FormsModule, StatusBadgeComponent, TooltipModule],
   templateUrl: './regla-table.html',
-  styleUrl: './regla-table.css',
 })
 export class ReglaTableComponent {
   @Output() lazyLoad = new EventEmitter<TableLazyLoadEvent>();

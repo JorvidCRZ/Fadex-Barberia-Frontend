@@ -4,7 +4,7 @@ import { providePrimeNG } from 'primeng/config';
 import { MessageService } from 'primeng/api';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { registerLocaleData } from '@angular/common';
-import localeEs from '@angular/common/locales/es';
+import localeEsPe from '@angular/common/locales/es';
 
 import { routes } from './app.routes';
 import Aura from '@primeuix/themes/aura';
@@ -12,7 +12,7 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { authInterceptor } from './core/interceptors/auth-interceptor';
 import { LOCALE_ID } from '@angular/core';
 
-registerLocaleData(localeEs);
+registerLocaleData(localeEsPe);
 
 export const appConfig: ApplicationConfig = {
   providers: [

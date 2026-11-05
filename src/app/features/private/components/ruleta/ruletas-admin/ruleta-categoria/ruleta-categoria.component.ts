@@ -8,7 +8,7 @@ import { ResumenCategoria } from '@/app/core/models/ruleta/ruleta-grafico.model'
     selector: 'app-ruleta-categoria',
     imports: [CommonModule],
     templateUrl: './ruleta-categoria.html',
-    styleUrl: './ruleta-categoria.css',
+    styleUrl: './ruleta-categoria.scss',
 })
 export class RuletaCategoriasComponent {
     @Input({ required: true }) set items(value: RuletaItemResponse[]) {this._items = value ?? [];this.mostrarEstado = true;this.recalcular();}

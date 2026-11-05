@@ -4,7 +4,7 @@ export const environment = {
     apiUrl: 'http://localhost:8081/api/v1',
     apiBaseUrl: 'http://localhost:8081',
 
-    nombre_negocio: 'Ultimate Protector',
+    nombre_negocio: 'Fadex',
     recaptcha: {
         siteKeyV3: '6LfHIDksAAAAAC6Sl0MPfpho1jZ0NHSRCtkV49oF'
     },

@@ -79,8 +79,6 @@ export const FILTROS_REPORTE: FilterField<ReporteFiltro>[] = [
     { key: 'hasta', label: 'Hasta', type: 'date', placeholder: 'Fecha fin' },
     { key: 'barberoId', label: 'Barbero', type: 'select', placeholder: 'Seleccione barbero', options: [] },
     { key: 'servicioId', label: 'Servicio', type: 'select', placeholder: 'Seleccione servicio', options: [] },
-    { key: 'estado', label: 'Estado', type: 'select', placeholder: 'Seleccione estado', options: ESTADO_RESERVA_OPTIONS },
-    { key: 'metodoPago', label: 'Método de pago', type: 'select', placeholder: 'Seleccione método', options: METODO_PAGO_OPTIONS },
 ];
 export const FILTROS_METRICAS: FilterField<MetricasFiltro>[] = [
     { key: 'fechaInicio', label: 'Desde', type: 'date', placeholder: 'Fecha inicio' },

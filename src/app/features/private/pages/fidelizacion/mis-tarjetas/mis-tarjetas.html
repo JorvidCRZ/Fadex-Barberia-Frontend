@@ -1,24 +1,24 @@
-<div class="min-h-screen bg-[#0d0d0d] text-white p-6">
-    <p class="text-xs tracking-widest uppercase text-brand-gold mb-1">Programa de puntos</p>
-    <h2 class="text-2xl font-medium mb-6">Tus tarjetas de fidelización</h2>
+<div class="w-full">
 
-    <div *ngIf="cargando" class="text-white/40 text-sm py-10 text-center">
-        Cargando tarjetas...
-    </div>
+    <header class="mb-6">
+        <h2 class="m-0 text-xl font-bold text-text-primary">Tus tarjetas de fidelización</h2>
+        <p class="mt-1 text-sm text-text-secondary">Programa de puntos: completa tu progreso y gira la ruleta</p>
+    </header>
 
-    <div *ngIf="error && !cargando" class="text-red-400 text-sm py-4 text-center">
-        {{ error }}
-    </div>
-
-    <app-tarjeta-grafico *ngIf="!cargando && !error" variante="cliente" [tarjetas]="misTarjetas" (canjear)="onCanjear($event)" (verRuleta)="verRuleta($event)" />
+    @if (cargando) {
+    <app-empty-state tipo="cargando" mensaje="Cargando tarjetas..." />
+    } @else if (error) {
+    <app-empty-state tipo="error" [mensaje]="error">
+        <app-button variant="secondary" size="sm" icon="refresh" label="Reintentar" (clicked)="cargarMisTarjetas()" />
+    </app-empty-state>
+    } @else {
+    <app-tarjeta-grafico variante="cliente" [tarjetas]="misTarjetas" (canjear)="abrirRuleta($event)" (verRuleta)="abrirRuleta($event)" />
+    }
 </div>
 
-<!-- MODAL RULETA (se usa tanto para "Ver ruleta" como para "Canjear") -->
-<div *ngIf="showRuletaModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
-    (click)="cerrarModalRuleta()">
-    <div (click)="$event.stopPropagation()">
-        <app-mi-ruleta *ngIf="tarjetaRuletaSeleccionada" [tarjeta]="tarjetaRuletaSeleccionada" [activa]="showRuletaModal" (girado)="onGiroRealizado($event)"/>
-    </div>
-</div>
-
-<!-- <p-toast position="top-right"></p-toast> -->
+<!-- Un solo modal para "Ver ruleta" y "Canjear": mi-ruleta decide si es interactiva o solo vista previa -->
+<app-modal [(visible)]="showRuletaModal" titulo="Ruleta de fidelización" mode="ver" icono="pi-star" maxWidth="36rem" (cerrado)="alCerrarRuleta()">
+    @if (tarjetaRuletaSeleccionada) {
+    <app-mi-ruleta [tarjeta]="tarjetaRuletaSeleccionada" [activa]="showRuletaModal" />
+    }
+</app-modal>

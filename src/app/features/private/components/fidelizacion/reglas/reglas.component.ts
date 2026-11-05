@@ -22,7 +22,6 @@ import { of } from 'rxjs';
     selector: 'app-reglas',
     imports: [ReglaFormComponent, ReglaTableComponent, DialogModule, ButtonModule, CommonModule, FormsModule, DialogHeaderComponent, FiltrosComponent],
     templateUrl: './reglas.html',
-    styleUrl: './reglas.css',
 })
 export class ReglasComponent implements OnInit {
     private cd = inject(ChangeDetectorRef);

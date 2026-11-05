@@ -1,19 +1,27 @@
-import { CommonModule } from '@angular/common';
 import { Chart, registerables } from 'chart.js';
-import { StatsCard } from '../../../../../core/models/common/card.model';
-import { StatsComponent } from '../../../../../shared/components/stats/stats.component';
-import { FidelizacionTarjetaResponse } from '../../../../../core/models/fidelizacion/tarjeta.model';
-import { FidelizacionDashboardClienteResponse } from '../../../../../core/models/fidelizacion/dashboard.model';
+import { ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import { BadgeTone } from '../../../../../core/config/status-badge.config';
 import { FIDELIZACION_DASHBOARD_MOCK } from '../../../../../core/config/fidelizacion-mock.config';
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef, inject, ChangeDetectorRef } from '@angular/core';
+import { StatsCard } from '../../../../../core/models/common/card.model';
+import { FidelizacionDashboardClienteResponse } from '../../../../../core/models/fidelizacion/dashboard.model';
+import { FidelizacionTarjetaResponse } from '../../../../../core/models/fidelizacion/tarjeta.model';
+import { CollapsibleSectionComponent } from '../../../../../shared/components/collapsible-section/collapsible-section.component';
+import { EmptyStateComponent } from '../../../../../shared/components/empty-state/empty-state.component';
+import { PillTab, PillTabsComponent } from '../../../../../shared/components/pill-tabs/pill-tabs.component';
+import { StatsComponent } from '../../../../../shared/components/stats/stats.component';
+import { StatusBadgeComponent } from '../../../../../shared/components/status-badge/status-badge.component';
+import { DateFormatPipe } from '@/app/shared/pipes/dat.pipe';
+
 Chart.register(...registerables);
 
 type TarjetaConMeta = FidelizacionTarjetaResponse & { meta: number; girosPorMeta: number };
+type TabCategoria = 'progreso' | 'giros';
+type Seccion = 'categoria' | 'movimientos' | 'recompensas';
 
 @Component({
   selector: 'app-mi-resumen',
   standalone: true,
-  imports: [CommonModule, StatsComponent],
+  imports: [StatsComponent, StatusBadgeComponent, EmptyStateComponent, CollapsibleSectionComponent, PillTabsComponent, DateFormatPipe],
   templateUrl: './mi-resumen.html',
 })
 export class MiResumenComponent implements OnInit, OnDestroy {
@@ -23,70 +31,74 @@ export class MiResumenComponent implements OnInit, OnDestroy {
   // private dashboardService = inject(FidelizacionDashboardService);
   // private notify = inject(NotificationService);
 
-  @ViewChild('progresoChart') progresoRef!: ElementRef<HTMLCanvasElement>;
-  @ViewChild('girosChart') girosRef!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('progresoChart') progresoRef?: ElementRef<HTMLCanvasElement>;
+  @ViewChild('girosChart') girosRef?: ElementRef<HTMLCanvasElement>;
 
   private charts: Chart[] = [];
 
-  // expuesto para usarlo en el template ([style.height.px]="Math.max(...)")
+  /** Expuesto para el template ([style.height.px]="Math.max(...)") */
   readonly Math = Math;
 
   cargando = false;
   data: FidelizacionDashboardClienteResponse | null = null;
   statsCards: StatsCard[] = [];
 
-  // control de secciones colapsables
-  secciones = {
-    categoria: true,
-    movimientos: true,
-    recompensas: false,
-  };
+  secciones: Record<Seccion, boolean> = { categoria: true, movimientos: true, recompensas: false };
 
-  // tab activo dentro de la sección "categoria"
-  tabCategoria: 'progreso' | 'giros' = 'progreso';
+  readonly tabsCategoria: PillTab<TabCategoria>[] = [
+    { value: 'progreso', label: 'Progreso' },
+    { value: 'giros', label: 'Giros disponibles' },
+  ];
+  tabCategoria: TabCategoria = 'progreso';
 
-  private readonly gold = '#c9a84c';
-  private readonly textColor = 'rgba(255,255,255,0.55)';
-  private readonly gridColor = 'rgba(255,255,255,0.06)';
-  private readonly colors = ['#c9a84c', '#8a7a5c', '#e2c074', '#6b4f25', '#d4af37', '#b8964b', '#a07840', '#f0d080'];
+  /** Paleta de la gráfica de giros (tonos dorados; no hay tokens para series) */
+  private readonly serieColores = ['#d4af37', '#8a7a5c', '#e2c074', '#6b4f25', '#f0d080', '#b8964b', '#a07840', '#c9a84c'];
 
   ngOnInit(): void {
     this.cargar();
   }
 
   ngOnDestroy(): void {
-    this.charts.forEach((c) => c.destroy());
+    this.destruirCharts();
   }
 
-  toggleSeccion(seccion: keyof typeof this.secciones): void {
-    this.secciones[seccion] = !this.secciones[seccion];
-
-    if (seccion === 'categoria' && this.secciones.categoria && this.data) {
+  alCambiarSeccion(seccion: Seccion, abierta: boolean): void {
+    this.secciones[seccion] = abierta;
+    if (seccion === 'categoria' && abierta && this.data) {
       setTimeout(() => this.renderTabActivo());
     }
   }
 
-  cambiarTabCategoria(tab: 'progreso' | 'giros'): void {
+  cambiarTabCategoria(tab: TabCategoria): void {
     if (this.tabCategoria === tab) return;
     this.tabCategoria = tab;
     setTimeout(() => this.renderTabActivo());
+  }
+
+  origenTono(origen: string): BadgeTone {
+    switch (origen) {
+      case 'RESERVA': return 'warning';
+      case 'VENTA': return 'success';
+      case 'AJUSTE': return 'info';
+      default: return 'neutral';
+    }
   }
 
   get tarjetasConGirosDisponibles() {
     return this.data?.tarjetas.filter((t) => t.girosDisponibles > 0) ?? [];
   }
 
-  get nombresSinMeta(): string {
-    return this.tarjetasSinMeta.map((t) => t.categoriaNombre).join(', ');
-  }
-
-  // solo tarjetas con configuración activa (meta definida) pueden mostrar % de progreso
+  /** Solo las tarjetas con meta definida pueden mostrar % de progreso */
   get tarjetasConMeta(): TarjetaConMeta[] {
-    return (this.data?.tarjetas.filter((t): t is TarjetaConMeta => t.meta !== null && t.meta !== undefined) ?? []);
+    return this.data?.tarjetas.filter((t): t is TarjetaConMeta => t.meta !== null && t.meta !== undefined) ?? [];
   }
 
   get tarjetasSinMeta() {
     return this.data?.tarjetas.filter((t) => !t.meta) ?? [];
+  }
+
+  get nombresSinMeta(): string {
+    return this.tarjetasSinMeta.map((t) => t.categoriaNombre).join(', ');
   }
 
   private cargar(): void {
@@ -110,27 +122,35 @@ export class MiResumenComponent implements OnInit, OnDestroy {
     ];
   }
 
-  private renderTabActivo(): void {
-    if (!this.data) return;
-    this.charts.forEach((c) => c.destroy());
-    this.charts = [];
-
-    if (this.tabCategoria === 'progreso') {
-      this.buildProgresoChart(this.data);
-    } else {
-      this.buildGirosChart(this.data);
-    }
+  /** Lee un token CSS (ej. 'brand-gold' → --color-brand-gold = "212 175 55") y lo devuelve como rgba() */
+  private token(nombre: string, alpha = 1): string {
+    const raw = getComputedStyle(document.documentElement).getPropertyValue(`--color-${nombre}`).trim();
+    const [r, g, b] = raw.split(/[\s/]+/).map(Number);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 
-  private buildProgresoChart(d: FidelizacionDashboardClienteResponse): void {
-    if (!this.progresoRef) return;
+  private destruirCharts(): void {
+    this.charts.forEach((c) => c.destroy());
+    this.charts = [];
+  }
 
+  private renderTabActivo(): void {
+    if (!this.data) return;
+    this.destruirCharts();
+    if (this.tabCategoria === 'progreso') this.buildProgresoChart();
+    else this.buildGirosChart();
+  }
+
+  private buildProgresoChart(): void {
+    const canvas = this.progresoRef?.nativeElement;
     const conMeta = this.tarjetasConMeta;
-    if (!conMeta.length) return;
+    if (!canvas || !conMeta.length) return;
 
-    const ctx = this.progresoRef.nativeElement.getContext('2d')!;
+    const texto = this.token('text-primary', 0.55);
+    const rejilla = this.token('text-primary', 0.06);
+
     this.charts.push(
-      new Chart(ctx, {
+      new Chart(canvas.getContext('2d')!, {
         type: 'bar',
         data: {
           labels: conMeta.map((t) => t.categoriaNombre),
@@ -138,7 +158,7 @@ export class MiResumenComponent implements OnInit, OnDestroy {
             {
               label: 'Progreso',
               data: conMeta.map((t) => Math.round((t.progreso / t.meta) * 100)),
-              backgroundColor: this.gold,
+              backgroundColor: this.token('brand-gold'),
               borderRadius: 6,
               barPercentage: 0.5,
               categoryPercentage: 0.6,
@@ -161,35 +181,28 @@ export class MiResumenComponent implements OnInit, OnDestroy {
             },
           },
           scales: {
-            x: {
-              min: 0,
-              max: 100,
-              ticks: { color: this.textColor, font: { size: 11 }, callback: (v) => v + '%' },
-              grid: { color: this.gridColor },
-            },
-            y: { ticks: { color: this.textColor, font: { size: 11 } }, grid: { display: false } },
+            x: { min: 0, max: 100, ticks: { color: texto, font: { size: 11 }, callback: (v) => v + '%' }, grid: { color: rejilla } },
+            y: { ticks: { color: texto, font: { size: 11 } }, grid: { display: false } },
           },
         },
-      })
+      }),
     );
   }
 
-  private buildGirosChart(d: FidelizacionDashboardClienteResponse): void {
-    if (!this.girosRef) return;
-
+  private buildGirosChart(): void {
+    const canvas = this.girosRef?.nativeElement;
     const conGiros = this.tarjetasConGirosDisponibles;
-    if (!conGiros.length) return;
+    if (!canvas || !conGiros.length) return;
 
-    const ctx = this.girosRef.nativeElement.getContext('2d')!;
     this.charts.push(
-      new Chart(ctx, {
+      new Chart(canvas.getContext('2d')!, {
         type: 'doughnut',
         data: {
           labels: conGiros.map((t) => t.categoriaNombre),
           datasets: [
             {
               data: conGiros.map((t) => t.girosDisponibles),
-              backgroundColor: this.colors.slice(0, conGiros.length),
+              backgroundColor: this.serieColores.slice(0, conGiros.length),
               borderColor: 'rgba(0,0,0,0)',
               borderWidth: 2,
             },
@@ -199,10 +212,10 @@ export class MiResumenComponent implements OnInit, OnDestroy {
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: { position: 'right', labels: { color: this.textColor, font: { size: 11 }, padding: 12 } },
+            legend: { position: 'right', labels: { color: this.token('text-primary', 0.55), font: { size: 11 }, padding: 12 } },
           },
         },
-      })
+      }),
     );
   }
 }

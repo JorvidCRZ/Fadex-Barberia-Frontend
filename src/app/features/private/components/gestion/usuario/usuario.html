@@ -2,15 +2,23 @@
   <app-header-usuario (search)="onSearch($event)" (create)="abrirModalAdmin()" />
 </div>
 
-<div class="mt-5">
-  <app-filtrar-users (apply)="onApplyFilters($event)" (clear)="onClearFilters()" />
-</div>
+<app-filtros
+  class="block mt-5"
+  [fields]="filtroFields"
+  titulo="Usuarios"
+  text="Usuarios"
+  icono="pi pi-users"
+  [acordeon]="true"
+  [abierto]="false"
+  (buscar)="onBuscarFiltros($event)"
+  (limpiar)="onClearFilters()"
+/>
 
 <div *ngIf="errorCarga" class="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
   {{ errorCarga }} </div>
 
 <div class="mt-5">
-  <app-table-users [usuarios]="usuarios" [totalElements]="totalElements" [pageSize]="10"
+  <app-table-users [usuarios]="usuarios" [totalElements]="totalElements" [pageSize]="10" [cargando]="cargando"
     (pageChange)="onPageChange($event)" (createAdmin)="abrirModalAdmin()" />
 </div>
 

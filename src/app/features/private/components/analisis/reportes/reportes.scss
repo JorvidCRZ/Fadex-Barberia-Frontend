@@ -1,120 +1,152 @@
 $gold: #d4af37;
 $card-bg: #111111;
-$card-border: rgba(201, 168, 76, 0.16);
+$green: #4caf50;
+$red: #ef4444;
 
-select option {
-  background-color: var(--color-ui-elevated, #1e1e1e);
-  color: var(--color-text-primary, #ffffff);
-}
+$borde-card: rgba(#fff, 0.08);
+$borde-gold: rgba($gold, 0.45);
 
-.reporte-card {
-  background: $card-bg;
-  border: 1px solid $card-border;
-  border-radius: 12px;
-}
+:host {
+  display: block;
 
-.reporte-select {
-  appearance: none;
-  -webkit-appearance: none;
-  min-width: 174px;
-  padding: 0.55rem 2.2rem 0.55rem 0.75rem;
-  font-size: 0.8rem;
-  color: #cfcfcf;
-  background: #161616;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  outline: none;
-  cursor: pointer;
-  transition: border-color 0.2s;
+  // ───────────── TARJETA DE TÍTULO ─────────────
+  > div > div:first-of-type {
+    background: var(--color-ui-card, #{$card-bg});
+    border: 1px solid $borde-card;
+    border-radius: 1rem;
 
-  &:hover,
-  &:focus {
-    border-color: rgba($gold, 0.5);
-  }
-}
+    h1 {
+      color: $gold;
+      font-weight: 700;
+    }
 
-.reporte-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 40px;
-  height: 40px;
-  margin-top: 2px;
-  color: $gold;
-  background: rgba(201, 168, 76, 0.1);
-  border-radius: 10px;
-}
-
-%btn-base {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-  height: 30px;
-  padding: 0 0.7rem;
-  font-size: 0.76rem;
-  border-radius: 7px;
-  cursor: pointer;
-  transition: all 0.2s;
-
-  i {
-    font-size: 0.78rem;
+    p {
+      color: var(--color-text-secondary, #9a9a9a);
+    }
   }
 
-  &:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
+  // ───────────── ETIQUETAS DE SECCIÓN ─────────────
+  > div > p {
+    color: var(--color-text-muted, #8a8a8a);
+    border-bottom: 1px solid $borde-card;
   }
-}
 
-.btn-pdf {
-  @extend %btn-base;
-  color: #111111;
-  background: $gold;
-  border: 1px solid $gold;
+  // ───────────── TARJETAS DE REPORTES ─────────────
+  .grid > div {
+    background: var(--color-ui-card, #{$card-bg});
+    border: 1px solid $borde-card;
+    border-radius: 1rem;
+    transition: transform 0.2s ease, border-color 0.2s ease;
 
-  &:hover:not(:disabled) {
-    background: #e2c074;
-    border-color: #e2c074;
+    &:hover {
+      transform: translateY(-2px);
+      border-color: $borde-gold;
+    }
+
+    > div:first-child {
+      // caja del icono
+      > div:first-child {
+        background: #0a0a0a;
+        border: 1px solid $borde-card;
+        border-radius: 0.75rem;
+        color: $gold;
+
+        i {
+          color: $gold;
+        }
+      }
+
+      p:first-child {
+        color: #fff;
+        font-weight: 600;
+      }
+
+      p:last-child {
+        color: var(--color-text-secondary, #9a9a9a);
+      }
+    }
   }
-}
 
-.btn-excel {
-  @extend %btn-base;
-  color: #ffffff;
-  background: #0d0d0d;
-  border: 1px solid $card-border;
-
-  &:hover:not(:disabled) {
-    border-color: rgba($gold, 0.6);
+  // ───────────── BOTONES PDF / EXCEL ─────────────
+  .grid button {
+    background: #0a0a0a;
     color: $gold;
+    border: 1px solid $borde-gold;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+
+    &:hover:enabled {
+      background: $gold;
+      border-color: $gold;
+      color: #000;
+    }
+
+    &:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    span {
+      border-top-color: $gold;
+    }
   }
-}
 
-.spinner {
-  display: inline-block;
-  width: 12px;
-  height: 12px;
-  border: 2px solid transparent;
-  border-top-color: #111111;
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
+  // ───────────── RESUMEN SEMANAL ─────────────
+  .overflow-hidden {
+    background: var(--color-ui-card, #{$card-bg});
+    border: 1px solid $borde-gold;
+    border-radius: 1rem;
 
-  &--light {
-    border-top-color: #ffffff;
-  }
-}
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
 
-.kpi-mini {
-  padding: 0.9rem 0.9rem 1rem;
-  background: #161616;
-  border: 1px solid $card-border;
-  border-radius: 10px;
-}
+    thead tr {
+      background: #0a0a0a;
+      border-bottom: 1px solid $borde-card;
+    }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
+    th {
+      color: $gold;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid $borde-card;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &:hover td {
+        background: var(--color-ui-elevated, #1e1e1e);
+      }
+    }
+
+    // columnas: Día | Reservas | Completadas | Canceladas | Ingresos
+    td {
+      color: #fff;
+      font-weight: 600;
+
+      &:nth-child(2) { color: $gold; }
+      &:nth-child(3) { color: $green; }
+      &:nth-child(4) { color: $red; }
+      &:nth-child(5) { color: $gold; }
+    }
+
+    // fila Total
+    tfoot tr {
+      background: rgba($gold, 0.06);
+      border-top: 1px solid $borde-card;
+
+      td {
+        font-weight: 700;
+
+        &:nth-child(2) { color: #d3c724; }
+      }
+    }
   }
 }
