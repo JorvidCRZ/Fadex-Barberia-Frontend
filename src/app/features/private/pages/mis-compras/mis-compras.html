@@ -99,10 +99,7 @@
   </p-table>
 
   <div class="producto-page-paginator">
-    <p-paginator [first]="first()" [rows]="rows()" [totalRecords]="totalRecords()"
-      [rowsPerPageOptions]="[5, 10, 25, 50]" [showCurrentPageReport]="true"
-      currentPageReportTemplate="Página {currentPage} de {totalPages} · {totalRecords} compra(s)"
-      (onPageChange)="onPaginatorChange($event)" />
+    <app-paginator [first]="first()" [rows]="rows()" [totalRecords]="totalRecords()" etiqueta="compra(s)" (pageChange)="onPaginatorChange($event)" />
   </div>
 
 </div>

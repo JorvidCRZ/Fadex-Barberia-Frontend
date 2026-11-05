@@ -25,7 +25,7 @@ import { NotificationService } from '@/app/core/services/common/notification.ser
 type BarberoVista = Barbero & { nombreCompleto: string };
 
 const APERTURA = 9 * 60;
-const CIERRE = 19 * 60;
+const CIERRE = 21 * 60;
 const PASO_MINUTOS = 30;
 
 const fechaHoraValida = (control: AbstractControl): ValidationErrors | null => {
@@ -56,7 +56,7 @@ interface Horario {
   minutos: number;   // minutos desde las 00:00
 }
 
-/** 09:00, 09:30 ... 18:30 (la última cita empieza 30 min antes del cierre) */
+/** 09:00, 09:30 ... 20:30 (la última cita empieza 30 min antes del cierre) */
 const HORARIOS: Horario[] = (() => {
   const out: Horario[] = [];
   for (let m = APERTURA; m < CIERRE; m += PASO_MINUTOS) {
@@ -351,7 +351,7 @@ export class ReservarComponent {
     const errors = this.citaForm.controls.fechaHora.errors;
     if (errors?.['fechaPasada']) return 'La fecha y hora no pueden ser anteriores a este momento';
     if (errors?.['domingo']) return 'No atendemos los domingos';
-    if (errors?.['fueraHorario']) return 'Atendemos de 09:00 AM a 07:00 PM (última cita 06:30 PM)';
+    if (errors?.['fueraHorario']) return 'Atendemos de 09:00 AM a 09:00 PM (última cita 08:30 PM)';
     return 'Selecciona la fecha y la hora';
   }
 

@@ -1,38 +1,42 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ImageModule } from 'primeng/image';
 import { FormsModule } from '@angular/forms';
+import { PaginatorState } from 'primeng/paginator';
 import { TableModule } from 'primeng/table';
-import { ButtonModule } from 'primeng/button';
-import { TableLazyLoadEvent } from 'primeng/table';
-import { InputIconModule } from 'primeng/inputicon';
-import { IconFieldModule } from 'primeng/iconfield';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { TooltipModule } from 'primeng/tooltip';
+import { ButtonComponent } from '@/app/shared/components/button/button.component';
 import { ConfirmPopoverComponent } from '@/app/shared/components/confirm-popover/confirm-popover.component';
+import { EmptyStateComponent } from '@/app/shared/components/empty-state/empty-state.component';
+import { PaginatorComponent } from '@/app/shared/components/paginator/paginator.component';
 import { StatusBadgeComponent } from '@/app/shared/components/status-badge/status-badge.component';
 import { CategoriaTreeComponent } from '../categoria-tree/categoria-tree.component';
 import { Categoria } from '@/app/core/models/catalogos/categorias.model';
-import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-categoria-table',
   standalone: true,
   imports: [
-    ButtonModule, CommonModule, TableModule, ConfirmPopoverComponent, ToggleSwitchModule, FormsModule,TooltipModule,
-    CategoriaTreeComponent, ImageModule, IconFieldModule, InputIconModule, StatusBadgeComponent,
+    TableModule, ToggleSwitchModule, TooltipModule, FormsModule,
+    ButtonComponent, ConfirmPopoverComponent, EmptyStateComponent, PaginatorComponent, StatusBadgeComponent,
+    CategoriaTreeComponent,
   ],
   templateUrl: './categoria-table.html'
 })
 export class CategoriaTableComponent {
-  @Output() lazyLoad = new EventEmitter<TableLazyLoadEvent>();
   @Output() editar = new EventEmitter<Categoria>();
   @Output() eliminar = new EventEmitter<Categoria>();
   @Output() estado = new EventEmitter<{ id: number, activo: boolean }>();
+  /** Se emite desde el estado vacío cuando hay filtros activos */
+  @Output() limpiar = new EventEmitter<void>();
+  /** Cambio de página o de filas por página en el paginador */
+  @Output() pageChange = new EventEmitter<PaginatorState>();
   @Input({ required: true }) categorias: Categoria[] = [];
-  @Input() icono: string = 'pi-trash';
   @Input() cargado = false;
-  @Input() totalRecords = 0;
+  /** Cambia el mensaje del estado vacío y muestra el botón "Limpiar filtros" */
+  @Input() hayFiltros = false;
+  @Input() first = 0;
   @Input() rows = 25;
+  @Input() totalRecords = 0;
 
   mostrarConfirmacion = false;
   categoriaAEliminar: Categoria | null = null;
@@ -41,14 +45,14 @@ export class CategoriaTableComponent {
     this.editar.emit(categoria);
   }
 
-  pedirConfirmacion(categoria: Categoria, event: MouseEvent) {
-    event.stopPropagation();
+  pedirConfirmacion(categoria: Categoria, event?: MouseEvent) {
+    event?.stopPropagation();
     this.categoriaAEliminar = categoria;
     this.mostrarConfirmacion = true;
   }
 
   cambiarEstado(categoria: Categoria, event: { checked: boolean }) {
-    this.estado.emit({ id: categoria.id, activo: event.checked })
+    this.estado.emit({ id: categoria.id, activo: event.checked });
   }
 
   handleTreeEstado(event: { id: number, activo: boolean }) {
@@ -56,8 +60,7 @@ export class CategoriaTableComponent {
   }
 
   eliminarDesdeTree(categoria: Categoria) {
-    this.categoriaAEliminar = categoria;
-    this.mostrarConfirmacion = true;
+    this.pedirConfirmacion(categoria);
   }
 
   confirmarEliminar() {

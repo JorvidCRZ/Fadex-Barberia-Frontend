@@ -1,17 +1,12 @@
-import { finalize } from 'rxjs';
-
+import { catchError, finalize, forkJoin, of } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
-
 import { PaginatorModule, PaginatorState } from 'primeng/paginator';
 import { TableModule } from 'primeng/table';
-
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FILTROS_HISTORIAL } from '../../../../core/config/filtros.config';
 import { Reserva } from '../../../../core/models/operaciones/Reserva.model';
-import {
-  HistorialClienteFiltro,
-  HistorialClienteModel,
-} from '../../../../core/models/operaciones/historial-cliente.model';
+import { HistorialClienteFiltro, HistorialClienteModel,} from '../../../../core/models/operaciones/historial-cliente.model';
+import { Venta } from '../../../../core/models/ventas/venta.model';
 import { ReservaService } from '../../../../core/services/operaciones/reserva.service';
 import { NotificationService } from '../../../../core/services/common/notification.service';
 import { ReservarComponent } from '../reservar/reservar.component';
@@ -24,6 +19,8 @@ import { ConfirmPopoverComponent } from '../../../../shared/components/confirm-p
 import { FiltrosComponent } from '../../../../shared/components/filtros/filtros.component';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { EstadoReserva } from '@/app/core/models/operaciones/EstadoReserva';
+import { VentaService } from '@/app/core/services/venta/venta.service';
+import { PaginatorComponent } from '@/app/shared/components/paginator/paginator.component';
 
 type TabReservas = 'reservas' | 'historial';
 
@@ -31,14 +28,15 @@ type TabReservas = 'reservas' | 'historial';
   selector: 'app-mis-reservas',
   standalone: true,
 
-  imports: [ TableModule, PaginatorModule, ReservarComponent, StatusBadgeComponent, DateFormatPipe,
-     MonedaPipe, ButtonComponent, PageHeaderComponent, ConfirmPopoverComponent, FiltrosComponent, ModalComponent,
+  imports: [ PaginatorComponent, TableModule, PaginatorModule, ReservarComponent, StatusBadgeComponent, DateFormatPipe, MonedaPipe,
+     ButtonComponent, PageHeaderComponent, ConfirmPopoverComponent, FiltrosComponent, ModalComponent,
   ],
 
   templateUrl: './mis-reservas.html',
 })
 export class MisReservasComponent implements OnInit {
   private reservaService = inject(ReservaService);
+  private ventaService = inject(VentaService);
   private notify = inject(NotificationService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
@@ -107,7 +105,7 @@ export class MisReservasComponent implements OnInit {
       this.router.navigate([], {
         relativeTo: this.route,
         queryParams: { tab: params.get('tab') },
-        replaceUrl: true
+        replaceUrl: true,
       });
     }
   }
@@ -127,6 +125,10 @@ export class MisReservasComponent implements OnInit {
     }
   }
 
+  // =====================================================
+  // RESERVAS: PRÓXIMAS
+  // =====================================================
+
   cargarMisReservas(): void {
     this.loadingReservas.set(true);
 
@@ -137,7 +139,7 @@ export class MisReservasComponent implements OnInit {
         next: (response) => {
           if (response.success && response.data) {
             const activas = response.data.content
-              .filter(r => this.ESTADOS_ACTIVOS.includes(r.estadoReserva))
+              .filter((r) => this.ESTADOS_ACTIVOS.includes(r.estadoReserva))
               .sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime());
 
             this.reservas.set(activas);
@@ -216,6 +218,7 @@ export class MisReservasComponent implements OnInit {
 
           this.cargarMisReservas();
 
+          // La reserva cancelada pasa al historial: forzar recarga la próxima vez
           this.historialCargado = false;
         },
         error: (err) => {
@@ -225,6 +228,9 @@ export class MisReservasComponent implements OnInit {
       });
   }
 
+  // =====================================================
+  // RESERVAS: PAGAR
+  // =====================================================
 
   irAPagar(reserva: Reserva): void {
     this.router.navigate(['/mi-cuenta/pago', reserva.reservaId]);
@@ -238,9 +244,10 @@ export class MisReservasComponent implements OnInit {
     return reserva.estadoReserva === EstadoReserva.PENDIENTE_PAGO;
   }
 
-puedeDescargarBoleta(reserva: HistorialClienteModel): boolean {
-  return reserva.ventaId != null;
-}
+  // =====================================================
+  // HISTORIAL
+  // =====================================================
+
   cargarHistorial(): void {
     const size = this.rowsHistorial();
     const page = Math.floor(this.firstHistorial() / size);
@@ -248,20 +255,48 @@ puedeDescargarBoleta(reserva: HistorialClienteModel): boolean {
 
     this.loadingHistorial.set(true);
 
-    this.reservaService
-      .getHistorialCliente(page, size, estado, desde, hasta)
+    // Se pide el historial y, en paralelo, las ventas del cliente (mismo endpoint de Mis Compras)
+    // para saber a qué venta corresponde cada reserva pagada. Si las ventas fallan,
+    // el historial se muestra igual, solo que sin botón de boleta.
+    forkJoin({
+      historial: this.reservaService.getHistorialCliente(page, size, estado, desde, hasta),
+      compras: this.ventaService.obtenerMisCompras().pipe(catchError(() => of(null))),
+    })
       .pipe(finalize(() => this.loadingHistorial.set(false)))
       .subscribe({
-        next: (response) => {
+        next: ({ historial, compras }) => {
           this.historialCargado = true;
 
-          if (response.success && response.data) {
-            this.historial.set(response.data.content);
-            this.totalHistorial.set(response.data.totalElements);
-          } else {
+          if (!historial.success || !historial.data) {
             this.historial.set([]);
             this.totalHistorial.set(0);
+            return;
           }
+
+          const ventas = compras?.success && Array.isArray(compras.data) ? compras.data : [];
+          const ventaPorReserva = new Map<number, Venta>();
+          for (const venta of ventas) {
+            const reservaId = this.reservaIdDeVenta(venta);
+            if (reservaId != null) ventaPorReserva.set(reservaId, venta);
+          }
+
+          const content = historial.data.content.map((item) => {
+            // Si el backend ya manda la venta en el historial, se respeta
+            if (item.ventaId != null) return item;
+
+            const venta = ventaPorReserva.get(this.reservaIdDeHistorial(item));
+            return venta
+              ? {
+                  ...item,
+                  ventaId: venta.ventaId,
+                  serieComprobante: venta.serieComprobante,
+                  numeroComprobante: venta.numeroComprobante,
+                }
+              : item;
+          });
+
+          this.historial.set(content);
+          this.totalHistorial.set(historial.data.totalElements);
         },
         error: (err) => {
           console.error('Error cargando el historial:', err);
@@ -295,32 +330,72 @@ puedeDescargarBoleta(reserva: HistorialClienteModel): boolean {
     this.displayModal.set(true);
   }
 
+  // =====================================================
+  // HISTORIAL: BOLETA
+  // =====================================================
+
+  puedeDescargarBoleta(reserva: HistorialClienteModel): boolean {
+    return reserva.ventaId != null;
+  }
+
   descargarBoleta(reserva: HistorialClienteModel): void {
     const ventaId = reserva.ventaId;
-if (ventaId == null) {
-  this.notify.showError('Esta reserva aún no tiene boleta. La boleta se genera al pagar la reserva.');
-  return;
-}
+    if (ventaId == null) {
+      this.notify.showError(
+        'Esta reserva aún no tiene boleta. La boleta se genera al pagar la reserva.',
+      );
+      return;
+    }
 
     this.descargandoBoleta.set(ventaId);
 
-    this.reservaService
-      .descargarBoleta(ventaId, reserva.serieComprobante, reserva.numeroComprobante)
+    this.ventaService
+      .descargarComprobantePdf(ventaId)
       .pipe(finalize(() => this.descargandoBoleta.set(null)))
       .subscribe({
-        next: (blob) => {
-          this.reservaService.iniciarDescargaBoleta(
-            blob,
-            ventaId,
-            reserva.serieComprobante,
-            reserva.numeroComprobante,
-          );
-        },
+        next: (blob) => this.guardarArchivo(blob, this.nombreBoleta(reserva, ventaId)),
         error: (err) => {
           console.error('Error descargando la boleta de la reserva:', err);
-          this.notify.showError('No se pudo descargar la boleta de esta reserva. Inténtalo nuevamente.');
+          this.notify.showError(
+            'No se pudo descargar la boleta de esta reserva. Inténtalo nuevamente.',
+          );
         },
       });
+  }
+
+  private nombreBoleta(reserva: HistorialClienteModel, ventaId: number): string {
+    return reserva.serieComprobante && reserva.numeroComprobante
+      ? `boleta-${reserva.serieComprobante}-${reserva.numeroComprobante}.pdf`
+      : `boleta-${ventaId}.pdf`;
+  }
+
+  private guardarArchivo(blob: Blob, nombre: string): void {
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = nombre;
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  // =====================================================
+  // HELPERS
+  // =====================================================
+
+  /** Id de la reserva que originó la venta (si el backend lo envía en la venta). */
+  private reservaIdDeVenta(venta: Venta): number | null {
+    return (venta as Venta & { reservaId?: number | null }).reservaId ?? null;
+  }
+
+  /**
+   * Id de la reserva en un item del historial.
+   * Ajusta el nombre del campo si en HistorialClienteModel se llama distinto.
+   */
+  private reservaIdDeHistorial(item: HistorialClienteModel): number {
+    const modelo = item as HistorialClienteModel & { reservaId?: number; id?: number };
+    return modelo.reservaId ?? modelo.id ?? -1;
   }
 
   /** Acepta "09:00:00", "09:00" o Date y devuelve "09:00". */

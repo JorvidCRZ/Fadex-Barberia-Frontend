@@ -319,6 +319,16 @@ button.boton-submit.p-button {
     @include boton-tabla;
 }
 
+.boton-expandir-tabla {
+    @include boton-tabla;
+
+    @apply border border-ui-border bg-ui-card text-text-secondary;
+
+    &:hover {
+        @apply border-brand-gold/40 bg-brand-gold/10 text-brand-gold;
+    }
+}
+
 .boton-editar-tabla {
     @include boton-tabla;
 

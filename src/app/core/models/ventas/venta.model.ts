@@ -2,7 +2,6 @@ import { VentaDetalle } from "./detalle.model";
 
 
 export interface Venta {
-
   ventaId: number;
   numeroCorrelativo?: string;
   clienteId?: number;

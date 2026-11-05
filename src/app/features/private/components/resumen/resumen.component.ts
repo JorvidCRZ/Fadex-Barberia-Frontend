@@ -1,12 +1,4 @@
-import {
-  ChangeDetectorRef,
-  Component,
-  ElementRef,
-  OnDestroy,
-  OnInit,
-  ViewChild,
-  inject,
-} from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, inject, } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { TableModule } from 'primeng/table';
@@ -16,17 +8,9 @@ import { TokenService } from '@/app/core/services/auth/token.service';
 import { BarberoService } from '@/app/core/services/gestion/barbero.service';
 import { ResumenCliente } from '@/app/core/services/gestion/resumen-cliente.service';
 import { ResumenadminService } from '@/app/core/services/gestion/resumen-admin.service';
-import {
-  KpiCard,
-  CitaBarberoResponseDTO,
-  EstadoReserva,
-} from '@/app/core/models/gestion/admin/resumen-admin';
+import { KpiCard, CitaBarberoResponseDTO, EstadoReserva,} from '@/app/core/models/gestion/admin/resumen-admin';
 import { ClienteDetalleResumenDTO } from '@/app/core/models/gestion/cliente/ClienteResumen.model';
-import {
-  PrediccionService,
-  PrediccionDia,
-  PrediccionResponse,
-} from '@/app/core/services/analisis/prediccion.service';
+import { PrediccionService, PrediccionDia, PrediccionResponse,} from '@/app/core/services/analisis/prediccion.service';
 import { StatsCard } from '@/app/core/models/common/card.model';
 import { StatsComponent } from '@/app/shared/components/stats/stats.component';
 import { StatusBadgeComponent } from '@/app/shared/components/status-badge/status-badge.component';
@@ -630,7 +614,7 @@ export class ResumenComponent implements OnInit, OnDestroy {
         title: 'Cortes',
         value: this.kpis.totalCortes,
         description: 'Últimas semanas',
-        icon: 'pi pi-scissors',
+        icon: 'pi pi-sparkles',
       },
       {
         title: 'Total gastado',

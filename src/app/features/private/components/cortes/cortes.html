@@ -8,7 +8,7 @@
 
   <app-stats [items]="stats" />
 
-  <app-filtros [fields]="filtrosFields" [titulo]="'Historial'" [text]="'Buscar cortes'" [acordeon]="true"
+  <app-filtros [fields]="filtrosFields" [titulo]="'Historial de Cortes'" [text]="'Buscar cortes'" [acordeon]="true"
     (buscar)="onBuscar($event)" (limpiar)="onLimpiar()" />
 
   <p-table [value]="pagina" [loading]="cargando" [tableStyle]="{ 'min-width': '950px' }" dataKey="reservaId">

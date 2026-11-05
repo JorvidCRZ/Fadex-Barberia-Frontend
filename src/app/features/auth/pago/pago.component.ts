@@ -12,6 +12,7 @@ import { Reserva } from '../../../core/models/operaciones/Reserva.model';
 import { CarritoService } from '../../../core/services/catalogos/carrito.service';
 import { NotificationService } from '../../../core/services/common/notification.service';
 import { ReservaService } from '../../../core/services/operaciones/reserva.service';
+import { VentaService } from '../../../core/services/venta/venta.service';
 import { SolesPipe } from '../../../shared/pipes/moneda.pipe';
 
 type MetodoPago = 'TARJETA' | 'YAPE' | 'BANCA';
@@ -26,6 +27,7 @@ export class PagoComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly notify = inject(NotificationService);
   private readonly reservaService = inject(ReservaService);
+  private readonly ventaService = inject(VentaService);
   private readonly http = inject(HttpClient);
   readonly carrito = inject(CarritoService);
 
@@ -271,23 +273,33 @@ export class PagoComponent implements OnInit {
 
     this.descargandoBoleta.set(true);
 
-    this.reservaService
-      .descargarBoleta(comprobante.ventaId, comprobante.serieComprobante, comprobante.numeroComprobante)
+    this.ventaService
+      .descargarComprobantePdf(comprobante.ventaId)
       .pipe(finalize(() => this.descargandoBoleta.set(false)))
       .subscribe({
         next: (blob) => {
-          this.reservaService.iniciarDescargaBoleta(
-            blob,
-            comprobante.ventaId,
-            comprobante.serieComprobante,
-            comprobante.numeroComprobante,
-          );
+          const nombre =
+            comprobante.serieComprobante && comprobante.numeroComprobante
+              ? `boleta-${comprobante.serieComprobante}-${comprobante.numeroComprobante}.pdf`
+              : `boleta-${comprobante.ventaId}.pdf`;
+          this.guardarArchivo(blob, nombre);
         },
         error: (err) => {
           console.error('Error descargando la boleta de la reserva pagada:', err);
           this.notify.showError('No se pudo descargar la boleta. Inténtalo nuevamente.');
         },
       });
+  }
+
+  private guardarArchivo(blob: Blob, nombre: string): void {
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = nombre;
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
   volverAlCheckout(): void {
@@ -299,6 +311,6 @@ export class PagoComponent implements OnInit {
   volverAInicio(): void {
     this.router.navigate(
       this.esReserva ? ['/mi-cuenta/reservas/mis-reservas'] : ['/'],
-    ); 
+    );
   }
 }

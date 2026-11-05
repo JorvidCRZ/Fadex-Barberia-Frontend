@@ -200,7 +200,7 @@
                     <p class="text-sm text-text-muted">Primero elige un día en el calendario</p>
                   </div>
                 } @else {
-                  <div class="grid grid-cols-3 gap-2">
+                  <div class="grid grid-cols-3 gap-2 sm:grid-cols-4">
                     @for (h of horarios; track h.valor) {
                       <button
                         type="button"
@@ -218,7 +218,7 @@
               </div>
             </div>
 
-            <p class="mt-3 text-xs text-text-muted">Atendemos de lunes a sábado, de 09:00 AM a 07:00 PM.</p>
+            <p class="mt-3 text-xs text-text-muted">Atendemos de lunes a sábado, de 09:00 AM a 09:00 PM.</p>
 
             @if (invalido('fechaHora')) {
               <span class="mt-1 block text-xs text-danger">{{ errorFechaHora }}</span>
@@ -258,7 +258,7 @@
           <div class="mb-6 overflow-hidden rounded-xl border border-ui-border-soft">
             @if (imagenServicio(servicio); as img) {
               <img [src]="img | safeImageUrl" [alt]="servicio.nombre"
-                class="h-44 w-full object-cover" (error)="ocultarImagen($event)" />
+                class="h-44 w-full object-contain" (error)="ocultarImagen($event)" />
             } @else {
               <div class="flex h-44 w-full items-center justify-center bg-brand-gold/5 text-brand-gold/50">
                 <i class="pi pi-image text-4xl"></i>

@@ -17,7 +17,7 @@ export const BUTTON_VARIANTS = [
   'ver', 'comprar', 'limpiar', 'approve', 'reject', 'google', 'agregar-texto', 'excel', 'pdf',
   // Tabla (cuadrados, solo icono)
   'tabla', 'editar-tabla', 'eliminar-tabla', 'ver-tabla', 'devolver-tabla', 'agregar',
-  'accion-cita', 'accion-rojo', 'cierre',
+  'accion-cita', 'accion-rojo', 'cierre', 'expandir-tabla',
   // Estados (tabla)
   'cerrar-tabla', 'close-tabla', 'close-aprobar', 'close-devolver', 'close-pagado',
   'close-preparando', 'close-enviado', 'close-entregado',
@@ -33,7 +33,7 @@ export type ButtonVariant = (typeof BUTTON_VARIANTS)[number];
 const SOLO_ICONO = new Set<ButtonVariant>([
   'sidebar-toggle',
   'tabla', 'editar-tabla', 'eliminar-tabla', 'ver-tabla', 'devolver-tabla', 'agregar',
-  'accion-cita', 'accion-rojo', 'cierre',
+  'accion-cita', 'accion-rojo', 'cierre', 'expandir-tabla',
   'cerrar-tabla', 'close-tabla', 'close-aprobar', 'close-devolver', 'close-pagado',
   'close-preparando', 'close-enviado', 'close-entregado',
 ]);

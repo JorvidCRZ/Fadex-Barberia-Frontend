@@ -1,16 +1,14 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ImageModule } from 'primeng/image';
-import { ButtonModule } from 'primeng/button';
-import { Categoria } from '@/app/core/models/catalogos/categorias.model';
-import { StatusBadgeComponent } from '@/app/shared/components/status-badge/status-badge.component';
-import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { FormsModule } from '@angular/forms';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { ButtonComponent } from '@/app/shared/components/button/button.component';
+import { StatusBadgeComponent } from '@/app/shared/components/status-badge/status-badge.component';
+import { Categoria } from '@/app/core/models/catalogos/categorias.model';
 
 @Component({
   selector: 'app-categoria-tree',
   standalone: true,
-  imports: [CommonModule, ButtonModule, ImageModule, StatusBadgeComponent, ToggleSwitchModule, FormsModule],
+  imports: [FormsModule, ToggleSwitchModule, ButtonComponent, StatusBadgeComponent],
   templateUrl: './categoria-tree.html'
 })
 export class CategoriaTreeComponent {
@@ -29,7 +27,7 @@ export class CategoriaTreeComponent {
     this.eliminar.emit(categoria);
   }
 
-  cambiarEstado(categoria: Categoria, event: any) {
+  cambiarEstado(categoria: Categoria, event: { checked: boolean }) {
     this.estado.emit({ id: categoria.id, activo: event.checked });
   }
 

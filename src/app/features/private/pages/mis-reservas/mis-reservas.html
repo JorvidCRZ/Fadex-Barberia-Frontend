@@ -127,10 +127,7 @@
   </p-table>
 
   <div class="producto-page-paginator">
-    <p-paginator [first]="firstReservas()" [rows]="rowsReservas()" [totalRecords]="totalReservas()"
-      [rowsPerPageOptions]="[5, 10, 25, 50]" [showCurrentPageReport]="true"
-      currentPageReportTemplate="Página {currentPage} de {totalPages} · {totalRecords} reserva(s)"
-      (onPageChange)="onPaginatorReservas($event)" />
+    <app-paginator [first]="firstReservas()" [rows]="rowsReservas()" [totalRecords]="totalReservas()" etiqueta="reserva(s)" (pageChange)="onPaginatorReservas($event)" />
   </div>
   }
 
@@ -245,10 +242,7 @@
   </p-table>
 
   <div class="producto-page-paginator">
-    <p-paginator [first]="firstHistorial()" [rows]="rowsHistorial()" [totalRecords]="totalHistorial()"
-      [rowsPerPageOptions]="[5, 10, 25, 50]" [showCurrentPageReport]="true"
-      currentPageReportTemplate="Página {currentPage} de {totalPages} · {totalRecords} atención(es)"
-      (onPageChange)="onPaginatorHistorial($event)" />
+    <app-paginator [first]="firstHistorial()" [rows]="rowsHistorial()" [totalRecords]="totalHistorial()" etiqueta="atención(es)" (pageChange)="onPaginatorHistorial($event)" />
   </div>
   }
 </div>

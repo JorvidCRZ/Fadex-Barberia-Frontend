@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { SelectModule } from 'primeng/select';
+import { TableModule } from 'primeng/table';
 import { ProductoService } from '@/app/core/services/catalogos/producto.service';
 import { ClienteService } from '@/app/core/services/gestion/cliente.service';
 import { VentaService } from '@/app/core/services/venta/venta.service';
@@ -14,7 +15,7 @@ import { ModalComponent } from '@/app/shared/components/modal/modal.component';
 import { PageHeaderComponent } from '@/app/shared/components/page-header/page-header.component';
 import { MonedaPipe } from '@/app/shared/pipes/moneda.pipe';
 import { SafeImageUrlPipe } from '@/app/shared/pipes/safe-image-url.pipe';
-import { Image } from 'primeng/image';
+import { SearchBarComponent } from '@/app/shared/components/search-bar/search-bar.component';
 
 interface ProductoPos {
   id: number;
@@ -36,19 +37,24 @@ interface Opcion<T = string> {
   value: T;
 }
 
+/** Minúsculas y sin tildes, para que "crema" encuentre "Crema" y "Pomada" */
+const normalizar = (t: string): string =>
+  t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+
 @Component({
   selector: 'app-pos',
   standalone: true,
   imports: [
     FormsModule,
     SelectModule,
+    TableModule,
     MonedaPipe,
     SafeImageUrlPipe,
     ButtonComponent,
     ModalComponent,
     PageHeaderComponent,
-    Image
-],
+    SearchBarComponent,
+  ],
   templateUrl: './pos.html',
 })
 export class PosComponent implements OnInit {
@@ -82,8 +88,12 @@ export class PosComponent implements OnInit {
   cliente: number | null = null;
   comprobante = 'BOLETA';
   metodo = 'EFECTIVO';
-  textoBusqueda = '';
   carrito: LineaCarrito[] = [];
+
+  // Catálogo: búsqueda en vivo y paginación en el cliente
+  textoBusqueda = '';
+  readonly rowsProductos = 8;
+  firstProductos = 0;
 
   procesando = false;
   mostrarModalPago = false;
@@ -218,15 +228,26 @@ export class PosComponent implements OnInit {
     this.notify.showSuccess(`Reserva de ${this.nombreClienteReserva} cargada correctamente.`);
   }
 
-  // ───────── Getters ─────────
+  // ───────── Catálogo: búsqueda y paginación ─────────
 
   get productosFiltrados(): ProductoPos[] {
-    const t = this.textoBusqueda.trim().toLowerCase();
+    const t = normalizar(this.textoBusqueda);
     return t
       ? this.productos.filter(p =>
-          p.nombre.toLowerCase().includes(t) || p.categoria.toLowerCase().includes(t))
+        normalizar(p.nombre).includes(t) || normalizar(p.categoria).includes(t))
       : this.productos;
   }
+
+  /** Al buscar (Enter o botón "Buscar"), vuelve a la primera página */
+  onBuscar(): void {
+    this.firstProductos = 0;
+  }
+
+  onPageProductos(event: { first?: number }): void {
+    this.firstProductos = event.first ?? 0;
+  }
+
+  // ───────── Getters ─────────
 
   get totalVenta(): number {
     return this.carrito.reduce((acc, l) => acc + l.producto.precio * l.cantidad, 0);

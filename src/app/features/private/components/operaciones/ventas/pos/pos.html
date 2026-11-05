@@ -9,36 +9,84 @@
 
         <!-- Catálogo -->
         <section class="min-h-[460px] rounded-xl border border-brand-gold-soft bg-ui-surface">
+
+            <!-- Buscador en vivo -->
             <div class="border-b border-ui-border-soft p-3">
-                <div class="relative">
-                    <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-sm text-text-muted"></i>
-                    <input type="text" [(ngModel)]="textoBusqueda" placeholder="Buscar en el catálogo..." class="pl-10">
-                </div>
+                <app-search-bar
+                    placeholder="Buscar producto por nombre o categoría..."
+                    [(value)]="textoBusqueda"
+                    (search)="onBuscar()" />
             </div>
 
-            <div class="grid grid-cols-1 gap-3 p-3 md:grid-cols-2">
-                @for (p of productosFiltrados; track p.id) {
-                <div class="flex items-center gap-3 rounded-xl border border-ui-border-soft bg-ui-black p-3">
-                    <div class="flex size-[52px] shrink-0 items-center justify-center overflow-hidden rounded-lg bg-ui-elevated">
-                        @if (p.imagen) {
-                        <img [src]="p.imagen | safeImageUrl" [alt]="p.nombre" class="h-full w-full object-cover">
-                        } @else {
-                        <i class="pi pi-image text-text-subtle"></i>
-                        }
-                    </div>
-                    <div class="flex min-w-0 flex-1 flex-col">
-                        <span class="truncate text-sm font-semibold text-text-primary">{{ p.nombre }}</span>
-                        <span class="text-xs text-text-muted">{{ p.categoria }}</span>
-                        <span class="mt-1 text-sm font-bold text-brand-gold">{{ p.stock }} en stock</span>
-                        <span class="mt-1 text-sm font-bold text-brand-gold">{{ p.precio | moneda }}</span>
-                    </div>
-                    <app-button variant="agregar" icon="plus" [tooltip]="'Agregar ' + p.nombre"
-                        (clicked)="agregarProducto(p)" />
-                </div>
-                }
-                @empty {
-                <p class="col-span-full py-8 text-center text-sm text-text-muted">No se encontraron productos.</p>
-                }
+            <!-- Tabla de productos -->
+            <div class="p-3">
+                <p-table
+                    [value]="productosFiltrados"
+                    dataKey="id"
+                    [paginator]="true"
+                    [rows]="rowsProductos"
+                    [first]="firstProductos"
+                    (onPage)="onPageProductos($event)"
+                    [showCurrentPageReport]="true"
+                    currentPageReportTemplate="{currentPage} de {totalPages} · {totalRecords} producto(s)"
+                    [tableStyle]="{ 'min-width': '100%' }">
+
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th class="w-16"></th>
+                            <th>Producto</th>
+                            <th class="text-center">Stock</th>
+                            <th class="text-right">Precio</th>
+                            <th class="w-16"></th>
+                        </tr>
+                    </ng-template>
+
+                    <ng-template pTemplate="body" let-p>
+                        <tr [class.opacity-50]="p.stock <= 0">
+                            <td>
+                                <div class="flex size-11 items-center justify-center overflow-hidden rounded-lg bg-ui-elevated">
+                                    @if (p.imagen) {
+                                    <img [src]="p.imagen | safeImageUrl" [alt]="p.nombre" class="h-full w-full object-cover">
+                                    } @else {
+                                    <i class="pi pi-image text-text-subtle"></i>
+                                    }
+                                </div>
+                            </td>
+                            <td>
+                                <p class="m-0 font-semibold text-text-primary">{{ p.nombre }}</p>
+                                @if (p.categoria) {
+                                <p class="m-0 mt-0.5 text-xs text-text-muted">{{ p.categoria }}</p>
+                                }
+                            </td>
+                            <td class="text-center">
+                                @if (p.stock > 0) {
+                                <span class="text-sm font-semibold text-text-primary">{{ p.stock }}</span>
+                                } @else {
+                                <span class="text-xs font-semibold uppercase text-danger">Agotado</span>
+                                }
+                            </td>
+                            <td class="text-right font-semibold text-brand-gold">{{ p.precio | moneda }}</td>
+                            <td>
+                                <div class="flex justify-center">
+                                    <app-button variant="agregar" icon="plus" [tooltip]="'Agregar ' + p.nombre"
+                                        [disabled]="p.stock <= 0" (clicked)="agregarProducto(p)" />
+                                </div>
+                            </td>
+                        </tr>
+                    </ng-template>
+
+                    <ng-template pTemplate="emptymessage">
+                        <tr>
+                            <td colspan="5" class="py-8 text-center text-sm text-text-muted">
+                                @if (textoBusqueda.trim()) {
+                                No se encontraron productos para "{{ textoBusqueda }}"
+                                } @else {
+                                No hay productos disponibles.
+                                }
+                            </td>
+                        </tr>
+                    </ng-template>
+                </p-table>
             </div>
         </section>
 

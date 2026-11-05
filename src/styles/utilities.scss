@@ -61,3 +61,15 @@
   border-color: rgb(var(--color-brand-gold) / 0.75);
   pointer-events: none;
 }
+
+app-search-bar{
+    min-width: 20vw;
+    max-width: fit-content;
+    margin-right: 1rem;
+    width: 100% !important;
+}
+
+p-paginator .ng-pristine {
+    align-items: center;
+    padding: 0.5rem 1rem;
+ }
