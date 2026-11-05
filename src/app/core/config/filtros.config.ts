@@ -4,7 +4,7 @@ import { CategoriaFiltro } from "../models/catalogos/categorias.model";
 import { ProductoFiltro } from "../models/catalogos/productos.model";
 import { ServicioFiltro } from "../models/catalogos/servicios.model";
 import { FilterField } from "../models/common/filtro.model";
-import { BOOLEAN_FILTERS, CATEGORIA_OPTIONS, CAUSA_RECLAMO_OPTIONS, ESTADO_RECLAMO_OPTIONS, ESTADO_RECOMPENSA_OPTIONS, ESTADO_RESERVA_OPTIONS, METODO_PAGO_OPTIONS, ORIGEN_MOVIMIENTO_OPTIONS, TIPO_ALCANCE_FIDELIZACION_OPTIONS, TIPO_PREMIO_OPTIONS, TIPO_PROBLEMA_OPTIONS, TIPO_RECLAMACION_OPTIONS, TIPO_RESERVA_OPTIONS, TIPO_RULETA_OPTIONS } from "../models/common/select.option.model";
+import { BOOLEAN_FILTERS, CATEGORIA_OPTIONS, CAUSA_RECLAMO_OPTIONS, ESTADO_BARBERO_OPTIONS, ESTADO_RECLAMO_OPTIONS, ESTADO_RECOMPENSA_OPTIONS, METODO_PAGO_OPTIONS, ORIGEN_MOVIMIENTO_OPTIONS, TIPO_ALCANCE_FIDELIZACION_OPTIONS, TIPO_PREMIO_OPTIONS, TIPO_PROBLEMA_OPTIONS, TIPO_RECLAMACION_OPTIONS, TIPO_RESERVA_OPTIONS, TIPO_RULETA_OPTIONS, ORDEN_BARBERO_OPTIONS, ESTADO_RESERVA_OPTIONS } from "../models/common/select.option.model";
 import { ConfiguracionFiltro } from "../models/ruleta/ruleta-configuracion.model";
 import { FidelizacionReglaFiltro } from "../models/fidelizacion/regla.model";
 import { ReclamoFiltro } from "../models/operaciones/reclamos-model/reclamo.filtro.model";
@@ -169,4 +169,9 @@ export const FILTROS_RESERVA: FilterField<ReservaFiltro>[] = [
     { key: 'tipoReserva', label: 'Tipo de reserva', type: 'select', placeholder: 'Seleccione tipo', options: TIPO_RESERVA_OPTIONS },
     { key: 'fecha', label: 'Fecha de inicio', type: 'date', placeholder: 'Desde' },
     { key: 'fechaHasta', label: 'Fecha de fin', type: 'date', placeholder: 'Hasta', endOfDay: true }
+];
+
+export const FILTROS_BARBERO: FilterField[] = [
+    { key: 'estado', label: 'Estado', type: 'select', options: ESTADO_BARBERO_OPTIONS, placeholder: 'Todos' },
+    { key: 'orden', label: 'Ordenar por', type: 'select', options: ORDEN_BARBERO_OPTIONS, placeholder: 'Seleccione orden' },
 ];

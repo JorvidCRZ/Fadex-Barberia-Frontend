@@ -1,0 +1,24 @@
+<app-modal [(visible)]="visible" titulo="Asignar PIN" mode="crear" icono="pi-key" maxWidth="26rem">
+  <form [formGroup]="form" class="form-base">
+    <p class="m-0 text-sm text-text-muted">
+      El PIN permite al usuario autenticarse al escanear su QR. Debe ser numérico, de 4 a 6 dígitos.
+    </p>
+
+    <div class="part-form">
+      <label for="pinValor">PIN numérico *</label>
+      <p-password inputId="pinValor" formControlName="pin" [feedback]="false" [toggleMask]="true" [maxLength]="6"
+        styleClass="w-full" [inputStyle]="{ width: '100%', textAlign: 'center', letterSpacing: '0.4em' }"
+        placeholder="1234" />
+      @if (invalido()) {
+      <p-message severity="error" variant="simple" size="small">El PIN debe ser numérico, de 4 a 6 dígitos</p-message>
+      }
+    </div>
+
+    <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+      <app-button variant="cancel" icon="times" label="Cancelar" [disabled]="guardando()" [fullWidth]="true"
+        class="sm:w-auto" (clicked)="cerrar()" />
+      <app-button variant="submit" icon="key" label="Confirmar PIN" loadingLabel="Asignando..." [loading]="guardando()"
+        [fullWidth]="true" class="sm:w-auto" (clicked)="guardar()" />
+    </div>
+  </form>
+</app-modal>

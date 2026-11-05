@@ -1,0 +1,90 @@
+<app-modal [(visible)]="visible" titulo="Nuevo barbero" mode="crear" icono="pi-user-plus" maxWidth="48rem">
+  <form [formGroup]="form" (ngSubmit)="guardar()" class="flex flex-col gap-6" autocomplete="off">
+
+    <section class="flex flex-col gap-4">
+      <h3 class="m-0 text-xs font-semibold uppercase tracking-widest text-brand-gold">Datos personales</h3>
+      <div class="grid gap-x-4 md:grid-cols-2">
+        <div class="part-form">
+          <label class="label-form" for="nb-nombre">Nombre <span class="text-brand-amber">*</span></label>
+          <input pInputText id="nb-nombre" formControlName="nombre" placeholder="Juan" autocomplete="off" />
+          @if (error('nombre'); as msg) { <p-message severity="error" size="small" variant="simple">{{ msg }}</p-message> }
+        </div>
+
+        <div class="part-form">
+          <label class="label-form" for="nb-apellido">Apellido <span class="text-brand-amber">*</span></label>
+          <input pInputText id="nb-apellido" formControlName="apellido" placeholder="Pérez" autocomplete="off" />
+          @if (error('apellido'); as msg) { <p-message severity="error" size="small" variant="simple">{{ msg }}</p-message> }
+        </div>
+
+        <div class="part-form">
+          <label class="label-form" for="nb-telefono">Teléfono <span class="text-brand-amber">*</span></label>
+          <input pInputText pKeyFilter="int" id="nb-telefono" formControlName="telefono" type="tel" inputmode="numeric"
+            maxlength="9" placeholder="999999999" autocomplete="off" />
+          @if (error('telefono'); as msg) { <p-message severity="error" size="small" variant="simple">{{ msg }}</p-message> }
+        </div>
+
+        <div class="part-form">
+          <label class="label-form" for="nb-email">Email <span class="text-brand-amber">*</span></label>
+          <input pInputText id="nb-email" formControlName="email" type="email" placeholder="barbero@mail.com" autocomplete="off" />
+          @if (error('email'); as msg) { <p-message severity="error" size="small" variant="simple">{{ msg }}</p-message> }
+        </div>
+      </div>
+    </section>
+
+    <section class="flex flex-col gap-4 border-t border-ui-border-soft pt-6">
+      <h3 class="m-0 text-xs font-semibold uppercase tracking-widest text-brand-gold">Datos profesionales</h3>
+      <div class="grid gap-x-4 md:grid-cols-3">
+        <div class="part-form">
+          <label class="label-form" for="nb-experiencia">Experiencia <span class="text-brand-amber">*</span></label>
+          <p-inputnumber formControlName="experiencia" inputId="nb-experiencia" [min]="0" [max]="60" [useGrouping]="false"
+            suffix=" años" styleClass="w-full" inputStyleClass="w-full" />
+          @if (error('experiencia'); as msg) { <p-message severity="error" size="small" variant="simple">{{ msg }}</p-message> }
+        </div>
+
+        <div class="part-form">
+          <label class="label-form" for="nb-sueldo">Sueldo base <span class="text-brand-amber">*</span></label>
+          <p-inputnumber formControlName="sueldo" inputId="nb-sueldo" mode="currency" currency="PEN" locale="es-PE"
+            [min]="0" [maxFractionDigits]="2" placeholder="S/ 0.00" styleClass="w-full" inputStyleClass="w-full" />
+          @if (error('sueldo'); as msg) { <p-message severity="error" size="small" variant="simple">{{ msg }}</p-message> }
+        </div>
+
+        <div class="part-form">
+          <label class="label-form" for="nb-comision">Comisión <span class="text-brand-amber">*</span></label>
+          <p-inputnumber formControlName="comision" inputId="nb-comision" suffix=" %" [min]="0" [max]="100"
+            [maxFractionDigits]="2" placeholder="0 %" styleClass="w-full" inputStyleClass="w-full" />
+          @if (error('comision'); as msg) { <p-message severity="error" size="small" variant="simple">{{ msg }}</p-message> }
+        </div>
+      </div>
+    </section>
+
+    <section class="flex flex-col gap-4 border-t border-ui-border-soft pt-6">
+      <h3 class="m-0 text-xs font-semibold uppercase tracking-widest text-brand-gold">Acceso</h3>
+      <div class="grid gap-x-4 md:grid-cols-2">
+        <div class="part-form md:col-span-2">
+          <label class="label-form" for="nb-usuario">Usuario <span class="text-brand-amber">*</span></label>
+          <input pInputText id="nb-usuario" formControlName="usuario" placeholder="usuario.barbero" autocomplete="off" />
+          @if (error('usuario'); as msg) { <p-message severity="error" size="small" variant="simple">{{ msg }}</p-message> }
+        </div>
+
+        <div class="part-form">
+          <label class="label-form" for="nb-password">Contraseña <span class="text-brand-amber">*</span></label>
+          <p-password formControlName="password" inputId="nb-password" [feedback]="false" [toggleMask]="true"
+            placeholder="Mínimo 8 caracteres" autocomplete="new-password" styleClass="w-full" inputStyleClass="w-full" />
+          @if (error('password'); as msg) { <p-message severity="error" size="small" variant="simple">{{ msg }}</p-message> }
+        </div>
+
+        <div class="part-form">
+          <label class="label-form" for="nb-password2">Confirmar contraseña <span class="text-brand-amber">*</span></label>
+          <p-password formControlName="passwordConfirm" inputId="nb-password2" [feedback]="false" [toggleMask]="true"
+            placeholder="Repite la contraseña" autocomplete="new-password" styleClass="w-full" inputStyleClass="w-full" />
+          @if (error('passwordConfirm'); as msg) { <p-message severity="error" size="small" variant="simple">{{ msg }}</p-message> }
+        </div>
+      </div>
+    </section>
+
+    <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+      <app-button variant="cancel" icon="times" label="Cancelar" (clicked)="cerrar()" />
+      <app-button variant="primary" type="submit" icon="save" label="Guardar barbero" loadingLabel="Guardando..." [loading]="guardando()" />
+    </div>
+  </form>
+</app-modal>

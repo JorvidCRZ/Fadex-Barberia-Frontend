@@ -1,139 +1,119 @@
-<div class="mt-5">
-  <app-header-usuario (search)="onSearch($event)" (create)="abrirModalAdmin()" />
-</div>
+<div class="flex flex-col gap-6 mt-5">
+  <app-page-header titulo="Usuarios" icono="users" subtitulo="Gestión y administración de usuarios">
+    <app-search-bar placeholder="Buscar usuario..." (search)="onSearch($event)" />
+    <app-button variant="primary" size="sm" icon="user-plus" label="Añadir administrador" (clicked)="abrirRegistro()" />
+  </app-page-header>
 
-<app-filtros
-  class="block mt-5"
-  [fields]="filtroFields"
-  titulo="Usuarios"
-  text="Usuarios"
-  icono="pi pi-users"
-  [acordeon]="true"
-  [abierto]="false"
-  (buscar)="onBuscarFiltros($event)"
-  (limpiar)="onClearFilters()"
-/>
+  @if (stats.length) {
+    <app-stats [items]="stats" />
+  }
 
-<div *ngIf="errorCarga" class="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-  {{ errorCarga }} </div>
+  <app-filtros [fields]="filtroFields" titulo="Usuarios" text="Usuarios" icono="pi pi-users" [acordeon]="true"
+    [abierto]="false" (buscar)="onBuscarFiltros($event)" (limpiar)="onLimpiar()" />
 
-<div class="mt-5">
-  <app-table-users [usuarios]="usuarios" [totalElements]="totalElements" [pageSize]="10" [cargando]="cargando"
-    (pageChange)="onPageChange($event)" (createAdmin)="abrirModalAdmin()" />
-</div>
+  @if (errorCarga) {
+    <app-empty-state tipo="error" [mensaje]="errorCarga" [boxed]="true">
+      <app-button variant="secondary" size="sm" icon="refresh" label="Reintentar" (clicked)="cargarUsuarios(currentPage)" />
+    </app-empty-state>
+  } @else {
+    <div class="flex flex-col gap-2">
+      <div class="table-base p-4 md:p-6 lg:p-8">
+        <div class="relative w-full overflow-x-auto">
+          <p-table [value]="usuarios" [loading]="cargando" dataKey="usuarioId" [tableStyle]="{ 'min-width': '900px' }"
+            class="rounded-xl">
 
-<p-dialog [(visible)]="showCrearAdminModal" [modal]="true" [draggable]="false" [resizable]="false"
-  [dismissableMask]="true" [closable]="false" [style]="{ width: 'min(95vw, 860px)' }" contentStyleClass="p-0"
-  (onHide)="cerrarModalAdmin()">
-  <div
-    class="overflow-hidden rounded-3xl border border-brand-gold-soft bg-[#070707] text-white shadow-2xl shadow-black/60">
-    <div
-      class="relative overflow-hidden border-b border-brand-gold-soft/30 bg-linear-to-br from-brand-black via-[#111111] to-[#050505] px-6 py-6 sm:px-8">
-      <div
-        class="absolute inset-0 opacity-50 bg-[radial-gradient(circle_at_top_right,rgba(212,175,55,0.18),transparent_32%),radial-gradient(circle_at_bottom_left,rgba(255,255,255,0.06),transparent_28%)]">
-      </div>
-      <div class="relative flex items-start justify-between gap-4">
-        <div>
-          <p class="text-[11px] uppercase tracking-[0.45em] text-brand-gold/70">Nuevo acceso</p>
-          <h2 class="mt-2 text-2xl font-semibold text-brand-gold sm:text-3xl">Crear administrador</h2>
-          <p class="mt-2 max-w-2xl text-sm leading-relaxed text-gray-400">
-            Registra un nuevo administrador con el rol por defecto asignado automáticamente.
-          </p>
+            <ng-template #header>
+              <tr class="table-header">
+                <th class="text-left">Usuario</th>
+                <th class="text-left">Nombre</th>
+                <th class="text-left">Roles</th>
+                <th class="text-center">QR</th>
+                <th class="text-center">PIN</th>
+                <th class="text-center">Acciones</th>
+              </tr>
+            </ng-template>
+
+            <ng-template #body let-u>
+              <tr class="table-row">
+                <td>
+                  <div class="flex items-center gap-3">
+                    <div class="flex size-10 items-center justify-center rounded-full border border-brand-gold/20 bg-brand-gold/10 font-bold text-brand-gold">
+                      {{ iniciales(u.username) }}
+                    </div>
+                    <span class="truncate font-semibold leading-tight text-text-primary">{{ u.username || '—' }}</span>
+                  </div>
+                </td>
+
+                <td>
+                  <div class="font-semibold leading-tight text-text-primary">{{ u.nombre || '—' }}</div>
+                  <div class="text-xs leading-tight text-text-muted">{{ u.apellido }}</div>
+                </td>
+
+                <td>
+                  <div class="flex flex-wrap gap-1">
+                    @for (rol of u.roles; track rol) {
+                      <app-status-badge type="text" [value]="rol" [customClass]="claseRol(rol)" />
+                    } @empty {
+                      <span class="text-xs text-text-muted">—</span>
+                    }
+                  </div>
+                </td>
+
+                <td class="text-center">
+                  <span class="inline-flex size-10 items-center justify-center rounded-xl border"
+                    [class]="u.tieneQr ? 'border-success/30 bg-success/10 text-success' : 'border-ui-border bg-ui-card text-text-subtle'"
+                    [pTooltip]="u.tieneQr ? 'QR disponible' : 'Sin QR'" tooltipPosition="top">
+                    <i class="pi pi-qrcode text-sm"></i>
+                  </span>
+                </td>
+ 
+                <td class="text-center">
+                  <span class="inline-flex size-10 items-center justify-center rounded-xl border"
+                    [class]="u.tienePin ? 'border-info/30 bg-info/10 text-info' : 'border-ui-border bg-ui-card text-text-subtle'"
+                    [pTooltip]="u.tienePin ? 'Tiene PIN' : 'Sin PIN'" tooltipPosition="top">
+                    <i class="pi pi-lock text-sm"></i>
+                  </span>
+                </td>
+
+                <td class="text-center">
+                  <div class="table-actions">
+                    <app-button variant="ver-tabla" icon="eye" tooltip="Ver detalle" (clicked)="abrirVer(u)" />
+                    <app-button variant="editar-tabla" icon="pencil" tooltip="Editar usuario" (clicked)="abrirEditar(u)" />
+                  </div>
+                </td>
+              </tr>
+            </ng-template>
+
+            <ng-template #emptymessage>
+              <tr>
+                <td colspan="6">
+                  <app-empty-state icono="users"
+                    [mensaje]="hayFiltros ? 'No se encontraron usuarios con los filtros aplicados' : 'Aún no hay usuarios registrados'">
+                    @if (hayFiltros) {
+                      <app-button variant="limpiar" size="sm" label="Limpiar filtros" (clicked)="onLimpiar()" />
+                    }
+                  </app-empty-state>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
         </div>
-
-        <button pButton type="button" icon="pi pi-times" class="p-button-text text-brand-gold! hover:bg-white/5!"
-          (click)="cerrarModalAdmin()">
-        </button>
       </div>
+
+      <app-paginator [first]="first" [rows]="rows" [totalRecords]="totalElements" etiqueta="usuario(s)"
+        [rowsPerPageOptions]="[10, 25, 50]" (pageChange)="onPageChange($event)" />
     </div>
+  }
+</div>
 
-    <form [formGroup]="adminForm" (ngSubmit)="onSubmitAdmin()" class="p-6 sm:p-8">
-      <div class="grid gap-4 sm:grid-cols-2">
-        <div class="space-y-2">
-          <label for="adminNombre" class="text-sm font-medium text-gray-300">Nombre</label>
-          <input pInputText id="adminNombre" type="text" formControlName="nombre" placeholder="Juan" maxlength="150"
-            class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-gray-500 focus:border-brand-gold focus:ring-1 focus:ring-brand-gold/30"
-            [class.border-red-500]="isAdminInvalid('nombre')">
-          <div class="mt-1 h-4 text-sm text-red-400"><ng-container *ngIf="isAdminInvalid('nombre')">El nombre es
-              obligatorio.</ng-container></div>
-        </div>
+<app-usuario-registrar [(visible)]="registroVisible" (creado)="onUsuarioCreado()" />
 
-        <div class="space-y-2">
-          <label for="adminApellido" class="text-sm font-medium text-gray-300">Apellido</label>
-          <input pInputText id="adminApellido" type="text" formControlName="apellido" placeholder="Pérez"
-            maxlength="150"
-            class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-gray-500 focus:border-brand-gold focus:ring-1 focus:ring-brand-gold/30"
-            [class.border-red-500]="isAdminInvalid('apellido')">
-          <div class="mt-1 h-4 text-sm text-red-400"><ng-container *ngIf="isAdminInvalid('apellido')">El apellido es
-              obligatorio.</ng-container></div>
-        </div>
+<app-usuario-detalle [(visible)]="verVisible" [usuarioId]="usuarioId" [refresco]="refrescoVer"
+  (editar)="editarVisible = true" (pin)="pinVisible = true" (qr)="abrirQr($event)" />
 
-        <div class="space-y-2">
-          <label for="adminTelefono" class="text-sm font-medium text-gray-300">Teléfono</label>
-          <input pInputText id="adminTelefono" type="tel" formControlName="telefono" placeholder="999999999"
-            maxlength="9" inputmode="numeric" (input)="onPhoneInput($event)"
-            class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-gray-500 focus:border-brand-gold focus:ring-1 focus:ring-brand-gold/30">
-          <div class="mt-1 h-4 text-sm text-red-400"><ng-container
-              *ngIf="adminForm.get('telefono')?.value && adminForm.get('telefono')?.invalid">El teléfono debe tener 9
-              dígitos.</ng-container></div>
-        </div>
+<app-usuario-editar [(visible)]="editarVisible" [usuarioId]="usuarioId" (guardado)="onUsuarioActualizado()" />
 
-        <div class="space-y-2">
-          <label for="adminEmail" class="text-sm font-medium text-gray-300">Correo electrónico</label>
-          <input pInputText id="adminEmail" type="email" formControlName="email" placeholder="admin@correo.com"
-            class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-gray-500 focus:border-brand-gold focus:ring-1 focus:ring-brand-gold/30"
-            [class.border-red-500]="isAdminInvalid('email')">
-          <div class="mt-1 h-4 text-sm text-red-400"><ng-container *ngIf="isAdminInvalid('email')">Ingresa un correo
-              válido.</ng-container></div>
-        </div>
+<app-usuario-pin [(visible)]="pinVisible" [usuarioId]="usuarioId" (asignado)="onUsuarioActualizado()" />
 
-        <div class="space-y-2">
-          <label for="adminUsername" class="text-sm font-medium text-gray-300">Username</label>
-          <input pInputText id="adminUsername" type="text" formControlName="username" placeholder="admin.barberia"
-            class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-gray-500 focus:border-brand-gold focus:ring-1 focus:ring-brand-gold/30"
-            [class.border-red-500]="isAdminInvalid('username')">
-          <div class="mt-1 h-4 text-sm text-red-400"><ng-container *ngIf="isAdminInvalid('username')">El username es
-              obligatorio.</ng-container></div>
-        </div>
-
-        <div class="space-y-2">
-          <label for="adminPassword" class="text-sm font-medium text-gray-300">Contraseña</label>
-          <p-password inputId="adminPassword" formControlName="password" [feedback]="false" [toggleMask]="true"
-            styleClass="w-full" [inputStyle]="{ width: '100%' }" [ngClass]="{ 'p-invalid': isAdminInvalid('password') }"
-            placeholder="••••••••">
-          </p-password>
-          <div class="mt-1 h-4 text-sm text-red-400"><ng-container *ngIf="isAdminInvalid('password')">La contraseña debe
-              tener al menos 8 caracteres.</ng-container></div>
-        </div>
-
-        <div class="space-y-2 sm:col-span-2">
-          <label for="adminPasswordConfirm" class="text-sm font-medium text-gray-300">Confirmar contraseña</label>
-          <p-password inputId="adminPasswordConfirm" formControlName="passwordConfirm" [feedback]="false"
-            [toggleMask]="true" styleClass="w-full" [inputStyle]="{ width: '100%' }"
-            [ngClass]="{ 'p-invalid': isAdminInvalid('passwordConfirm') }" placeholder="••••••••">
-          </p-password>
-          <div class="mt-1 h-4 text-sm text-red-400">
-            <ng-container *ngIf="passwordsMismatch()">Las contraseñas no son iguales.</ng-container>
-            <ng-container *ngIf="!passwordsMismatch() && isAdminInvalid('passwordConfirm')">Confirma la
-              contraseña.</ng-container>
-          </div>
-        </div>
-      </div>
-
-      <div *ngIf="adminError"
-        class="mt-4 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-        {{ adminError }}
-      </div>
-
-      <div class="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-        <button pButton type="button" label="Cancelar" class="p-button-secondary boton-secundario w-full sm:w-auto"
-          (click)="cerrarModalAdmin()">
-        </button>
-
-        <button pButton type="submit" [loading]="adminLoading"
-          [label]="adminLoading ? 'Registrando...' : 'Crear administrador'" class="boton-primary w-full sm:w-auto">
-        </button>
-      </div>
-    </form>
-  </div>
-</p-dialog>
+<app-usuario-qr [(visible)]="qrVisible" [usuarioId]="usuarioId" [regenerar]="qrRegenerar" [qrActual]="qrActual"
+  (generado)="onUsuarioActualizado()" />

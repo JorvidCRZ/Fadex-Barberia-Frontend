@@ -176,3 +176,20 @@ export const METODO_PAGO_OPTIONS: SelectOption<MetodoPago>[] = [
     { label: 'Plin', value: 'PLIN' },
     { label: 'Transferencia bancaria', value: 'TRANSFERENCIA' },
 ];
+
+export const ESTADO_BARBERO_OPTIONS: SelectOption<string>[] = [
+    { label: 'Disponible', value: 'disponible' },
+    { label: 'Ocupado', value: 'ocupado' },
+    { label: 'Inhabilitados', value: 'inhabilitados' },
+];
+
+export const ORDEN_BARBERO_OPTIONS: SelectOption<string>[] = [
+    { label: 'Fecha (más recientes)', value: 'fechaIngreso_desc' },
+    { label: 'Fecha (más antiguas)', value: 'fechaIngreso_asc' },
+    { label: 'Experiencia (mayor)', value: 'experiencia_desc' },
+    { label: 'Experiencia (menor)', value: 'experiencia_asc' },
+    { label: 'Sueldo (mayor)', value: 'sueldo_desc' },
+    { label: 'Sueldo (menor)', value: 'sueldo_asc' },
+    { label: 'Comisión (mayor)', value: 'comision_desc' },
+    { label: 'Comisión (menor)', value: 'comision_asc' },
+];

@@ -1,0 +1,31 @@
+<app-modal [(visible)]="visible" [titulo]="regenerar() ? 'Regenerar QR' : 'Generar QR'"
+  [mode]="regenerar() ? 'editar' : 'crear'" icono="pi-qrcode" maxWidth="26rem">
+  <div class="flex flex-col items-center gap-5 text-center">
+    <p class="m-0 text-sm text-text-secondary">
+      {{ regenerar()
+        ? 'Se generará un nuevo QR. El QR anterior quedará inválido.'
+        : 'Se generará un QR vinculado a este usuario para acceso rápido.' }}
+    </p>
+
+    @if (regenerar() && qrActual(); as qr) {
+      <div class="relative">
+        <img [src]="qr" alt="QR actual"
+          class="size-24 rounded-xl border border-ui-border bg-white object-contain p-1 opacity-40 grayscale" />
+        <div class="absolute inset-0 flex items-center justify-center rounded-xl bg-black/40">
+          <i class="pi pi-ban text-2xl text-danger"></i>
+        </div>
+      </div>
+    } @else {
+      <div class="flex size-24 items-center justify-center rounded-xl border border-dashed border-ui-border bg-ui-surface">
+        <i class="pi pi-qrcode text-4xl text-text-muted opacity-60"></i>
+      </div>
+    }
+
+    <div class="flex w-full flex-col-reverse gap-3 sm:flex-row sm:justify-around">
+      <app-button variant="cancel" icon="times" label="Cancelar" size="sm" [disabled]="generando()" (clicked)="cerrar()" />
+      <app-button [variant]="regenerar() ? 'warning' : 'submit'" icon="qrcode"
+        [label]="regenerar() ? 'Sí, regenerar' : 'Generar QR'" loadingLabel="Generando..." size="sm"
+        [loading]="generando()" (clicked)="confirmar()" />
+    </div>
+  </div>
+</app-modal>

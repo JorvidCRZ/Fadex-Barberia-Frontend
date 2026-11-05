@@ -1,0 +1,82 @@
+<app-modal [(visible)]="visible" titulo="Editar usuario" mode="editar" maxWidth="40rem">
+  @if (cargando()) {
+    <app-empty-state tipo="cargando" mensaje="Cargando usuario..." />
+  } @else if (error()) {
+    <app-empty-state tipo="error" [mensaje]="error()" />
+  } @else {
+    <form [formGroup]="form" class="form-base">
+
+      <p class="m-0 text-xs font-semibold uppercase tracking-widest text-brand-gold">Datos personales</p>
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div class="part-form">
+          <label for="edNombre">Nombre</label>
+          <input pInputText id="edNombre" formControlName="nombre" class="inputs-text" />
+          @if (invalido('nombre')) {
+          <p-message severity="error" variant="simple" size="small">El nombre no puede superar 100 caracteres</p-message>
+          }
+        </div>
+
+        <div class="part-form">
+          <label for="edApellido">Apellido</label>
+          <input pInputText id="edApellido" formControlName="apellido" class="inputs-text" />
+          @if (invalido('apellido')) {
+          <p-message severity="error" variant="simple" size="small">El apellido no puede superar 100 caracteres</p-message>
+          }
+        </div>
+
+        <div class="part-form">
+          <label for="edTelefono">Teléfono</label>
+          <input pInputText id="edTelefono" type="tel" formControlName="telefono" class="inputs-text" maxlength="9"
+            inputmode="numeric" (input)="onTelefono($event)" />
+          @if (invalido('telefono')) {
+          <p-message severity="error" variant="simple" size="small">El teléfono debe tener exactamente 9 dígitos</p-message>
+          }
+        </div>
+
+        <div class="part-form">
+          <label for="edEmail">Email</label>
+          <input pInputText id="edEmail" type="email" formControlName="email" class="inputs-text" />
+          @if (invalido('email')) {
+          <p-message severity="error" variant="simple" size="small">El correo electrónico no es válido</p-message>
+          }
+        </div>
+      </div>
+
+      <p class="m-0 mt-2 text-xs font-semibold uppercase tracking-widest text-brand-gold">Acceso</p>
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div class="part-form sm:col-span-2">
+          <label for="edUsername">Nombre de usuario *</label>
+          <input pInputText id="edUsername" formControlName="username" class="inputs-text" maxlength="50" />
+          @if (invalido('username')) {
+          <p-message severity="error" variant="simple" size="small">El nombre de usuario debe tener entre 4 y 50 caracteres</p-message>
+          }
+        </div>
+
+        <div class="part-form">
+          <label for="edPassword">Nueva contraseña (opcional)</label>
+          <p-password inputId="edPassword" formControlName="password" [feedback]="false" [toggleMask]="true"
+            styleClass="w-full" [inputStyle]="{ width: '100%' }" placeholder="Dejar vacío para no cambiarla" />
+          @if (invalido('password')) {
+          <p-message severity="error" variant="simple" size="small">Debe tener al menos 8 caracteres</p-message>
+          }
+        </div>
+
+        <div class="part-form">
+          <label for="edPasswordConfirm">Repetir contraseña</label>
+          <p-password inputId="edPasswordConfirm" formControlName="passwordConfirm" [feedback]="false"
+            [toggleMask]="true" styleClass="w-full" [inputStyle]="{ width: '100%' }" />
+          @if (noCoinciden) {
+          <p-message severity="error" variant="simple" size="small">Las contraseñas no coinciden</p-message>
+          }
+        </div>
+      </div>
+
+      <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+        <app-button variant="cancel" icon="times" label="Cancelar" [disabled]="guardando()" [fullWidth]="true"
+          class="sm:w-auto" (clicked)="cerrar()" />
+        <app-button variant="submit" icon="save" label="Guardar cambios" loadingLabel="Guardando..."
+          [loading]="guardando()" [fullWidth]="true" class="sm:w-auto" (clicked)="guardar()" />
+      </div>
+    </form>
+  }
+</app-modal>

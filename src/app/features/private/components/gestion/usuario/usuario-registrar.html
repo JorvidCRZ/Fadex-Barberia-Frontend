@@ -1,0 +1,77 @@
+<app-modal [(visible)]="visible" titulo="Crear administrador" mode="crear" icono="pi-user-plus" maxWidth="52rem">
+  <form [formGroup]="form" class="form-base">
+    <p class="m-0 text-sm text-text-muted">
+      Registra un nuevo administrador con el rol por defecto asignado automáticamente.
+    </p>
+
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div class="part-form">
+        <label for="regNombre">Nombre *</label>
+        <input pInputText id="regNombre" formControlName="nombre" class="inputs-text" placeholder="Juan" maxlength="150" />
+        @if (invalido('nombre')) {
+        <p-message severity="error" variant="simple" size="small">El nombre es obligatorio (mínimo 2 caracteres)</p-message>
+        }
+      </div>
+
+      <div class="part-form">
+        <label for="regApellido">Apellido *</label>
+        <input pInputText id="regApellido" formControlName="apellido" class="inputs-text" placeholder="Pérez" maxlength="150" />
+        @if (invalido('apellido')) {
+        <p-message severity="error" variant="simple" size="small">El apellido es obligatorio (mínimo 2 caracteres)</p-message>
+        }
+      </div>
+
+      <div class="part-form">
+        <label for="regTelefono">Teléfono</label>
+        <input pInputText id="regTelefono" type="tel" formControlName="telefono" class="inputs-text" placeholder="999999999"
+          maxlength="9" inputmode="numeric" (input)="onTelefono($event)" />
+        @if (invalido('telefono')) {
+        <p-message severity="error" variant="simple" size="small">El teléfono debe tener 9 dígitos</p-message>
+        }
+      </div>
+
+      <div class="part-form">
+        <label for="regEmail">Correo electrónico</label>
+        <input pInputText id="regEmail" type="email" formControlName="email" class="inputs-text" placeholder="admin@correo.com" />
+        @if (invalido('email')) {
+        <p-message severity="error" variant="simple" size="small">Ingresa un correo válido</p-message>
+        }
+      </div>
+
+      <div class="part-form sm:col-span-2">
+        <label for="regUsername">Username *</label>
+        <input pInputText id="regUsername" formControlName="username" class="inputs-text" placeholder="admin.barberia" />
+        @if (invalido('username')) {
+        <p-message severity="error" variant="simple" size="small">El username es obligatorio (mínimo 4 caracteres)</p-message>
+        }
+      </div>
+
+      <div class="part-form">
+        <label for="regPassword">Contraseña *</label>
+        <p-password inputId="regPassword" formControlName="password" [feedback]="false" [toggleMask]="true"
+          styleClass="w-full" [inputStyle]="{ width: '100%' }" placeholder="••••••••" />
+        @if (invalido('password')) {
+        <p-message severity="error" variant="simple" size="small">La contraseña debe tener al menos 8 caracteres</p-message>
+        }
+      </div>
+
+      <div class="part-form">
+        <label for="regPasswordConfirm">Confirmar contraseña *</label>
+        <p-password inputId="regPasswordConfirm" formControlName="passwordConfirm" [feedback]="false" [toggleMask]="true"
+          styleClass="w-full" [inputStyle]="{ width: '100%' }" placeholder="••••••••" />
+        @if (noCoinciden) {
+        <p-message severity="error" variant="simple" size="small">Las contraseñas no son iguales</p-message>
+        } @else if (invalido('passwordConfirm')) {
+        <p-message severity="error" variant="simple" size="small">Confirma la contraseña</p-message>
+        }
+      </div>
+    </div>
+
+    <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+      <app-button variant="cancel" icon="times" label="Cancelar" [disabled]="guardando()" [fullWidth]="true"
+        class="sm:w-auto" (clicked)="cerrar()" />
+      <app-button variant="submit" icon="save" label="Crear administrador" loadingLabel="Registrando..."
+        [loading]="guardando()" [fullWidth]="true" class="sm:w-auto" (clicked)="guardar()" />
+    </div>
+  </form>
+</app-modal>

@@ -1,0 +1,60 @@
+<app-modal [(visible)]="visible" titulo="Detalle del barbero" mode="ver" icono="pi-user" maxWidth="44rem">
+  @if (cargando()) {
+  <app-empty-state tipo="cargando" mensaje="Cargando barbero..." />
+  } @else if (error()) {
+  <app-empty-state tipo="error" [mensaje]="error()!" />
+  } @else if (barbero(); as b) {
+  <div class="flex flex-col gap-5">
+
+    <div class="flex items-center justify-between gap-4 border-b border-ui-border-soft pb-4">
+      <div class="flex items-center gap-4">
+        <div class="flex size-14 shrink-0 items-center justify-center rounded-full border border-brand-gold/30 bg-brand-gold/10 text-xl font-bold text-brand-gold">
+          {{ b.iniciales }}
+        </div>
+        <div>
+          <h2 class="m-0 text-xl font-bold text-text-primary">{{ b.nombreCompleto || 'Barbero' }}</h2>
+          <p class="m-0 mt-1 text-sm text-text-muted">{{ b.descripcion || 'Sin descripción' }}</p>
+        </div>
+      </div>
+      <app-status-badge type="text" [humanize]="false" [value]="b.ocupado ? 'Ocupado' : 'Disponible'" [tone]="b.ocupado ? 'warning' : 'success'" />
+    </div>
+
+    <div class="grid gap-3 sm:grid-cols-2">
+      <div class="rounded-xl border border-ui-border-soft bg-ui-black p-4">
+        <p class="m-0 text-[11px] uppercase tracking-widest text-text-muted">Teléfono</p>
+        <p class="m-0 mt-1 text-sm font-semibold text-text-primary">{{ b.telefono || '—' }}</p>
+      </div>
+      <div class="rounded-xl border border-ui-border-soft bg-ui-black p-4">
+        <p class="m-0 text-[11px] uppercase tracking-widest text-text-muted">Email</p>
+        <p class="m-0 mt-1 break-all text-sm font-semibold text-text-primary">{{ b.email || '—' }}</p>
+      </div>
+      <div class="rounded-xl border border-ui-border-soft bg-ui-black p-4">
+        <p class="m-0 text-[11px] uppercase tracking-widest text-text-muted">Experiencia</p>
+        <p class="m-0 mt-1 text-sm font-semibold text-text-primary">{{ b.experiencia != null ? b.experiencia + ' años' : '—' }}</p>
+      </div>
+      <div class="rounded-xl border border-ui-border-soft bg-ui-black p-4">
+        <p class="m-0 text-[11px] uppercase tracking-widest text-text-muted">Fecha de ingreso</p>
+        <p class="m-0 mt-1 text-sm font-semibold text-text-primary">{{ b.fechaIngreso ? (b.fechaIngreso | dateHelper) : '—' }}</p>
+      </div>
+      <div class="rounded-xl border border-ui-border-soft bg-ui-black p-4">
+        <p class="m-0 text-[11px] uppercase tracking-widest text-text-muted">Sueldo base</p>
+        <p class="m-0 mt-1 text-sm font-bold text-brand-gold">{{ b.sueldo != null ? (b.sueldo | moneda) : '—' }}</p>
+      </div>
+      <div class="rounded-xl border border-ui-border-soft bg-ui-black p-4">
+        <p class="m-0 text-[11px] uppercase tracking-widest text-text-muted">Comisión</p>
+        <p class="m-0 mt-1 text-sm font-bold text-brand-gold">{{ b.comision != null ? b.comision + '%' : '—' }}</p>
+      </div>
+    </div>
+
+    <div class="rounded-xl border border-brand-gold/20 bg-ui-black p-4">
+      <p class="m-0 text-[11px] uppercase tracking-widest text-text-muted">Usuario de acceso</p>
+      <p class="m-0 mt-1 text-sm font-semibold text-text-primary">{{ b.usuario || 'No disponible' }}</p>
+    </div>
+
+    <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+      <app-button variant="cancel" icon="times" label="Cerrar" (clicked)="cerrar()" />
+      <app-button variant="editar-tabla" icon="pencil" label="Editar" (clicked)="editar.emit(b.barberoId)" />
+    </div>
+  </div>
+  }
+</app-modal>

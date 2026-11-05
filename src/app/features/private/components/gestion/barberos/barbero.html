@@ -1,0 +1,120 @@
+<div class="mt-5 flex flex-col gap-6">
+  <app-page-header titulo="Barberos" icono="users" subtitulo="Gestión y administración de barberos">
+    <app-search-bar placeholder="Buscar barbero..." [value]="termino()" (search)="onSearch($event)" />
+    <app-button variant="primary" icon="plus" label="Nuevo barbero" (clicked)="abrirCrear()" />
+  </app-page-header>
+
+  @if (stats().length) {
+  <app-stats [items]="stats()" />
+  }
+
+  <app-filtros [fields]="filtrosFields" titulo="Barberos" text="Barberos" [acordeon]="true"
+    (buscar)="onBuscarFiltros($event)" (limpiar)="onLimpiar()" />
+
+  <p-table [value]="barberos()" [loading]="cargando()" dataKey="barberoId" [tableStyle]="{ 'min-width': '1000px' }">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Nombre completo</th>
+        <th>Correo</th>
+        <th>Disponibilidad</th>
+        <th>Comisión</th>
+        <th>Sueldo</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-b>
+      <tr>
+        <!-- Barbero -->
+        <td>
+          <div class="flex items-center gap-3">
+            <div class="flex size-9 shrink-0 items-center justify-center rounded-full border border-brand-gold/30 bg-brand-gold/10 text-xs font-bold text-brand-gold">
+              {{ b.iniciales }}
+            </div>
+            <span class="font-medium text-text-primary">{{ b.nombreCompleto || '—' }}</span>
+          </div>
+        </td>
+
+        <td>{{ b.email || '—' }}</td>
+
+        <!-- Disponible / ocupado (solo tiene sentido si está activo) -->
+        <td>
+          @if (activo(b)) {
+          <app-status-badge type="text" [humanize]="false" [value]="disponibilidad(b).label" [tone]="disponibilidad(b).tone" />
+          } @else {
+          <span class="text-text-muted">—</span>
+          }
+        </td>
+
+        <td>{{ b.comision != null ? b.comision + '%' : '—' }}</td>
+
+        <td>
+          <span class="font-semibold text-brand-gold">{{ b.sueldo != null ? (b.sueldo | moneda) : '—' }}</span>
+        </td>
+
+        <!-- Estado: badge + switch -->
+        <td>
+          <div class="flex items-center justify-center gap-3">
+            <app-status-badge [value]="activo(b)" trueLabel="Activo" falseLabel="Inhabilitado" />
+            <button type="button" role="switch" [attr.aria-checked]="activo(b)"
+              [attr.aria-label]="activo(b) ? 'Deshabilitar barbero' : 'Reactivar barbero'"
+              [disabled]="procesandoId() === b.barberoId" (click)="cambiarEstado(b)"
+              class="relative h-6 w-11 shrink-0 cursor-pointer rounded-full transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50"
+              [class]="activo(b) ? 'bg-success' : 'bg-ui-border'">
+              <span class="absolute left-0.5 top-0.5 size-5 rounded-full bg-white shadow transition-transform duration-200"
+                [class.translate-x-5]="activo(b)"></span>
+            </button>
+          </div>
+        </td>
+
+        <!-- Acciones -->
+        <td>
+          <div class="flex items-center justify-center gap-2">
+            @if (activo(b)) {
+            <app-button variant="ver-tabla" icon="eye" tooltip="Ver detalle" tooltipPosition="top" (clicked)="ver(b)" />
+            <app-button variant="editar-tabla" icon="pencil" tooltip="Editar" tooltipPosition="top" (clicked)="editar(b)" />
+            } @else {
+            <span class="text-text-muted">—</span>
+            }
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="7" class="py-12 text-center">
+          <div class="flex flex-col items-center gap-3">
+            <i class="pi pi-users text-5xl text-text-muted opacity-30"></i>
+            <p class="text-lg text-text-muted">No hay barberos que coincidan</p>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="loadingbody">
+      <tr>
+        <td colspan="7" class="py-12 text-center">
+          <div class="flex flex-col items-center gap-3">
+            <div class="size-10 animate-spin rounded-full border-4 border-brand-gold border-t-transparent"></div>
+            <p class="text-text-muted">Cargando barberos...</p>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  @if (modo() !== 'busqueda') {
+  <app-paginator [first]="first()" [rows]="rows()" [totalRecords]="total()" etiqueta="barbero(s)"
+    [rowsPerPageOptions]="[5, 10, 25, 50]" (pageChange)="onPage($event)" />
+  }
+</div>
+
+<app-barbero-nuevo [(visible)]="mostrarCrear" (creado)="alCambiar()" />
+<app-barbero-detalle [(visible)]="mostrarDetalle" [barberoId]="barberoIdSel()" (editar)="editarPorId($event)" />
+<app-barbero-editar [(visible)]="mostrarEditar" [barberoId]="barberoIdSel()" (guardado)="alCambiar()" />
+
+<app-confirm-popover [visible]="confirmarVisible()" mode="anular" titulo="Deshabilitar barbero"
+  [mensaje]="mensajeConfirmacion()" confirmText="Sí, deshabilitar" cancelText="No"
+  (confirm)="confirmarDeshabilitar()" (cancel)="cerrarConfirmacion()" />

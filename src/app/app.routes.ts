@@ -16,10 +16,6 @@ import { PagoComponent } from './features/auth/pago/pago.component';
 import { DashboardBarberoComponent } from './features/private/layout/dashboard-barbero.component';
 import { DashboardClienteComponent } from './features/private/layout/dashboard-cliente.component';
 import { DashboardAdministrativoComponent } from './features/private/layout/dashboard-administrativo.component';
-import { RegistrarBarbero } from './features/private/components/gestion/barberos/registrar-barbero/registrar-barbero.component';
-import { Usuario } from './features/private/components/gestion/usuario/usuario.component';
-import { PerfilUsuario } from './features/private/components/gestion/usuario/perfil-usuario/perfil-usuario.component';
-import { PerfilBarbero } from './features/private/components/gestion/barberos/perfil-barbero/perfil-barbero.component';
 import { CheckoutComponent } from './features/auth/checkout/checkout.component';
 
 export const routes: Routes = [
@@ -47,11 +43,8 @@ export const routes: Routes = [
       {
         path: 'gestion', children: [
           { path: 'clientes', loadComponent: () => import('./features/private/components/gestion/clientes/cliente.component').then(m => m.ClienteComponent) },
-          { path: 'barberos', loadComponent: () => import('./features/private/components/gestion/barberos/barberos.component').then(m => m.Barberos) },
-          { path: 'barberos/registrar-barbero', component: RegistrarBarbero },
-          { path: 'barberos/:id', component: PerfilBarbero },
-          { path: 'usuarios', component: Usuario },
-          { path: 'usuarios/:id', component: PerfilUsuario },
+          { path: 'barberos', loadComponent: () => import('./features/private/components/gestion/barberos/barbero.component').then(m => m.BarberoComponent) },
+          { path: 'usuarios', loadComponent: () => import('./features/private/components/gestion/usuario/usuario.component').then(m => m.UsuarioComponent) },
           { path: 'sueldos', children: [
             { path: '', loadComponent: () => import('./features/private/components/sueldos/sueldos.component').then(m => m.SueldosComponent) },
             { path: ':id', loadComponent: () => import('./features/private/components/sueldos/mi-sueldo-analisis/mi-sueldo-analisis.component').then(m => m.MiSueldoAnalisis) }]

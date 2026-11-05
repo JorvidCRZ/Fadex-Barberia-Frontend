@@ -1,139 +1,122 @@
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import { ButtonModule } from 'primeng/button';
-import { DialogModule } from 'primeng/dialog';
-import { InputTextModule } from 'primeng/inputtext';
-import { MessageModule } from 'primeng/message';
-import { PasswordModule } from 'primeng/password';
-import { HeaderUsuario } from "./components/header-usuario/header-usuario.component";
-import { TableUsers } from './components/table-users/table-users.component';
-import { FiltroUsuario } from '@/app/core/models/gestion/usuario.model';
+import { PaginatorState } from 'primeng/paginator';
+import { TableModule } from 'primeng/table';
+import { TooltipModule } from 'primeng/tooltip';
+import { ButtonComponent } from '@/app/shared/components/button/button.component';
+import { EmptyStateComponent } from '@/app/shared/components/empty-state/empty-state.component';
 import { FiltrosComponent } from '@/app/shared/components/filtros/filtros.component';
+import { PageHeaderComponent } from '@/app/shared/components/page-header/page-header.component';
+import { PaginatorComponent } from '@/app/shared/components/paginator/paginator.component';
+import { SearchBarComponent } from '@/app/shared/components/search-bar/search-bar.component';
+import { StatsComponent } from '@/app/shared/components/stats/stats.component';
+import { StatusBadgeComponent } from '@/app/shared/components/status-badge/status-badge.component';
 import { FilterField } from '@/app/core/models/common/filtro.model';
+import { StatsCard } from '@/app/core/models/common/card.model';
 import { UsuarioService } from '@/app/core/services/auth/usuario.service';
-import { NotificationService } from '@/app/core/services/common/notification.service';
-import { UsuarioTablaResponse } from '@/app/core/models/gestion/usuario.model';
-import { AdminRegister } from '@/app/core/models/auth/usuario/admin-register.model';
-import { campoInvalido, marcarFormulario } from '@/app/shared/utils/form-utils.component';
-
+import { FiltroConsulta, UsuarioFila, aFilaUsuario, aFiltroConsulta, claseRol, hayFiltroConsulta, iniciales,} from './usuario.utils.component';
+import { UsuarioRegistrarComponent } from './usuario-registrar.component';
+import { UsuarioDetalleComponent } from './usuario-detalle.component';
+import { UsuarioEditarComponent } from './usuario-editar.component';
+import { UsuarioPinComponent } from './usuario-pin.component';
+import { UsuarioQrComponent } from './usuario-qr.component';
 
 @Component({
   selector: 'app-usuario',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ButtonModule, DialogModule, InputTextModule, MessageModule, PasswordModule, HeaderUsuario, FiltrosComponent, TableUsers,],
+  imports: [
+    TableModule, TooltipModule, PageHeaderComponent, ButtonComponent, SearchBarComponent, StatsComponent,
+    FiltrosComponent, EmptyStateComponent, PaginatorComponent, StatusBadgeComponent, UsuarioRegistrarComponent,
+    UsuarioDetalleComponent, UsuarioEditarComponent, UsuarioPinComponent, UsuarioQrComponent,
+  ],
   templateUrl: './usuario.html',
 })
-export class Usuario implements OnInit {
-  private readonly fb = inject(FormBuilder);
+export class UsuarioComponent implements OnInit {
   private readonly cd = inject(ChangeDetectorRef);
   private readonly usuarioService = inject(UsuarioService);
-  private readonly notificationService = inject(NotificationService);
-  private readonly pageSize = 10;
 
-  usuarios: UsuarioTablaResponse[] = [];
+  // Lista
+  usuarios: UsuarioFila[] = [];
+  stats: StatsCard[] = [];
   totalElements = 0;
-  totalPages = 0;
   currentPage = 0;
+  first = 0;
+  rows = 10;
   cargando = true;
   errorCarga = '';
   searchTerm = '';
   isSearchMode = false;
-  showCrearAdminModal = false;
-  adminLoading = false;
-  adminError = '';
-  adminSubmitted = false;
-  private filtrosConsulta: {
-    rol?: string;
-    tieneQr?: boolean;
-    multiplesRoles?: boolean;
-  } = {};
+  private filtrosConsulta: FiltroConsulta = {};
+
+  // Modales: todos trabajan sobre el mismo usuario (usuarioId)
+  usuarioId: number | null = null;
+  registroVisible = false;
+  verVisible = false;
+  editarVisible = false;
+  pinVisible = false;
+  qrVisible = false;
+  qrRegenerar = false;
+  qrActual: string | null = null;
+  /** Se incrementa cuando otro modal cambia datos del usuario, para que "ver" los vuelva a cargar */
+  refrescoVer = 0;
+
+  readonly iniciales = iniciales;
+  readonly claseRol = claseRol;
 
   readonly filtroFields: FilterField[] = [
     {
-      key: 'rol',
-      label: 'Rol',
-      type: 'select',
-      placeholder: 'Todos',
+      key: 'rol', label: 'Rol', type: 'select', placeholder: 'Todos',
       options: [
-        { value: 'ADMIN',   label: 'Admin'   },
+        { value: 'ADMIN', label: 'Admin' },
         { value: 'BARBERO', label: 'Barbero' },
         { value: 'CLIENTE', label: 'Cliente' },
       ],
     },
     {
-      key: 'qr',
-      label: 'QR',
-      type: 'select',
-      placeholder: 'Todos',
+      key: 'qr', label: 'QR', type: 'select', placeholder: 'Todos',
       options: [
         { value: 'conQr', label: 'Con QR' },
         { value: 'sinQr', label: 'Sin QR' },
       ],
     },
     {
-      key: 'cantidadRoles',
-      label: 'Cantidad de roles',
-      type: 'select',
-      placeholder: 'Todos',
+      key: 'cantidadRoles', label: 'Cantidad de roles', type: 'select', placeholder: 'Todos',
       options: [
-        { value: 'unRol',          label: 'Un rol'          },
+        { value: 'unRol', label: 'Un rol' },
         { value: 'multiplesRoles', label: 'Múltiples roles' },
       ],
     },
   ] as FilterField[];
 
-  filtrosActuales: FiltroUsuario = {
-    rol: '',
-    tipo: '',
-    qr: '',
-    cantidadRoles: '',
-  };
-
-  adminForm = this.fb.group({
-    nombre: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(150)]],
-    apellido: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(150)]],
-    telefono: ['', [Validators.pattern('^\\d{9}$')]],
-    email: ['', [Validators.email]],
-    username: ['', [Validators.required, Validators.minLength(4)]],
-    password: ['', [Validators.required, Validators.minLength(8)]],
-    passwordConfirm: ['', [Validators.required]],
-  });
-
-  constructor() {
-    // attach cross-field validator for password match
-    this.adminForm.setValidators(this.passwordsMatchValidator);
+  /** true si hay búsqueda por texto o algún filtro activo */
+  get hayFiltros(): boolean {
+    return this.searchTerm.length > 0 || hayFiltroConsulta(this.filtrosConsulta);
   }
 
   ngOnInit(): void {
     this.cargarUsuarios(0);
   }
 
-  onBuscarFiltros(v: any): void {
-    this.onApplyFilters({
-      rol: v?.rol ?? '',
-      tipo: '',
-      qr: v?.qr ?? '',
-      cantidadRoles: v?.cantidadRoles ?? '',
-    });
-  }
-
-  onPageChange(event: { page: number; size: number }): void {
-    this.cargarUsuarios(event.page);
-  }
-
   cargarUsuarios(page: number = 0): void {
     this.cargando = true;
     this.errorCarga = '';
 
-    const request$ = this.isSearchMode && this.searchTerm.trim().length > 0
-      ? this.usuarioService.buscar(this.searchTerm.trim(), page, this.pageSize)
-      : this.tieneFiltrosActivos()
-        ? this.usuarioService.filtrar(this.filtrosConsulta, page, this.pageSize)
-        : this.usuarioService.listar(page, this.pageSize);
+    const request$ = this.isSearchMode && this.searchTerm.length > 0
+      ? this.usuarioService.buscar(this.searchTerm, page, this.rows)
+      : hayFiltroConsulta(this.filtrosConsulta)
+        ? this.usuarioService.filtrar(this.filtrosConsulta, page, this.rows)
+        : this.usuarioService.listar(page, this.rows);
 
     request$.subscribe({
-      next: (response) => this.aplicarRespuesta(response, page),
+      next: (response: any) => {
+        const pageData = response?.data ?? {};
+        this.usuarios = (pageData.content ?? []).map(aFilaUsuario);
+        this.totalElements = pageData.totalElements ?? this.usuarios.length;
+        this.currentPage = pageData.number ?? pageData.pageNumber ?? page;
+        this.first = this.currentPage * this.rows;
+        this.actualizarStats();
+        this.cargando = false;
+        this.cd.detectChanges();
+      },
       error: () => {
         this.cargando = false;
         this.errorCarga = 'No se pudo cargar la tabla de usuarios.';
@@ -142,218 +125,89 @@ export class Usuario implements OnInit {
     });
   }
 
-  onPrevPage(): void {
-    if (this.currentPage <= 0) return;
-    this.cargarUsuarios(this.currentPage - 1);
+  onPageChange(event: PaginatorState): void {
+    this.rows = event.rows ?? this.rows;
+    this.first = event.first ?? 0;
+    this.cargarUsuarios(Math.floor(this.first / this.rows));
   }
 
-  onNextPage(): void {
-    if (this.currentPage >= this.totalPages - 1) return;
-    this.cargarUsuarios(this.currentPage + 1);
-  }
-
-  onApplyFilters(filtros: FiltroUsuario): void {
-    this.filtrosActuales = filtros;
+  onBuscarFiltros(valores: { rol?: string; qr?: string; cantidadRoles?: string }): void {
     this.searchTerm = '';
     this.isSearchMode = false;
-    this.filtrosConsulta = this.mapearFiltrosConsulta(filtros);
-    this.cargarUsuarios(0);
-  }
-
-  onClearFilters(): void {
-    this.filtrosActuales = {
-      rol: '',
-      tipo: '',
-      qr: '',
-      cantidadRoles: '',
-    };
-    this.filtrosConsulta = {};
+    this.filtrosConsulta = aFiltroConsulta(valores);
     this.cargarUsuarios(0);
   }
 
   onSearch(texto: string): void {
     this.searchTerm = (texto || '').trim();
-
-    if (this.searchTerm.length > 0) {
-      this.isSearchMode = true;
-      this.filtrosActuales = {
-        rol: '',
-        tipo: '',
-        qr: '',
-        cantidadRoles: '',
-      };
-      this.filtrosConsulta = {};
-      this.cargarUsuarios(0);
-      return;
-    }
-
-    this.isSearchMode = false;
+    this.isSearchMode = this.searchTerm.length > 0;
+    if (this.isSearchMode) this.filtrosConsulta = {}; // búsqueda y filtros no se mezclan
     this.cargarUsuarios(0);
   }
 
-  abrirModalAdmin(): void {
-    this.showCrearAdminModal = true;
-    this.adminError = '';
-    this.adminSubmitted = false;
-    this.adminForm.reset({
-      nombre: '',
-      apellido: '',
-      telefono: '',
-      email: '',
-      username: '',
-      password: '',
-      passwordConfirm: '',
-    });
+  onLimpiar(): void {
+    this.searchTerm = '';
+    this.isSearchMode = false;
+    this.filtrosConsulta = {};
+    this.cargarUsuarios(0);
   }
 
-  cerrarModalAdmin(): void {
-    this.showCrearAdminModal = false;
-    this.adminError = '';
-    this.adminSubmitted = false;
-    this.adminLoading = false;
-  }
+  private actualizarStats(): void {
+    const conQr = this.usuarios.filter(u => u.tieneQr).length;
+    const conPin = this.usuarios.filter(u => u.tienePin).length;
+    const variosRoles = this.usuarios.filter(u => u.roles.length > 1).length;
 
-  isAdminInvalid(campo: string): boolean {
-    return campoInvalido(this.adminForm, campo, this.adminSubmitted);
-  }
-
-  passwordsMismatch(): boolean {
-    const p = this.adminForm.get('password')?.value ?? '';
-    const c = this.adminForm.get('passwordConfirm')?.value ?? '';
-    return !!(p || c) && p !== c;
-  }
-
-  private passwordsMatchValidator = (group: AbstractControl): ValidationErrors | null => {
-    const password = group.get('password')?.value ?? '';
-    const confirm = group.get('passwordConfirm')?.value ?? '';
-    const confirmControl = group.get('passwordConfirm');
-
-    if (password && confirm && password !== confirm) {
-      confirmControl?.setErrors({ ...(confirmControl?.errors || {}), passwordMismatch: true });
-      return { passwordMismatch: true };
-    }
-
-    // remove passwordMismatch if present and now matching
-    if (confirmControl?.errors && confirmControl.errors['passwordMismatch']) {
-      const errs = { ...confirmControl.errors } as any;
-      delete errs['passwordMismatch'];
-      const remaining = Object.keys(errs).length ? errs : null;
-      confirmControl.setErrors(remaining);
-    }
-
-    return null;
-  }
-
-  onPhoneInput(event: any): void {
-    const input = event.target as HTMLInputElement;
-    let val = (input.value || '').toString();
-    val = val.replace(/\D/g, '').slice(0, 9);
-    input.value = val;
-    this.adminForm.get('telefono')?.setValue(val, { emitEvent: true });
-  }
-
-  onSubmitAdmin(): void {
-    this.adminSubmitted = true;
-    this.adminError = '';
-    marcarFormulario(this.adminForm);
-
-    const passwordConfirmControl = this.adminForm.get('passwordConfirm');
-    if (passwordConfirmControl?.hasError('passwordMismatch')) {
-      passwordConfirmControl.setErrors(null);
-    }
-
-    if (this.adminForm.invalid) {
-      this.notificationService.showError('Por favor corrige los campos marcados antes de continuar.', 'Error de validación');
-      return;
-    }
-
-    const password = this.adminForm.value.password ?? '';
-    const passwordConfirm = this.adminForm.value.passwordConfirm ?? '';
-
-    if (password !== passwordConfirm) {
-      passwordConfirmControl?.setErrors({ passwordMismatch: true });
-      this.adminError = 'Las contraseñas no coinciden.';
-      this.notificationService.showError('Las contraseñas no coinciden.', 'Error de validación');
-      return;
-    }
-
-    const payload: AdminRegister = {
-      nombre: (this.adminForm.value.nombre ?? '').trim(),
-      apellido: (this.adminForm.value.apellido ?? '').trim(),
-      telefono: (this.adminForm.value.telefono ?? '').trim() || undefined,
-      email: (this.adminForm.value.email ?? '').trim() || undefined,
-      username: (this.adminForm.value.username ?? '').trim(),
-      password,
-      idRol: 1,
-    };
-
-    this.adminLoading = true;
-
-    this.usuarioService.registrarAdmin(payload).subscribe({
-      next: () => {
-        this.adminLoading = false;
-        this.showCrearAdminModal = false;
-        this.notificationService.showSuccess('Administrador registrado correctamente.');
-        this.cargarUsuarios(this.currentPage);
+    this.stats = [
+      {
+        title: 'Total usuarios', value: this.totalElements, icon: 'pi pi-users',
+        description: this.hayFiltros ? 'Según los filtros aplicados' : 'Registrados en el sistema',
       },
-      error: (err) => {
-        this.adminLoading = false;
-        this.adminError = err?.error?.message ?? 'No se pudo registrar el administrador.';
-        this.notificationService.showHttpError(err, 'No se pudo registrar el administrador');
+      {
+        title: 'Con QR', value: conQr, icon: 'pi pi-qrcode', description: 'En esta página',
+        accentClass: 'bg-success', iconBgClass: 'bg-success/10', accentTextClass: 'text-success',
       },
-    });
-  }
-
-  private aplicarRespuesta(response: any, page: number): void {
-    const pageData: any = response?.data ?? {};
-    const content: UsuarioTablaResponse[] = pageData.content ?? [];
-
-    this.usuarios = content.map((usuario) => this.mapearUsuarioTabla(usuario));
-    this.totalElements = pageData.totalElements ?? this.usuarios.length;
-    this.totalPages = pageData.totalPages ?? 0;
-    this.currentPage = pageData.number ?? pageData.pageNumber ?? page;
-    this.cargando = false;
-    this.cd.detectChanges();
-  }
-
-  private mapearUsuarioTabla(usuario: UsuarioTablaResponse): any {
-    const usuarioId = Number(usuario.idUsuario ?? (usuario as any).usuarioId ?? (usuario as any).id);
-    return {
-      usuarioId,
-      username: usuario.usuario,
-      persona: {
-        nombre: usuario.nombre,
-        apellido: usuario.apellido,
+      {
+        title: 'Con PIN', value: conPin, icon: 'pi pi-lock', description: 'En esta página',
+        accentClass: 'bg-info', iconBgClass: 'bg-info/10', accentTextClass: 'text-info',
       },
-      roles: usuario.roles ?? [],
-      tieneQr: usuario.tieneQr,
-      tienePin: usuario.tienePin ?? false,
-      activo: null,
-      ultimoAcceso: '—',
-    };
+      {
+        title: 'Varios roles', value: variosRoles, icon: 'pi pi-id-card', description: 'En esta página',
+        accentClass: 'bg-warning', iconBgClass: 'bg-warning/10', accentTextClass: 'text-warning',
+      },
+    ];
   }
 
-  private mapearFiltrosConsulta(filtros: FiltroUsuario): {
-    rol?: string;
-    tieneQr?: boolean;
-    multiplesRoles?: boolean;
-  } {
-    return {
-      rol: filtros.rol?.trim() || undefined,
-      tieneQr: filtros.qr === 'conQr' ? true : filtros.qr === 'sinQr' ? false : undefined,
-      multiplesRoles: filtros.cantidadRoles === 'multiplesRoles'
-        ? true
-        : filtros.cantidadRoles === 'unRol'
-          ? false
-          : undefined,
-    };
+  // =====================================================
+  // MODALES
+  // =====================================================
+
+  abrirRegistro(): void {
+    this.registroVisible = true;
   }
 
-  private tieneFiltrosActivos(): boolean {
-    return Boolean(
-      this.filtrosConsulta.rol ||
-      this.filtrosConsulta.tieneQr !== undefined ||
-      this.filtrosConsulta.multiplesRoles !== undefined
-    );
+  abrirVer(usuario: UsuarioFila): void {
+    this.usuarioId = usuario.usuarioId;
+    this.verVisible = true;
+  }
+
+  abrirEditar(usuario: UsuarioFila): void {
+    this.usuarioId = usuario.usuarioId;
+    this.editarVisible = true;
+  }
+
+  /** Lo pide el modal "ver": regenerar = true si el usuario ya tiene QR */
+  abrirQr(regenerar: boolean): void {
+    this.qrRegenerar = regenerar;
+    this.qrVisible = true;
+  }
+
+  onUsuarioCreado(): void {
+    this.cargarUsuarios(this.currentPage);
+  }
+
+  /** Tras editar, asignar PIN o generar QR: recarga la lista y el modal "ver" */
+  onUsuarioActualizado(): void {
+    this.refrescoVer++;
+    this.cargarUsuarios(this.currentPage);
   }
 }
