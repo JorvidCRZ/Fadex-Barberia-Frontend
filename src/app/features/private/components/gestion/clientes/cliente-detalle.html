@@ -1,0 +1,70 @@
+<app-modal [(visible)]="visible" titulo="Perfil del cliente" mode="ver" icono="pi-user" maxWidth="50rem">
+
+  @if (perfil(); as c) {
+    <div class="space-y-5 pt-4">
+
+      <!-- Cabecera -->
+      <div class="flex items-center gap-4 border-b border-ui-border-soft pb-4">
+        <div class="flex size-14 shrink-0 items-center justify-center rounded-full border border-brand-gold/25 bg-brand-gold/10 text-lg font-bold tracking-wide text-brand-gold">
+          {{ iniciales(c) }}
+        </div>
+        <div class="min-w-0">
+          <p class="m-0 truncate text-lg font-bold text-white">{{ nombreCompleto(c) }}</p>
+          <p class="m-0 text-sm text-gray-400">
+            Cliente desde {{ c.fechaRegistro | dateHelper }}
+            <span class="mx-1 text-gray-600">·</span>
+            Última visita: {{ resumen()?.ultimaVisita || 'Sin visitas' }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Resumen del cliente -->
+      @if (stats().length) {
+        <app-stats [items]="stats()" />
+      }
+
+      <!-- Datos -->
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div class="rounded-xl border border-white/10 bg-black/30 p-4">
+          <p class="mb-1 text-sm text-gray-400">Teléfono</p>
+          <p class="m-0 font-semibold text-white">{{ c.persona?.telefono || '—' }}</p>
+        </div>
+        <div class="rounded-xl border border-white/10 bg-black/30 p-4">
+          <p class="mb-1 text-sm text-gray-400">Email</p>
+          <p class="m-0 break-all font-semibold text-white">{{ c.persona?.email || '—' }}</p>
+        </div>
+        <div class="rounded-xl border border-white/10 bg-black/30 p-4">
+          <p class="mb-1 text-sm text-gray-400">Usuario</p>
+          <p class="m-0 font-semibold text-white">{{ c.persona?.usuario?.user || '—' }}</p>
+        </div>
+        <div class="rounded-xl border border-white/10 bg-black/30 p-4">
+          <p class="mb-1 text-sm text-gray-400">Contraseña</p>
+          <p class="m-0 font-semibold tracking-widest text-white">••••••••</p>
+        </div>
+      </div>
+
+      <!-- Actividad reciente -->
+      <div>
+        <p class="mb-2 text-sm text-gray-400">Actividad reciente</p>
+
+        @if (actividadReciente().length) {
+          <div class="max-h-64 space-y-4 overflow-y-auto rounded-xl border border-white/10 bg-black/30 p-4">
+            @for (a of actividadReciente(); track $index) {
+              <div class="flex gap-3">
+                <div class="mt-1.5 size-3 shrink-0 rounded-full" [class]="colorPunto(a.tipo)"></div>
+                <div class="min-w-0">
+                  <p class="m-0 text-sm font-semibold" [class]="colorTexto(a.tipo)">{{ a.titulo }}</p>
+                  <p class="m-0 text-sm text-gray-300">{{ a.descripcion }}</p>
+                  <p class="m-0 mt-1 text-xs text-gray-500">{{ a.fecha | date: 'dd MMM yyyy - HH:mm' }}</p>
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <app-empty-state icono="history" mensaje="Sin actividad reciente." />
+        }
+      </div>
+
+    </div>
+  }
+</app-modal>

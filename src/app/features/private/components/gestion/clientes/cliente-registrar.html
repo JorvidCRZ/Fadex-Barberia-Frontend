@@ -1,0 +1,107 @@
+<app-modal [(visible)]="visible" titulo="Registrar cliente" mode="crear" icono="pi-user-plus" maxWidth="52rem">
+
+  <form [formGroup]="form" (ngSubmit)="abrirConfirmacion()" class="cliente-modal-form flex flex-col gap-5 pt-2">
+
+    <section class="rounded-xl border border-ui-border-soft bg-ui-elevated/25 p-5">
+      <div class="mb-5">
+        <h3 class="m-0 text-base font-bold text-text-primary">Información del cliente</h3>
+        <p class="m-0 mt-1 text-sm text-text-muted">Completa los datos para registrar al cliente.</p>
+      </div>
+
+      <div class="grid gap-x-5 md:grid-cols-2">
+        <div class="part-form">
+          <label for="rc-nombre">Nombre</label>
+          <input pInputText id="rc-nombre" type="text" formControlName="nombre" maxlength="150" placeholder="Juan" />
+          @if (f.nombre.touched && f.nombre.invalid) {
+            <small class="text-danger">
+              @if (f.nombre.hasError('required')) { El nombre es requerido. }
+              @else if (f.nombre.hasError('minlength')) { Mínimo 2 caracteres. }
+              @else { Máximo 150 caracteres. }
+            </small>
+          }
+        </div>
+
+        <div class="part-form">
+          <label for="rc-apellido">Apellido</label>
+          <input pInputText id="rc-apellido" type="text" formControlName="apellido" maxlength="150" placeholder="Pérez" />
+          @if (f.apellido.touched && f.apellido.invalid) {
+            <small class="text-danger">
+              @if (f.apellido.hasError('required')) { El apellido es requerido. }
+              @else if (f.apellido.hasError('minlength')) { Mínimo 2 caracteres. }
+              @else { Máximo 150 caracteres. }
+            </small>
+          }
+        </div>
+
+        <div class="part-form">
+          <label for="rc-telefono">Teléfono</label>
+          <input pInputText id="rc-telefono" type="tel" formControlName="telefono" maxlength="9" inputmode="numeric" placeholder="999999999" (input)="onPhoneInput($event)" />
+          @if (f.telefono.touched && f.telefono.invalid) {
+            <small class="text-danger">
+              @if (f.telefono.hasError('required')) { El teléfono es requerido. }
+              @else { El teléfono debe tener 9 dígitos. }
+            </small>
+          }
+        </div>
+
+        <div class="part-form">
+          <label for="rc-email">Email</label>
+          <input pInputText id="rc-email" type="email" formControlName="email" placeholder="cliente@mail.com" />
+          @if (f.email.touched && f.email.invalid) {
+            <small class="text-danger">
+              @if (f.email.hasError('required')) { El email es requerido. }
+              @else { Formato de email inválido. }
+            </small>
+          }
+        </div>
+        <div class="part-form md:col-span-2">
+          <label for="rc-usuario">Usuario</label>
+          <input pInputText id="rc-usuario" type="text" formControlName="usuario" placeholder="usuario.cliente" />
+          @if (f.usuario.touched && f.usuario.invalid) {
+            <small class="text-danger">El usuario es requerido.</small>
+          }
+        </div>
+
+        <div class="part-form">
+          <label for="rc-password">Contraseña</label>
+          <p-password inputId="rc-password" formControlName="password" [feedback]="false" [toggleMask]="true" [fluid]="true" placeholder="Mínimo 8 caracteres" />
+          @if (f.password.touched && f.password.invalid) {
+            <small class="text-danger">
+              @if (f.password.hasError('required')) { La contraseña es requerida. }
+              @else { Debe tener al menos 8 caracteres. }
+            </small>
+          }
+        </div>
+
+        <div class="part-form">
+          <label for="rc-password-confirm">Confirmar contraseña</label>
+          <p-password inputId="rc-password-confirm" formControlName="passwordConfirm" [feedback]="false" [toggleMask]="true" [fluid]="true" placeholder="Repite la contraseña" />
+          @if (f.passwordConfirm.touched) {
+            @if (f.passwordConfirm.hasError('required')) {
+              <small class="text-danger">La confirmación es requerida.</small>
+            } @else if (form.hasError('mismatch')) {
+              <small class="text-danger">Las contraseñas no coinciden.</small>
+            }
+          }
+        </div>
+      </div>
+    </section>
+
+    <div class="flex justify-end gap-3 border-t border-ui-border-soft pt-5">
+      <app-button variant="secondary" label="Cancelar" (clicked)="volver()" />
+      <app-button variant="primary" icon="save" label="Guardar cliente" (clicked)="abrirConfirmacion()" />
+    </div>
+  </form>
+</app-modal>
+
+<!-- Modal: confirmar registro -->
+<app-modal [(visible)]="displayConfirm" titulo="Guardar cliente" mode="crear" icono="pi-user-plus" maxWidth="28rem">
+  <div class="space-y-5">
+    <p class="m-0 text-sm text-gray-300">¿Deseas guardar este cliente en el sistema?</p>
+
+    <div class="flex justify-end gap-3">
+      <app-button variant="secondary" size="sm" label="Cancelar" (clicked)="displayConfirm.set(false)" />
+      <app-button variant="primary" size="sm" icon="check" label="Sí, guardar" loadingLabel="Guardando..." [loading]="guardando()" (clicked)="guardar()" />
+    </div>
+  </div>
+</app-modal>

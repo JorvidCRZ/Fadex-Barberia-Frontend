@@ -1,0 +1,46 @@
+:host ::ng-deep .cliente-modal-form {
+  .p-inputtext,
+  .p-password-input {
+    width: 100%;
+    min-height: 3rem;
+    border: 1px solid rgb(var(--color-ui-border)) !important;
+    border-radius: 0.75rem !important;
+    background: rgb(var(--color-ui-surface)) !important;
+    color: rgb(var(--color-text-primary)) !important;
+    font-size: 0.95rem;
+    padding: 0.75rem 1rem !important;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+  }
+
+  .p-inputtext::placeholder,
+  .p-password-input::placeholder {
+    color: rgb(var(--color-text-muted)) !important;
+    opacity: 1;
+  }
+
+  .p-inputtext:hover,
+  .p-password-input:hover {
+    border-color: rgb(var(--color-brand-gold-hover)) !important;
+  }
+
+  .p-inputtext:enabled:focus,
+  .p-password-input:enabled:focus {
+    border-color: rgb(var(--color-brand-gold)) !important;
+    box-shadow: 0 0 0 3px rgb(var(--color-brand-gold) / 0.18) !important;
+    outline: none;
+  }
+
+  p-password {
+    display: block;
+    width: 100%;
+  }
+
+  .p-password {
+    display: block;
+    width: 100%;
+  }
+
+  .p-password-input {
+    padding-right: 3rem !important;
+  }
+}

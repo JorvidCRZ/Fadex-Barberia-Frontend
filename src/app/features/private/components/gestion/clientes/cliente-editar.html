@@ -1,0 +1,106 @@
+<app-modal [(visible)]="visible" titulo="Editar cliente" mode="editar" icono="pi-pencil" maxWidth="48rem">
+  <div class="cliente-modal-form space-y-5 pt-2">
+
+    <section class="rounded-xl border border-ui-border-soft bg-ui-elevated/25 p-5">
+      <div class="mb-5">
+        <h3 class="m-0 text-base font-bold text-text-primary">Información del cliente</h3>
+        <p class="m-0 mt-1 text-sm text-text-muted">Actualiza los datos y la información de acceso.</p>
+      </div>
+
+      <form [formGroup]="datosForm" (ngSubmit)="guardarDatos()">
+        <div class="grid gap-x-5 sm:grid-cols-2">
+          <div class="part-form">
+            <label for="ed-nombre">Nombre</label>
+            <input pInputText id="ed-nombre" type="text" formControlName="nombre" maxlength="100" />
+            @if (df.nombre.touched && df.nombre.invalid) {
+              <small class="text-danger">El nombre es requerido.</small>
+            }
+          </div>
+
+          <div class="part-form">
+            <label for="ed-apellido">Apellido</label>
+            <input pInputText id="ed-apellido" type="text" formControlName="apellido" maxlength="100" />
+            @if (df.apellido.touched && df.apellido.invalid) {
+              <small class="text-danger">El apellido es requerido.</small>
+            }
+          </div>
+
+          <div class="part-form">
+            <label for="ed-telefono">Teléfono</label>
+            <input pInputText id="ed-telefono" type="tel" formControlName="telefono" maxlength="9" inputmode="numeric" (input)="onPhoneInput($event)" />
+            @if (df.telefono.touched && df.telefono.invalid) {
+              <small class="text-danger">El teléfono debe tener 9 dígitos.</small>
+            }
+          </div>
+
+          <div class="part-form">
+            <label for="ed-email">Email</label>
+            <input pInputText id="ed-email" type="email" formControlName="email" />
+            @if (df.email.touched && df.email.invalid) {
+              <small class="text-danger">Ingresa un correo válido.</small>
+            }
+          </div>
+        </div>
+
+        <div class="flex justify-end border-t border-ui-border-soft pt-4">
+          <app-button variant="primary" size="sm" icon="save" label="Guardar datos" loadingLabel="Guardando..." [loading]="guardando()" (clicked)="guardarDatos()" />
+        </div>
+      </form>
+    </section>
+
+    <section class="rounded-xl border border-ui-border-soft bg-ui-elevated/25 p-5">
+      <div class="mb-5">
+        <h3 class="m-0 text-base font-bold text-text-primary">Acceso</h3>
+        <p class="m-0 mt-1 text-sm text-text-muted">Administra el usuario y la contraseña del cliente.</p>
+      </div>
+
+      <form [formGroup]="usernameForm" (ngSubmit)="guardarUsername()" class="mb-5">
+        <div class="part-form mb-0">
+          <label for="ed-username">Usuario</label>
+          <input pInputText id="ed-username" type="text" formControlName="username" maxlength="50" placeholder="usuario.cliente" />
+          @if (uf.username.touched && uf.username.invalid) {
+            <small class="text-danger">
+              @if (uf.username.hasError('required')) { El usuario es requerido. }
+              @else if (uf.username.hasError('minlength')) { Debe tener al menos 4 caracteres. }
+              @else { No puede superar los 50 caracteres. }
+            </small>
+          }
+        </div>
+        <div class="mt-4 flex justify-end">
+          <app-button variant="primary" size="sm" icon="save" label="Guardar usuario" loadingLabel="Guardando..." [loading]="guardando()" (clicked)="guardarUsername()" />
+        </div>
+      </form>
+
+      <form [formGroup]="passwordForm" (ngSubmit)="guardarPassword()" class="border-t border-ui-border-soft pt-5">
+        <div class="grid gap-x-5 sm:grid-cols-2">
+          <div class="part-form">
+            <label for="ed-nueva">Nueva contraseña</label>
+            <p-password inputId="ed-nueva" formControlName="newPassword" [feedback]="false" [toggleMask]="true" [fluid]="true" placeholder="Mínimo 8 caracteres" />
+            @if (pf.newPassword.touched && pf.newPassword.invalid) {
+              <small class="text-danger">
+                @if (pf.newPassword.hasError('required')) { La contraseña es requerida. }
+                @else { Debe tener al menos 8 caracteres. }
+              </small>
+            }
+          </div>
+
+          <div class="part-form">
+            <label for="ed-confirm">Repetir contraseña</label>
+            <p-password inputId="ed-confirm" formControlName="confirmPassword" [feedback]="false" [toggleMask]="true" [fluid]="true" placeholder="Repite la contraseña" />
+            @if (pf.confirmPassword.touched) {
+              @if (pf.confirmPassword.hasError('required')) {
+                <small class="text-danger">Debes repetir la contraseña.</small>
+              } @else if (passwordForm.hasError('mismatch')) {
+                <small class="text-danger">Las contraseñas no coinciden.</small>
+              }
+            }
+          </div>
+        </div>
+
+        <div class="flex justify-end">
+          <app-button variant="primary" size="sm" icon="key" label="Cambiar contraseña" loadingLabel="Cambiando..." [loading]="guardando()" (clicked)="guardarPassword()" />
+        </div>
+      </form>
+    </section>
+  </div>
+</app-modal>

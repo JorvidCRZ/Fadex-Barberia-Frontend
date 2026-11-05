@@ -16,9 +16,7 @@ import { PagoComponent } from './features/auth/pago/pago.component';
 import { DashboardBarberoComponent } from './features/private/layout/dashboard-barbero.component';
 import { DashboardClienteComponent } from './features/private/layout/dashboard-cliente.component';
 import { DashboardAdministrativoComponent } from './features/private/layout/dashboard-administrativo.component';
-import { RegistrarClient } from './features/private/components/gestion/clientes/registrar-client/registrar-client.component';
 import { RegistrarBarbero } from './features/private/components/gestion/barberos/registrar-barbero/registrar-barbero.component';
-import { PerfilClient } from './features/private/components/gestion/clientes/perfil-client/perfil-client.component';
 import { Usuario } from './features/private/components/gestion/usuario/usuario.component';
 import { PerfilUsuario } from './features/private/components/gestion/usuario/perfil-usuario/perfil-usuario.component';
 import { PerfilBarbero } from './features/private/components/gestion/barberos/perfil-barbero/perfil-barbero.component';
@@ -48,9 +46,7 @@ export const routes: Routes = [
       },
       {
         path: 'gestion', children: [
-          { path: 'clientes', loadComponent: () => import('./features/private/components/gestion/clientes/clientes.component').then(m => m.Clientes) },
-          { path: 'clientes/register-cliente', component: RegistrarClient },
-          { path: 'clientes/:id', component: PerfilClient },
+          { path: 'clientes', loadComponent: () => import('./features/private/components/gestion/clientes/cliente.component').then(m => m.ClienteComponent) },
           { path: 'barberos', loadComponent: () => import('./features/private/components/gestion/barberos/barberos.component').then(m => m.Barberos) },
           { path: 'barberos/registrar-barbero', component: RegistrarBarbero },
           { path: 'barberos/:id', component: PerfilBarbero },
@@ -97,16 +93,6 @@ export const routes: Routes = [
           { path: 'pos', loadComponent: () => import('./features/private/components/operaciones/ventas/pos/pos.component').then(m => m.PosComponent) },
           { path: 'ventas', loadComponent: () => import('./features/private/components/operaciones/ventas/ventas.component').then(m => m.VentasComponent) },
           { path: 'reservas', loadComponent: () => import('./features/private/components/operaciones/reservas/reserva-list/reserva-list.component').then(m => m.ReservaList) },
-        ]
-      },
-
-      {
-        path: 'gestion', children: [
-          { path: 'clientes', loadComponent: () => import('./features/private/components/gestion/clientes/clientes.component').then(m => m.Clientes) },
-          { path: 'clientes/registrar-client', component: RegistrarClient },
-          { path: 'clientes/:id', component: PerfilClient },
-          { path: 'barberos', loadComponent: () => import('./features/private/components/gestion/barberos/barberos.component').then(m => m.Barberos) },
-          { path: 'barberos/:id', component: PerfilBarbero },
         ]
       },
       { path: 'perfil', loadComponent: () => import('./features/private/pages/perfil/perfil.component').then(m => m.PerfilComponent) },
