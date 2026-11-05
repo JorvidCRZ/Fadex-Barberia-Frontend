@@ -152,77 +152,64 @@
         </section>
 
         <!-- Reservas actuales (tabla) + detalle de la seleccionada (card) -->
-        <section class="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-3">
-          <!-- Card de detalle -->
-          @if (seleccionada; as cita) {
-            <div class="relative overflow-hidden rounded-2xl border border-ui-border-soft bg-ui-card p-5">
-              <div class="absolute left-0 right-0 top-0 h-[2px] bg-brand-gold"></div>
+       <section class="mb-8">
+  <div class="mb-3 flex items-center justify-between">
+    <h2 class="text-xl font-bold text-white">Próximas citas</h2>
+    @if (proximasCitas.length > 3) {
+    <app-button variant="ghost" size="sm" label="Ver todas" (clicked)="onVerReservas()" />
+    }
+  </div>
 
-              <div class="flex items-start justify-between gap-3">
-                <div>
-                  <span class="text-[10px] font-bold tracking-[0.18em] text-brand-gold">DETALLE DE LA CITA</span>
-                  <h3 class="mt-2 text-lg font-bold text-white">{{ cita.servicio }}</h3>
-                </div>
-                <app-status-badge [value]="cita.estado" type="text" />
-              </div>
+  @if (citasVisibles.length) {
+  <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+    @for (cita of citasVisibles; track cita.reservaId) {
+    <div class="relative overflow-hidden rounded-2xl border border-ui-border-soft bg-ui-card p-5">
+      <div class="absolute inset-x-0 top-0 h-[2px] bg-brand-gold"></div>
 
-              <div class="mt-5 flex flex-col gap-3">
-                <div class="flex items-center gap-3">
-                  <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-gold/10">
-                    <i class="pi pi-calendar text-brand-gold"></i>
-                  </div>
-                  <div>
-                    <p class="text-[11px] text-text-muted">Fecha</p>
-                    <p class="text-sm font-medium capitalize text-white">{{ formatFechaCita(cita.fecha) }}</p>
-                  </div>
-                </div>
+      <div class="flex items-start justify-between gap-3">
+        <h3 class="m-0 text-lg font-bold text-white">{{ cita.servicio }}</h3>
+        <app-status-badge [value]="cita.estado" type="text" />
+      </div>
 
-                <div class="flex items-center gap-3">
-                  <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/5">
-                    <i class="pi pi-clock text-text-secondary"></i>
-                  </div>
-                  <div>
-                    <p class="text-[11px] text-text-muted">Hora</p>
-                    <p class="text-sm font-medium text-white">{{ cita.hora }}</p>
-                  </div>
-                </div>
+      <div class="mt-4 flex flex-col gap-2 text-sm">
+        <p class="m-0 flex items-center gap-2 text-text-secondary">
+          <i class="pi pi-calendar text-brand-gold"></i>
+          <span class="first-letter:uppercase">{{ formatFechaCita(cita.fecha) }}</span>
+        </p>
+        <p class="m-0 flex items-center gap-2 text-text-secondary">
+          <i class="pi pi-clock text-brand-gold"></i>{{ cita.hora }}
+        </p>
+        <p class="m-0 flex items-center gap-2 text-text-secondary">
+          <i class="pi pi-user text-brand-gold"></i>{{ cita.barbero }}
+        </p>
+      </div>
 
-                <div class="flex items-center gap-3">
-                  <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/5">
-                    <i class="pi pi-user text-text-secondary"></i>
-                  </div>
-                  <div>
-                    <p class="text-[11px] text-text-muted">Barbero</p>
-                    <p class="text-sm font-medium text-white">{{ cita.barbero }}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div class="mt-5 flex items-center justify-between border-t border-ui-border-soft pt-4">
-                <div>
-                  <p class="text-[11px] text-text-muted">Total</p>
-                  <p class="text-sm font-bold text-brand-gold">
-                    {{ cita.monto === 'Gratis' || cita.monto === '—' ? cita.monto : 'S/ ' + cita.monto }}
-                  </p>
-                </div>
-                <app-button variant="ghost" size="sm" label="Ver detalle" icon="pi-arrow-right"
-                            (clicked)="onVerDetalle(cita.reservaId)" />
-              </div>
-            </div>
-          } @else {
-            <div class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-ui-border-soft bg-ui-card px-6 py-10 text-center">
-              <div class="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-brand-gold/10">
-                <i class="pi pi-calendar text-xl text-brand-gold"></i>
-              </div>
-              <p class="font-medium text-white">No tienes citas programadas</p>
-              <p class="mt-1 text-sm text-text-muted">Agenda tu próxima visita a Fadex Barber.</p>
-              <a class="boton-ver mt-4 !px-5 !py-2.5" routerLink="/mi-cuenta/reservas/mis-reservas" [queryParams]="{ nueva: 1 }">
-                <i class="pi pi-plus mr-2"></i>Agendar cita
-              </a>
-            </div>
-          }
-        </section>
-
+      <div class="mt-4 flex items-center justify-between border-t border-ui-border-soft pt-4">
+        <p class="m-0 text-base font-bold text-brand-gold">
+          {{ cita.monto === 'Gratis' || cita.monto === '—' ? cita.monto : 'S/ ' + (+cita.monto).toFixed(2) }}
+        </p>
+        @if (esPendientePago(cita)) {
+        <app-button variant="agregar" size="sm" icon="pi-credit-card" label="Pagar" (clicked)="irAPagar(cita.reservaId)" />
+        } @else {
+        <app-button variant="ghost" size="sm" label="Ver" icon="pi-arrow-right" (clicked)="onVerReservas()" />
+        }
+      </div>
+    </div>
+    }
+  </div>
+  } @else {
+  <div class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-ui-border-soft bg-ui-card px-6 py-10 text-center">
+    <div class="mb-3 flex size-12 items-center justify-center rounded-full bg-brand-gold/10">
+      <i class="pi pi-calendar text-xl text-brand-gold"></i>
+    </div>
+    <p class="m-0 font-medium text-white">No tienes citas programadas</p>
+    <p class="mt-1 text-sm text-text-muted">Agenda tu próxima visita a Fadex Barber.</p>
+    <a class="boton-ver mt-4 !px-5 !py-2.5" routerLink="/mi-cuenta/reservas/mis-reservas" [queryParams]="{ nueva: 1 }">
+      <i class="pi pi-plus mr-2"></i>Agendar cita
+    </a>
+  </div>
+  }
+</section>
         <!-- Actividad reciente -->
         <section>
           <div class="mb-3 flex items-center justify-between">

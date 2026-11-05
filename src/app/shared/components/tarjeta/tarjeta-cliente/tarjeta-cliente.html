@@ -1,0 +1,61 @@
+<div class="tg-textura group relative overflow-hidden rounded-2xl border transition-all duration-300" [ngClass]="
+    tarjeta.cicloActivo ? 'border-brand-gold/30 shadow-[0_0_35px_-15px_rgb(var(--color-brand-gold)/0.55)]' : 'border-brand-gold/20' ">
+    <div class="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full border border-brand-gold/10">
+    </div>
+    <div class="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full border border-brand-gold/5"></div>
+
+    <div class="relative p-6">
+        <div class="mb-5 flex items-start justify-between">
+            <div>
+                <p class="font-medium tracking-wide text-brand-gold">{{ tarjeta.categoriaNombre }}</p>
+                <p class="mt-0.5 text-xs uppercase tracking-widest text-brand-gold/50">
+                    Tarjeta Fidelización
+                </p>
+            </div>
+            <span class="filtros-badge whitespace-nowrap uppercase tracking-wide text-brand-gold">
+                {{ tarjeta.girosDisponibles }} giro{{ tarjeta.girosDisponibles === 1 ? '' : 's' }}
+            </span>
+        </div>
+
+        @if (tieneMeta(tarjeta)) {
+        <div class="mb-2 flex items-end justify-between">
+            <span class="text-[11px] uppercase tracking-wide text-text-muted">Progreso · meta {{ tarjeta.meta }} pts</span>
+            <span class="text-xl font-bold leading-none text-brand-gold">
+                {{ progresoPct(tarjeta) | number: '1.0-0' }}<span class="align-top text-xs">%</span>
+            </span>
+        </div>
+        <div class="mb-5">
+            <app-progreso-barra [pct]="progresoPct(tarjeta)" />
+        </div>
+
+        <div class="mx-auto mb-6 grid max-w-sm grid-cols-5 gap-x-3 gap-y-7">
+            @for (n of slots(tarjeta); track n) {
+            <div class="flex flex-col items-center gap-1.5">
+                <div class="flex size-12 items-center justify-center rounded-xl border text-xl transition-all"[ngClass]=" n <= tarjeta.progreso
+                  ? 'border-brand-gold/50 bg-brand-gold/10 text-brand-gold shadow-[0_0_10px_-2px_rgb(var(--color-brand-gold)/0.6)]' : 'border-white/15 bg-white/5 text-white/25'">
+                    <i class="pi pi-crown text-xl"></i>
+                </div>
+                <span class="text-[10px]" [ngClass]="n <= tarjeta.progreso ? 'text-brand-gold/60' : 'text-white/30'">{{ n }}</span>
+            </div>
+            }
+        </div>
+
+        <p class="border-t border-white/10 pt-4 text-sm text-text-secondary">
+            <span class="font-medium text-brand-gold">{{ tarjeta.progreso }} / {{ tarjeta.meta }}</span> cortes
+        </p>
+        } @else {
+        <div class="flex flex-col items-center justify-center gap-2 border-t border-white/10 py-6 pt-4 text-text-muted">
+            <i class="pi pi-id-card text-xl opacity-40"></i>
+            <p class="text-xs">Esta categoría aún no tiene una meta configurada.</p>
+        </div>
+        }
+    </div>
+
+    <div class="relative flex flex-wrap items-center justify-between gap-3 px-6 pb-5">
+        @if (puedeCanjear(tarjeta)) {
+        <app-button variant="primary" icon="pi-sparkles" label="Girar ruleta" (clicked)="verRuleta.emit(tarjeta)" />
+        } @else {
+        <app-button variant="secondary" icon="pi-sparkles" label="Ver ruleta" (clicked)="verRuleta.emit(tarjeta)" />
+        }
+    </div>
+</div>

@@ -30,7 +30,11 @@
           <a [routerLink]="profileLink()" aria-label="Perfil" class="flex h-10 w-10 items-center justify-center rounded-full bg-brand-gold text-black transition-all hover:scale-110 hover:bg-brand-gold-hover">
             <i class="pi pi-user text-lg" aria-hidden="true"></i>
           </a>
-          
+
+          <button type="button" (click)="logout()" aria-label="Cerrar sesión" class="flex flex-col items-center justify-center gap-1 rounded-lg p-2 text-xs text-brand-white transition hover:bg-ui-elevated hover:text-brand-red">
+            <i class="pi pi-sign-out  text-sm" aria-hidden="true"></i> 
+          </button>
+
           } @else {
             <a routerLink="/login" class="rounded-full bg-brand-gold px-7 py-3 text-sm font-bold uppercase tracking-wide text-black transition-colors hover:bg-brand-gold-hover xl:px-9 xl:py-3.5"> Login </a>
           }

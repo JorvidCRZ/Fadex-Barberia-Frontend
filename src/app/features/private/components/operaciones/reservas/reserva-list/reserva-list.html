@@ -1,190 +1,102 @@
-<div class="p-4 md:p-6 lg:p-8">
-    <div class="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-            <h1 class="text-xl font-semibold text-text-primary">Reservas</h1>
-            <p class="mt-0.5 text-sm text-text-secondary">Gestiona todas las citas del sistema</p>
-        </div>
-        <div class="flex gap-2">
-            <app-button variant="secondary" icon="pi-calendar" label="Calendario" (clicked)="abrirCalendario()" />
-            <app-button variant="primary" icon="pi-plus" label="Nueva reserva" (clicked)="abrirCrear()" />
-        </div>
-    </div>
+<div class="flex flex-col gap-6 mt-5">
+  <app-page-header titulo="Reservas" [icono]="icono" subtitulo="Gestiona todas las citas del sistema">
+    <app-search-bar placeholder="Buscar por cliente" ancho="w-full md:w-[24rem] lg:w-[32rem] xl:w-[40rem]"
+      (search)="buscarCliente($event)" />
+    <app-button variant="secondary" size="sm" icon="calendar" label="Calendario" (clicked)="abrirCalendario()" />
+    <app-button variant="primary" size="sm" icon="plus" label="Nueva reserva" (clicked)="abrirCrear()" />
+  </app-page-header>
 
-    <div class="mb-4 flex flex-col gap-4">
-        <app-search-bar placeholder="Buscar por cliente" (search)="buscarCliente($event)" />
-        <app-filtros [fields]="filtrosFields" [titulo]="texto" [text]="texto" [acordeon]="true"
-            (buscar)="onBuscar($event)" (limpiar)="onLimpiar()" />
-    </div>
+  @if (stats.length) {
+    <app-stats [items]="stats" />
+  }
 
-    <div class="relative w-full overflow-x-auto">
-        <p-table [value]="reservas" [lazy]="true" (onLazyLoad)="onLazyLoad($event)" [paginator]="true" [rows]="rows"
-            [totalRecords]="totalRecords" [loading]="!cargado" dataKey="reservaId" [showCurrentPageReport]="true"
-            currentPageReportTemplate="Viendo {first} a {last} de {totalRecords} entradas"
-            [tableStyle]="{ 'min-width': '900px' }" class="rounded-xl">
+  <app-filtros [fields]="filtrosFields" [titulo]="texto" [text]="texto" [acordeon]="true" [abierto]="false"
+    (buscar)="onBuscar($event)" (limpiar)="onLimpiar()" />
 
-            <ng-template #header>
-                <tr>
-                    <th>Cliente</th>
-                    <th>Barbero</th>
-                    <th>Servicio</th>
-                    <th>Fecha</th>
-                    <th>Tipo</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-            </ng-template>
+  <div class="flex flex-col gap-2">
+    <div class="table-base p-4 md:p-6 lg:p-8">
+      <div class="relative w-full overflow-x-auto">
+        <p-table [value]="reservas" [loading]="!cargado" dataKey="reservaId"
+          [tableStyle]="{ 'min-width': '1000px' }" class="rounded-xl">
 
-            <ng-template #body let-reserva>
-                <tr>
-                    <td class="whitespace-nowrap">{{ reserva.clienteNombre || 'N/A' }}</td>
-                    <td class="whitespace-nowrap">{{ reserva.barberoNombre || 'N/A' }}</td>
-                    <td class="whitespace-nowrap">{{ reserva.servicio || 'N/A' }}</td>
-                    <td class="whitespace-nowrap text-text-table">{{ reserva.fecha | dateHelper }}</td>
+          <ng-template #header>
+            <tr class="table-header">
+              <th class="text-center">Cliente</th>
+              <th class="text-center">Barbero</th>
+              <th class="text-center">Servicio</th>
+              <th class="text-center">Fecha</th>
+              <th class="text-center">Tipo</th>
+              <th class="text-center">Estado</th>
+              <th class="text-center">Acciones</th>
+            </tr>
+          </ng-template>
 
-                    <td class="whitespace-nowrap">
-                        <app-status-badge type="text" tone="info"
-                            [value]="reserva.tipoReserva === 'RESERVA_VIRTUAL' ? 'Virtual' : 'Gratis'" />
-                    </td>
+          <ng-template #body let-reserva>
+            <tr class="table-row">
+              <td class="whitespace-nowrap text-center font-medium">{{ reserva.clienteNombre || 'N/A' }}</td>
+              <td class="whitespace-nowrap text-center">{{ reserva.barberoNombre || 'N/A' }}</td>
+              <td class="whitespace-nowrap text-center">{{ reserva.servicio || 'N/A' }}</td>
+              <td class="whitespace-nowrap text-center">{{ reserva.fecha | dateHelper }}</td>
+              <td class="whitespace-nowrap text-center">
+                <app-status-badge type="text" tone="info"
+                  [value]="reserva.tipoReserva === 'RESERVA_VIRTUAL' ? 'Virtual' : 'Gratis'" />
+              </td>
+              <td class="whitespace-nowrap text-center">
+                <div class="flex flex-col items-center gap-1">
+                  <app-status-badge type="text" [value]="reserva.estadoReserva || 'Sin estado'" />
+                  @if (reserva.recordatorioEnviado) {
+                    <span class="flex items-center gap-1 text-[10px] text-success">
+                      <i class="pi pi-whatsapp" aria-hidden="true"></i> Avisado
+                    </span>
+                  }
+                </div>
+              </td>
+              <td class="whitespace-nowrap text-center">
+                <div class="table-actions">
+                  @if (puedeCobrar(reserva)) {
+                    <app-button variant="agregar" icon="wallet" tooltip="Cobrar y generar venta"
+                      (clicked)="cobrarReserva(reserva)" />
+                  }
+                  <app-button variant="ver-tabla" icon="eye" tooltip="Ver detalle" (clicked)="verDetalle(reserva)" />
+                </div>
+              </td>
+            </tr>
+          </ng-template>
 
-                    <td class="whitespace-nowrap">
-                        <div class="flex flex-col items-center gap-1">
-                            <app-status-badge type="text" [value]="reserva.estadoReserva || 'Sin estado'" />
-                            @if (reserva.recordatorioEnviado) {
-                                <span class="flex items-center gap-1 text-[10px] text-success">
-                                    <i class="pi pi-whatsapp"></i> Avisado
-                                </span>
-                            }
-                        </div>
-                    </td>
-
-                    <td class="whitespace-nowrap">
-                        <div class="flex flex-row justify-center">
-                            @if (reserva.estadoReserva !== 'FINALIZADA' && reserva.estadoReserva !== 'CANCELADA') {
-                                <app-button variant="agregar" icon="pi-wallet" tooltip="Cobrar y generar venta"
-                                    (clicked)="cobrarReserva(reserva)" />
-                            }
-                            <app-button variant="ver-tabla" icon="pi-eye" tooltip="Ver detalle"
-                                (clicked)="verDetalle(reserva)" />
-                        </div>
-                    </td>
-                </tr>
-            </ng-template>
-
-            <ng-template #emptymessage>
-                <tr>
-                    <td colspan="7" class="py-16 text-center">
-                        <div class="flex flex-col items-center gap-3 text-text-muted">
-                            <i class="pi pi-calendar-times text-4xl"></i>
-                            <p class="text-sm font-medium">No hay reservas que coincidan</p>
-                            <app-button variant="limpiar" icon="pi-filter-slash" label="Limpiar filtros" size="sm"
-                                (clicked)="onLimpiar()" />
-                        </div>
-                    </td>
-                </tr>
-            </ng-template>
+          <ng-template #emptymessage>
+            <tr>
+              <td colspan="7">
+                <app-empty-state icono="calendar-times"
+                  [mensaje]="hayFiltros ? 'No se encontraron reservas con los filtros aplicados' : 'Aún no hay reservas registradas'"
+                  [detalle]="hayFiltros ? undefined : 'Crea la primera con el botón «Nueva reserva».'">
+                  @if (hayFiltros) {
+                    <app-button variant="limpiar" size="sm" label="Limpiar filtros" (clicked)="onLimpiar()" />
+                  }
+                </app-empty-state>
+              </td>
+            </tr>
+          </ng-template>
         </p-table>
+      </div>
     </div>
+
+    <app-paginator [first]="first" [rows]="rows" [totalRecords]="totalRecords" etiqueta="reserva(s)"
+      [rowsPerPageOptions]="[10, 25, 50, 100]" (pageChange)="onPageChange($event)" />
+  </div>
 </div>
 
-<!-- Detalle -->
-<p-dialog [(visible)]="showDetalle" [modal]="true" [draggable]="false" [resizable]="false"
-  [closable]="false" styleClass="modal-venta w-11/12 md:w-5/12" maskStyleClass="mask-venta"
-  header="Detalle de reserva" [baseZIndex]="10000">
-
-  <ng-template pTemplate="header">
-    <div class="flex w-full items-center justify-between gap-4">
-      <span class="text-white font-bold uppercase tracking-widest text-sm ml-2">Detalle de reserva</span>
-      <app-button variant="cierre" icon="pi-times" tooltip="Cerrar" (clicked)="showDetalle = false" />
-    </div>
-  </ng-template>
-
-  <ng-template pTemplate="content">
-    @if (reservaSeleccionada) {
-      <div class="mv">
-
-        <div class="mv__hero">
-          <div class="mv__hero-main">
-            <div class="mv__hero-icon"><i class="pi pi-calendar"></i></div>
-            <div>
-              <p class="mv__label">Fecha de reserva</p>
-              <p class="mv__num">{{ reservaSeleccionada.fecha | date:'dd/MM/yyyy' }}</p>
-            </div>
-          </div>
-          <app-status-badge type="text" [value]="reservaSeleccionada.estadoReserva || 'Sin estado'" />
-        </div>
-
-        <div class="mv__grid">
-          <div class="mv__field">
-            <i class="pi pi-user"></i>
-            <div>
-              <p class="mv__label">Cliente</p>
-              <p class="mv__value">{{ reservaSeleccionada.clienteNombre || 'N/A' }}</p>
-            </div>
-          </div>
-          <div class="mv__field">
-            <i class="pi pi-id-card"></i>
-            <div>
-              <p class="mv__label">Barbero</p>
-              <p class="mv__value">{{ reservaSeleccionada.barberoNombre || 'N/A' }}</p>
-            </div>
-          </div>
-          <div class="mv__field">
-            <i class="pi pi-clock"></i>
-            <div>
-              <p class="mv__label">Horario</p>
-              <p class="mv__fecha">{{ reservaSeleccionada.horaInicio }} - {{ reservaSeleccionada.horaFin }}</p>
-            </div>
-          </div>
-          <div class="mv__field">
-            <i [class]="reservaSeleccionada.tipoReserva === 'RESERVA_VIRTUAL' ? 'pi pi-globe' : 'pi pi-map-marker'"></i>
-            <div>
-              <p class="mv__label">Tipo</p>
-              <p class="mv__value mv__value--gold">
-                {{ reservaSeleccionada.tipoReserva === 'RESERVA_VIRTUAL' ? 'Virtual' : 'Gratis' }}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <p class="mv__section">Detalle</p>
-        <div class="mv__items">
-          <div class="mv__item">
-            <div class="mv__item-left">
-              <div class="mv__item-icon"><i class="pi pi-scissors"></i></div>
-              <div>
-                <p class="mv__item-name">{{ reservaSeleccionada.servicio || 'N/A' }}</p>
-                <p class="mv__item-sub">Servicio</p>
-              </div>
-            </div>
-            <span class="mv__item-price">{{ reservaSeleccionada.total | moneda }}</span>
-          </div>
-        </div>
-
-        @if (reservaSeleccionada.recordatorioEnviado) {
-          <div class="mv__estado">
-            <i class="pi pi-whatsapp"></i>
-            Recordatorio enviado por WhatsApp
-          </div>
-        }
-
-        <div class="mv__total">
-          <span class="mv__total-label">Total</span>
-          <span class="mv__total-value">{{ reservaSeleccionada.total | moneda }}</span>
-        </div>
-
-      </div>
-    }
-  </ng-template>
-</p-dialog>
-<!-- Nueva reserva -->
-<app-modal [(visible)]="mostrarFormulario" titulo="Nueva Reserva" mode="crear" [icono]="icono" maxWidth="50rem">
-    <app-create-reserva [resetTrigger]="resetFormTrigger" (guardar)="onReservaGuardada()"
-        (cancelarEvento)="cerrarFormulario()" />
+<app-modal [(visible)]="showDetalle" titulo="Detalle de reserva" mode="ver" [icono]="icono"
+  maxWidth="40rem" (cerrado)="cerrarDetalle()">
+  @if (reservaSeleccionada) {
+    <app-reserva-detalle [reserva]="reservaSeleccionada" />
+  }
 </app-modal>
 
-<!-- Calendario -->
-<app-modal [(visible)]="mostrarCalendario" titulo="Calendario de Reservas" mode="ver" icono="pi-calendar" maxWidth="75rem">
-    @if (mostrarCalendario) {
-        <app-calendar-reservas />
-    }
+<app-reservar modo="admin" [(visible)]="mostrarFormulario" (creada)="onReservaGuardada()" />
+
+<app-modal [(visible)]="mostrarCalendario" titulo="Calendario de Reservas" mode="ver" icono="pi-calendar"
+  maxWidth="75rem">
+  @if (mostrarCalendario) {
+    <app-calendar-reservas />
+  }
 </app-modal>

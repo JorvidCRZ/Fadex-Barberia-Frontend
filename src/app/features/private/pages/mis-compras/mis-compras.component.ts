@@ -14,6 +14,7 @@ import { StatusBadgeComponent } from '../../../../shared/components/status-badge
 import { DateFormatPipe } from '../../../../shared/pipes/dat.pipe';
 import { MonedaPipe } from '../../../../shared/pipes/moneda.pipe';
 import { VentaService } from '@/app/core/services/venta/venta.service';
+import { PaginatorComponent } from '@/app/shared/components/paginator/paginator.component';
 
 @Component({
   selector: 'app-mis-compras',
@@ -21,7 +22,7 @@ import { VentaService } from '@/app/core/services/venta/venta.service';
 
   imports: [
     CommonModule, TableModule, PaginatorModule, ModalComponent, StatusBadgeComponent,
-    ButtonComponent, PageHeaderComponent, DateFormatPipe, MonedaPipe,
+    ButtonComponent, PageHeaderComponent, DateFormatPipe, MonedaPipe,PaginatorComponent,
   ],
 
   templateUrl: './mis-compras.html',

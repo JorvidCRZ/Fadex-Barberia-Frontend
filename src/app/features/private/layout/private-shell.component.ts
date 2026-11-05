@@ -9,7 +9,7 @@ import { ButtonComponent } from '../../../shared/components/button/button.compon
   imports: [SidebarComponent, RouterOutlet, AvatarModule, ButtonComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-  <div class="relative flex min-h-screen overflow-hidden bg-brand-black">
+  <div class="relative flex min-h-screen bg-brand-black">
     @if (sidebarOpen()) {
       <div class="fixed inset-0 z-30 bg-black/60 md:hidden" (click)="toggleSidebar()"></div>
     }
@@ -27,6 +27,8 @@ import { ButtonComponent } from '../../../shared/components/button/button.compon
     </aside>
 
     <div class="flex min-h-screen min-w-0 flex-1 flex-col">
+      <div class="h-[72px] shrink-0 md:hidden" aria-hidden="true"></div>
+
       <div class="flex h-16 items-center justify-between gap-3 border-b border-ui-border bg-ui-black px-3 md:px-6">
         <div class="flex min-w-0 flex-1 items-center gap-3">
           <span class="inline-flex shrink-0 md:hidden">
@@ -60,7 +62,7 @@ import { ButtonComponent } from '../../../shared/components/button/button.compon
         </div>
       </div>
 
-      <div class="min-h-0 flex-1 overflow-y-auto bg-brand-black p-4 md:p-6">
+      <div class="min-h-0 flex-1 bg-brand-black p-4 md:p-6">
         <router-outlet></router-outlet>
       </div>
     </div>

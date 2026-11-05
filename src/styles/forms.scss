@@ -114,6 +114,7 @@ textarea:-webkit-autofill:focus,
 .p-multiselect,
 .p-treeselect {
     border-radius: 0.75rem !important;
+    background: rgb(var(--color-ui-card)) !important;
 }
 
 /* ========================================
@@ -126,7 +127,6 @@ app-reclamos {
     .p-datepicker-input,
     .p-select,
     textarea {
-        width: 100%;
         border: 1px solid rgb(var(--color-ui-border)) !important;
         border-radius: 0.75rem !important;
         background: rgb(var(--color-ui-card)) !important;

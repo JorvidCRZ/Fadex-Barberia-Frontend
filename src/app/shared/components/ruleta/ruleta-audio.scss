@@ -1,0 +1,58 @@
+:host {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 20;
+}
+
+.controles {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    padding: .55rem .8rem;
+    border-radius: 999px;
+    background: rgba(18, 18, 18, .82);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(202, 162, 74, .25);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, .35);
+}
+
+.controles ::ng-deep .slider-volumen {
+    width: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: all .25s ease;
+}
+
+.controles:hover ::ng-deep .slider-volumen {
+    width: 120px;
+    opacity: 1;
+}
+
+.controles ::ng-deep .p-slider {
+    height: 4px;
+    background: rgba(255, 255, 255, .18);
+}
+
+.controles ::ng-deep .p-slider-range {
+    background: #d4af37;
+}
+
+.controles ::ng-deep .p-slider-handle {
+    width: 18px;
+    height: 18px;
+    margin-top: -7px;
+    margin-left: -9px;
+    border: 3px solid #d4af37;
+    background: #fff;
+    box-shadow: 0 0 12px rgba(212, 175, 55, .45);
+    transition: .2s;
+}
+
+.controles ::ng-deep .p-slider-handle:hover {
+    transform: scale(1.15);
+}
+
+.controles ::ng-deep .p-slider-handle:focus {
+    box-shadow: 0 0 0 4px rgba(212, 175, 55, .25), 0 0 12px rgba(212, 175, 55, .45);
+}

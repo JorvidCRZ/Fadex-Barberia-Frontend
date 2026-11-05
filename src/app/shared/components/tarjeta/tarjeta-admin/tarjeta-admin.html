@@ -1,0 +1,113 @@
+<div class="flex flex-col gap-4">
+
+    @if (clienteNombre) {
+    <div>
+        <p class="mb-1 text-xs uppercase tracking-widest text-brand-gold/70">Cliente</p>
+        <h3 class="text-lg font-semibold text-text-primary">{{ clienteNombre }}</h3>
+    </div>
+    }
+
+    <div class="flex w-fit gap-1 rounded-lg bg-black/20 p-1">
+        <app-button [variant]="vista === 'tarjetas' ? 'primary' : 'ghost'" size="sm" icon="pi-id-card" label="Tarjetas"
+            (clicked)="cambiarVista('tarjetas')" />
+        <app-button [variant]="vista === 'grafico' ? 'primary' : 'ghost'" size="sm" icon="pi-chart-bar" label="Gráfico"
+            (clicked)="cambiarVista('grafico')" />
+    </div>
+
+    @if (vista === 'grafico') {
+    <div class="rounded-2xl border border-ui-border-soft bg-ui-card p-5">
+        @if (tarjetasConMeta.length) {
+        <div class="relative" [style.height.px]="alturaGrafico">
+            <canvas #progresoChart></canvas>
+        </div>
+        } @else {
+        <div class="flex flex-col items-center justify-center gap-2 py-10 text-text-muted">
+            <i class="pi pi-chart-bar text-2xl opacity-40"></i>
+            <p class="text-xs">Ninguna categoría tiene meta configurada aún.</p>
+        </div>
+        }
+
+        @if (tarjetasSinMeta.length) {
+        <p class="mt-3 text-[11px] text-text-muted">
+            Sin meta configurada: <span class="text-text-secondary">{{ nombresSinMeta }}</span>
+        </p>
+        }
+    </div>
+    } @else {
+
+    @for (t of tarjetas; track t.id) {
+    <div class="tg-textura group relative overflow-hidden rounded-2xl border transition-all duration-300"
+        [ngClass]="t.cicloActivo
+            ? 'border-brand-gold/30 shadow-[0_0_35px_-15px_rgb(var(--color-brand-gold)/0.55)]'
+            : 'border-ui-border'">
+
+        <div class="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-brand-gold/10 blur-3xl"></div>
+        <div class="pointer-events-none absolute inset-0 bg-gradient-to-br from-ui-card via-ui-card to-ui-elevated/60"></div>
+
+        <div class="tg-esquina left-2.5 top-2.5 rounded-tl-md border-l-2 border-t-2"></div>
+        <div class="tg-esquina right-2.5 top-2.5 rounded-tr-md border-r-2 border-t-2"></div>
+        <div class="tg-esquina bottom-2.5 left-2.5 rounded-bl-md border-b-2 border-l-2"></div>
+        <div class="tg-esquina bottom-2.5 right-2.5 rounded-br-md border-b-2 border-r-2"></div>
+
+        <button type="button" class="relative flex w-full cursor-pointer items-center gap-4 p-6 text-left"
+            [attr.aria-expanded]="expandidaId() === t.id" (click)="toggle(t)">
+            <div class="relative size-16 shrink-0">
+                <div class="absolute inset-0 animate-girar-anillo rounded-2xl"
+                    style="background:conic-gradient(from 0deg, transparent 0%, rgb(var(--color-brand-gold) / 0.9) 15%, transparent 35%);">
+                </div>
+                <div class="absolute inset-[3px] flex items-center justify-center rounded-2xl border border-brand-gold/40 bg-ui-card shadow-[0_0_15px_-3px_rgb(var(--color-brand-gold)/0.5)]">
+                    <i class="pi pi-id-card text-2xl text-brand-gold"></i>
+                </div>
+            </div>
+
+            <div class="min-w-0 flex-1">
+                <div class="flex items-center justify-between gap-3">
+                    <div class="min-w-0">
+                        <p class="mb-0.5 text-[10px] uppercase tracking-widest text-brand-gold/60">Categoría</p>
+                        <h4 class="truncate text-lg font-bold leading-tight tracking-tight text-text-primary">{{ t.categoriaNombre }}</h4>
+                    </div>
+                    <app-status-badge class="shrink-0" [value]="t.cicloActivo" trueLabel="Activo" falseLabel="Ciclo inactivo" />
+                </div>
+
+                <div class="mt-4 rounded-xl border border-brand-gold/15 bg-black/25 px-3.5 py-3">
+                    @if (tieneMeta(t)) {
+                    <div class="mb-1.5 flex items-end justify-between">
+                        <span class="text-[11px] uppercase tracking-wide text-text-muted">Progreso · meta {{ t.meta }} pts</span>
+                        <span class="text-xl font-bold leading-none text-brand-gold">
+                            {{ progresoPct(t) | number:'1.0-0' }}<span class="align-top text-xs">%</span>
+                        </span>
+                    </div>
+                    <app-progreso-barra [pct]="progresoPct(t)" />
+                    <p class="mt-1.5 text-[11px] text-text-secondary">{{ t.progreso }} de {{ t.meta }} pts acumulados</p>
+                    } @else {
+                    <p class="py-2 text-[11px] italic text-text-muted">Categoría sin meta configurada.</p>
+                    }
+                </div>
+
+                <div class="mt-3 flex items-center justify-between">
+                    <span class="flex items-center gap-1.5 text-xs text-text-muted">
+                        <i class="pi pi-refresh text-[10px]"></i>Giros disponibles
+                    </span>
+                    <span class="text-sm font-semibold text-text-primary">
+                        {{ t.girosDisponibles }}
+                        <span class="font-normal text-text-muted">/ {{ t.totalGiros }} totales</span>
+                    </span>
+                </div>
+            </div>
+
+            <div class="flex size-8 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 transition-transform"
+                [class.rotate-180]="expandidaId() === t.id">
+                <i class="pi pi-chevron-down text-xs text-text-muted"></i>
+            </div>
+        </button>
+
+        @if (expandidaId() === t.id) {
+        <app-tarjeta-movimientos [tarjetaId]="t.id" />
+        }
+    </div>
+    } @empty {
+    <p class="py-6 text-center text-sm text-text-muted">No hay tarjetas para mostrar.</p>
+    }
+
+    }
+</div>

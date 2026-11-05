@@ -41,7 +41,6 @@
           </span>
         </td>
 
-        <!-- Productos -->
         <td>
           <div class="flex items-center justify-center gap-2">
             <div
@@ -55,27 +54,20 @@
           </div>
         </td>
 
-        <!-- Método de pago -->
         <td>
           <span class="text-sm text-text-primary">{{ compra.metodoPago || '—' }}</span>
         </td>
 
-        <!-- Total -->
         <td>
           <span class="font-bold text-brand-gold">{{ compra.total | moneda }}</span>
         </td>
 
-        <!-- Acciones -->
         <td>
           <div class="flex items-center justify-center gap-2">
-            <app-button variant="ver-tabla" icon="eye" tooltip="Ver detalle" tooltipPosition="top"
-              (clicked)="verDetalle(compra)" />
-            <app-button variant="secondary" size="sm" icon="download" tooltip="Descargar comprobante"
-              tooltipPosition="top" [loading]="descargandoId() === compra.ventaId"
-              (clicked)="descargarComprobante(compra)" />
+            <app-button variant="ver-tabla" icon="eye" tooltip="Ver detalle" tooltipPosition="top" (clicked)="verDetalle(compra)" />
+            <app-button variant="accion-cita" icon="download" tooltip="Descargar comprobante" tooltipPosition="top" [loading]="descargandoId() === compra.ventaId" (clicked)="descargarComprobante(compra)" />
           </div>
         </td>
-
       </tr>
     </ng-template>
 
@@ -86,8 +78,7 @@
           <div class="flex flex-col items-center gap-3">
             <i class="pi pi-shopping-bag text-5xl text-text-muted opacity-30"></i>
             <p class="text-lg text-text-muted">Aún no has comprado productos</p>
-            <app-button variant="primary" size="sm" icon="shopping-cart" label="Ver productos"
-              (clicked)="irAProductos()" />
+            <app-button variant="primary" size="sm" icon="shopping-cart" label="Ver productos" (clicked)="irAProductos()" />
           </div>
         </td>
       </tr>
@@ -106,14 +97,7 @@
     </ng-template>
 
   </p-table>
-
-  <div class="producto-page-paginator">
-    <p-paginator [first]="first()" [rows]="rows()" [totalRecords]="totalRecords()"
-      [rowsPerPageOptions]="[5, 10, 25, 50]" [showCurrentPageReport]="true"
-      currentPageReportTemplate="Página {currentPage} de {totalPages} · {totalRecords} compra(s)"
-      (onPageChange)="onPaginatorChange($event)" />
-  </div>
-
+    <app-paginator [first]="first()" [rows]="rows()" [totalRecords]="totalRecords()" etiqueta="compra(s)" (pageChange)="onPaginatorChange($event)" />
 </div>
 
 <!-- Modal: detalle de la compra -->
@@ -184,8 +168,7 @@
         </div>
       </div>
 
-      <app-button variant="secondary" icon="download" label="Descargar comprobante" [fullWidth]="true"
-        [loading]="descargandoId() === compra.ventaId" (clicked)="descargarComprobante(compra)" />
+      <app-button variant="secondary" icon="download" label="Descargar comprobante" [fullWidth]="true" [loading]="descargandoId() === compra.ventaId" (clicked)="descargarComprobante(compra)" />
     </div>
   }
 </app-modal>

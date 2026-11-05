@@ -1,0 +1,4 @@
+<div class="controles">
+    <app-button variant="sidebar-toggle" [icon]="icono" tooltip="Música" (clicked)="audio.toggle()" />
+    <p-slider [(ngModel)]="volumen" [min]="0" [max]="100" (onChange)="cambiarVolumen($event.value)" styleClass="slider-volumen" />
+</div>

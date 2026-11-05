@@ -1,8 +1,9 @@
 import { Component, computed, effect, inject, input, model, output, signal, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { AbstractControl, FormBuilder, FormControl, ReactiveFormsModule, ValidationErrors, Validators, } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormControl, FormsModule, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { PrimeNG } from 'primeng/config';
+import { AutoCompleteCompleteEvent, AutoCompleteModule, AutoCompleteSelectEvent } from 'primeng/autocomplete';
 import { DatePickerModule } from 'primeng/datepicker';
 import { CheckboxModule } from 'primeng/checkbox';
 import { SelectModule } from 'primeng/select';
@@ -10,21 +11,25 @@ import { TableModule } from 'primeng/table';
 import { finalize } from 'rxjs';
 import { Servicio } from '../../../../core/models/catalogos/servicios.model';
 import { Barbero } from '../../../../core/models/gestion/barbero/barbero.model';
+import { Cliente } from '../../../../core/models/gestion/cliente/cliente.model';
 import { ReservaRequest } from '../../../../core/models/reserva/reservaRequest';
 import { TokenService } from '../../../../core/services/auth/token.service';
 import { ServicioService } from '../../../../core/services/catalogos/servicio.service';
 import { BarberoService } from '../../../../core/services/gestion/barbero.service';
+import { ClienteService } from '../../../../core/services/gestion/cliente.service';
 import { ReservaService } from '../../../../core/services/operaciones/reserva.service';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { MonedaPipe } from '../../../../shared/pipes/moneda.pipe';
 import { DateFormatPipe } from '../../../../shared/pipes/dat.pipe';
+import { SafeImageUrlPipe } from '../../../../shared/pipes/safe-image-url.pipe';
 import { NotificationService } from '@/app/core/services/common/notification.service';
 
 type BarberoVista = Barbero & { nombreCompleto: string };
+type ClienteVista = Cliente & { nombreCompleto: string };
 
 const APERTURA = 9 * 60;
-const CIERRE = 19 * 60;
+const CIERRE = 21 * 60;
 const PASO_MINUTOS = 30;
 
 const fechaHoraValida = (control: AbstractControl): ValidationErrors | null => {
@@ -55,7 +60,7 @@ interface Horario {
   minutos: number;   // minutos desde las 00:00
 }
 
-/** 09:00, 09:30 ... 18:30 (la última cita empieza 30 min antes del cierre) */
+/** 09:00, 09:30 ... 20:30 (la última cita empieza 30 min antes del cierre) */
 const HORARIOS: Horario[] = (() => {
   const out: Horario[] = [];
   for (let m = APERTURA; m < CIERRE; m += PASO_MINUTOS) {
@@ -75,12 +80,17 @@ const esMismoDia = (a: Date, b: Date): boolean => a.toDateString() === b.toDateS
 
 // ── Componente ───────────────────────────────────────────────────────────────
 
+/**
+ * Formulario único de reservas.
+ *   <app-reservar [(visible)]="mostrar" (creada)="recargar()" />                 → cliente logueado
+ *   <app-reservar modo="admin" [(visible)]="mostrar" (creada)="recargar()" />    → admin elige al cliente
+ */
 @Component({
   selector: 'app-reservar',
   standalone: true,
   imports: [
-    CommonModule, ReactiveFormsModule, DatePickerModule, CheckboxModule, SelectModule, TableModule,
-    ModalComponent, ButtonComponent, MonedaPipe, DateFormatPipe
+    CommonModule, FormsModule, ReactiveFormsModule, AutoCompleteModule, DatePickerModule, CheckboxModule,
+    SelectModule, TableModule, ModalComponent, ButtonComponent, MonedaPipe, DateFormatPipe, SafeImageUrlPipe,
   ],
   templateUrl: './reservar.html',
   styles: [`
@@ -95,6 +105,7 @@ export class ReservarComponent {
   private readonly notify = inject(NotificationService);
   private readonly tokenService = inject(TokenService);
   private readonly barberoService = inject(BarberoService);
+  private readonly clienteService = inject(ClienteService);
   private readonly servicioService = inject(ServicioService);
   private readonly reservaService = inject(ReservaService);
   private readonly primeng = inject(PrimeNG);
@@ -102,6 +113,10 @@ export class ReservarComponent {
   visible = model(false);
   creada = output<void>();
   guardando = signal(false);
+
+  /** 'cliente': usa el usuario logueado y pide términos. 'admin': elige el cliente, sin términos */
+  modo = input<'cliente' | 'admin'>('cliente');
+  esAdmin = computed(() => this.modo() === 'admin');
 
   /** Servicio que se preselecciona al abrir (viene desde el detalle del servicio). null = ninguno */
   servicioIdInicial = input<number | null>(null);
@@ -122,6 +137,13 @@ export class ReservarComponent {
   fechaCtrl = new FormControl<Date | null>(null);
   fechaSel = signal<Date | null>(null);
   horaSel = signal<string | null>(null);
+
+  // ── Cliente (solo modo admin) ──
+  /** Lo que muestra el buscador: texto mientras escribe, el cliente una vez elegido */
+  clienteModelo: ClienteVista | string | null = null;
+  clientesSugeridos = signal<ClienteVista[]>([]);
+  clienteSel = signal<ClienteVista | null>(null);
+  buscandoCliente = signal(false);
 
   // ── Barberos (select con búsqueda) ──
   barberos = signal<BarberoVista[]>([]);
@@ -145,6 +167,7 @@ export class ReservarComponent {
   });
 
   citaForm = this.fb.group({
+    clienteId: [null as number | null],
     barberoId: [null as number | null, [Validators.required]],
     servicioId: [null as number | null, [Validators.required]],
     fechaHora: [null as Date | null, [Validators.required, fechaHoraValida]],
@@ -186,6 +209,22 @@ export class ReservarComponent {
 
   alAbrir(): void {
     this.citaForm.reset({ notas: '', aceptaTerminos: false });
+
+    // Validaciones según el modo
+    const { clienteId, aceptaTerminos } = this.citaForm.controls;
+    if (this.esAdmin()) {
+      clienteId.setValidators([Validators.required]);
+      aceptaTerminos.clearValidators();
+    } else {
+      clienteId.clearValidators();
+      aceptaTerminos.setValidators([Validators.requiredTrue]);
+    }
+    clienteId.updateValueAndValidity();
+    aceptaTerminos.updateValueAndValidity();
+
+    this.clienteModelo = null;
+    this.clienteSel.set(null);
+    this.clientesSugeridos.set([]);
     this.barberoSel.set(null);
     this.servicioSel.set(null);
     this.busquedaServicio.set('');
@@ -200,6 +239,53 @@ export class ReservarComponent {
 
   cerrar(): void {
     this.visible.set(false);
+  }
+
+  // ── Cliente (modo admin) ───────────────────────────────────────────────────
+
+  buscarCliente(event: AutoCompleteCompleteEvent): void {
+    const texto = event.query.trim();
+    this.buscandoCliente.set(true);
+
+    const request$ = texto
+      ? this.clienteService.buscarPorNombre(texto, 0, 10)
+      : this.clienteService.listar(0, 10);
+
+    request$.pipe(finalize(() => this.buscandoCliente.set(false))).subscribe({
+      next: (res) => {
+        const data = (res?.data?.content ?? []) as Cliente[];
+        this.clientesSugeridos.set(
+          data.map((c) => ({
+            ...c,
+            nombreCompleto: `${c.persona?.nombre ?? ''} ${c.persona?.apellido ?? ''}`.trim(),
+          })),
+        );
+      },
+      error: (error) => {
+        this.clientesSugeridos.set([]);
+        this.notify.showHttpError(error, 'Error buscando clientes');
+      },
+    });
+  }
+
+  onClienteSelect(event: AutoCompleteSelectEvent): void {
+    const cliente = event.value as ClienteVista;
+    this.clienteSel.set(cliente);
+    this.citaForm.controls.clienteId.setValue(cliente?.clienteId ?? null);
+    this.citaForm.controls.clienteId.markAsTouched();
+  }
+
+  /** Si vuelve a escribir (texto en vez de cliente), se invalida la selección anterior */
+  onClienteInput(valor: ClienteVista | string | null): void {
+    if (typeof valor === 'string' || valor === null) {
+      this.limpiarCliente();
+    }
+  }
+
+  limpiarCliente(): void {
+    this.clienteSel.set(null);
+    this.citaForm.controls.clienteId.setValue(null);
+    this.citaForm.controls.clienteId.markAsTouched();
   }
 
   // ── Barberos ───────────────────────────────────────────────────────────────
@@ -284,18 +370,17 @@ export class ReservarComponent {
     return this.servicioSel()?.servicioId === servicio.servicioId;
   }
 
-
+  /** Primera imagen del servicio (urlsMultimedia). El template la pasa por safeImageUrl. */
   imagenServicio(servicio: Servicio | null): string | null {
-    if (!servicio) return null;
-    const s = servicio as any;
-    const url = s.imagenUrl ?? s.imagen ?? s.urlImagen ?? s.imagenes?.[0]?.url ?? s.imagenes?.[0] ?? null;
-    return typeof url === 'string' && url.length > 0 ? url : null;
+    const url = servicio?.urlsMultimedia?.[0];
+    return typeof url === 'string' && url.trim().length > 0 ? url : null;
   }
 
   ocultarImagen(event: Event): void {
     (event.target as HTMLImageElement).style.display = 'none';
   }
 
+  // ── Fecha y hora ───────────────────────────────────────────────────────────
 
   onFechaSelect(fecha: Date | null): void {
     this.fechaSel.set(fecha);
@@ -352,7 +437,7 @@ export class ReservarComponent {
     const errors = this.citaForm.controls.fechaHora.errors;
     if (errors?.['fechaPasada']) return 'La fecha y hora no pueden ser anteriores a este momento';
     if (errors?.['domingo']) return 'No atendemos los domingos';
-    if (errors?.['fueraHorario']) return 'Atendemos de 09:00 AM a 07:00 PM (última cita 06:30 PM)';
+    if (errors?.['fueraHorario']) return 'Atendemos de 09:00 AM a 09:00 PM (última cita 08:30 PM)';
     return 'Selecciona la fecha y la hora';
   }
 
@@ -371,7 +456,7 @@ export class ReservarComponent {
       return;
     }
 
-    if (!this.tokenService.isLogged()) {
+    if (!this.esAdmin() && !this.tokenService.isLogged()) {
       this.notify.showError('Por favor inicia sesión nuevamente', 'Sesión no válida');
       this.router.navigate(['/login']);
       return;
@@ -381,7 +466,7 @@ export class ReservarComponent {
     const fechaHora = f.fechaHora as Date;
 
     const request: ReservaRequest = {
-      clienteId: Number(this.tokenService.getUserId()),
+      clienteId: this.esAdmin() ? f.clienteId! : Number(this.tokenService.getUserId()),
       barberoId: f.barberoId!,
       servicioId: f.servicioId!,
       fecha: toIsoDate(fechaHora),
@@ -403,10 +488,11 @@ export class ReservarComponent {
   }
 
   private alGuardar(): void {
-    this.notify.showSuccess('Tu cita fue agendada exitosamente', '¡Cita agendada!');
+    this.notify.showSuccess(
+      this.esAdmin() ? 'La reserva se creó correctamente' : 'Tu cita fue agendada exitosamente',
+      this.esAdmin() ? 'Reserva creada' : '¡Cita agendada!',
+    );
     this.cerrar();
     this.creada.emit();
   }
-
-
 }

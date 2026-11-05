@@ -1,7 +1,6 @@
 import { ChangeDetectorRef, Component, DestroyRef, EventEmitter, inject, Input, OnChanges, OnInit, Output, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ButtonModule } from 'primeng/button';
 import { SelectModule } from "primeng/select";
 import { MessageModule } from 'primeng/message';
 import { CheckboxModule } from 'primeng/checkbox';
@@ -10,13 +9,14 @@ import { InputTextModule } from 'primeng/inputtext';
 import { FileUpload, FileUploadModule } from 'primeng/fileupload';
 import { Categoria, CategoriaTipo } from '@/app/core/models/catalogos/categorias.model';
 import { campoInvalido, marcarFormulario } from '@/app/shared/utils/form-utils.component';
+import { ButtonComponent } from '@/app/shared/components/button/button.component';
 
 @Component({
   selector: 'app-categoria-form',
   standalone: true,
   imports: [
     ReactiveFormsModule, InputTextModule, SelectModule, TextareaModule,
-    CheckboxModule, ButtonModule, MessageModule, FileUploadModule
+    CheckboxModule, MessageModule, FileUploadModule, ButtonComponent
   ],
   templateUrl: './categoria-form.html'
 })
@@ -26,6 +26,7 @@ export class CategoriaFormComponent implements OnChanges, OnInit {
   @Output() cancelarEvento = new EventEmitter<void>();
   @Input() categoria: Categoria | null = null;
   @Input() categoriasPadres: Categoria[] = [];
+  @Input() guardando = false;
 
   private cd = inject(ChangeDetectorRef);
   private destroyRef = inject(DestroyRef);

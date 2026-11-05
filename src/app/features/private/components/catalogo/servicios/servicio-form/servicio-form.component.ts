@@ -3,64 +3,70 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { forkJoin } from 'rxjs';
 import { TreeNode } from 'primeng/api';
-import { FileUpload, FileUploadModule } from 'primeng/fileupload';
 import { ImageModule } from 'primeng/image';
-import { ButtonModule } from 'primeng/button';
 import { MessageModule } from 'primeng/message';
 import { CheckboxModule } from 'primeng/checkbox';
+import { TextareaModule } from 'primeng/textarea';
 import { InputTextModule } from 'primeng/inputtext';
 import { TreeSelectModule } from 'primeng/treeselect';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { FileUpload, FileUploadModule } from 'primeng/fileupload';
 import { Servicio, ServicioRequest } from '@/app/core/models/catalogos/servicios.model';
 import { Categoria } from '@/app/core/models/catalogos/categorias.model';
-import { ImageUploadService } from '@/app/core/services/common/imageUpload.service';
 import { ImagenProductoUI } from '@/app/core/models/common/imagen.model';
-import { SafeImageUrlPipe } from '@/app/shared/pipes/safe-image-url.pipe';
+import { ImageUploadService } from '@/app/core/services/common/imageUpload.service';
 import { campoInvalido, marcarFormulario } from '@/app/shared/utils/form-utils.component';
+import { ButtonComponent } from '@/app/shared/components/button/button.component';
+import { SafeImageUrlPipe } from '@/app/shared/pipes/safe-image-url.pipe';
 
 @Component({
   selector: 'app-servicio-form',
+  standalone: true,
   imports: [
-    ReactiveFormsModule, InputTextModule, CheckboxModule, TreeSelectModule, ButtonModule,
-    MessageModule, ImageModule, FileUploadModule, InputNumberModule, SafeImageUrlPipe
+    ReactiveFormsModule, InputTextModule, TextareaModule, CheckboxModule, TreeSelectModule,
+    InputNumberModule, MessageModule, ImageModule, FileUploadModule, ButtonComponent, SafeImageUrlPipe
   ],
-  templateUrl: './servicio-form.html',
+  templateUrl: './servicio-form.html'
 })
-export class ServicioFormComponent implements OnInit, OnChanges {
-  @Output() guardar = new EventEmitter<{ data: ServicioRequest, imagenes?: File[] }>();
-  @Output() cancelarEvento = new EventEmitter<void>();
+export class ServicioFormComponent implements OnChanges, OnInit {
   @ViewChild('fileUpload') fileUpload!: FileUpload;
+  @Output() guardar = new EventEmitter<{ data: ServicioRequest, imagenes?: File[] | null }>();
+  @Output() cancelarEvento = new EventEmitter<void>();
   @Input() servicio: Servicio | null = null;
   @Input() categorias: Categoria[] = [];
-  @Input() resetTrigger: number = 0;
+  @Input() guardando = false;
+  @Input() resetTrigger = 0;
 
-  private fb = inject(FormBuilder);
   private cd = inject(ChangeDetectorRef);
   private destroyRef = inject(DestroyRef);
+  private fb: FormBuilder = inject(FormBuilder);
   private imageService = inject(ImageUploadService);
 
+  formSubmitted = false;
   servicioForm!: FormGroup;
   categoriaTree: TreeNode[] = [];
   imagenes: ImagenProductoUI[] = [];
   imagenesEliminadas: string[] = [];
-  formSubmitted = false;
 
   campoInvalido = (campo: string) => campoInvalido(this.servicioForm, campo, this.formSubmitted);
 
   ngOnInit(): void {
     this.initForm();
-    this.cargarCategoriasTree();
+    this.cargarCategoriasEnTree();
+    if (this.servicio) { this.actualizarFormulario(); }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (!this.servicioForm || Object.keys(this.servicioForm.controls).length === 0) return;
-    if (changes['resetTrigger'] && !changes['resetTrigger'].firstChange) { this.limpiarFormulario(); }
-    if (changes['categorias'] || (changes['servicio'] && !changes['servicio'].firstChange && !this.servicio)) { this.cargarCategoriasTree(); }
+    if (!this.servicioForm) return;
+    if (changes['resetTrigger'] && !changes['resetTrigger'].firstChange) {
+      this.limpiarFormulario();
+    }
+    if (changes['categorias']) {
+      this.cargarCategoriasEnTree();
+      if (this.servicio) { this.seleccionarCategoriaDelServicio(); }
+    }
     if (changes['servicio']) {
       this.actualizarFormulario();
-      if (this.servicio?.urlsMultimedia?.length) {
-        this.cargarImagenExistente(this.servicio.urlsMultimedia);
-      }
     }
   }
 
@@ -72,29 +78,26 @@ export class ServicioFormComponent implements OnInit, OnChanges {
       duracion: [0, [Validators.required, Validators.min(1)]],
       idCategoria: [null, Validators.required],
       estado: [false],
-      publicado: [false]
+      publicado: [false],
     });
   }
 
   private actualizarFormulario(): void {
-    this.imagenes = [];
-    this.imagenesEliminadas = [];
+    this.formSubmitted = false;
+    this.limpiarEstadoImagen();
     if (this.servicio) {
       this.servicioForm.patchValue({
         nombre: this.servicio.nombre,
+        descripcion: this.servicio.descripcion,
         precio: this.servicio.precio,
         duracion: this.servicio.duracion,
         estado: this.servicio.estado,
         publicado: this.servicio.publicado,
+        idCategoria: null,
       });
-      if (this.servicio.categoriaId) {
-        setTimeout(() => {
-          if (this.categoriaTree.length && this.servicio?.categoriaId) {
-            const match = this.findTreeNodeById(this.categoriaTree, this.servicio!.categoriaId!);
-            this.servicioForm.patchValue({ idCategoria: match || null });
-            this.cd.detectChanges();
-          }
-        });
+      this.seleccionarCategoriaDelServicio();
+      if (this.servicio.urlsMultimedia?.length) {
+        this.cargarImagenExistente(this.servicio.urlsMultimedia);
       }
     } else {
       this.resetFormularioBase();
@@ -103,110 +106,23 @@ export class ServicioFormComponent implements OnInit, OnChanges {
     this.servicioForm.markAsUntouched();
   }
 
-  private cargarImagenExistente(urls: string[]) {
-    const requests = urls.map(url => this.imageService.obtenerImagenProtegida(url));
-    forkJoin(requests).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(blobs => {
-      this.imagenes = [];
-      blobs.forEach((blob, index) => {
-        if (!blob) return;
-        const file = new File([blob], `img-${index}.jpg`, { type: blob.type });
-        this.imagenes.push({
-          file,
-          preview: URL.createObjectURL(file),
-          nombre: 'Imagen actual',
-          peso: this.imageService.obtenerReadableSize(file),
-          tipo: 'existente',
-          urlOriginal: urls[index]
-        });
-      });
-      this.cd.detectChanges();
-    });
-  }
-
-  private limpiarEstadoImagen(): void {
-    this.imagenes.forEach(img => { if (img.preview) { URL.revokeObjectURL(img.preview); } });
-    this.imagenes = [];
-    this.imagenesEliminadas = [];
-    this.fileUpload?.clear();
-  }
-
-  private resetFormularioBase(): void {
-    this.servicioForm.reset({
-      nombre: '',
-      descripcion: '',
-      precio: 0,
-      duracion: 0,
-      idCategoria: null
-    });
-    this.limpiarEstadoImagen();
-  }
-
-  onSeleccionarArchivo(event: any): void {
-    const files: File[] = Array.from(event.files);
-    const validas = this.imageService.imagenesValidas(files);
-    validas.forEach(file => {
-      this.imagenes.push({
-        file,
-        preview: URL.createObjectURL(file),
-        nombre: file.name,
-        peso: this.imageService.obtenerReadableSize(file),
-        tipo: 'nueva'
-      });
-    });
-  }
-
-  eliminarImagen(index: number) {
-    const img = this.imagenes[index];
-    if (img.preview) URL.revokeObjectURL(img.preview);
-    if (img.tipo === 'existente' && img.urlOriginal) { this.imagenesEliminadas.push(img.urlOriginal); }
-    this.imagenes.splice(index, 1);
-  }
-
-  cargarCategoriasTree() {
-    this.categoriaTree = this.construirTree(this.categorias ?? []);
-    this.cd.detectChanges();
-  }
+  // =====================================================
+  // CATEGORÍA (TreeSelect)
+  // =====================================================
 
   private construirTree(categorias: Categoria[]): TreeNode[] {
-    if (!Array.isArray(categorias)) { return []; }
+    if (!Array.isArray(categorias)) return [];
     return categorias.map(categoria => ({
-      label: categoria.nombre, key: String(categoria.id), data: categoria.id,
-      children: categoria.subcategorias?.length ? this.construirTree(categoria.subcategorias) : []
+      label: categoria.nombre,
+      key: String(categoria.id),
+      data: categoria.id,
+      children: categoria.subcategorias?.length ? this.construirTree(categoria.subcategorias) : [],
     }));
   }
 
-  onGuardar() {
-    this.formSubmitted = true;
-    if (this.servicioForm.invalid) {
-      marcarFormulario(this.servicioForm);
-      return;
-    }
-    const archivos = this.imagenes.filter(i => i.file).map(i => i.file as File);
-    const categoria = this.servicioForm.value.idCategoria;
-    const data: ServicioRequest = {
-      nombre: this.servicioForm.value.nombre,
-      precio: this.servicioForm.value.precio,
-      duracion: this.servicioForm.value.duracion,
-      categoriaId: Number(categoria?.key),
-      descripcion: this.servicioForm.value.descripcion,
-      estado: this.servicioForm.value.estado,
-      publicado: this.servicioForm.value.publicado
-    };
-
-    this.guardar.emit({ data, imagenes: archivos.length ? archivos : undefined });
-  }
-
-  onCancelar() {
-    this.formSubmitted = false;
-    this.limpiarFormulario();
-    this.cancelarEvento.emit();
-  }
-
-  private limpiarFormulario() {
-    this.formSubmitted = false;
-    this.resetFormularioBase();
-    this.servicioForm.markAsPristine();
-    this.servicioForm.markAsUntouched();
+  private cargarCategoriasEnTree(): void {
+    this.categoriaTree = this.construirTree(this.categorias);
+    this.cd.detectChanges();
   }
 
   private findTreeNodeById(nodes: TreeNode[], id: number): TreeNode | null {
@@ -218,5 +134,117 @@ export class ServicioFormComponent implements OnInit, OnChanges {
       }
     }
     return null;
+  }
+
+  /** El TreeSelect trabaja con el nodo completo, no con el id */
+  private seleccionarCategoriaDelServicio(): void {
+    const id = this.servicio?.categoriaId;
+    if (!id || !this.categoriaTree.length) return;
+    const nodo = this.findTreeNodeById(this.categoriaTree, id);
+    this.servicioForm.patchValue({ idCategoria: nodo ?? null });
+    this.cd.detectChanges();
+  }
+
+  // =====================================================
+  // IMÁGENES
+  // =====================================================
+
+  private cargarImagenExistente(urls: string[]): void {
+    const requests = urls.map(url => this.imageService.obtenerImagenProtegida(url));
+    forkJoin(requests).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(blobs => {
+      this.imagenes = [];
+      blobs.forEach((blob, index) => {
+        if (!blob) return;
+        const file = new File([blob], `imagen-${index}.jpg`, { type: blob.type });
+        this.imagenes.push({
+          file,
+          preview: URL.createObjectURL(file),
+          nombre: 'Imagen actual',
+          peso: this.imageService.obtenerReadableSize(file),
+          tipo: 'existente',
+          urlOriginal: urls[index],
+        });
+      });
+      this.cd.detectChanges();
+    });
+  }
+
+  onSeleccionarArchivo(event: any): void {
+    const files: File[] = Array.from(event.files);
+    const validas = this.imageService.imagenesValidas(files);
+    validas.forEach(file => {
+      this.imagenes.push({
+        file,
+        preview: URL.createObjectURL(file),
+        nombre: file.name,
+        peso: this.imageService.obtenerReadableSize(file),
+        tipo: 'nueva',
+      });
+    });
+    // Evita que el componente acumule los archivos ya procesados
+    this.fileUpload?.clear();
+  }
+
+  eliminarImagen(index: number): void {
+    const img = this.imagenes[index];
+    if (img.preview) { URL.revokeObjectURL(img.preview); }
+    if (img.tipo === 'existente' && img.urlOriginal) { this.imagenesEliminadas.push(img.urlOriginal); }
+    this.imagenes.splice(index, 1);
+  }
+
+  private limpiarEstadoImagen(): void {
+    this.imagenes.forEach(img => { if (img.preview) { URL.revokeObjectURL(img.preview); } });
+    this.imagenes = [];
+    this.imagenesEliminadas = [];
+    this.fileUpload?.clear();
+  }
+
+  // =====================================================
+  // ACCIONES
+  // =====================================================
+
+  onCancelar(): void {
+    this.limpiarFormulario();
+    this.cancelarEvento.emit();
+  }
+
+  onGuardar(): void {
+    this.formSubmitted = true;
+    if (this.servicioForm.invalid) {
+      marcarFormulario(this.servicioForm);
+      return;
+    }
+    const archivos: File[] = this.imagenes.filter(img => img.file).map(img => img.file as File);
+    const valores = this.servicioForm.value;
+    const data: ServicioRequest = {
+      nombre: valores.nombre,
+      descripcion: valores.descripcion,
+      precio: valores.precio,
+      duracion: valores.duracion,
+      categoriaId: Number(valores.idCategoria?.key),
+      estado: valores.estado,
+      publicado: valores.publicado,
+    };
+    this.guardar.emit({ data, imagenes: archivos.length ? archivos : undefined });
+  }
+
+  private limpiarFormulario(): void {
+    this.formSubmitted = false;
+    this.resetFormularioBase();
+    this.servicioForm.markAsPristine();
+    this.servicioForm.markAsUntouched();
+  }
+
+  private resetFormularioBase(): void {
+    this.servicioForm.reset({
+      nombre: '',
+      descripcion: '',
+      precio: 0,
+      duracion: 0,
+      idCategoria: null,
+      estado: false,
+      publicado: false,
+    });
+    this.limpiarEstadoImagen();
   }
 }

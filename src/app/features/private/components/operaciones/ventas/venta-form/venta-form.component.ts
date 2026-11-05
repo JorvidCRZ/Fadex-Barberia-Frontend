@@ -28,6 +28,8 @@ import { ClienteService } from '@/app/core/services/gestion/cliente.service';
 import { ProductoService } from '@/app/core/services/catalogos/producto.service';
 import { ServicioService } from '@/app/core/services/catalogos/servicio.service';
 import { NotificationService } from '@/app/core/services/common/notification.service';
+import { ButtonComponent } from '@/app/shared/components/button/button.component';
+import { StatusBadgeComponent } from '@/app/shared/components/status-badge/status-badge.component';
 
 interface DetalleProductoValue {
   itemId: number;
@@ -44,6 +46,8 @@ interface DetalleServicioValue {
   selector: 'app-venta-form',
   standalone: true,
   imports: [
+    StatusBadgeComponent,
+    ButtonComponent,
     CommonModule,
     ReactiveFormsModule,
     ButtonModule,

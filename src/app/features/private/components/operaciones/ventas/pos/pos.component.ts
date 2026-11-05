@@ -1,15 +1,21 @@
 import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { SelectModule } from 'primeng/select';
-import { DialogModule } from 'primeng/dialog';
+import { TableModule } from 'primeng/table';
 import { ProductoService } from '@/app/core/services/catalogos/producto.service';
 import { ClienteService } from '@/app/core/services/gestion/cliente.service';
 import { VentaService } from '@/app/core/services/venta/venta.service';
 import { NotificationService } from '@/app/core/services/common/notification.service';
 import { BarberoService } from '@/app/core/services/gestion/barbero.service';
 import { Venta } from '@/app/core/models/ventas/venta.model';
+import { ProductoMultimedia, TipoMultimedia } from '@/app/core/models/catalogos/productos.model';
+import { ButtonComponent } from '@/app/shared/components/button/button.component';
+import { ModalComponent } from '@/app/shared/components/modal/modal.component';
+import { PageHeaderComponent } from '@/app/shared/components/page-header/page-header.component';
+import { MonedaPipe } from '@/app/shared/pipes/moneda.pipe';
+import { SafeImageUrlPipe } from '@/app/shared/pipes/safe-image-url.pipe';
+import { SearchBarComponent } from '@/app/shared/components/search-bar/search-bar.component';
 
 interface ProductoPos {
   id: number;
@@ -31,10 +37,24 @@ interface Opcion<T = string> {
   value: T;
 }
 
+/** Minúsculas y sin tildes, para que "crema" encuentre "Crema" y "Pomada" */
+const normalizar = (t: string): string =>
+  t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+
 @Component({
   selector: 'app-pos',
   standalone: true,
-  imports: [CommonModule, FormsModule, SelectModule, DialogModule],
+  imports: [
+    FormsModule,
+    SelectModule,
+    TableModule,
+    MonedaPipe,
+    SafeImageUrlPipe,
+    ButtonComponent,
+    ModalComponent,
+    PageHeaderComponent,
+    SearchBarComponent,
+  ],
   templateUrl: './pos.html',
 })
 export class PosComponent implements OnInit {
@@ -68,8 +88,12 @@ export class PosComponent implements OnInit {
   cliente: number | null = null;
   comprobante = 'BOLETA';
   metodo = 'EFECTIVO';
-  textoBusqueda = '';
   carrito: LineaCarrito[] = [];
+
+  // Catálogo: búsqueda en vivo y paginación en el cliente
+  textoBusqueda = '';
+  readonly rowsProductos = 8;
+  firstProductos = 0;
 
   procesando = false;
   mostrarModalPago = false;
@@ -145,16 +169,24 @@ export class PosComponent implements OnInit {
     return [];
   }
 
-  // Ajusta los nombres de campo según tu modelo Producto / Cliente
   private mapearProducto(p: any): ProductoPos {
     return {
       id: p.id,
       nombre: p.nombre,
-      categoria: p.categoria?.nombre ?? p.categoriaNombre ?? p.categoria ?? '',
+      categoria: p.nombreCategoria ?? p.categoria?.nombre ?? p.categoriaNombre ?? '',
       precio: Number(p.precio ?? p.precioVenta ?? 0),
       stock: Number(p.stock ?? 0),
-      imagen: p.imagen ?? p.imagenUrl ?? '',
+      imagen: this.imagenPrincipal(p),
     };
+  }
+
+  /** Primera imagen por ordenDisplay; si no hay `multimedia`, la primera de `urlsMultimedia`. */
+  private imagenPrincipal(p: any): string {
+    const imagenes: ProductoMultimedia[] = (p.multimedia ?? [])
+      .filter((m: ProductoMultimedia) => m.tipo === TipoMultimedia.IMAGEN)
+      .sort((a: ProductoMultimedia, b: ProductoMultimedia) => a.ordenDisplay - b.ordenDisplay);
+
+    return imagenes[0]?.url ?? p.urlsMultimedia?.[0] ?? '';
   }
 
   private nombreCliente(c: any): string {
@@ -196,15 +228,26 @@ export class PosComponent implements OnInit {
     this.notify.showSuccess(`Reserva de ${this.nombreClienteReserva} cargada correctamente.`);
   }
 
-  // ───────── Getters ─────────
+  // ───────── Catálogo: búsqueda y paginación ─────────
 
   get productosFiltrados(): ProductoPos[] {
-    const t = this.textoBusqueda.trim().toLowerCase();
+    const t = normalizar(this.textoBusqueda);
     return t
       ? this.productos.filter(p =>
-          p.nombre.toLowerCase().includes(t) || p.categoria.toLowerCase().includes(t))
+        normalizar(p.nombre).includes(t) || normalizar(p.categoria).includes(t))
       : this.productos;
   }
+
+  /** Al buscar (Enter o botón "Buscar"), vuelve a la primera página */
+  onBuscar(): void {
+    this.firstProductos = 0;
+  }
+
+  onPageProductos(event: { first?: number }): void {
+    this.firstProductos = event.first ?? 0;
+  }
+
+  // ───────── Getters ─────────
 
   get totalVenta(): number {
     return this.carrito.reduce((acc, l) => acc + l.producto.precio * l.cantidad, 0);

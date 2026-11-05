@@ -9,53 +9,57 @@ import { StatusBadgeComponent } from '../status-badge/status-badge.component';
   standalone: true,
   imports: [CommonModule, EmptyStateComponent, StatusBadgeComponent],
   template: `
-    <div class="citas-table-wrapper">
-      <table class="citas-table">
+    <div class="relative w-full overflow-x-auto">
+      <table class="w-full border-collapse" style="min-width: 800px">
         <thead>
-          <tr>
-            <th>Cliente</th>
-            <th>Hora</th>
-            <th>Servicio</th>
-            <th>Tipo</th>
-            <th>Estado</th>
+          <tr class="table-header">
+            <th class="px-4 py-3 text-center">Cliente</th>
+            <th class="px-4 py-3 text-center">Hora</th>
+            <th class="px-4 py-3 text-center">Servicio</th>
+            <th class="px-4 py-3 text-center">Tipo</th>
+            <th class="px-4 py-3 text-center">Estado</th>
           </tr>
         </thead>
         <tbody>
           @if (loading) {
             <tr>
-              <td colspan="5" class="citas-table__empty">
+              <td colspan="5" class="py-8">
                 <app-empty-state tipo="cargando" mensaje="Cargando citas..." />
               </td>
             </tr>
           } @else if (citas.length === 0) {
             <tr>
-              <td colspan="5" class="citas-table__empty">
+              <td colspan="5" class="py-8">
                 <app-empty-state icono="pi-calendar" mensaje="No hay citas programadas para hoy" />
               </td>
             </tr>
           } @else {
             @for (cita of citas; track cita.idReserva) {
-              <tr>
-                <td>
-                  <div class="cliente-nombre">{{ nombreCompleto(cita) }}</div>
-                  <div class="cliente-tel">
-                    <i class="pi pi-phone mr-1" aria-hidden="true"></i>{{ cita.telefonoCliente }}
+              <tr class="table-row border-b border-ui-border-soft last:border-0">
+                <td class="whitespace-nowrap px-4 py-3 text-center">
+                  <div class="flex flex-col items-center leading-tight">
+                    <span class="text-base font-medium text-text-primary">{{ nombreCompleto(cita) }}</span>
+                    @if (cita.telefonoCliente) {
+                      <span class="mt-0.5 text-sm text-text-subtle">
+                        <i class="pi pi-phone mr-1 text-xs" aria-hidden="true"></i>{{ cita.telefonoCliente }}
+                      </span>
+                    }
                   </div>
                 </td>
-                <td>
-                  <span class="hora">
-                    <i class="pi pi-clock mr-1" aria-hidden="true"></i>{{ cita.horaInicio }}
-                  </span>
+                <td class="whitespace-nowrap px-4 py-3 text-center text-base font-medium text-text-primary">
+                  <i class="pi pi-clock mr-1.5 text-sm text-brand-gold" aria-hidden="true"></i>{{ hora(cita) }}
                 </td>
-                <td>
-                  <span class="badge-base servicio-badge">
-                    <i class="pi pi-scissors mr-1" aria-hidden="true"></i>{{ servicioResumen(cita) }}
-                  </span>
+                <td class="whitespace-nowrap px-4 py-3 text-center text-base text-text-primary">
+                  @if (servicioResumen(cita); as servicios) {
+                    <i class="pi pi-scissors mr-1.5 text-sm text-brand-gold" aria-hidden="true"></i>{{ servicios }}
+                  } @else {
+                    <span class="text-text-subtle"></span>
+                  }
                 </td>
-                <td>
+                <td class="whitespace-nowrap px-4 py-3 text-center">
                   <app-status-badge type="text" [value]="cita.tipoReserva" />
                 </td>
-                <td>
+                <td class="whitespace-nowrap px-4 py-3 text-center">
                   <app-status-badge type="text" [value]="cita.estado" />
                 </td>
               </tr>
@@ -64,34 +68,6 @@ import { StatusBadgeComponent } from '../status-badge/status-badge.component';
         </tbody>
       </table>
     </div>
-  `,
-  styles: `
-    .citas-table-wrapper { overflow-x: auto; }
-    .citas-table { width: 100%; border-collapse: collapse; }
-    .citas-table thead tr { border-bottom: 1px solid rgb(var(--color-ui-border-soft)); }
-    .citas-table th {
-      padding: 0.65rem 0.8rem;
-      color: var(--color-text-muted);
-      font-size: 0.68rem;
-      font-weight: 600;
-      letter-spacing: 0.05em;
-      text-align: left;
-      text-transform: uppercase;
-      white-space: nowrap;
-    }
-    .citas-table td {
-      padding: 0.75rem 0.8rem;
-      border-bottom: 1px solid rgb(var(--color-ui-border-soft));
-      color: rgb(var(--color-text-primary));
-      font-size: 0.78rem;
-      white-space: nowrap;
-    }
-    .citas-table tbody tr:last-child td { border-bottom: 0; }
-    .citas-table tbody tr:hover td { background: rgba(255, 255, 255, 0.02); }
-    .citas-table__empty { padding: 2rem 1rem !important; text-align: center; }
-    .cliente-nombre { color: rgb(var(--color-brand-white)); font-weight: 600; }
-    .cliente-tel { color: var(--color-text-muted); font-size: 0.68rem; margin-top: 0.2rem; }
-    .hora { color: rgb(var(--color-brand-white)); font-weight: 500; }
   `,
 })
 export class CitasTableComponent {
@@ -102,7 +78,13 @@ export class CitasTableComponent {
     return `${cita.nombreCliente} ${cita.apellidoCliente}`.trim();
   }
 
+  hora(cita: CitaBarberoResponseDTO): string {
+    return (cita.horaInicio ?? '').substring(0, 5);
+  }
+
   servicioResumen(cita: CitaBarberoResponseDTO): string {
-    return cita.servicios.map((servicio) => servicio.servicioNombre).filter(Boolean).join(', ') || '—';
+    const c = cita as any;
+    if (typeof c.servicioResumen === 'string' && c.servicioResumen) return c.servicioResumen;
+    return (c.servicios ?? []).map((s: any) => (typeof s === 'string' ? s : s?.servicioNombre || s?.nombreCorte || s?.nombre)).filter(Boolean).join(', ');
   }
 }

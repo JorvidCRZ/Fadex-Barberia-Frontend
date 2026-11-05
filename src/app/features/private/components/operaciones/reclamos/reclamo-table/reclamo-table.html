@@ -1,171 +1,161 @@
-    <div class="p-4 md:p-6 lg:p-8 bg-neutral-primary-lighter rounded-base shadow-sm">
-        <div class="relative w-full overflow-x-auto">
-            <p-table [value]="reclamos" [lazy]="true" (onLazyLoad)="lazyLoad.emit($event)" [paginator]="true" [rows]="rows"
-                [totalRecords]="totalRecords" [loading]="!cargado" dataKey="idReclamo" expandableRows
-                [showCurrentPageReport]="true"
-                currentPageReportTemplate="Viendo {first} a {last} de {totalRecords} entradas"
-                [tableStyle]="{ 'min-width': '1100px' }" class="rounded-xl">
+<div class="flex flex-col gap-2">
+  <div class="table-base p-4 md:p-6 lg:p-8">
+    <div class="relative w-full overflow-x-auto">
+      <p-table [value]="reclamos" [loading]="!cargado" dataKey="idReclamo" expandableRows
+        [tableStyle]="{ 'min-width': '1200px' }" class="rounded-xl">
 
-                <ng-template #header>
-                    <tr>
-                        <th class="whitespace-nowrap text-center">N° Reclamo</th>
-                        <th class="whitespace-nowrap text-center">Fecha</th>
-                        <th class="whitespace-nowrap text-center">Cliente</th>
-                        <th class="whitespace-nowrap text-center">Tipo</th>
-                        <th class="whitespace-nowrap text-center">Problema</th>
-                        <th class="whitespace-nowrap text-center">Monto Rec.</th>
-                        <th class="whitespace-nowrap text-center">Origen</th>
-                        <th class="whitespace-nowrap text-center">Estado</th>
-                        <th class="whitespace-nowrap text-center">Acciones</th>
-                    </tr>
-                </ng-template>
+        <ng-template #header>
+          <tr class="table-header">
+            <th class="text-center">N° Reclamo</th>
+            <th class="text-center">Fecha</th>
+            <th class="text-center">Cliente</th>
+            <th class="text-center">Problema</th>
+            <th class="text-center">Monto rec.</th>
+            <th class="text-center">Origen</th>
+            <th class="text-center">Estado</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </ng-template>
 
-                <ng-template #body let-reclamo let-expanded="expanded">
-                    <tr>    
-                        <td class="px-4 py-2 whitespace-nowrap">
-                            <div class="inline-flex items-center gap-2">
-                                <p-button type="button" [pRowToggler]="reclamo" [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'" class="boton-expandir-tabla" />
-                                <span class="font-mono text-sm">{{ reclamo.numeroReclamo }}</span>
-                            </div>
-                        </td>
-                
-                        <td class="whitespace-nowrap text-center">
-                            <div class="flex flex-col items-center">
-                                <span class="font-medium text-white text-sm">
-                                    {{ reclamo.fechaReclamo | date:'dd/MM/yyyy' }}
-                                </span> 
-                                <span class="text-xs text-[#888888]">
-                                    {{ reclamo.fechaReclamo | date:'HH:mm' }}
-                                </span>
-                            </div>
-                        </td>
+        <ng-template #body let-reclamo let-expanded="expanded">
+          <tr class="table-row">
+            <td class="px-4 py-2 whitespace-nowrap">
+              <div class="inline-flex items-center gap-2">
+                <app-button variant="expandir-tabla" [pRowToggler]="reclamo"
+                  [icon]="expanded ? 'chevron-down' : 'chevron-right'"
+                  [tooltip]="expanded ? 'Ocultar detalle' : 'Ver detalle'" />
+                <span class="font-mono">{{ reclamo.numeroReclamo }}</span>
+              </div>
+            </td>
 
-                        <td class="whitespace-nowrap text-center">
-                            <div class="flex flex-col leading-tight">
-                                <span>{{ reclamo.nombreCliente }}</span>
-                                @if (reclamo.correoCliente) {
-                                <span class="text-xs text-gray-400">{{ reclamo.correoCliente }}</span>
-                                }
-                            </div>
-                        </td>
+            <td class="whitespace-nowrap text-center">
+              <div class="flex flex-col items-center">
+                <span class="font-medium">{{ reclamo.fechaReclamo | date:'dd/MM/yyyy' }}</span>
+                <span class="text-sm text-text-subtle">{{ reclamo.fechaReclamo | date:'HH:mm' }}</span>
+              </div>
+            </td>
 
-                        <td class="whitespace-nowrap text-center">
-                            <app-status-badge type="text" [value]="formatearTexto(reclamo.tipoReclamacion)" />
-                        </td>
-
-                        <td class="whitespace-nowrap text-center">
-                            <app-status-badge type="text" [value]="formatearTexto(reclamo.tipoProblema)" />
-                        </td>
-                        
-                        <td class="whitespace-nowrap text-center">
-                            {{ reclamo.montoReclamado != null ? ((reclamo.montoReclamado | soles)) : '—' }}
-                        </td>
-                        
-                        <td class="whitespace-nowrap text-center">
-                            <app-status-badge type="boolean" [value]="reclamo.esPublico" trueLabel='Público' falseLabel='Interno' />
-                        </td>
-
-                        <td class="whitespace-nowrap text-center">
-                            <app-status-badge type="text" [value]="formatearTexto(reclamo.estadoReclamo)" />
-                        </td>
-
-                        <td class="whitespace-nowrap text-center">
-                            <div class="flex flex-row justify-center">
-                                <p-button icon="pi pi-pencil" class="boton-editar-tabla" (click)="actualizarReclamo(reclamo)" />
-                                <p-button icon="pi pi-trash" class="boton-eliminar-tabla" (click)="pedirConfirmacion(reclamo, $event)" />
-                                <p-button icon="pi pi-eye" class="boton-ver-tabla" (click)="verReclamo(reclamo)" />
-                            </div>
-                        </td>
-                    </tr>
-                </ng-template>
-
-                <ng-template #expandedrow let-reclamo>
-                    <tr>
-                        <td colspan="9">
-                            <div class="rounded-xl border border-brand-gold-soft  bg-neutral-primary-lighter p-6 space-y-6">
-
-                                <div>
-                                    <h3 class="text-lg font-semibold mb-4">Detalle del reclamo</h3>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div class="rounded-lg border border-brand-gold-soft  bg-neutral-primary-lighter p-4">
-                                            <span class="text-xs text-text-secondary uppercase">Causa</span>
-                                            <div class="mt-2">
-                                                @if (reclamo.causaReclamo) {
-                                                    <app-status-badge type="text" [value]="formatearTexto(reclamo.causaReclamo)" />
-                                                } @else {
-                                                    <span class="italic text-gray-500">Sin causa especificada</span>
-                                                }
-                                            </div>
-                                        </div>
-
-                                        <div class="rounded-lg border border-brand-gold-soft  bg-neutral-primary-lighter p-4">
-                                            <span class="text-xs text-text-secondary uppercase">Estado</span>
-                                            <div class="mt-2">
-                                                <app-status-badge type="text" [value]="formatearTexto(reclamo.estadoReclamo)" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="rounded-xl border border-brand-gold-soft  bg-neutral-primary-lighter p-5">
-                                    <div class="flex items-center gap-2 mb-3">
-                                        <i class="pi pi-file-edit"></i>
-                                        <h4 class="font-semibold">Descripción</h4>
-                                    </div>
-
-                                    @if (reclamo.descripcion) {
-                                        <p class="leading-relaxed">{{ reclamo.descripcion }}</p>
-                                    } @else {
-                                        <p class="italic text-gray-500">Sin descripción.</p>
-                                    }
-                                </div>
-
-                                <div class="rounded-xl border border-brand-gold-soft  bg-neutral-primary-lighter p-5">
-                                    <div class="flex items-center gap-2 mb-3">
-                                        <i class="pi pi-lock"></i>
-                                        <h4 class="font-semibold">Notas internas</h4>
-                                    </div>
-
-                                    @if (reclamo.notasInternas) {
-                                        <p class="leading-relaxed">{{ reclamo.notasInternas }}</p>
-                                    } @else {
-                                        <p class="italic text-gray-500">Sin notas internas.</p>
-                                    }
-                                </div>
-
-                                <div class="rounded-xl border border-brand-gold-soft  bg-neutral-primary-lighter p-5">
-                                    <div class="flex items-center gap-2 mb-3">
-                                        <i class="pi pi-lock"></i>
-                                        <h4 class="font-semibold">Detalle Solucion </h4>
-                                    </div>
-
-                                    @if (reclamo.detalleSolucion) {
-                                        <p class="leading-relaxed">{{ reclamo.detalleSolucion }}</p>
-                                    } @else {
-                                        <p class="italic text-gray-500">Sin detalle de solución.</p>
-                                    }
-                                </div>
-
-                            </div>
-                        </td>
-                    </tr>
-                </ng-template>
-            </p-table>
-        </div>
-    </div>
-
-    <app-confirm-popover [visible]="mostrarConfirmacion" [mensaje]="mensajeConfirmacion" [icono]="icono" [titulo]="'Eliminar Reclamo'" (confirm)="confirmarEliminar()" (cancel)="cancelarEliminar()" />
-
-    <p-dialog header="Imágenes adjuntas" [(visible)]="mostrarGaleria" [modal]="true" [style]="{ width: '700px' }" [dismissableMask]="true">
-        <p-galleria [value]="imagenesGaleria" [activeIndex]="activeIndex" [circular]="true" [showItemNavigators]="true"
-            [showThumbnails]="true" [numVisible]="numVisible" [responsiveOptions]="responsiveOptions">
-            <ng-template #item let-item>
-                <img [src]="item?.itemImageSrc" style="width:100%; max-height:400px; object-fit:contain" />
-            </ng-template>
-            <ng-template #thumbnail let-item>
-                @if (item) {
-                    <img [src]="item?.thumbnailImageSrc" style="width:70px; height:50px; object-fit:cover" />
+            <td class="whitespace-nowrap text-center">
+              <div class="flex flex-col items-center leading-tight">
+                <span>{{ reclamo.nombreCliente }}</span>
+                @if (reclamo.correoCliente) {
+                  <span class="text-sm text-text-subtle">{{ reclamo.correoCliente }}</span>
                 }
-            </ng-template>
-        </p-galleria>
-    </p-dialog>
+              </div>
+            </td>
+      
+            <td class="whitespace-nowrap text-center">
+              <app-status-badge type="text" [value]="formatearTexto(reclamo.tipoProblema)" />
+            </td>
+
+            <td class="td-gold whitespace-nowrap text-center">
+              {{ reclamo.montoReclamado != null ? (reclamo.montoReclamado | soles) : '—' }}
+            </td>
+
+            <td class="whitespace-nowrap text-center">
+              <app-status-badge type="boolean" [value]="reclamo.esPublico" trueLabel="Público" falseLabel="Interno" />
+            </td>
+            <td class="whitespace-nowrap text-center">
+              <app-status-badge type="text" [value]="formatearTexto(reclamo.estadoReclamo)" />
+            </td>
+
+            <td class="whitespace-nowrap text-center">
+              <div class="table-actions">
+                <app-button variant="ver-tabla" icon="eye" tooltip="Ver detalle" (clicked)="verReclamo(reclamo)" />
+                <app-button variant="editar-tabla" icon="pencil" tooltip="Actualizar reclamo" (clicked)="actualizarReclamo(reclamo)" />
+                <app-button variant="eliminar-tabla" icon="trash" tooltip="Eliminar reclamo" (clicked)="pedirConfirmacion(reclamo, $event)" />
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template #expandedrow let-reclamo>
+          <tr>
+            <td colspan="9" class="p-0">
+              <div class="flex flex-col gap-4 rounded-xl bg-ui-surface p-4 shadow-sm">
+                <h3 class="m-0 text-md font-semibold text-text-primary">Detalle del reclamo {{ reclamo.numeroReclamo }}</h3>
+
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div class="rounded-lg border border-ui-border bg-ui-card p-4">
+                    <span class="text-xs uppercase tracking-widest text-text-muted">Causa</span>
+                    <div class="mt-2">
+                      @if (reclamo.causaReclamo) {
+                        <app-status-badge type="text" [value]="formatearTexto(reclamo.causaReclamo)" />
+                      } @else {
+                        <span class="text-sm italic text-text-subtle">Sin causa especificada</span>
+                      }
+                    </div>
+                  </div>
+                  <div class="rounded-lg border border-ui-border bg-ui-card p-4">
+                    <span class="text-xs uppercase tracking-widest text-text-muted">Estado</span>
+                    <div class="mt-2">
+                      <app-status-badge type="text" [value]="formatearTexto(reclamo.estadoReclamo)" />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                  <div class="rounded-lg border border-ui-border bg-ui-card p-4">
+                    <div class="mb-2 flex items-center gap-2 text-brand-gold">
+                      <i class="pi pi-file-edit" aria-hidden="true"></i>
+                      <h4 class="m-0 text-sm font-semibold uppercase tracking-widest">Descripción</h4>
+                    </div>
+                    @if (reclamo.descripcion) {
+                      <p class="m-0 text-sm leading-relaxed text-text-secondary">{{ reclamo.descripcion }}</p>
+                    } @else {
+                      <p class="m-0 text-sm italic text-text-subtle">Sin descripción.</p>
+                    }
+                  </div>
+
+                  <div class="rounded-lg border border-ui-border bg-ui-card p-4">
+                    <div class="mb-2 flex items-center gap-2 text-brand-gold">
+                      <i class="pi pi-lock" aria-hidden="true"></i>
+                      <h4 class="m-0 text-sm font-semibold uppercase tracking-widest">Notas internas</h4>
+                    </div>
+                    @if (reclamo.notasInternas) {
+                      <p class="m-0 text-sm leading-relaxed text-text-secondary">{{ reclamo.notasInternas }}</p>
+                    } @else {
+                      <p class="m-0 text-sm italic text-text-subtle">Sin notas internas.</p>
+                    }
+                  </div>
+
+                  <div class="rounded-lg border border-ui-border bg-ui-card p-4">
+                    <div class="mb-2 flex items-center gap-2 text-brand-gold">
+                      <i class="pi pi-check-circle" aria-hidden="true"></i>
+                      <h4 class="m-0 text-sm font-semibold uppercase tracking-widest">Detalle de solución</h4>
+                    </div>
+                    @if (reclamo.detalleSolucion) {
+                      <p class="m-0 text-sm leading-relaxed text-text-secondary">{{ reclamo.detalleSolucion }}</p>
+                    } @else {
+                      <p class="m-0 text-sm italic text-text-subtle">Sin detalle de solución.</p>
+                    }
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template #emptymessage>
+          <tr>
+            <td colspan="9">
+              <app-empty-state icono="exclamation-triangle"
+                [mensaje]="hayFiltros ? 'No se encontraron reclamos con los filtros aplicados' : 'Aún no hay reclamos registrados'"
+                [detalle]="hayFiltros ? undefined : 'Crea el primero con el botón «Crear reclamo».'">
+                @if (hayFiltros) {
+                  <app-button variant="limpiar" size="sm" label="Limpiar filtros" (clicked)="limpiar.emit()" />
+                }
+              </app-empty-state>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+
+  <app-paginator [first]="first" [rows]="rows" [totalRecords]="totalRecords" etiqueta="reclamo(s)"
+    [rowsPerPageOptions]="[10, 25, 50, 100]" (pageChange)="pageChange.emit($event)" />
+</div>
+
+<app-confirm-popover [visible]="mostrarConfirmacion" mode="eliminar" titulo="Eliminar reclamo"
+  [mensaje]="mensajeConfirmacion" (confirm)="confirmarEliminar()" (cancel)="cancelarEliminar()" />

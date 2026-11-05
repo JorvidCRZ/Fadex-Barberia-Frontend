@@ -1,45 +1,42 @@
-import { Component, EventEmitter, Input, Output, ViewEncapsulation } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { TableModule, TableLazyLoadEvent } from 'primeng/table';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { DatePipe, LowerCasePipe } from '@angular/common';
+import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
-import { DialogModule } from 'primeng/dialog';
-import { TooltipModule } from 'primeng/tooltip';
+import { PaginatorModule, PaginatorState } from 'primeng/paginator';
 import { Venta } from '@/app/core/models/ventas/venta.model';
 import { VentaDetalle } from '@/app/core/models/ventas/detalle.model';
 import { ConfirmPopoverComponent } from '@/app/shared/components/confirm-popover/confirm-popover.component';
 import { ButtonComponent } from '@/app/shared/components/button/button.component';
-import { MonedaPipe } from '@/app/shared/pipes/moneda.pipe';
 import { ModalComponent } from '@/app/shared/components/modal/modal.component';
+import { StatusBadgeComponent } from '@/app/shared/components/status-badge/status-badge.component';
+import { MonedaPipe } from '@/app/shared/pipes/moneda.pipe';
 
 @Component({
   selector: 'app-venta-table',
   standalone: true,
   imports: [
-    CommonModule,
-    FormsModule,
+    DatePipe,
+    LowerCasePipe,
     TableModule,
     ButtonModule,
-    DialogModule,
-    TooltipModule,
+    PaginatorModule,
     ConfirmPopoverComponent,
     ButtonComponent,
+    ModalComponent,
+    StatusBadgeComponent,
     MonedaPipe,
-    ModalComponent
-],
+  ],
   templateUrl: './venta-table.html',
-  styleUrls: ['./venta-table.scss'],
-  encapsulation: ViewEncapsulation.None
 })
 export class VentaTableComponent {
-
   @Input() ventas: Venta[] = [];
   @Input() cargado = false;
   @Input() totalRecords = 0;
+  @Input() first = 0;
   @Input() rows = 25;
   @Input() esAdmin = true;
 
-  @Output() lazyLoad = new EventEmitter<TableLazyLoadEvent>();
+  @Output() paginar = new EventEmitter<PaginatorState>();
   @Output() eliminar = new EventEmitter<Venta>();
   @Output() descargarComprobante = new EventEmitter<Venta>();
 
@@ -71,21 +68,21 @@ export class VentaTableComponent {
     return (venta.detalles ?? []).reduce((acc, detalle) => acc + this.subtotalDe(detalle), 0);
   }
 
-  pedirConfirmacion(venta: Venta) {
+  pedirConfirmacion(venta: Venta): void {
     this.ventaAEliminar = venta;
-    const identificador = venta.numeroCorrelativo || ('#' + venta.ventaId);
+    const identificador = venta.numeroCorrelativo || '#' + venta.ventaId;
     this.mensajeConfirmacion = `¿Estás seguro de que deseas eliminar la venta ${identificador}? Esta acción es irreversible.`;
     this.mostrarConfirmacion = true;
   }
 
-  confirmarEliminar() {
+  confirmarEliminar(): void {
     if (this.ventaAEliminar) {
       this.eliminar.emit(this.ventaAEliminar);
     }
     this.cancelarEliminar();
   }
 
-  cancelarEliminar() {
+  cancelarEliminar(): void {
     this.mostrarConfirmacion = false;
     this.ventaAEliminar = null;
   }

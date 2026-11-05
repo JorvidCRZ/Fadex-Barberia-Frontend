@@ -1,9 +1,11 @@
 <section class="producto-detail-modal">
     <div class="container-main producto-detail-modal-content">
 
-        <div class="producto-detail-modal-close">
+        <div class="producto-detail-modal-close flex w-full items-center justify-between">
             @if (producto) {
                 <span class="producto-detail-modal-code">SKU {{ producto.sku || 'FADEX' }}</span>
+            } @else {
+                <span></span>
             }
             <app-button variant="cierre" icon="pi-times" tooltip="Cerrar" (clicked)="cerrar.emit()" />
         </div>
@@ -11,82 +13,125 @@
         @if (cargando) {
             <div class="producto-detail-loading">Cargando detalle...</div>
         } @else if (producto) {
-            <div class="producto-page-panel grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,4fr)_minmax(0,3fr)]">
+            <div class="producto-page-panel grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
 
-                <!-- Columna 1: galería (miniaturas debajo) -->
-                <div class="flex flex-col gap-3">
-                    <div class="producto-detail-main-image producto-page-detail relative aspect-square overflow-hidden">
-                        <span class="producto-detail-image-label"><i class="pi pi-image"></i> Vista del producto</span>
-                        <p-image [src]="imagenSeleccionada | safeImageUrl" [alt]="producto.nombre"
-                            (error)="imagenFallback.src = '/assets/producto.webp'" #imagenFallback preview="true"
-                            styleClass="block size-full" imageClass="size-full object-cover" />
+                <!-- Galería -->
+                <div class="flex flex-col gap-4">
+                    <div class="relative aspect-square w-full overflow-hidden rounded-2xl border border-ui-border bg-white">
+                        <span class="pointer-events-none absolute left-3 top-3 z-10 inline-flex items-center gap-2 rounded-full bg-black/70 px-3 py-1 text-xs text-white">
+                            <i class="pi pi-image" aria-hidden="true"></i> Vista del producto
+                        </span>
+                        <p-image [src]="imagenSeleccionada | safeImageUrl" [alt]="producto.nombre" [preview]="true"
+                            class="block size-full cursor-zoom-in" imageClass="size-full object-contain" />
                     </div>
 
-                    <div class="flex flex-wrap gap-3">
-                        @for (it of images; track it.itemImageSrc) {
-                            <button type="button" class="producto-detail-thumb size-16 sm:size-20"
-                                [class.selected]="it.itemImageSrc === imagenSeleccionada"
-                                (click)="seleccionarImagen(it.itemImageSrc)"
-                                [attr.aria-label]="'Ver imagen de ' + producto.nombre">
-                                <p-image [src]="it.thumbnailImageSrc | safeImageUrl" [alt]="producto.nombre"
-                                    [class.selected]="it.itemImageSrc === imagenSeleccionada" preview="false" />
-                            </button>
-                        }
-                    </div>
+                    @if (images.length > 1) {
+                        <div class="flex flex-wrap gap-3">
+                            @for (it of images; track it.itemImageSrc) {
+                                <button type="button" (click)="seleccionarImagen(it.itemImageSrc)"
+                                    [attr.aria-label]="'Ver imagen de ' + producto.nombre"
+                                    class="size-16 cursor-pointer overflow-hidden rounded-xl border bg-white transition-all duration-200 sm:size-20"
+                                    [class]="it.itemImageSrc === imagenSeleccionada
+                                        ? 'border-brand-gold shadow-[0_0_12px_rgb(var(--color-brand-gold)/0.35)]'
+                                        : 'border-ui-border opacity-70 hover:opacity-100'">
+                                    <img [src]="it.thumbnailImageSrc | safeImageUrl" [alt]="producto.nombre" class="size-full object-contain" />
+                                </button>
+                            }
+                        </div>
+                    }
                 </div>
 
-                <!-- Columna 2: información -->
-                <div class="producto-detail-info">
-                    <app-status-badge type="text" [value]="producto.nombreCategoria" tone="info" />
-                    <h1 class="producto-detail-name">{{ producto.nombre }}</h1>
-                    <div class="producto-detail-rating">
-                        <i class="pi pi-verified producto-detail-rating-stars" aria-hidden="true"></i>
-                        <span>Producto profesional para barbería</span>
+                <!-- Información + compra -->
+                <div class="flex min-w-0 flex-col gap-5">
+                    <div class="flex flex-col items-start gap-3">
+                        <app-status-badge type="text" tone="info" [value]="producto.nombreCategoria" />
+                        <h1 class="m-0 break-words text-2xl font-bold leading-tight text-text-primary md:text-3xl">{{ producto.nombre }}</h1>
+                        <p class="m-0 inline-flex items-center gap-2 text-sm text-text-muted">
+                            <i class="pi pi-verified text-brand-gold" aria-hidden="true"></i>
+                            Producto profesional para barbería
+                        </p>
                     </div>
-                    <div class="producto-detail-price-row">
-                        <div class="producto-detail-price">{{ (producto.precioPromo ?? producto.precioVenta ?? producto.precio) | soles }}</div>
-                    </div>
-                    <div class="producto-detail-desc">{{ producto.descripcion }}</div>
-                    <div class="producto-detail-info-divider"></div>
-                    <div class="producto-detail-specs">
-                        <div class="spec-row"><span>Marca</span><strong>FadeX</strong></div>
-                        <div class="spec-row"><span>Categoría</span><strong>{{ producto.nombreCategoria }}</strong></div>
-                        <div class="spec-row"><span>Disponibilidad</span><strong [class.producto-detail-stock-out]="!producto.stock">{{ producto.stock ? 'En stock' : 'Agotado' }}</strong></div>
-                    </div>
-                    <div class="producto-detail-features">
-                        <h2>Características principales</h2>
-                        <div class="producto-detail-feature">
-                            <i class="pi pi-check-circle" aria-hidden="true"></i>
-                            <span><strong>Calidad profesional</strong><small>Diseñado para el cuidado personal.</small></span>
-                        </div>
-                        <div class="producto-detail-feature">
-                            <i class="pi pi-shield" aria-hidden="true"></i>
-                            <span><strong>Compra segura</strong><small>Producto seleccionado por FadeX.</small></span>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Columna 3: compra -->
-                <aside class="producto-detail-actions h-fit">
-                    <div class="producto-page-panel producto-detail-buy">
-                        <span class="producto-detail-buy-label">Compra segura</span>
-                        <div class="producto-detail-price">{{ (producto.precioPromo ?? producto.precioVenta ?? producto.precio) | soles }}</div>
-                        <div class="producto-detail-stock" [class.out]="!producto.stock">
-                            <i class="pi" [class.pi-check-circle]="producto.stock" [class.pi-times-circle]="!producto.stock"></i>
-                            {{ producto.stock ? 'En stock · ' + producto.stock + ' unidades' : 'Producto agotado' }}
+                    @if (producto.descripcion) {
+                        <p class="m-0 border-t border-ui-border pt-5 text-sm leading-relaxed text-text-secondary md:text-base">{{ producto.descripcion }}</p>
+                    }
+
+                    <dl class="m-0 grid grid-cols-[8rem_1fr] gap-y-3 border-t border-ui-border pt-5 text-sm">
+                        <dt class="font-semibold text-text-primary">Marca</dt>
+                        <dd class="m-0 text-text-secondary">FadeX</dd>
+                        <dt class="font-semibold text-text-primary">Categoría</dt>
+                        <dd class="m-0 text-text-secondary">{{ producto.nombreCategoria }}</dd>
+                        <dt class="font-semibold text-text-primary">Disponibilidad</dt>
+                        <dd class="m-0" [class]="producto.stock ? 'text-success' : 'text-danger'">{{ producto.stock ? 'En stock' : 'Agotado' }}</dd>
+                    </dl>
+
+                    <!-- Compra -->
+                    <div class="flex flex-col gap-4 rounded-xl border border-brand-gold/30 bg-ui-card p-5">
+                        <div class="flex flex-wrap items-end justify-between gap-2">
+                            <div class="flex items-baseline gap-3">
+                                <span class="text-3xl font-bold text-brand-gold">{{ (producto.precioPromo ?? producto.precioVenta ?? producto.precio) | soles }}</span>
+                                @if (producto.precioPromo != null) {
+                                    <span class="text-sm text-text-subtle line-through">{{ (producto.precioVenta ?? producto.precio) | soles }}</span>
+                                }
+                            </div>
+                            <span class="inline-flex items-center gap-1 text-sm" [class]="producto.stock ? 'text-success' : 'text-danger'">
+                                <i class="pi" [class.pi-check-circle]="producto.stock" [class.pi-times-circle]="!producto.stock" aria-hidden="true"></i>
+                                {{ producto.stock ? 'En stock · ' + producto.stock + ' unidades' : 'Producto agotado' }}
+                            </span>
                         </div>
-                        <label class="producto-detail-quantity">Cantidad</label>
-                        <p-inputNumber [(ngModel)]="cantidad" [min]="1" [max]="cantidadMaxima" [showButtons]="true"buttonLayout="horizontal" inputStyleClass="w-full text-center" styleClass="w-full" />
-                        <br>
-                        <app-button variant="comprar" icon="pi-shopping-cart" label="Agregar al carrito" [fullWidth]="true" [disabled]="!producto.stock" (clicked)="agregarAlCarrito()" />
-                        <br>
-                        <app-button variant="ver" icon="pi-bolt" label="Comprar ahora" [fullWidth]="true" [disabled]="!producto.stock" (clicked)="comprarAhora()" />
-                        <br>
+
+                        <div class="flex items-center justify-between gap-4">
+                            <label for="cantidad" class="text-sm font-semibold text-text-primary">Cantidad</label>
+                            <div class="inline-flex h-11 items-center overflow-hidden rounded-xl border border-ui-border bg-ui-surface"
+                                [class.opacity-50]="!producto.stock">
+                                <button type="button" aria-label="Disminuir cantidad"
+                                    class="flex size-11 cursor-pointer items-center justify-center text-text-secondary transition-colors hover:bg-brand-gold/10 hover:text-brand-gold disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
+                                    [disabled]="!producto.stock || cantidad <= 1"
+                                    (click)="cantidad = cantidad > 1 ? cantidad - 1 : 1">
+                                    <i class="pi pi-minus text-xs" aria-hidden="true"></i>
+                                </button>
+                                <input id="cantidad" type="number" readonly [value]="cantidad" aria-live="polite"
+                                    class="h-full w-14 border-x border-ui-border bg-transparent text-center text-sm font-semibold text-text-primary [appearance:textfield] focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" />
+                                <button type="button" aria-label="Aumentar cantidad"
+                                    class="flex size-11 cursor-pointer items-center justify-center text-text-secondary transition-colors hover:bg-brand-gold/10 hover:text-brand-gold disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
+                                    [disabled]="!producto.stock || cantidad >= cantidadMaxima"
+                                    (click)="cantidad = cantidad < cantidadMaxima ? cantidad + 1 : cantidadMaxima">
+                                    <i class="pi pi-plus text-xs" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            <app-button variant="comprar" icon="pi-shopping-cart" label="Agregar al carrito" [fullWidth]="true"
+                                [disabled]="!producto.stock" (clicked)="agregarAlCarrito()" />
+                            <app-button variant="ver" icon="pi-bolt" label="Comprar ahora" [fullWidth]="true"
+                                [disabled]="!producto.stock" (clicked)="comprarAhora()" />
+                        </div>
                         <app-button variant="secondary" icon="pi-shopping-bag" label="Ir al carrito" [fullWidth]="true" (clicked)="irCarrito()" />
-                        <br>
-                        <div class="producto-detail-note"><span>Subtotal</span><strong>{{ subtotal | soles }}</strong></div>
+
+                        <div class="flex items-center justify-between rounded-lg border border-brand-gold/30 bg-brand-gold/10 px-4 py-3 text-sm">
+                            <span class="text-text-secondary">Subtotal</span>
+                            <strong class="text-base text-brand-gold">{{ subtotal | soles }}</strong>
+                        </div>
                     </div>
-                </aside>
+
+                    <div class="grid grid-cols-1 gap-4 border-t border-ui-border pt-5 sm:grid-cols-2">
+                        <div class="flex items-start gap-3">
+                            <i class="pi pi-check-circle mt-1 text-brand-gold" aria-hidden="true"></i>
+                            <span class="flex flex-col text-sm">
+                                <strong class="text-text-primary">Calidad profesional</strong>
+                                <small class="text-text-subtle">Diseñado para el cuidado personal.</small>
+                            </span>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <i class="pi pi-shield mt-1 text-brand-gold" aria-hidden="true"></i>
+                            <span class="flex flex-col text-sm">
+                                <strong class="text-text-primary">Compra segura</strong>
+                                <small class="text-text-subtle">Producto seleccionado por FadeX.</small>
+                            </span>
+                        </div>
+                    </div>
+                </div>
             </div>
         }
     </div>

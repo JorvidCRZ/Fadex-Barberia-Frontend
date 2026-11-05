@@ -10,30 +10,30 @@
     <div class="part-form">
         <label for="descripcion">Descripción</label>
         <textarea pTextarea class="textarea-base" [autoResize]="true" formControlName="descripcion" id="descripcion" fluid></textarea>
+        @if (campoInvalido('descripcion')) {
+        <p-message severity="error" variant="simple" size="small">La descripción no puede superar los 255 caracteres</p-message>
+        }
     </div>
 
     <div class="part-form">
-        <span class="label-form">Categoría Padre</span>
-        <p-select [options]="categoriasPadresFormateadas" optionLabel="nombre" optionValue="id"
+        <label for="padreId" class="label-form">Categoría Padre</label>
+        <p-select inputId="padreId" [options]="categoriasPadresFormateadas" optionLabel="nombre" optionValue="id"
             placeholder="Sin padre" formControlName="padreId" [showClear]="true" [filter]="true"
             filterBy="nombre"></p-select>
     </div>
+
     @if (rutaPadreSeleccionado.length > 0) {
     <div class="mt-2 rounded-lg border border-brand-gold p-3">
-        <p class="text-xs font-semibold text-text-primary mb-2">Ubicación de la nueva categoría</p>
+        <p class="mb-2 text-xs font-semibold text-text-primary">Ubicación de la nueva categoría</p>
         <div class="flex flex-col gap-1 font-mono text-xs">
             @for (item of rutaPadreSeleccionado; track item.id; let i = $index) {
-            <div class="flex items-center gap-2 text-brand-secundary">
-                <span class="text-brand-gold" [style.marginLeft.px]="i * 16">
-                    └──
-                </span>
+            <div class="flex items-center gap-2 text-text-secondary">
+                <span class="text-brand-gold" [style.marginLeft.px]="i * 16">└──</span>
                 <span>{{ item.nombre }}</span>
             </div>
             }
-            <div class="flex items-center gap-2 text-blue-600 font-semibold">
-                <span class="text-brand-gold" [style.marginLeft.px]="rutaPadreSeleccionado.length * 16">
-                    └──
-                </span>
+            <div class="flex items-center gap-2 font-semibold text-info">
+                <span class="text-brand-gold" [style.marginLeft.px]="rutaPadreSeleccionado.length * 16">└──</span>
                 <span>Nueva categoría</span>
             </div>
         </div>
@@ -41,21 +41,25 @@
     }
 
     <div class="part-form">
-        <span for="tipo" class="label-form">Tipo *</span>
-        <p-select inputId="tipo" formControlName="tipo" [options]="tiposCategoria" optionLabel="label"optionValue="value" placeholder="Seleccione un tipo"></p-select>
+        <label for="tipo" class="label-form">Tipo *</label>
+        <p-select inputId="tipo" formControlName="tipo" [options]="tiposCategoria" optionLabel="label"
+            optionValue="value" placeholder="Seleccione un tipo"></p-select>
         @if (campoInvalido('tipo')) {
-            <p-message severity="error" variant="simple" size="small">Seleccione un tipo</p-message>
+        <p-message severity="error" variant="simple" size="small">Seleccione un tipo</p-message>
         }
     </div>
 
-    <div class="flex flex-col sm:flex-row justify-around gap-6 ">
+    <div class="flex flex-col justify-around gap-6 sm:flex-row">
         <div class="part-form items-center">
-            <span for="estado" class="label-form">Estado</span>
+            <label for="estado" class="label-form">Estado</label>
             <p-checkbox binary="true" formControlName="estado" inputId="estado"></p-checkbox>
         </div>
     </div>
+
     <div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
-        <button pButton label="Guardar" class="w-full sm:w-auto boton-submit" type="button" (click)="onGuardar()"></button>
-        <button pButton label="Cancelar" class="w-full sm:w-auto boton-cancel" type="button" (click)="onCancelar()"></button>
+        <app-button variant="submit" icon="save" label="Guardar" loadingLabel="Guardando..." [loading]="guardando"
+            [fullWidth]="true" class="sm:w-auto" (clicked)="onGuardar()" />
+        <app-button variant="cancel" icon="times" label="Cancelar" [disabled]="guardando"
+            [fullWidth]="true" class="sm:w-auto" (clicked)="onCancelar()" />
     </div>
 </form>

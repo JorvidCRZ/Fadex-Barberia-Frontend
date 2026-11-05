@@ -1,82 +1,75 @@
-<form [formGroup]="actualizarForm"
-    class="flex flex-col gap-6 md:p-6 p-0 md-border border-default rounded-xl bg-neutral-primary-soft shadow-xs">
+<form [formGroup]="actualizarForm" class="form-base">
 
-    <!-- Info de solo lectura del reclamo -->
-    @if (reclamo) {
-    <div class="grid grid-cols-2 gap-3 p-4 rounded-lg bg-neutral-primary-lighter border border-default text-sm">
-        <div class="flex flex-col gap-1">
-            <span class="text-text-tertiary">N° Reclamo</span>
-            <span class="font-mono font-semibold">{{ reclamo.numeroReclamo }}</span>
+  @if (reclamo) {
+    <dl class="m-0 grid grid-cols-1 gap-x-6 gap-y-4 rounded-xl border border-ui-border bg-ui-card p-4 text-sm sm:grid-cols-2">
+      <div class="flex flex-col gap-1">
+        <dt class="text-text-muted">N° Reclamo</dt>
+        <dd class="m-0 font-mono font-semibold text-text-primary">{{ reclamo.numeroReclamo }}</dd>
+      </div>
+      <div class="flex flex-col gap-1">
+        <dt class="text-text-muted">Cliente</dt>
+        <dd class="m-0 font-medium text-text-primary">{{ reclamo.nombreCliente }}</dd>
+      </div>
+      <div class="flex flex-col items-start gap-1">
+        <dt class="text-text-muted">Tipo de reclamación</dt>
+        <dd class="m-0"><app-status-badge type="text" [value]="formatearTexto(reclamo.tipoReclamacion)" /></dd>
+      </div>
+      <div class="flex flex-col items-start gap-1">
+        <dt class="text-text-muted">Tipo de problema</dt>
+        <dd class="m-0"><app-status-badge type="text" [value]="formatearTexto(reclamo.tipoProblema)" /></dd>
+      </div>
+      @if (reclamo.montoReclamado) {
+        <div class="flex flex-col gap-1 sm:col-span-2">
+          <dt class="text-text-muted">Monto reclamado</dt>
+          <dd class="m-0 text-lg font-bold text-brand-gold">{{ reclamo.montoReclamado | soles }}</dd>
         </div>
-        <div class="flex flex-col gap-1">
-            <span class="text-text-tertiary">Cliente</span>
-            <span class="font-medium">{{ reclamo.nombreCliente }}</span>
-        </div>
-        <div class="flex flex-col gap-1">
-            <span class="text-text-tertiary">Tipo reclamación</span>
-            <span>{{ reclamo.tipoReclamacion }}</span>
-        </div>
-        <div class="flex flex-col gap-1">
-            <span class="text-text-tertiary">Tipo problema</span>
-            <span>{{ reclamo.tipoProblema }}</span>
-        </div>
-        @if (reclamo.montoReclamado) {
-        <div class="flex flex-col gap-1 col-span-2">
-            <span class="text-text-tertiary">Monto reclamado</span>
-            <span class="font-bold text-brand-gold">S/ {{ reclamo.montoReclamado |soles }}</span>
-        </div>
-        }
-    </div>
+      }
+    </dl>
+  }
+
+  <h2 class="subtitle-form">Resolución del reclamo</h2>
+
+  <div class="part-form">
+    <label for="estadoReclamo">Estado *</label>
+    <p-select [options]="estadoOpts" formControlName="estadoReclamo" optionLabel="label" optionValue="value"
+      placeholder="Seleccione estado" inputId="estadoReclamo" />
+    @if (campoInvalido('estadoReclamo')) {
+      <p-message severity="error" variant="simple" size="small">El estado es requerido</p-message>
     }
+  </div>
 
-    <h2 class="subtitle-form">Resolución del reclamo</h2>
+  <div class="part-form">
+    <label for="solucionReclamo">Solución aplicada</label>
+    <p-select [options]="solucionOpts" formControlName="solucionReclamo" optionLabel="label" optionValue="value"
+      placeholder="Seleccione solución (opcional)" inputId="solucionReclamo" [showClear]="true" />
+  </div>
 
-    <!-- Estado -->
-    <div class="part-form">
-        <label for="estadoReclamo">Estado *</label>
-        <p-select [options]="estadoOpts" formControlName="estadoReclamo" optionLabel="label" optionValue="value"
-            placeholder="Seleccione estado" inputId="estadoReclamo" />
-        @if (campoInvalido('estadoReclamo')) {
-        <p-message severity="error" variant="simple" size="small">El estado es requerido</p-message>
-        }
-    </div>
+  <div class="part-form">
+    <label for="montoCompensado">Monto compensado</label>
+    <p-inputNumber formControlName="montoCompensado" inputId="montoCompensado" mode="currency" currency="PEN"
+      locale="es-PE" [minFractionDigits]="2" [maxFractionDigits]="2" [showButtons]="true" [min]="0"
+      [step]="0.5" [max]="999999" placeholder="0.00" />
+    @if (campoInvalido('montoCompensado')) {
+      <p-message severity="error" variant="simple" size="small">El monto no puede ser negativo</p-message>
+    }
+  </div>
 
-    <!-- Solución -->
-    <div class="part-form">
-        <label for="solucionReclamo">Solución aplicada</label>
-        <p-select [options]="solucionOpts" formControlName="solucionReclamo" optionLabel="label" optionValue="value"
-            placeholder="Seleccione solución (opcional)" inputId="solucionReclamo" [showClear]="true" />
-    </div>
+  <div class="part-form">
+    <label for="notasInternas">Notas internas</label>
+    <textarea pTextarea id="notasInternas" formControlName="notasInternas" class="textarea-base" [autoResize]="true"
+      rows="4" placeholder="Observaciones internas sobre la resolución..." fluid></textarea>
+  </div>
 
-    <!-- Monto compensado -->
-    <div class="part-form">
-        <label for="montoCompensado">Monto compensado (S/)</label>
-        <p-inputNumber formControlName="montoCompensado" inputId="montoCompensado" mode="decimal"
-            [minFractionDigits]="2" [maxFractionDigits]="2" [showButtons]="true" [min]="0" [step]="0.5" [max]="999999"
-            placeholder="0.00" mode="currency" currency="PEN"  locale="es-PE"/>
-        @if (campoInvalido('montoCompensado')) {
-        <p-message severity="error" variant="simple" size="small">El monto no puede ser negativo</p-message>
-        }
-    </div>
+  <div class="part-form">
+    <label for="detalleSolucion">Detalle de la solución</label>
+    <textarea pTextarea id="detalleSolucion" formControlName="detalleSolucion" class="textarea-base" [autoResize]="true"
+      rows="4" placeholder="Detalle de la solución aplicada..." fluid></textarea>
+  </div>
 
-    <!-- Notas internas -->
-    <div class="part-form">
-        <label for="notasInternas">Notas internas</label>
-        <textarea pTextarea id="notasInternas" formControlName="notasInternas" rows="4"
-            placeholder="Observaciones internas sobre la resolución..."></textarea>
-    </div>
-
-    <div class="part-form">
-        <label for="detalleSolucion">Detalle de la solución</label>
-        <textarea pTextarea id="detalleSolucion" formControlName="detalleSolucion" rows="4" placeholder="Detalle de la solución aplicada..."></textarea>
-    </div>
-
-    <!-- Acciones -->
-    <div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
-        <button pButton label="Guardar" class="boton-submit w-full sm:w-auto" type="button"
-            (click)="onGuardar()"></button>
-        <button pButton label="Cancelar" class="boton-cancel w-full sm:w-auto" type="button"
-            (click)="onCancelar()"></button>
-    </div>
-
+  <div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
+    <app-button variant="submit" icon="save" label="Guardar" loadingLabel="Guardando..." [loading]="guardando"
+      [fullWidth]="true" class="sm:w-auto" (clicked)="onGuardar()" />
+    <app-button variant="cancel" icon="times" label="Cancelar" [disabled]="guardando"
+      [fullWidth]="true" class="sm:w-auto" (clicked)="onCancelar()" />
+  </div>
 </form>

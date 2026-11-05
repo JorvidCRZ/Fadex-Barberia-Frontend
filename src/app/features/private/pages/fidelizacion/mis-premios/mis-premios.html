@@ -1,63 +1,62 @@
-<div class="w-full">
+<ng-template #cardPremio let-recompensa>
+    <article class="group relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-white/10 bg-ui-card p-4 transition-all duration-300 hover:-translate-y-1 hover:border-brand-gold/40 hover:shadow-lg hover:shadow-black/30"
+        [class.opacity-60]="recompensa.estado === EstadoRecompensa.VENCIDO || recompensa.estado === EstadoRecompensa.ANULADO">
 
-    <header class="mb-6">
-        <h2 class="m-0 text-xl font-bold text-text-primary">Mis recompensas</h2>
-        <p class="mt-1 text-sm text-text-secondary">Estos son los premios que ganaste en la ruleta</p>
-    </header>
+        <div class="absolute inset-x-0 top-0 h-[3px] bg-brand-gold opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
 
-    <app-stats class="mb-6 block" [items]="resumen()" />
-
-    <app-pill-tabs class="mb-6 block" [tabs]="tabs" [(value)]="tabActivo" />
-
-    @if (cargando()) {
-    <app-empty-state boxed tipo="cargando" mensaje="Cargando tus recompensas..." />
-    } @else if (error()) {
-    <app-empty-state boxed tipo="error" [mensaje]="error()!">
-        <app-button variant="secondary" size="sm" icon="refresh" label="Reintentar" (clicked)="cargarRecompensas()" />
-    </app-empty-state>
-    } @else if (recompensasFiltradas().length === 0) {
-    <app-empty-state boxed [icono]="iconoEstadoVacio()" mensaje="No tienes recompensas en esta categoría." />
-    } @else {
-
-    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        @for (recompensa of recompensasFiltradas(); track recompensa.id) {
-        <article class="group relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-white/10 bg-ui-card p-4 transition-all duration-300 hover:-translate-y-1 hover:border-brand-gold/40 hover:shadow-lg hover:shadow-black/30"
-            [class.opacity-60]="recompensa.estado === EstadoRecompensa.VENCIDO || recompensa.estado === EstadoRecompensa.ANULADO">
-
-            <!-- Barra dorada al hover -->
-            <div class="absolute inset-x-0 top-0 h-[3px] bg-brand-gold opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
-
-            <div class="flex items-center justify-between">
-                <div class="flex size-11 items-center justify-center rounded-xl" [class]="iconoFondoClase(recompensa.estado)">
-                    <i [class]="iconoPremio(recompensa.itemNombre) + ' text-lg'"></i>
-                </div>
-                <app-status-badge type="text" [humanize]="false" [tone]="estadoTono(recompensa.estado)" [value]="estadoLabel(recompensa.estado)" />
+        <div class="flex items-center justify-between">
+            <div class="flex size-11 items-center justify-center rounded-xl" [class]="iconoFondoClase(recompensa.estado)">
+                <i [class]="iconoPremio(recompensa.itemNombre) + ' text-lg'"></i>
             </div>
+            <app-status-badge type="text" [humanize]="false" [tone]="estadoTono(recompensa.estado)" [value]="estadoLabel(recompensa.estado)" />
+        </div>
 
-            <p class="m-0 text-base font-bold text-text-primary">{{ recompensa.itemNombre }}</p>
+        <p class="m-0 text-base font-bold text-text-primary">{{ recompensa.itemNombre }}</p>
 
-            <p class="m-0 flex items-center gap-1.5 text-xs text-text-muted">
-                <i class="pi pi-hashtag text-[10px]"></i>
-                <span class="font-semibold text-text-secondary">{{ recompensa.codigoCanje }}</span>
-            </p>
+        <p class="m-0 flex items-center gap-1.5 text-xs text-text-muted">
+            <i class="pi pi-hashtag text-[10px]"></i>
+            <span class="font-semibold text-text-secondary">{{ recompensa.codigoCanje }}</span>
+        </p>
 
-            <div class="mt-1 flex items-center justify-between border-t border-white/[0.06] pt-3">
-                @if (fechaInfo(recompensa); as info) {
-                <span class="flex items-center gap-1.5 text-xs text-text-muted">
-                    <i class="pi pi-calendar text-[10px]"></i>
-                    {{ info.prefijo }} {{ info.fecha | dateHelper }}
-                </span>
-                } @else {
-                <span></span>
-                }
+        @if (fechaInfo(recompensa); as info) {
+        <div class="mt-1 border-t border-white/[0.06] pt-3">
+            <span class="flex items-center gap-1.5 text-xs text-text-[gold]">
+                <i class="pi pi-calendar text-[10px]"></i>
+                {{ info.prefijo }} {{ info.fecha | dateHelper }}
+            </span>
+        </div>
+        }
+    </article>
+</ng-template>
 
-                @if (recompensa.estado === EstadoRecompensa.PENDIENTE) {
-                <app-button variant="primary" size="sm" icon="eye" label="Ver" />
-                }
-            </div>
-        </article>
+@if (cargando()) {
+<app-empty-state boxed tipo="cargando" mensaje="Cargando tus premios..." />
+} @else if (error()) {
+<app-empty-state boxed tipo="error" [mensaje]="error()!">
+    <app-button variant="secondary" size="sm" icon="refresh" label="Reintentar" (clicked)="cargarRecompensas()" />
+</app-empty-state>
+} @else if (recompensas().length === 0) {
+<app-empty-state boxed icono="pi-gift" mensaje="Aún no tienes premios. ¡Sigue acumulando cortes!" />
+} @else {
+<div class="flex flex-col gap-5">
+    @if (pendientes().length) {
+        <div class="grid gap-3">
+        @for (r of pendientes(); track r.id) {
+        <ng-container [ngTemplateOutlet]="cardPremio" [ngTemplateOutletContext]="{ $implicit: r }" />
         }
     </div>
+    } @else {
+    <p class="m-0 text-sm text-text-muted">No tienes premios pendientes.</p>
     }
 
+    @if (usados().length) {
+    <app-collapsible-section [titulo]="'Premios canjeados (' + usados().length + ')'" [abierto]="usadosAbierto()" (abiertoChange)="usadosAbierto.set($event)">
+        <div class="grid gap-3">
+            @for (r of usados(); track r.id) {
+            <ng-container [ngTemplateOutlet]="cardPremio" [ngTemplateOutletContext]="{ $implicit: r }" />
+            }
+        </div>
+    </app-collapsible-section>
+    }
 </div>
+}

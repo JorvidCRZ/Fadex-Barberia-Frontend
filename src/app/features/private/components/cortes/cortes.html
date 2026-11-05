@@ -1,69 +1,17 @@
-<div class="historial-cortes">
+<div class="flex flex-col gap-6 mt-5">
+  <app-page-header titulo="Historial de Cortes" icono="history" subtitulo="Consulta los servicios que realizaste">
+    <span class="text-sm text-text-muted">
+      {{ serviciosFiltrados.length }}
+      servicio{{ serviciosFiltrados.length !== 1 ? 's' : '' }}
+    </span>
+  </app-page-header>
 
-  <!-- HEADER -->
-  <div class="historial-cortes__header">
-    <div class="historial-cortes__header-left">
-      <h1 class="historial-cortes__title">
-        <i class="pi pi-history"></i>
-        Historial de Cortes
-      </h1>
-      <p class="historial-cortes__subtitle">Consulta los servicios que realizaste</p>
-    </div>
+  <app-stats [items]="stats" />
 
-    <div class="historial-cortes__header-right">
-      <span class="historial-cortes__count">
-        {{ serviciosFiltrados.length }}
-        servicio{{ serviciosFiltrados.length !== 1 ? 's' : '' }}
-      </span>
-    </div>
-  </div>
+  <app-filtros [fields]="filtrosFields" [titulo]="'Historial de Cortes'" [text]="'Buscar cortes'" [acordeon]="true"
+    (buscar)="onBuscar($event)" (limpiar)="onLimpiar()" />
 
-  <!-- TARJETAS DE ESTADÍSTICAS -->
-  <div class="cortes-stats">
-
-    <div class="cortes-stat-card cortes-stat-card--gold">
-      <div class="cortes-stat-card__icon"><i class="pi pi-check-circle"></i></div>
-      <div class="cortes-stat-card__label">Cortes finalizados</div>
-      <div class="cortes-stat-card__value">{{ totalCortesFinalizados }}</div>
-      <div class="cortes-stat-card__description">Servicios completados</div>
-    </div>
-
-    <div class="cortes-stat-card cortes-stat-card--green">
-      <div class="cortes-stat-card__icon"><i class="pi pi-wallet"></i></div>
-      <div class="cortes-stat-card__label">Ingresos registrados</div>
-      <div class="cortes-stat-card__value">{{ ingresosRegistrados | moneda }}</div>
-      <div class="cortes-stat-card__description">Total de servicios finalizados</div>
-    </div>
-
-    <div class="cortes-stat-card cortes-stat-card--blue">
-      <div class="cortes-stat-card__icon"><i class="pi pi-users"></i></div>
-      <div class="cortes-stat-card__label">Clientes atendidos</div>
-      <div class="cortes-stat-card__value">{{ clientesAtendidos }}</div>
-      <div class="cortes-stat-card__description">Clientes únicos atendidos</div>
-    </div>
-
-  </div>
-
-  <!-- FILTROS -->
-  <app-filtros
-    [fields]="filtrosFields"
-    [titulo]="'Historial'"
-    [text]="'Buscar cortes'"
-    [acordeon]="true"
-    (buscar)="onBuscar($event)"
-    (limpiar)="onLimpiar()" />
-
-  <!-- TABLA -->
-  <p-table
-    [value]="serviciosFiltrados"
-    [loading]="cargando"
-    [paginator]="true"
-    [rows]="10"
-    [showCurrentPageReport]="true"
-    currentPageReportTemplate="Viendo {first} a {last} de {totalRecords} entradas"
-    [tableStyle]="{ 'min-width': '950px' }"
-    dataKey="reservaId"
-    styleClass="tabla-estandar">
+  <p-table [value]="pagina" [loading]="cargando" [tableStyle]="{ 'min-width': '950px' }" dataKey="reservaId">
 
     <ng-template pTemplate="header">
       <tr>
@@ -81,27 +29,24 @@
 
     <ng-template pTemplate="body" let-servicio>
       <tr>
-        <td class="text-text-muted">#{{ servicio.reservaId }}</td>
-        <td class="font-medium">{{ servicio.clienteNombre }} {{ servicio.clienteApellido }}</td>
+        <td><span class="text-sm text-text-muted">#{{ servicio.reservaId }}</span></td>
         <td>
-          <span class="mx-auto block max-w-[200px] truncate" [title]="servicio.servicioNombre">
+          <span class="text-sm font-semibold text-text-primary">
+            {{ servicio.clienteNombre }} {{ servicio.clienteApellido }}
+          </span>
+        </td>
+        <td>
+          <span class="mx-auto block max-w-[200px] truncate text-sm text-text-primary"
+            [title]="servicio.servicioNombre">
             {{ servicio.servicioNombre || '—' }}
           </span>
         </td>
-        <td>{{ servicio.fecha | date:'dd/MM/yyyy' }}</td>
-        <td>{{ servicio.horaInicio | slice:0:5 }}</td>
-        <td>{{ servicio.duracion }} min</td>
+        <td><span class="text-sm font-medium text-text-primary">{{ servicio.fecha | dateHelper }}</span></td>
+        <td><span class="text-sm text-text-muted">{{ servicio.horaInicio | slice:0:5 }}</span></td>
+        <td><span class="text-sm text-text-muted">{{ servicio.duracion }} min</span></td>
         <td><span class="font-bold text-brand-gold">{{ servicio.precio | moneda }}</span></td>
         <td>
-          @if (servicio.estado === 'FINALIZADA') {
-            <span class="rounded-full border border-green-500/30 bg-green-500/10 px-3 py-1 text-xs font-semibold text-green-400">Finalizada</span>
-          }
-          @if (servicio.estado === 'CANCELADA' || servicio.estado === 'CANCELADA_AUTOMATICA') {
-            <span class="rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-xs font-semibold text-red-400">Cancelada</span>
-          }
-          @if (servicio.estado === 'NO_ASISTIO') {
-            <span class="rounded-full border border-zinc-500/30 bg-zinc-500/10 px-3 py-1 text-xs font-semibold text-zinc-400">No asistió</span>
-          }
+          <app-status-badge type="text" [value]="servicio.estado" />
         </td>
         <td>
           <div class="flex items-center justify-center">
@@ -113,16 +58,19 @@
 
     <ng-template pTemplate="emptymessage">
       <tr>
-        <td colspan="9" class="celda-vacia">
+        <td colspan="9" class="py-12 text-center">
           <div class="flex flex-col items-center gap-3">
             <i class="pi pi-inbox text-5xl text-text-muted opacity-30"></i>
             <p class="m-0 text-lg text-text-muted">
-              {{ hayFiltrosActivos
-                  ? 'No se encontraron servicios con esos filtros'
-                  : 'Aún no tienes servicios registrados' }}
+              @if (hayFiltrosActivos) {
+              No se encontraron servicios con esos filtros
+              } @else {
+              Aún no tienes servicios registrados
+              }
             </p>
             @if (hayFiltrosActivos) {
-              <app-button variant="limpiar" size="sm" icon="filter-slash" label="Limpiar filtros" (clicked)="onLimpiar()" />
+            <app-button variant="limpiar" size="sm" icon="filter-slash" label="Limpiar filtros"
+              (clicked)="onLimpiar()" />
             }
           </div>
         </td>
@@ -131,7 +79,7 @@
 
     <ng-template pTemplate="loadingbody">
       <tr>
-        <td colspan="9" class="celda-vacia">
+        <td colspan="9" class="py-12 text-center">
           <div class="flex flex-col items-center gap-3">
             <div class="size-10 animate-spin rounded-full border-4 border-brand-gold border-t-transparent"></div>
             <p class="m-0 text-text-muted">Cargando historial...</p>
@@ -139,70 +87,58 @@
         </td>
       </tr>
     </ng-template>
-
   </p-table>
 
+  <div class="producto-page-paginator">
+    <p-paginator [first]="first" [rows]="rows" [totalRecords]="serviciosFiltrados.length"
+      [rowsPerPageOptions]="[5, 10, 25, 50]" [showCurrentPageReport]="true"
+      currentPageReportTemplate="Página {currentPage} de {totalPages} · {totalRecords} servicio(s)"
+      (onPageChange)="onPaginator($event)" />
+  </div>
 </div>
 
-<!-- MODAL DETALLE -->
-<p-dialog [(visible)]="displayModal" [modal]="true" [draggable]="false" [resizable]="false"
-  styleClass="w-11/12 md:w-5/12 shadow-dialog" header="Detalle del Corte" [baseZIndex]="10000">
-
-  <ng-template pTemplate="content">
-    @if (servicioSeleccionado) {
-      <div class="space-y-5 p-4">
-
-        <div class="flex items-center justify-between border-b border-ui-border-soft pb-4">
-          <div>
-            <p class="label-detalle mb-1">Fecha</p>
-            <p class="m-0 text-lg font-bold text-brand-gold">
-              {{ servicioSeleccionado.fecha | date:'dd/MM/yyyy' }}
-            </p>
-          </div>
-          <span class="text-sm font-semibold">
-            {{ etiquetaEstado(servicioSeleccionado.estado) }}
-          </span>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-          <div class="card-detalle">
-            <p class="label-detalle mb-1">Cliente</p>
-            <p class="m-0 font-medium">
-              {{ servicioSeleccionado.clienteNombre }} {{ servicioSeleccionado.clienteApellido }}
-            </p>
-          </div>
-          <div class="card-detalle">
-            <p class="label-detalle mb-1">Duración</p>
-            <p class="m-0 font-medium">{{ servicioSeleccionado.duracion }} min</p>
-          </div>
-        </div>
-
-        <div>
-          <p class="label-detalle mb-2">Servicio realizado</p>
-          <div class="card-detalle !p-3 flex items-center">
-            <i class="pi pi-check-circle mr-3 text-brand-gold"></i>
-            <span>{{ servicioSeleccionado.servicioNombre || '—' }}</span>
-          </div>
-        </div>
-
-        <div class="card-detalle !border-brand-gold/20 mt-4 flex items-center justify-between">
-          <div>
-            <p class="label-detalle mb-1">Horario</p>
-            <p class="m-0 font-mono">
-              {{ servicioSeleccionado.horaInicio | slice:0:5 }} - {{ servicioSeleccionado.horaFin | slice:0:5 }}
-            </p>
-          </div>
-          <div class="text-right">
-            <p class="label-detalle mb-1">Precio</p>
-            <p class="m-0 text-2xl font-bold text-brand-gold">{{ servicioSeleccionado.precio | moneda }}</p>
-          </div>
-        </div>
-
+<app-modal [(visible)]="displayModal" titulo="Detalle del Corte" mode="crear" icono="pi-history" maxWidth="40rem">
+  @if (servicioSeleccionado; as servicio) {
+  <div class="space-y-5">
+    <div class="flex items-center justify-between border-b border-ui-border-soft pb-4">
+      <div>
+        <p class="mb-1 text-sm text-text-muted">Fecha</p>
+        <p class="m-0 text-lg font-bold text-brand-gold">{{ servicio.fecha | dateHelper }}</p>
       </div>
-    }
-  </ng-template>
+      <app-status-badge type="text" [value]="servicio.estado" />
+    </div>
 
-  <ng-template pTemplate="footer">
-    <app-button variant="primary" size="sm" label="Cerrar" (clicked)="displayModal = false" />
-  </ng-template>
-</p-dialog>
+    <div class="grid grid-cols-2 gap-4">
+      <div class="rounded-xl border border-ui-border-soft bg-ui-black p-4">
+        <p class="mb-1 text-sm text-text-muted">Cliente</p>
+        <p class="m-0 font-semibold text-text-primary">{{ servicio.clienteNombre }} {{ servicio.clienteApellido }}</p>
+      </div>
+      <div class="rounded-xl border border-ui-border-soft bg-ui-black p-4">
+        <p class="mb-1 text-sm text-text-muted">Duración</p>
+        <p class="m-0 font-semibold text-text-primary">{{ servicio.duracion }} min</p>
+      </div>
+    </div>
+
+    <div>
+      <p class="mb-2 text-sm text-text-muted">Servicio realizado</p>
+      <div class="flex items-center rounded-xl border border-ui-border-soft bg-ui-black p-3">
+        <i class="pi pi-check-circle mr-3 text-brand-gold"></i>
+        <span class="font-semibold text-text-primary">{{ servicio.servicioNombre || '—' }}</span>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between rounded-xl border border-brand-gold/20 bg-ui-black p-4">
+      <div>
+        <p class="mb-1 text-sm text-text-muted">Horario</p>
+        <p class="m-0 font-semibold text-text-primary">
+          {{ servicio.horaInicio | slice:0:5 }} - {{ servicio.horaFin | slice:0:5 }}
+        </p>
+      </div>
+      <div class="text-right">
+        <p class="mb-1 text-sm text-text-muted">Precio</p>
+        <p class="m-0 text-2xl font-bold text-brand-gold">{{ servicio.precio | moneda }}</p>
+      </div>
+    </div>
+  </div>
+  }
+</app-modal>

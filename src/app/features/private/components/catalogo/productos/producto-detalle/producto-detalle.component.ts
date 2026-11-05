@@ -1,58 +1,36 @@
-import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { Component, Input, OnChanges } from '@angular/core';
 import { ImageModule } from 'primeng/image';
-import { ButtonModule } from 'primeng/button';
 import { StatusBadgeComponent } from '@/app/shared/components/status-badge/status-badge.component';
-import { ProductoService } from '@/app/core/services/catalogos/producto.service';
-import { environment } from '@/environments/environment';
-import { Producto } from '@/app/core/models/catalogos/productos.model';
 import { SafeImageUrlPipe } from '@/app/shared/pipes/safe-image-url.pipe';
+import { SolesPipe } from '@/app/shared/pipes/moneda.pipe';
+import { Producto } from '@/app/core/models/catalogos/productos.model';
 import { INVENTARIO_CONFIG } from '@/app/core/config/valores.config';
-import { NotificationService } from '@/app/core/services/common/notification.service';
 
 @Component({
   selector: 'app-producto-detalle',
-  imports: [ButtonModule, ImageModule, CommonModule, StatusBadgeComponent, SafeImageUrlPipe],
-  templateUrl: './producto-detalle.html',
+  standalone: true,
+  imports: [ImageModule, StatusBadgeComponent, SafeImageUrlPipe, SolesPipe],
+  templateUrl: './producto-detalle.html'
 })
-export class ProductoDetalleComponent implements OnInit {
+export class ProductoDetalleComponent implements OnChanges {
+  @Input({ required: true }) producto!: Producto;
 
-  private router = inject(Router);
-  private cd = inject(ChangeDetectorRef);
-  private route = inject(ActivatedRoute);
-  private notify = inject(NotificationService);
-  private productoService = inject(ProductoService);
-
-  environment = environment.apiUrl;
-  readonly moneda = INVENTARIO_CONFIG.MONEDA;
   readonly stockMinimo = INVENTARIO_CONFIG.STOCK_MINIMO_GLOBAL;
-  detalleProducto?: Producto;
-  cargando = true;
+  activa = 0;
 
-  ngOnInit() {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-    if (!id) return;
-    this.obtenerDetalleProducto(id);
+  get imagenes(): string[] {
+    return this.producto?.urlsMultimedia ?? [];
   }
 
-  volver() {
-    this.router.navigate(['/dashboard/admin/catalogo/productos']);
+  get imagenActual(): string | undefined {
+    return this.imagenes[this.activa] ?? this.imagenes[0];
   }
 
-  private obtenerDetalleProducto(id: number) {
-    this.productoService.obtenerProductoId(id).subscribe({
-      next: (resp) => {
-        this.detalleProducto = resp.data;
-        this.cargando = false;
-        this.cd.detectChanges();
-      },
-      error: (err) => {
-        this.cargando = false;
-        this.cd.detectChanges();
-        this.notify.showHttpError(err.message);
-      }
-    });
+  ngOnChanges(): void {
+    this.activa = 0;
+  }
+
+  seleccionar(index: number): void {
+    this.activa = index;
   }
 }
-

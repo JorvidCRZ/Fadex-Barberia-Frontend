@@ -1,18 +1,5 @@
-<p-table
-  [value]="ventas"
-  [loading]="!cargado"
-  [paginator]="true"
-  [rows]="rows"
-  [totalRecords]="totalRecords"
-  [lazy]="true"
-  [lazyLoadOnInit]="false"
-  (onLazyLoad)="lazyLoad.emit($event)"
-  [showCurrentPageReport]="true"
-  currentPageReportTemplate="Viendo {first} a {last} de {totalRecords} entradas"
-  [tableStyle]="{ 'min-width': '1000px' }"
-  dataKey="ventaId"
-  expandableRows
-  styleClass="tabla-estandar">
+<p-table [value]="ventas" [loading]="!cargado" [tableStyle]="{ 'min-width': '1000px' }" dataKey="ventaId"
+  expandableRows>
 
   <ng-template pTemplate="header">
     <tr>
@@ -32,39 +19,34 @@
       <td>
         <div class="inline-flex items-center gap-3">
           @if ((venta.detalles ?? []).length > 0) {
-            <p-button type="button" [pRowToggler]="venta" class="boton-expandir-tabla"
-              [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"></p-button>
+          <p-button type="button" [pRowToggler]="venta" class="boton-expandir-tabla" [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"></p-button>
           }
-          <span class="font-medium text-text-muted">
+          <span class="text-sm text-text-muted">
             {{ venta.numeroCorrelativo || ('#' + venta.ventaId) }}
           </span>
         </div>
       </td>
-      <td class="font-medium">{{ venta.clienteNombre }}</td>
-      <td class="capitalize">{{ (venta.tipoComprobante || '') | lowercase }}</td>
+      <td><span class="text-sm font-semibold text-text-primary">{{ venta.clienteNombre }}</span></td>
+      <td><span class="text-sm capitalize text-text-primary">{{ (venta.tipoComprobante || '') | lowercase }}</span></td>
       <td>
         @if (venta.metodoPago) {
-          <span class="inline-flex items-center gap-2">
-            <i class="pi pi-wallet text-xs"></i>{{ venta.metodoPago }}
-          </span>
+        <app-status-badge type="text" [value]="venta.metodoPago" />
         } @else {
-          <span class="text-text-muted">-</span>
+        <span class="text-text-muted">-</span>
         }
       </td>
-      <td>{{ venta.detalles?.length || 0 }} ítem(s)</td>
+      <td><span class="text-sm text-text-muted">{{ venta.detalles?.length || 0 }} ítem(s)</span></td>
       <td>
-        <div class="flex flex-col items-center">
-          <span class="font-medium">{{ venta.fecha | date:'dd/MM/yyyy' }}</span>
-          <span class="text-xs text-text-muted">{{ venta.fecha | date:'HH:mm' }}</span>
-        </div>
+        <p class="m-0 text-sm font-medium text-text-primary">{{ venta.fecha | date:'dd/MM/yyyy' }}</p>
+        <p class="m-0 mt-1 text-xs text-text-muted">{{ venta.fecha | date:'HH:mm' }}</p>
       </td>
       <td><span class="font-bold text-brand-gold">{{ calcularTotal(venta) | moneda }}</span></td>
       <td>
         <div class="flex items-center justify-center gap-2">
           <app-button variant="ver-tabla" icon="eye" tooltip="Ver detalle" (clicked)="verDetalle(venta)" />
-          <app-button variant="editar-tabla" icon="wallet" tooltip="Ver información de pago" (clicked)="verPago(venta)" />
+          <app-button variant="accion-cita" icon="download" tooltip="Ver información de pago" (clicked)="verPago(venta)" />
           @if (esAdmin) {
-            <app-button variant="eliminar-tabla" icon="trash" tooltip="Eliminar" (clicked)="pedirConfirmacion(venta)" />
+          <app-button variant="eliminar-tabla" icon="trash" tooltip="Eliminar" (clicked)="pedirConfirmacion(venta)" />
           }
         </div>
       </td>
@@ -73,42 +55,42 @@
 
   <ng-template pTemplate="rowexpansion" let-venta>
     <tr>
-      <td colspan="8" class="p-0">
-        <div class="card-detalle mx-4 my-3 p-5">
+      <td colspan="8" class="!p-0">
+        <div class="mx-4 my-3 rounded-xl border border-ui-border-soft bg-ui-black p-5">
           <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
 
             <div>
-              <p class="label-detalle mb-3"><i class="pi pi-box mr-2 text-brand-gold"></i>Productos físicos</p>
+              <p class="mb-3 text-sm text-text-muted"><i class="pi pi-box mr-2 text-brand-gold"></i>Productos físicos</p>
               <div class="flex flex-col gap-2">
                 @for (detalle of venta.detalles; track detalle.detalleVentaId) {
-                  @if (detalle.productoNombre) {
-                    <div class="card-detalle !p-3 flex items-center justify-between">
-                      <div>
-                        <p class="m-0 text-sm font-medium">{{ detalle.productoNombre }}</p>
-                        <p class="m-0 text-xs text-text-muted">
-                          {{ detalle.cantidad }} unid. x {{ detalle.precioUnitario | moneda }}
-                        </p>
-                      </div>
-                      <span class="font-bold text-brand-gold">{{ subtotalDe(detalle) | moneda }}</span>
-                    </div>
-                  }
+                @if (detalle.productoNombre) {
+                <div class="flex items-center justify-between rounded-xl border border-ui-border-soft bg-ui-card p-3">
+                  <div>
+                    <p class="m-0 text-sm font-semibold text-text-primary">{{ detalle.productoNombre }}</p>
+                    <p class="m-0 text-xs text-text-muted">
+                      {{ detalle.cantidad }} unid. x {{ detalle.precioUnitario | moneda }}
+                    </p>
+                  </div>
+                  <span class="font-bold text-brand-gold">{{ subtotalDe(detalle) | moneda }}</span>
+                </div>
+                }
                 }
               </div>
             </div>
 
             <div>
-              <p class="label-detalle mb-3"><i class="pi pi-scissors mr-2 text-brand-gold"></i>Servicios realizados</p>
+              <p class="mb-3 text-sm text-text-muted"><i class="pi pi-scissors mr-2 text-brand-gold"></i>Servicios realizados</p>
               <div class="flex flex-col gap-2">
                 @for (detalle of venta.detalles; track detalle.detalleVentaId) {
-                  @if (detalle.servicioNombre) {
-                    <div class="card-detalle !p-3 flex items-center justify-between">
-                      <div>
-                        <p class="m-0 text-sm font-medium">{{ detalle.servicioNombre }}</p>
-                        <p class="m-0 text-xs text-text-muted">Servicio único</p>
-                      </div>
-                      <span class="font-bold text-brand-gold">{{ subtotalDe(detalle) | moneda }}</span>
-                    </div>
-                  }
+                @if (detalle.servicioNombre) {
+                <div class="flex items-center justify-between rounded-xl border border-ui-border-soft bg-ui-card p-3">
+                  <div>
+                    <p class="m-0 text-sm font-semibold text-text-primary">{{ detalle.servicioNombre }}</p>
+                    <p class="m-0 text-xs text-text-muted">Servicio único</p>
+                  </div>
+                  <span class="font-bold text-brand-gold">{{ subtotalDe(detalle) | moneda }}</span>
+                </div>
+                }
                 }
               </div>
             </div>
@@ -121,7 +103,7 @@
 
   <ng-template pTemplate="emptymessage">
     <tr>
-      <td colspan="8" class="celda-vacia">
+      <td colspan="8" class="py-12 text-center">
         <div class="flex flex-col items-center gap-3">
           <i class="pi pi-inbox text-5xl text-text-muted opacity-30"></i>
           <p class="m-0 text-lg text-text-muted">Sin ventas registradas</p>
@@ -132,7 +114,7 @@
 
   <ng-template pTemplate="loadingbody">
     <tr>
-      <td colspan="8" class="celda-vacia">
+      <td colspan="8" class="py-12 text-center">
         <div class="flex flex-col items-center gap-3">
           <div class="size-10 animate-spin rounded-full border-4 border-brand-gold border-t-transparent"></div>
           <p class="m-0 text-text-muted">Cargando ventas...</p>
@@ -142,178 +124,129 @@
   </ng-template>
 </p-table>
 
+<div class="producto-page-paginator">
+  <p-paginator [first]="first" [rows]="rows" [totalRecords]="totalRecords" [rowsPerPageOptions]="[5, 10, 25, 50]"
+    [showCurrentPageReport]="true" currentPageReportTemplate="Página {currentPage} de {totalPages} · {totalRecords} venta(s)"
+    (onPageChange)="paginar.emit($event)" />
+</div>
+
 <!-- ============ MODAL DETALLE ============ -->
-<p-dialog [(visible)]="mostrarDetalle" [modal]="true" [draggable]="false" [resizable]="false"
-  [closable]="false" styleClass="modal-venta w-11/12 md:w-5/12" maskStyleClass="mask-venta"
-  header="Detalle de venta" [baseZIndex]="10000">
-
-  <ng-template pTemplate="header">
-    <div class="flex w-full items-center justify-between gap-4">
-      <span class="text-white font-bold uppercase tracking-widest text-sm ml-2">Detalle de venta</span>
-      <app-button variant="cierre" icon="pi-times" tooltip="Cerrar" (clicked)="mostrarDetalle = false" />
-    </div>
-  </ng-template>
-
-  <ng-template pTemplate="content">
-    @if (ventaDetalle) {
-      <div class="mv">
-
-        <div class="mv__hero">
-          <div class="mv__hero-main">
-            <div class="mv__hero-icon"><i class="pi pi-receipt"></i></div>
-            <div>
-              <p class="mv__label">N° de venta</p>
-              <p class="mv__num">{{ ventaDetalle.numeroCorrelativo || ('#' + ventaDetalle.ventaId) }}</p>
-            </div>
-          </div>
-          <span class="mv__badge">{{ (ventaDetalle.tipoComprobante || '') | lowercase }}</span>
-        </div>
-
-        <div class="mv__grid">
-          <div class="mv__field">
-            <i class="pi pi-user"></i>
-            <div>
-              <p class="mv__label">Cliente</p>
-              <p class="mv__value">{{ ventaDetalle.clienteNombre }}</p>
-            </div>
-          </div>
-          <div class="mv__field">
-            <i class="pi pi-wallet"></i>
-            <div>
-              <p class="mv__label">Método de pago</p>
-              <p class="mv__value mv__value--gold">{{ ventaDetalle.metodoPago || '-' }}</p>
-            </div>
-          </div>
-          <div class="mv__field">
-            <i class="pi pi-id-card"></i>
-            <div>
-              <p class="mv__label">Barbero</p>
-              <p class="mv__value">{{ ventaDetalle.barberoId ? (ventaDetalle.barberoNombre || 'Barbero sin nombre') : 'Barbero no registrado' }}</p>
-            </div>
-          </div>
-          <div class="mv__field">
-            <i class="pi pi-calendar"></i>
-            <div>
-              <p class="mv__label">Fecha</p>
-              <p class="mv__fecha">{{ ventaDetalle.fecha | date:'dd/MM/yyyy HH:mm' }}</p>
-            </div>
-          </div>
-        </div>
-
-        <p class="mv__section">Detalle</p>
-        <div class="mv__items">
-          @for (detalle of ventaDetalle.detalles; track detalle.detalleVentaId) {
-            <div class="mv__item">
-              <div class="mv__item-left">
-                <div class="mv__item-icon">
-                  <i class="pi" [class.pi-box]="!!detalle.productoNombre"
-                    [class.pi-scissors]="!detalle.productoNombre"></i>
-                </div>
-                <div>
-                  <p class="mv__item-name">{{ detalle.productoNombre || detalle.servicioNombre }}</p>
-                  <p class="mv__item-sub">
-                    @if (detalle.productoNombre) {
-                      {{ detalle.cantidad }} unid. x {{ detalle.precioUnitario | moneda }}
-                    } @else {
-                      Servicio
-                    }
-                  </p>
-                </div>
-              </div>
-              <span class="mv__item-price">{{ subtotalDe(detalle) | moneda }}</span>
-            </div>
-          }
-        </div>
-
-        <div class="mv__total">
-          <span class="mv__total-label">Total</span>
-          <span class="mv__total-value">{{ calcularTotal(ventaDetalle) | moneda }}</span>
-        </div>
-
+<app-modal [(visible)]="mostrarDetalle" titulo="Detalle de venta" mode="crear" icono="pi-receipt" maxWidth="40rem">
+  @if (ventaDetalle) {
+  <div class="space-y-5">
+    <div class="flex items-center justify-between border-b border-ui-border-soft pb-4">
+      <div>
+        <p class="mb-1 text-sm text-text-muted">N° de venta</p>
+        <p class="m-0 text-lg font-bold text-brand-gold">
+          {{ ventaDetalle.numeroCorrelativo || ('#' + ventaDetalle.ventaId) }}
+        </p>
       </div>
-    }
-  </ng-template>
-</p-dialog>
+      <app-status-badge type="text" [value]="ventaDetalle.tipoComprobante || '-'" />
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div class="rounded-xl border border-ui-border-soft bg-ui-black p-4">
+        <p class="mb-1 text-sm text-text-muted"><i class="pi pi-user mr-1"></i>Cliente</p>
+        <p class="m-0 font-semibold text-text-primary">{{ ventaDetalle.clienteNombre }}</p>
+      </div>
+      <div class="rounded-xl border border-ui-border-soft bg-ui-black p-4">
+        <p class="mb-1 text-sm text-text-muted"><i class="pi pi-wallet mr-1"></i>Método de pago</p>
+        <p class="m-0 font-semibold text-brand-gold">{{ ventaDetalle.metodoPago || '-' }}</p>
+      </div>
+      <div class="rounded-xl border border-ui-border-soft bg-ui-black p-4">
+        <p class="mb-1 text-sm text-text-muted"><i class="pi pi-id-card mr-1"></i>Barbero</p>
+        <p class="m-0 font-semibold text-text-primary">
+          {{ ventaDetalle.barberoId ? (ventaDetalle.barberoNombre || 'Barbero sin nombre') : 'Barbero no registrado' }}
+        </p>
+      </div>
+      <div class="rounded-xl border border-ui-border-soft bg-ui-black p-4">
+        <p class="mb-1 text-sm text-text-muted"><i class="pi pi-calendar mr-1"></i>Fecha</p>
+        <p class="m-0 font-semibold text-text-primary">{{ ventaDetalle.fecha | date:'dd/MM/yyyy HH:mm' }}</p>
+      </div>
+    </div>
+
+    <div>
+      <p class="mb-2 text-sm text-text-muted">Detalle</p>
+      <div class="flex flex-col gap-2">
+        @for (detalle of ventaDetalle.detalles; track detalle.detalleVentaId) {
+        <div class="flex items-center justify-between rounded-xl border border-ui-border-soft bg-ui-black p-3">
+          <div class="flex items-center gap-3">
+            <i class="pi text-brand-gold" [class.pi-box]="!!detalle.productoNombre"
+              [class.pi-scissors]="!detalle.productoNombre"></i>
+            <div>
+              <p class="m-0 text-sm font-semibold text-text-primary">
+                {{ detalle.productoNombre || detalle.servicioNombre }}
+              </p>
+              <p class="m-0 text-xs text-text-muted">
+                @if (detalle.productoNombre) {
+                {{ detalle.cantidad }} unid. x {{ detalle.precioUnitario | moneda }}
+                } @else {
+                Servicio
+                }
+              </p>
+            </div>
+          </div>
+          <span class="font-bold text-brand-gold">{{ subtotalDe(detalle) | moneda }}</span>
+        </div>
+        }
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between rounded-xl border border-brand-gold/20 bg-ui-black p-4">
+      <span class="text-sm text-text-muted">Total</span>
+      <span class="text-2xl font-bold text-brand-gold">{{ calcularTotal(ventaDetalle) | moneda }}</span>
+    </div>
+  </div>
+  }
+</app-modal>
 
 <!-- ============ MODAL PAGO ============ -->
-<p-dialog [(visible)]="mostrarPago" [modal]="true" [draggable]="false" [resizable]="false"
-  [closable]="false" styleClass="modal-venta w-11/12 md:w-4/12" maskStyleClass="mask-venta"
-  header="Información de pago" [baseZIndex]="10000">
-
-  <ng-template pTemplate="header">
-    <div class="flex w-full items-center justify-between gap-4">
-      <span class="text-white font-bold uppercase tracking-widest text-sm ml-2">Información de pago</span>
-      <app-button variant="cierre" icon="pi-times" tooltip="Cerrar" (clicked)="mostrarPago = false" />
+<app-modal [(visible)]="mostrarPago" titulo="Información de pago" mode="crear" icono="pi-wallet" maxWidth="32rem">
+  @if (ventaPago) {
+  <div class="space-y-5">
+    <div class="border-b border-ui-border-soft pb-4">
+      <p class="mb-1 text-sm text-text-muted">Pago de venta</p>
+      <p class="m-0 text-lg font-bold text-brand-gold">
+        {{ ventaPago.numeroCorrelativo || ('#' + ventaPago.ventaId) }}
+      </p>
     </div>
-  </ng-template>
 
-  <ng-template pTemplate="content">
-    @if (ventaPago) {
-      <div class="mv">
-
-        <div class="mv__hero">
-          <div class="mv__hero-main">
-            <div class="mv__hero-icon"><i class="pi pi-wallet"></i></div>
-            <div>
-              <p class="mv__label">Pago de venta</p>
-              <p class="mv__num">{{ ventaPago.numeroCorrelativo || ('#' + ventaPago.ventaId) }}</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="mv__grid">
-          <div class="mv__field">
-            <i class="pi pi-user"></i>
-            <div>
-              <p class="mv__label">Cliente</p>
-              <p class="mv__value">{{ ventaPago.clienteNombre || '-' }}</p>
-            </div>
-          </div>
-          <div class="mv__field">
-            <i class="pi pi-id-card"></i>
-            <div>
-              <p class="mv__label">Barbero</p>
-              <p class="mv__value">{{ ventaPago.barberoId ? (ventaPago.barberoNombre || 'Barbero sin nombre') : 'Barbero no registrado' }}</p>
-            </div>
-          </div>
-          <div class="mv__field mv__field--full">
-            <i class="pi pi-credit-card"></i>
-            <div>
-              <p class="mv__label">Tipo de pago</p>
-              <p class="mv__value mv__value--gold">{{ ventaPago.metodoPago || 'No especificado' }}</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="mv__total">
-          <span class="mv__total-label">Monto</span>
-          <span class="mv__total-value">{{ calcularTotal(ventaPago) | moneda }}</span>
-        </div>
-
-        @if (ventaPago.tipoComprobante === 'BOLETA') {
-          <button type="button" class="mv__descarga" (click)="descargarComprobante.emit(ventaPago)">
-            <i class="pi pi-file"></i> Descargar boleta
-          </button>
-        } @else if (ventaPago.tipoComprobante === 'FACTURA') {
-          <button type="button" class="mv__descarga" (click)="descargarComprobante.emit(ventaPago)">
-            <i class="pi pi-file-pdf"></i> Descargar factura
-          </button>
-        }
-
-        <div class="mv__estado">
-          <i class="pi pi-check-circle"></i>
-          Pago registrado al crear la venta
-        </div>
-
+    <div class="grid grid-cols-2 gap-4">
+      <div class="rounded-xl border border-ui-border-soft bg-ui-black p-4">
+        <p class="mb-1 text-sm text-text-muted"><i class="pi pi-user mr-1"></i>Cliente</p>
+        <p class="m-0 font-semibold text-text-primary">{{ ventaPago.clienteNombre || '-' }}</p>
       </div>
-    }
-  </ng-template>
-</p-dialog>
+      <div class="rounded-xl border border-ui-border-soft bg-ui-black p-4">
+        <p class="mb-1 text-sm text-text-muted"><i class="pi pi-id-card mr-1"></i>Barbero</p>
+        <p class="m-0 font-semibold text-text-primary">
+          {{ ventaPago.barberoId ? (ventaPago.barberoNombre || 'Barbero sin nombre') : 'Barbero no registrado' }}
+        </p>
+      </div>
+      <div class="col-span-2 rounded-xl border border-ui-border-soft bg-ui-black p-4">
+        <p class="mb-1 text-sm text-text-muted"><i class="pi pi-credit-card mr-1"></i>Tipo de pago</p>
+        <p class="m-0 font-semibold text-brand-gold">{{ ventaPago.metodoPago || 'No especificado' }}</p>
+      </div>
+    </div>
 
-<app-confirm-popover
-  [visible]="mostrarConfirmacion"
-  [mensaje]="mensajeConfirmacion"
-  mode="eliminar"
-  (confirm)="confirmarEliminar()"
-  (cancel)="cancelarEliminar()">
-</app-confirm-popover>
+    <div class="flex items-center justify-between rounded-xl border border-brand-gold/20 bg-ui-black p-4">
+      <span class="text-sm text-text-muted">Monto</span>
+      <span class="text-2xl font-bold text-brand-gold">{{ calcularTotal(ventaPago) | moneda }}</span>
+    </div>
+
+    @if (ventaPago.tipoComprobante === 'BOLETA') {
+    <app-button variant="primary" icon="pdf" label="Descargar boleta" [fullWidth]="true"
+      (clicked)="descargarComprobante.emit(ventaPago)" />
+    } @else if (ventaPago.tipoComprobante === 'FACTURA') {
+    <app-button variant="primary" icon="pdf" label="Descargar factura" [fullWidth]="true"
+      (clicked)="descargarComprobante.emit(ventaPago)" />
+    }
+
+    <p class="m-0 flex items-center justify-center gap-2 text-sm text-success">
+      <i class="pi pi-check-circle"></i> Pago registrado al crear la venta
+    </p>
+  </div>
+  }
+</app-modal>
+
+<app-confirm-popover [visible]="mostrarConfirmacion" [mensaje]="mensajeConfirmacion" mode="eliminar"
+  (confirm)="confirmarEliminar()" (cancel)="cancelarEliminar()" />

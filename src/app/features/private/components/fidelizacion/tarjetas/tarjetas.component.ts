@@ -15,15 +15,15 @@ import { FiltrosComponent } from '@/app/shared/components/filtros/filtros.compon
 import { FILTROS_TARJETA } from '@/app/core/config/filtros.config';
 import { CategoriaService } from '@/app/core/services/catalogos/categoria.service';
 import { Categoria, CategoriaTipo } from '@/app/core/models/catalogos/categorias.model';
-import { TarjetaGraficoComponent } from '@/app/shared/components/tarjeta/tarjeta-grafico.component';
 import { ClienteService } from '@/app/core/services/gestion/cliente.service';
 import { of } from 'rxjs';
+import { TarjetaClienteComponent } from '@/app/shared/components/tarjeta/tarjeta-cliente/tarjeta-cliente.component';
+import { TarjetaAdminComponent } from '@/app/shared/components/tarjeta/tarjeta-admin/tarjeta-admin.component';
 
 @Component({
   selector: 'app-tarjetas',
   imports: [CommonModule, FormsModule, ButtonModule, DialogModule, SelectModule,
-    DialogHeaderComponent, TarjetaTableComponent, TarjetaFormComponent, FiltrosComponent, TarjetaGraficoComponent
-  ],
+    DialogHeaderComponent, TarjetaTableComponent, TarjetaFormComponent, FiltrosComponent, TarjetaAdminComponent, TarjetaClienteComponent],
   templateUrl: './tarjetas.html',
 })
 export class TarjetasComponent implements OnInit {

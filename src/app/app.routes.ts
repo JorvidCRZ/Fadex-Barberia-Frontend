@@ -16,8 +16,6 @@ import { PagoComponent } from './features/auth/pago/pago.component';
 import { DashboardBarberoComponent } from './features/private/layout/dashboard-barbero.component';
 import { DashboardClienteComponent } from './features/private/layout/dashboard-cliente.component';
 import { DashboardAdministrativoComponent } from './features/private/layout/dashboard-administrativo.component';
-//mport { BarberoLayoutComponent } from './features/private/layout/dashboard-barbero.component';
-//import { DashboardAdministrativoComponent } from './features/private/dashboard/dashboard-administrativo/dashboard-administrativo.component';
 import { RegistrarClient } from './features/private/components/gestion/clientes/registrar-client/registrar-client.component';
 import { RegistrarBarbero } from './features/private/components/gestion/barberos/registrar-barbero/registrar-barbero.component';
 import { PerfilClient } from './features/private/components/gestion/clientes/perfil-client/perfil-client.component';
@@ -44,9 +42,6 @@ export const routes: Routes = [
           { path: 'pos', loadComponent: () => import('./features/private/components/operaciones/ventas/pos/pos.component').then(m => m.PosComponent) },
           { path: 'ventas', loadComponent: () => import('./features/private/components/operaciones/ventas/ventas.component').then(m => m.VentasComponent) },
           { path: 'reservas', loadComponent: () => import('./features/private/components/operaciones/reservas/reserva-list/reserva-list.component').then(m => m.ReservaList) },
-          // { path: 'reservas/nueva', loadComponent: () => import('./features/private/components/operaciones/reservas/reserva-create/create-reserva.component').then(m => m.CreateReserva) },
-          // { path: 'reservas/calendario', loadComponent: () => import('./features/private/components/operaciones/reservas/reserva-calendar/reserva-calendar.component').then(m => m.CalendarReservas) },
-          // { path: 'pagos', loadComponent: () => import('./features/private/components/operaciones/pagos/pagos.component').then(m => m.PagosComponent) },
           { path: 'reclamos', loadComponent: () => import('./features/private/components/operaciones/reclamos/reclamos.component').then(m => m.ReclamosComponent) },
           { path: 'reclamos/:id', loadComponent: () => import('./features/private/components/operaciones/reclamos/reclamo-detalle/reclamo-detalle.component').then(m => m.ReclamoDetalleComponent) }
         ]
@@ -102,7 +97,6 @@ export const routes: Routes = [
           { path: 'pos', loadComponent: () => import('./features/private/components/operaciones/ventas/pos/pos.component').then(m => m.PosComponent) },
           { path: 'ventas', loadComponent: () => import('./features/private/components/operaciones/ventas/ventas.component').then(m => m.VentasComponent) },
           { path: 'reservas', loadComponent: () => import('./features/private/components/operaciones/reservas/reserva-list/reserva-list.component').then(m => m.ReservaList) },
-          // { path: 'pagos', loadComponent: () => import('./features/private/components/operaciones/pagos/pagos.component').then(m => m.PagosComponent) },
         ]
       },
 

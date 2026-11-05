@@ -1,48 +1,49 @@
-
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
-import { ButtonModule } from 'primeng/button';
-import { StatusBadgeComponent } from '@/app/shared/components/status-badge/status-badge.component';
-import { ReclamoService } from '@/app/core/services/operaciones/reclamo.service';
-import { ReclamoResponse } from '@/app/core/models/operaciones/reclamos-model/reclamo.model';
-import { NotificationService } from '@/app/core/services/common/notification.service';
 import { ImageModule } from 'primeng/image';
-import { environment } from '@/environments/environment';
-import { formatearTexto } from '@/app/shared/utils/formatear-text.utils.component';
+import { ButtonComponent } from '@/app/shared/components/button/button.component';
+import { EmptyStateComponent } from '@/app/shared/components/empty-state/empty-state.component';
+import { PageHeaderComponent } from '@/app/shared/components/page-header/page-header.component';
+import { StatusBadgeComponent } from '@/app/shared/components/status-badge/status-badge.component';
+import { DateFormatPipe } from '@/app/shared/pipes/dat.pipe';
+import { SolesPipe } from '@/app/shared/pipes/moneda.pipe';
 import { SafeImageUrlPipe } from '@/app/shared/pipes/safe-image-url.pipe';
+import { formatearTexto } from '@/app/shared/utils/formatear-text.utils.component';
+import { ReclamoService } from '@/app/core/services/operaciones/reclamo.service';
+import { NotificationService } from '@/app/core/services/common/notification.service';
+import { ReclamoResponse } from '@/app/core/models/operaciones/reclamos-model/reclamo.model';
 
 @Component({
   selector: 'app-reclamo-detalle',
-  imports: [ButtonModule, CommonModule, StatusBadgeComponent, ImageModule, SafeImageUrlPipe ] ,
+  standalone: true,
+  imports: [
+    ImageModule, ButtonComponent, EmptyStateComponent, PageHeaderComponent, StatusBadgeComponent,
+    DateFormatPipe, SolesPipe, SafeImageUrlPipe,
+  ],
   templateUrl: './reclamo-detalle.html',
-  styleUrl: './reclamo-detalle.scss',
 })
 export class ReclamoDetalleComponent implements OnInit {
-
   private router = inject(Router);
   private cd = inject(ChangeDetectorRef);
   private route = inject(ActivatedRoute);
   private notify = inject(NotificationService);
   private reclamoService = inject(ReclamoService);
 
-  environment = environment.apiUrl;
   detalleReclamo?: ReclamoResponse;
   cargando = true;
-
   formatearTexto = formatearTexto;
 
-  ngOnInit() {
+  ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
-    if (!id) return;
+    if (!id) { this.cargando = false; return; }
     this.obtenerDetalleReclamo(id);
   }
 
-  volver() {
+  volver(): void {
     this.router.navigate(['/dashboard/admin/operaciones/reclamos']);
   }
 
-  private obtenerDetalleReclamo(id: number) {
+  private obtenerDetalleReclamo(id: number): void {
     this.reclamoService.obtenerReclamoPorId(id).subscribe({
       next: (resp) => {
         this.detalleReclamo = resp.data;
@@ -53,7 +54,7 @@ export class ReclamoDetalleComponent implements OnInit {
         this.cargando = false;
         this.cd.detectChanges();
         this.notify.showHttpError(err);
-      }
+      },
     });
   }
 }

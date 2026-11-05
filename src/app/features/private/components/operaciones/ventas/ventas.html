@@ -1,60 +1,20 @@
 <div class="flex flex-col gap-6 mt-5">
-    
-    <aside class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between px-6 py-4 border-b border-brand-gold-soft bg-brand-black rounded-xl">
-        <h1 class="text-lg font-semibold text-brand-gold text-center md:text-start">
-            <i class="pi pi-shopping-cart"></i> Gestión de Ventas
-        </h1>
-        <app-search-bar placeholder="Buscar venta por cliente..." (search)="buscarPorTexto($event)" />
-        <button pButton label="Crear Venta" icon="pi pi-plus" class="p-button-sm boton-primary" (click)="abrirCrearVenta()"></button>
-    </aside>
+  <app-page-header titulo="Gestión de Ventas" icono="shopping-cart" subtitulo="Consulta y administra las ventas registradas">
+    <app-search-bar placeholder="Buscar venta por cliente..." (search)="buscarPorTexto($event)" />
+    <app-button variant="primary" size="sm" icon="plus" label="Crear Venta" (clicked)="abrirCrearVenta()" />
+  </app-page-header>
+  <app-stats [items]="stats" />
 
-    <app-filtros 
-        [fields]="filtrosFields" 
-        titulo="Filtros Avanzados" 
-        text="Filtros" 
-        [acordeon]="true" 
-        (buscar)="buscarVentas($event)" 
-        (limpiar)="limpiarFiltros()">
-    </app-filtros>
+  <app-filtros [fields]="filtrosFields" titulo="Filtros Avanzados" text="Filtros" [acordeon]="true"
+    (buscar)="buscarVentas($event)" (limpiar)="limpiarFiltros()" />
 
-    <app-venta-resumen
-        [totalVentas]="totalVentas"
-        [ingresos]="ingresos"
-        [promedio]="promedio">
-    </app-venta-resumen>
-
-<app-venta-table
-    [ventas]="ventas"
-    [cargado]="cargado"
-    [totalRecords]="totalRecords"
-    [rows]="rows"
-    [esAdmin]="!esBarbero"
-    (lazyLoad)="onLazyLoad($event)"
-    (eliminar)="eliminarVenta($event)"
-    (descargarComprobante)="descargarComprobante($event)">
-</app-venta-table>
+  <app-venta-table [ventas]="ventas" [cargado]="cargado" [totalRecords]="totalRecords" [rows]="rows" [first]="first"
+    [esAdmin]="!esBarbero" (paginar)="onPaginator($event)" (eliminar)="eliminarVenta($event)"
+    (descargarComprobante)="descargarComprobante($event)" />
 </div>
 
-<p-dialog
-    [(visible)]="mostrarFormulario"
-    [modal]="true"
-    [dismissableMask]="true"
-    [closable]="true"
-    [style]="{ width: '90vw', maxWidth: '70rem' }">
-
-    <ng-template pTemplate="header">
-        <app-dialog-header
-            icono="pi pi-shopping-cart"
-            [title]="ventaSeleccionada ? 'Editar Venta' : 'Crear Venta'"
-            [mode]="ventaSeleccionada ? 'editar' : 'crear'">
-        </app-dialog-header>
-    </ng-template>
-
-    <app-venta-form
-        [venta]="ventaSeleccionada"
-        [isEditMode]="!!ventaSeleccionada"
-        (guardar)="guardarVenta($event)"
-        (cancelarEvento)="cerrarFormulario()">
-    </app-venta-form>
-
-</p-dialog>
+<app-modal [(visible)]="mostrarFormulario" [titulo]="ventaSeleccionada ? 'Editar Venta' : 'Crear Venta'"
+  [mode]="ventaSeleccionada ? 'editar' : 'crear'" icono="pi-shopping-cart" maxWidth="70rem">
+  <app-venta-form [venta]="ventaSeleccionada" [isEditMode]="!!ventaSeleccionada" (guardar)="guardarVenta($event)"
+    (cancelarEvento)="cerrarFormulario()" />
+</app-modal>

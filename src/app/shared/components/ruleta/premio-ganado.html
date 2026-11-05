@@ -1,0 +1,43 @@
+<p-dialog [visible]="visible" (visibleChange)="visibleChange.emit($event)" [modal]="true" [showHeader]="false"
+    [dismissableMask]="true" [draggable]="false" appendTo="body" styleClass="modal-estandar"
+    [style]="{ width: '100vw', maxWidth: '24rem' }">
+
+    <div class="relative flex flex-col items-center gap-4 px-2 py-6 text-center">
+        <div class="pointer-events-none absolute -top-10 left-1/2 h-40 w-40 -translate-x-1/2 rounded-full bg-brand-gold/15 blur-3xl"></div>
+
+        <div class="relative flex size-20 items-center justify-center overflow-hidden rounded-full border border-brand-gold/40 bg-brand-gold/10">
+            @if (imagen) {
+            <img [src]="imagen | safeImageUrl" [alt]="titulo" class="size-full object-contain p-2">
+            } @else {
+            <i [class]="icono + ' text-3xl text-brand-gold'"></i>
+            }
+        </div>
+
+        <div class="relative">
+            <p class="m-0 text-xs font-semibold uppercase tracking-widest text-brand-gold">
+                {{ sinPremio ? 'Esta vez no hubo suerte' : '¡Ganaste!' }}
+            </p>
+            <h2 class="m-0 mt-1 text-2xl font-bold leading-tight text-text-primary">{{ titulo }}</h2>
+            @if (descripcion) {
+            <p class="m-0 mt-2 text-sm text-text-secondary">{{ descripcion }}</p>
+            }
+        </div>
+
+        @if (!sinPremio && codigo) {
+        <div class="relative w-full rounded-xl border border-dashed border-brand-gold/40 bg-black/20 px-4 py-3">
+            <p class="m-0 text-[11px] uppercase tracking-widest text-text-muted">Tu código de canje</p>
+            <div class="mt-1 flex items-center justify-between gap-3">
+                <span class="font-mono text-base font-bold tracking-wider text-text-primary">{{ codigo }}</span>
+                <button type="button" class="flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs text-brand-gold transition-colors hover:bg-brand-gold/10"
+                    (click)="copiar()">
+                    <i class="pi" [class]="copiado() ? 'pi-check' : 'pi-copy'"></i>
+                    {{ copiado() ? 'Copiado' : 'Copiar' }}
+                </button>
+            </div>
+        </div>
+        <p class="relative m-0 text-xs text-text-muted">Preséntalo en tu próxima visita. También lo encuentras en "Tus premios".</p>
+        }
+
+        <app-button class="relative w-full" variant="primary" [fullWidth]="true" [label]="sinPremio ? 'Seguir participando' : 'Entendido'" (clicked)="cerrar()" />
+    </div>
+</p-dialog>

@@ -1,15 +1,24 @@
 <div class="flex flex-col gap-6 mt-5">
-    <aside class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between px-6 py-4 border-b border-brand-gold-soft bg-brand-black rounded-xl">
-        <h1 class="text-lg font-semibold text-brand-gold  text-center md:text-start"> <i class="pi" [class]="icono"></i> Servicios </h1>
-        <app-search-bar placeholder="Buscar servicio" (search)="buscarServicios($event)" />
-        <button pButton label="Crear Servicio" icon="pi pi-plus" class="p-button-sm boton-primary" (click)="abrirCrear()"></button>
-    </aside>
-    <app-filtros [fields]="filtrosFields" [titulo]="texto" [text]="texto" [acordeon]="true" (buscar)="onBuscar($event)" (limpiar)="onLimpiar()"/>
-    <app-servicio-table [servicios]="servicios" [cargado]="cargado" [totalRecords]="totalRecords" [rows]="rows" (lazyLoad)="onLazyLoad($event)" (editar)="abrirEditar($event)" (eliminar)="eliminarServicio($event)" (estado)="onCambiarEstado($any($event))" (publicado)="onCambiarPublicado($any($event))"/>
+  <app-page-header titulo="Servicios" [icono]="icono" subtitulo="Gestiona los servicios, precios, duración y publicación">
+    <app-search-bar placeholder="Buscar servicio" ancho="w-full md:w-[24rem] lg:w-[32rem] xl:w-[40rem]" (search)="buscarServicios($event)" />
+    <app-button variant="primary" size="sm" icon="plus" label="Crear servicio" (clicked)="abrirCrear()" />
+  </app-page-header>
+
+  @if (stats.length) {
+    <app-stats [items]="stats" />
+  }
+
+  <app-filtros [fields]="filtrosFields" [titulo]="texto" [text]="texto" [acordeon]="true" [abierto]="false"
+    (buscar)="onBuscar($event)" (limpiar)="onLimpiar()" />
+
+  <app-servicio-table [servicios]="servicios" [cargado]="cargado" [hayFiltros]="hayFiltros"
+    [first]="first" [rows]="rows" [totalRecords]="totalRecords" (pageChange)="onPageChange($event)"
+    (editar)="abrirEditar($event)" (estado)="onCambiarEstado($event)" (publicado)="onCambiarPublicado($event)"
+    (eliminar)="eliminarServicio($event)" (limpiar)="onLimpiar()" />
 </div>
-<p-dialog [(visible)]="mostrarFormulario" [modal]="true" [dismissableMask]="true" [closable]="true" [style]="{ width: '90vw', maxWidth: '80rem' }" (onHide)="onDialogHide()">
-    <ng-template pTemplate="header">
-        <app-dialog-header [icono]="icono" [title]="servicioSeleccionado ? 'Editar Servicio' : 'Crear Servicio'" [mode]="servicioSeleccionado ? 'editar' : 'crear'" />
-    </ng-template>
-    <app-servicio-form [servicio]="servicioSeleccionado" [categorias]="categorias" [resetTrigger]="resetFormTrigger" (guardar)="guardarServicio($event)" (cancelarEvento)="cerrarFormulario()" />
-</p-dialog>
+
+<app-modal [(visible)]="mostrarFormulario" [titulo]="servicioSeleccionado ? 'Editar Servicio' : 'Crear Servicio'"
+  [mode]="servicioSeleccionado ? 'editar' : 'crear'" [icono]="icono" maxWidth="80rem" (cerrado)="cerrarFormulario()">
+  <app-servicio-form [servicio]="servicioSeleccionado" [categorias]="categorias" [guardando]="guardando"
+    [resetTrigger]="resetFormTrigger" (guardar)="guardarServicio($event)" (cancelarEvento)="cerrarFormulario()" />
+</app-modal>

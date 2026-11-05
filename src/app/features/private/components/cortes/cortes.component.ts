@@ -1,40 +1,47 @@
 import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
-import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { SlicePipe } from '@angular/common';
 import { TableModule } from 'primeng/table';
-import { DialogModule } from 'primeng/dialog';
+import { PaginatorModule, PaginatorState } from 'primeng/paginator';
 import { Reservas } from '@/app/core/services/reserva/reserva.service';
 import { FiltrosComponent } from '@/app/shared/components/filtros/filtros.component';
 import { ButtonComponent } from '@/app/shared/components/button/button.component';
+import { PageHeaderComponent } from '@/app/shared/components/page-header/page-header.component';
+import { StatsComponent } from '@/app/shared/components/stats/stats.component';
+import { StatusBadgeComponent } from '@/app/shared/components/status-badge/status-badge.component';
+import { ModalComponent } from '@/app/shared/components/modal/modal.component';
 import { MonedaPipe } from '@/app/shared/pipes/moneda.pipe';
+import { DateFormatPipe } from '@/app/shared/pipes/dat.pipe';
 import { FilterField } from '@/app/core/models/common/filtro.model';
+import { StatsCard } from '@/app/core/models/common/card.model';
 import { HistorialBarberFiltro } from '@/app/core/models/operaciones/historial-barbero.model';
+import { EstadoReserva } from '@/app/core/models/operaciones/EstadoReserva';
 import { FILTROS_HISTORIAL_BARBERO } from '@/app/core/config/filtros.config';
 import { ServicioHistorialDTO } from '@/app/core/models/gestion/barbero/cortes.model';
-
 
 @Component({
   selector: 'app-cortes',
   standalone: true,
   imports: [
-    CommonModule, FormsModule, DatePipe, TableModule, DialogModule,
-    FiltrosComponent, ButtonComponent, MonedaPipe
+    DateFormatPipe, SlicePipe, TableModule, PaginatorModule, FiltrosComponent, ButtonComponent, MonedaPipe,
+    PageHeaderComponent, StatsComponent, StatusBadgeComponent, ModalComponent,
   ],
   templateUrl: './cortes.html',
-  styleUrl: './cortes.scss'
 })
 export class CortesComponent implements OnInit {
-
   private readonly reservasService = inject(Reservas);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly moneda = new MonedaPipe();
 
   servicios: ServicioHistorialDTO[] = [];
   serviciosFiltrados: ServicioHistorialDTO[] = [];
+  pagina: ServicioHistorialDTO[] = [];
+  first = 0;
+  rows = 10;
   cargando = false;
   filtros: HistorialBarberFiltro = {};
   filtrosFields: FilterField<HistorialBarberFiltro>[] = FILTROS_HISTORIAL_BARBERO;
+  stats: StatsCard[] = [];
 
-  // Modal de detalle
   displayModal = false;
   servicioSeleccionado: ServicioHistorialDTO | null = null;
 
@@ -42,7 +49,6 @@ export class CortesComponent implements OnInit {
     this.cargarHistorial();
   }
 
-  
   private aISO(valor: unknown): string | undefined {
     if (!valor) return undefined;
     if (valor instanceof Date) {
@@ -63,8 +69,6 @@ export class CortesComponent implements OnInit {
 
     this.reservasService.getHistorialCortesBarbero(desde, hasta, clienteNombre).subscribe({
       next: (res: any) => {
-        console.log('respuesta historial:', res);
-
         try {
           // Soporta ApiResponse<List>, ApiResponse<Page> o array directo
           const data = res?.data ?? res;
@@ -80,20 +84,23 @@ export class CortesComponent implements OnInit {
             horaFin: item.horaFin,
             duracion: item.duracion,
             precio: item.precio,
-            estado: item.estado
+            estado: item.estado,
           }));
 
-          this.servicios = lista.sort((a, b) =>
-            new Date(`${b.fecha}T${b.horaInicio}`).getTime() -
-            new Date(`${a.fecha}T${a.horaInicio}`).getTime()
+          this.servicios = lista.sort(
+            (a, b) =>
+              new Date(`${b.fecha}T${b.horaInicio}`).getTime() -
+              new Date(`${a.fecha}T${a.horaInicio}`).getTime(),
           );
-
           this.serviciosFiltrados = [...this.servicios];
         } catch (e) {
           console.error('Error procesando historial:', e);
           this.servicios = [];
           this.serviciosFiltrados = [];
         } finally {
+          this.first = 0;
+          this.actualizarPagina();
+          this.actualizarStats();
           this.cargando = false;
           this.cdr.detectChanges();
         }
@@ -102,10 +109,23 @@ export class CortesComponent implements OnInit {
         console.error('Error cargando historial de cortes:', err);
         this.servicios = [];
         this.serviciosFiltrados = [];
+        this.first = 0;
+        this.actualizarPagina();
+        this.actualizarStats();
         this.cargando = false;
         this.cdr.detectChanges();
-      }
+      },
     });
+  }
+
+  onPaginator(event: PaginatorState): void {
+    this.rows = event.rows ?? this.rows;
+    this.first = event.first ?? 0;
+    this.actualizarPagina();
+  }
+
+  private actualizarPagina(): void {
+    this.pagina = this.serviciosFiltrados.slice(this.first, this.first + this.rows);
   }
 
   onBuscar(filtros: HistorialBarberFiltro): void {
@@ -123,36 +143,47 @@ export class CortesComponent implements OnInit {
     this.displayModal = true;
   }
 
-  etiquetaEstado(estado: string): string {
-    switch (estado) {
-      case 'FINALIZADA': return 'Finalizada';
-      case 'CANCELADA':
-      case 'CANCELADA_AUTOMATICA': return 'Cancelada';
-      case 'NO_ASISTIO': return 'No asistió';
-      default: return estado;
-    }
-  }
-
   get hayFiltrosActivos(): boolean {
     return !!(this.filtros.clienteNombre || this.filtros.desde || this.filtros.hasta);
   }
 
-  get totalCortesFinalizados(): number {
-    return this.serviciosFiltrados.filter(s => s.estado === 'FINALIZADA').length;
-  }
+  /** Se calcula una sola vez por carga para que <app-stats> no reciba un array nuevo en cada ciclo. */
+  private actualizarStats(): void {
+    const finalizados = this.serviciosFiltrados.filter((s) => s.estado === EstadoReserva.FINALIZADA);
 
-  get ingresosRegistrados(): number {
-    return this.serviciosFiltrados
-      .filter(s => s.estado === 'FINALIZADA')
-      .reduce((total, s) => total + (Number(s.precio) || 0), 0);
-  }
+    const ingresos = finalizados.reduce((total, s) => total + (Number(s.precio) || 0), 0);
 
-  get clientesAtendidos(): number {
-    const clientes = this.serviciosFiltrados
-      .filter(s => s.estado === 'FINALIZADA')
-      .map(s => `${s.clienteNombre ?? ''} ${s.clienteApellido ?? ''}`.trim())
-      .filter(nombre => nombre !== '');
+    const clientes = new Set(
+      finalizados
+        .map((s) => `${s.clienteNombre ?? ''} ${s.clienteApellido ?? ''}`.trim())
+        .filter((nombre) => nombre !== ''),
+    );
 
-    return new Set(clientes).size;
+    this.stats = [
+      {
+        title: 'Cortes finalizados',
+        value: finalizados.length,
+        icon: 'pi pi-check-circle',
+        description: 'Servicios completados',
+      },
+      {
+        title: 'Ingresos registrados',
+        value: this.moneda.transform(ingresos),
+        icon: 'pi pi-wallet',
+        description: 'Total de servicios finalizados',
+        accentClass: 'bg-green-500',
+        accentTextClass: 'text-green-400',
+        iconBgClass: 'bg-green-500/10',
+      },
+      {
+        title: 'Clientes atendidos',
+        value: clientes.size,
+        icon: 'pi pi-users',
+        description: 'Clientes únicos atendidos',
+        accentClass: 'bg-blue-500',
+        accentTextClass: 'text-blue-400',
+        iconBgClass: 'bg-blue-500/10',
+      },
+    ];
   }
 }

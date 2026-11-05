@@ -1,25 +1,9 @@
 import { Component, Input } from '@angular/core';
-
-/**
- * Barra de progreso dorada con brillo animado.
- * Reemplaza las copias que había en tarjeta-grafico (dashboard, admin y cliente).
- *
- * Uso:
- *   <app-progreso-barra [pct]="progresoPct(t)" />
- *   <app-progreso-barra [pct]="40" size="sm" />
- */
 @Component({
     standalone: true,
     selector: 'app-progreso-barra',
     template: `
-    <div
-      class="barra-track"
-      [class.barra-track--sm]="size === 'sm'"
-      role="progressbar"
-      aria-valuemin="0"
-      aria-valuemax="100"
-      [attr.aria-valuenow]="valor"
-    >
+    <div class="barra-track" [class.barra-track--sm]="size === 'sm'" role="progressbar" aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="valor">
       <div class="barra-fill" [style.width.%]="valor">
         <div class="barra-brillo"></div>
       </div>

@@ -1,77 +1,85 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ImageModule } from 'primeng/image';
-import { TableModule } from 'primeng/table';
-import { ButtonModule } from 'primeng/button';
-import { DialogModule } from 'primeng/dialog';
 import { GalleriaModule } from 'primeng/galleria';
-import { TableLazyLoadEvent } from 'primeng/table';
-import { InputIconModule } from 'primeng/inputicon';
-import { IconFieldModule } from 'primeng/iconfield';
+import { PaginatorState } from 'primeng/paginator';
+import { TableModule } from 'primeng/table';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { ButtonComponent } from '@/app/shared/components/button/button.component';
 import { ConfirmPopoverComponent } from '@/app/shared/components/confirm-popover/confirm-popover.component';
+import { EmptyStateComponent } from '@/app/shared/components/empty-state/empty-state.component';
+import { ModalComponent } from '@/app/shared/components/modal/modal.component';
+import { PaginatorComponent } from '@/app/shared/components/paginator/paginator.component';
 import { StatusBadgeComponent } from '@/app/shared/components/status-badge/status-badge.component';
-import { Producto } from '@/app/core/models/catalogos/productos.model';
-import { environment } from '@/environments/environment';
 import { SafeImageUrlPipe } from '@/app/shared/pipes/safe-image-url.pipe';
-import { INVENTARIO_CONFIG } from '@/app/core/config/valores.config';
 import { SolesPipe } from '@/app/shared/pipes/moneda.pipe';
+import { Producto } from '@/app/core/models/catalogos/productos.model';
+import { INVENTARIO_CONFIG } from '@/app/core/config/valores.config';
+
+interface ImagenGaleria { src: string; alt: string; }
 
 @Component({
   selector: 'app-producto-table',
-  imports: [ButtonModule, CommonModule, TableModule, ConfirmPopoverComponent, DialogModule, ToggleSwitchModule, SolesPipe,
-    ImageModule, IconFieldModule, InputIconModule, StatusBadgeComponent, GalleriaModule, FormsModule, SafeImageUrlPipe
+  standalone: true,
+  imports: [
+    TableModule, ToggleSwitchModule, ImageModule, GalleriaModule, FormsModule,
+    ButtonComponent, ConfirmPopoverComponent, EmptyStateComponent, ModalComponent,
+    PaginatorComponent, StatusBadgeComponent, SafeImageUrlPipe, SolesPipe,
   ],
-  templateUrl: './producto-table.html',
+  templateUrl: './producto-table.html'
 })
 export class ProductoTableComponent {
-  @Output() lazyLoad = new EventEmitter<TableLazyLoadEvent>();
-  @Output() publicado = new EventEmitter<{ id: number, publicado: boolean }>();
-  @Output() estado = new EventEmitter<{ id: number, activo: boolean }>();
-  @Output() ver = new EventEmitter<number>();
   @Output() editar = new EventEmitter<Producto>();
   @Output() eliminar = new EventEmitter<Producto>();
+  @Output() ver = new EventEmitter<Producto>();
+  @Output() estado = new EventEmitter<{ id: number, activo: boolean }>();
+  @Output() publicado = new EventEmitter<{ id: number, publicado: boolean }>();
+  /** Se emite desde el estado vacío cuando hay filtros activos */
+  @Output() limpiar = new EventEmitter<void>();
+  /** Cambio de página o de filas por página en el paginador */
+  @Output() pageChange = new EventEmitter<PaginatorState>();
   @Input({ required: true }) productos: Producto[] = [];
-  @Input() icono: string = 'pi-trash';
   @Input() cargado = false;
-  @Input() totalRecords = 0;
+  /** Cambia el mensaje del estado vacío y muestra el botón "Limpiar filtros" */
+  @Input() hayFiltros = false;
+  @Input() first = 0;
   @Input() rows = 25;
-  
+  @Input() totalRecords = 0;
+
   readonly stockMinimo = INVENTARIO_CONFIG.STOCK_MINIMO_GLOBAL;
-  readonly moneda = INVENTARIO_CONFIG.MONEDA;
-  environment = environment.apiBaseUrl;
+
   mostrarConfirmacion = false;
   productoAEliminar: Producto | null = null;
 
-  numVisible = 5;
-  activeIndex = 0;
   mostrarGaleria = false;
-  imagenesGaleria: any[] = [];
+  tituloGaleria = 'Imágenes del producto';
+  imagenesGaleria: ImagenGaleria[] = [];
+  activeIndex = 0;
+  numVisible = 5;
+  responsiveOptions = [
+    { breakpoint: '1024px', numVisible: 5 },
+    { breakpoint: '768px', numVisible: 3 },
+    { breakpoint: '560px', numVisible: 1 },
+  ];
 
   verProducto(producto: Producto) {
-    this.ver.emit(producto.id);
+    this.ver.emit(producto);
   }
 
   actualizarProducto(producto: Producto) {
     this.editar.emit(producto);
   }
 
-  cambiarEstadoProducto(producto: Producto, event: { checked: boolean }) {
-    this.estado.emit({ id: producto.id, activo: event.checked })
+  cambiarEstado(producto: Producto, event: { checked: boolean }) {
+    this.estado.emit({ id: producto.id, activo: event.checked });
   }
 
-  cambiarPublicadoProducto(producto: Producto, event: { checked: boolean }) {
-    this.publicado.emit({ id: producto.id, publicado: event.checked })
+  cambiarPublicado(producto: Producto, event: { checked: boolean }) {
+    this.publicado.emit({ id: producto.id, publicado: event.checked });
   }
 
-  pedirConfirmacion(producto: Producto, event: MouseEvent) {
-    event.stopPropagation();
-    this.productoAEliminar = producto;
-    this.mostrarConfirmacion = true;
-  }
-
-  eliminarDesdeTree(producto: Producto) {
+  pedirConfirmacion(producto: Producto, event?: MouseEvent) {
+    event?.stopPropagation();
     this.productoAEliminar = producto;
     this.mostrarConfirmacion = true;
   }
@@ -91,30 +99,15 @@ export class ProductoTableComponent {
     return this.productoAEliminar ? `¿Seguro que deseas eliminar el producto "${this.productoAEliminar.nombre}"?` : '';
   }
 
-  abrirGaleria(producto: Producto, index: number = 0) {
+  abrirGaleria(producto: Producto, index = 0) {
     if (!producto.urlsMultimedia?.length) return;
     this.imagenesGaleria = producto.urlsMultimedia.map((url, i) => ({
-      itemImageSrc: `${this.environment}uploads/${url}`,
-      thumbnailImageSrc: `${this.environment}uploads/${url}`,
-      alt: producto.nombre + ' ' + i
+      src: url,
+      alt: `${producto.nombre} ${i + 1}`,
     }));
+    this.tituloGaleria = `Imágenes de ${producto.nombre}`;
     this.activeIndex = Math.min(index, this.imagenesGaleria.length - 1);
     this.numVisible = Math.min(this.imagenesGaleria.length, 5);
     this.mostrarGaleria = true;
-  }
-
-  responsiveOptions = [
-    { breakpoint: '1024px', numVisible: 5 },
-    { breakpoint: '768px', numVisible: 3 },
-    { breakpoint: '560px', numVisible: 1 }
-  ];
-
-  agruparCaracteristicas(caracteristicas: { nombre: string, valor: string }[] = []): { nombre: string, valores: string[] }[] {
-    const agrupadas: Record<string, string[]> = {};
-    caracteristicas.forEach(c => {
-      if (!agrupadas[c.nombre]) { agrupadas[c.nombre] = []; }
-      agrupadas[c.nombre].push(c.valor);
-    });
-    return Object.entries(agrupadas).map(([nombre, valores]) => ({ nombre, valores }));
   }
 }
