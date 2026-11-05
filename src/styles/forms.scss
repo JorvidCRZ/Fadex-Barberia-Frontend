@@ -114,6 +114,7 @@ textarea:-webkit-autofill:focus,
 .p-multiselect,
 .p-treeselect {
     border-radius: 0.75rem !important;
+    background: rgb(var(--color-ui-card)) !important;
 }
 
 /* ========================================

@@ -4,53 +4,56 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { forkJoin } from 'rxjs';
 import { TreeNode } from 'primeng/api';
 import { ImageModule } from 'primeng/image';
-import { ButtonModule } from 'primeng/button';
-import { SelectModule } from "primeng/select";
 import { MessageModule } from 'primeng/message';
 import { CheckboxModule } from 'primeng/checkbox';
+import { TextareaModule } from 'primeng/textarea';
 import { InputTextModule } from 'primeng/inputtext';
 import { TreeSelectModule } from 'primeng/treeselect';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { FileUpload, FileUploadModule } from 'primeng/fileupload';
 import { Producto, ProductoRequest } from '@/app/core/models/catalogos/productos.model';
 import { Categoria } from '@/app/core/models/catalogos/categorias.model';
-import { ImageUploadService } from '@/app/core/services/common/imageUpload.service';
 import { ImagenProductoUI } from '@/app/core/models/common/imagen.model';
+import { ImageUploadService } from '@/app/core/services/common/imageUpload.service';
 import { campoInvalido, marcarFormulario } from '@/app/shared/utils/form-utils.component';
+import { ButtonComponent } from '@/app/shared/components/button/button.component';
 import { SafeImageUrlPipe } from '@/app/shared/pipes/safe-image-url.pipe';
 
 @Component({
   selector: 'app-producto-form',
-  imports: [ReactiveFormsModule, InputTextModule, SelectModule, CheckboxModule, TreeSelectModule, SafeImageUrlPipe,
-    ButtonModule, MessageModule, ImageModule, FileUploadModule, InputNumberModule, TreeSelectModule],
-
-  templateUrl: './producto-form.html',
+  standalone: true,
+  imports: [
+    ReactiveFormsModule, InputTextModule, TextareaModule, CheckboxModule, TreeSelectModule,
+    InputNumberModule, MessageModule, ImageModule, FileUploadModule, ButtonComponent, SafeImageUrlPipe
+  ],
+  templateUrl: './producto-form.html'
 })
 export class ProductoFormComponent implements OnChanges, OnInit {
+  @ViewChild('fileUpload') fileUpload!: FileUpload;
   @Output() guardar = new EventEmitter<{ data: ProductoRequest, imagenes?: File[] | null }>();
   @Output() cancelarEvento = new EventEmitter<void>();
-  @ViewChild('fileUpload') fileUpload!: FileUpload;
   @Input() producto: Producto | null = null;
   @Input() categorias: Categoria[] = [];
-  @Input() resetTrigger: number = 0;
+  @Input() guardando = false;
+  @Input() resetTrigger = 0;
 
   private cd = inject(ChangeDetectorRef);
   private destroyRef = inject(DestroyRef);
   private fb: FormBuilder = inject(FormBuilder);
   private imageService = inject(ImageUploadService);
 
-  abrirSelector = false;
   formSubmitted = false;
   productoForm!: FormGroup;
   categoriaTree: TreeNode[] = [];
-  imagenesEliminada: string[] = [];
   imagenes: ImagenProductoUI[] = [];
+  imagenesEliminada: string[] = [];
 
   campoInvalido = (campo: string) => campoInvalido(this.productoForm, campo, this.formSubmitted);
 
   ngOnInit(): void {
     this.initForm();
     this.cargarCategoriasEnTree();
+    if (this.producto) { this.actualizarFormulario(); }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -58,14 +61,12 @@ export class ProductoFormComponent implements OnChanges, OnInit {
     if (changes['resetTrigger'] && !changes['resetTrigger'].firstChange) {
       this.limpiarFormulario();
     }
-    if (changes['categorias'] || (changes['producto'] && !this.producto)) {
+    if (changes['categorias']) {
       this.cargarCategoriasEnTree();
+      if (this.producto) { this.seleccionarCategoriaDelProducto(); }
     }
     if (changes['producto']) {
       this.actualizarFormulario();
-      if (this.producto?.urlsMultimedia?.length) {
-        this.cargarImagenExistente(this.producto.urlsMultimedia);
-      }
     }
   }
 
@@ -77,23 +78,91 @@ export class ProductoFormComponent implements OnChanges, OnInit {
       stock: [0, [Validators.required, Validators.min(0)]],
       idCategoria: [null, Validators.required],
       publicado: [false],
-      estado: [false]
+      estado: [false],
     });
   }
+
+  private actualizarFormulario(): void {
+    this.formSubmitted = false;
+    this.limpiarEstadoImagen();
+    if (this.producto) {
+      this.productoForm.patchValue({
+        nombre: this.producto.nombre,
+        descripcion: this.producto.descripcion,
+        precio: this.producto.precio,
+        stock: this.producto.stock,
+        publicado: this.producto.publicado,
+        estado: this.producto.estado,
+        idCategoria: null,
+      });
+      this.seleccionarCategoriaDelProducto();
+      if (this.producto.urlsMultimedia?.length) {
+        this.cargarImagenExistente(this.producto.urlsMultimedia);
+      }
+    } else {
+      this.resetFormularioBase();
+    }
+    this.productoForm.markAsPristine();
+    this.productoForm.markAsUntouched();
+  }
+
+  // =====================================================
+  // CATEGORÍA (TreeSelect)
+  // =====================================================
+
+  private construirTree(categorias: Categoria[]): TreeNode[] {
+    if (!Array.isArray(categorias)) return [];
+    return categorias.map(categoria => ({
+      label: categoria.nombre,
+      key: String(categoria.id),
+      data: categoria.id,
+      children: categoria.subcategorias?.length ? this.construirTree(categoria.subcategorias) : [],
+    }));
+  }
+
+  private cargarCategoriasEnTree(): void {
+    this.categoriaTree = this.construirTree(this.categorias);
+    this.cd.detectChanges();
+  }
+
+  private findTreeNodeById(nodes: TreeNode[], id: number): TreeNode | null {
+    for (const node of nodes) {
+      if (Number(node.key) === id) return node;
+      if (node.children?.length) {
+        const found = this.findTreeNodeById(node.children, id);
+        if (found) return found;
+      }
+    }
+    return null;
+  }
+
+  /** El TreeSelect trabaja con el nodo completo, no con el id */
+  private seleccionarCategoriaDelProducto(): void {
+    const id = this.producto?.idCategoria;
+    if (!id || !this.categoriaTree.length) return;
+    const nodo = this.findTreeNodeById(this.categoriaTree, id);
+    this.productoForm.patchValue({ idCategoria: nodo ?? null });
+    this.cd.detectChanges();
+  }
+
+  // =====================================================
+  // IMÁGENES
+  // =====================================================
 
   private cargarImagenExistente(urls: string[]): void {
     const requests = urls.map(url => this.imageService.obtenerImagenProtegida(url));
     forkJoin(requests).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(blobs => {
       this.imagenes = [];
-      blobs.forEach((blob, index) => {if (!blob) return;
+      blobs.forEach((blob, index) => {
+        if (!blob) return;
         const file = new File([blob], `imagen-${index}.jpg`, { type: blob.type });
         this.imagenes.push({
           file,
           preview: URL.createObjectURL(file),
-          nombre: `Imagen actual`,
+          nombre: 'Imagen actual',
           peso: this.imageService.obtenerReadableSize(file),
           tipo: 'existente',
-          urlOriginal: urls[index]
+          urlOriginal: urls[index],
         });
       });
       this.cd.detectChanges();
@@ -104,8 +173,16 @@ export class ProductoFormComponent implements OnChanges, OnInit {
     const files: File[] = Array.from(event.files);
     const validas = this.imageService.imagenesValidas(files);
     validas.forEach(file => {
-      this.imagenes.push({ file, preview: URL.createObjectURL(file), nombre: file.name, peso: this.imageService.obtenerReadableSize(file), tipo: 'nueva' });
+      this.imagenes.push({
+        file,
+        preview: URL.createObjectURL(file),
+        nombre: file.name,
+        peso: this.imageService.obtenerReadableSize(file),
+        tipo: 'nueva',
+      });
     });
+    // Evita que el componente acumule los archivos ya procesados
+    this.fileUpload?.clear();
   }
 
   eliminarImagen(index: number): void {
@@ -122,17 +199,33 @@ export class ProductoFormComponent implements OnChanges, OnInit {
     this.fileUpload?.clear();
   }
 
-  private resetFormularioBase(): void {
-    this.productoForm.reset({
-      nombre: '',
-      descripcion: '',
-      precio: 0,
-      stock: 0,
-      publicado: false,
-      estado: false,
-      idCategoria: null
-    });
-    this.limpiarEstadoImagen();
+  // =====================================================
+  // ACCIONES
+  // =====================================================
+
+  onCancelar(): void {
+    this.limpiarFormulario();
+    this.cancelarEvento.emit();
+  }
+
+  onGuardar(): void {
+    this.formSubmitted = true;
+    if (this.productoForm.invalid) {
+      marcarFormulario(this.productoForm);
+      return;
+    }
+    const archivos: File[] = this.imagenes.filter(img => img.file).map(img => img.file as File);
+    const valores = this.productoForm.value;
+    const data: ProductoRequest = {
+      nombre: valores.nombre,
+      descripcion: valores.descripcion,
+      precio: valores.precio,
+      stock: valores.stock,
+      publicado: valores.publicado,
+      estado: valores.estado,
+      idCategoria: Number(valores.idCategoria.key),
+    };
+    this.guardar.emit({ data, imagenes: archivos.length ? archivos : undefined });
   }
 
   private limpiarFormulario(): void {
@@ -142,80 +235,16 @@ export class ProductoFormComponent implements OnChanges, OnInit {
     this.productoForm.markAsUntouched();
   }
 
-  private construirTree(categorias: Categoria[]): TreeNode[] {
-    if (!Array.isArray(categorias)) { return []; }
-    return categorias.map(categoria => ({
-      label: categoria.nombre, key: String(categoria.id), data: categoria.id,
-      children: categoria.subcategorias?.length ? this.construirTree(categoria.subcategorias) : []
-    }));
-  }
-
-  cargarCategoriasEnTree(): void {
-    this.categoriaTree = Array.isArray(this.categorias) ? this.construirTree(this.categorias) : [];
-    this.cd.detectChanges();
-  }
-
-  private findTreeNodeById(nodes: TreeNode[], id: number): TreeNode | null {
-    for (const node of nodes) {
-      if (Number(node.key) === id) return node;
-      if (node.children?.length) {
-        const found = this.findTreeNodeById(node.children, id);
-        if (found) return found;
-      }
-    }
-    return null;
-  }
-
-  private actualizarFormulario(): void {
-    this.imagenesEliminada = [];
-    if (this.producto) {
-      this.productoForm.patchValue({
-        nombre: this.producto.nombre,
-        descripcion: this.producto.descripcion,
-        precio: this.producto.precio,
-        stock: this.producto.stock,
-        publicado: this.producto.publicado,
-        estado: this.producto.estado,
-        idCategoria: null,
-      });
-    }
-    if (this.producto?.idCategoria) {
-      setTimeout(() => {
-        if (this.categoriaTree.length && this.producto?.idCategoria) {
-          const match = this.findTreeNodeById(this.categoriaTree, this.producto.idCategoria!);
-          this.productoForm.patchValue({ idCategoria: match || null });
-          this.cd.detectChanges();
-        }
-      });
-    }
-    else {
-      this.resetFormularioBase();
-    }
-    this.productoForm.markAsPristine();
-    this.productoForm.markAsUntouched();
-  }
-
-  onCancelar(): void {
-    this.formSubmitted = false;
-    this.limpiarFormulario();
-    this.abrirSelector = false;
-    this.cancelarEvento.emit();
-  }
-
-  onGuardar(): void {
-    this.formSubmitted = true;
-    if (this.productoForm.invalid) { marcarFormulario(this.productoForm); return; }
-    const archivos: File[] = this.imagenes.filter(img => img.file).map(img => img.file as File);
-    const categoriaSeleccionada = this.productoForm.value.idCategoria;
-    const data: ProductoRequest = {
-      nombre: this.productoForm.value.nombre,
-      descripcion: this.productoForm.value.descripcion,
-      precio: this.productoForm.value.precio,
-      stock: this.productoForm.value.stock,
-      publicado: this.productoForm.value.publicado,
-      estado: this.productoForm.value.estado,
-      idCategoria: Number(categoriaSeleccionada.key)
-    };
-    this.guardar.emit({ data, imagenes: archivos.length ? archivos : undefined });
+  private resetFormularioBase(): void {
+    this.productoForm.reset({
+      nombre: '',
+      descripcion: '',
+      precio: 0,
+      stock: 0,
+      publicado: false,
+      estado: false,
+      idCategoria: null,
+    });
+    this.limpiarEstadoImagen();
   }
 }
