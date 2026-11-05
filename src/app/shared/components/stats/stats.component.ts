@@ -30,13 +30,13 @@ import { StatsCard } from '../../../core/models/common/card.model';
         }
 
         <div class="flex flex-col gap-1">
-          <span class="text-[11px] uppercase tracking-widest text-text-muted">{{
+          <span class="text-[14px] uppercase tracking-widest text-white">{{
             item.title
           }}</span>
-          <h2 class="text-2xl font-bold leading-none text-text-primary">{{ item.value }}</h2>
+          <h2 class="text-2xl font-bold leading-none text-white">{{ item.value }}</h2>
 
           @if (item.description) {
-            <p class="mt-1 line-clamp-1 text-[11px] text-text-subtle">{{ item.description }}</p>
+            <p class="mt-1 line-clamp-1 text-[14px] text-text-subtle">{{ item.description }}</p>
           }
         </div>
       </div>

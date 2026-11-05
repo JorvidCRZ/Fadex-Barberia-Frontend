@@ -242,9 +242,6 @@ export class ProductosComponent implements OnInit {
     this.cerrarFormulario();
   }
 
-  // =====================================================
-  // ELIMINAR, CAMBIAR ESTADO Y PUBLICADO
-  // =====================================================
 
   eliminarProducto(producto: Producto) {
     this.productoService.eliminarProducto(producto.id).subscribe({

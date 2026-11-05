@@ -1,116 +1,126 @@
-<div class="p-4 md:p-6 lg:p-8 bg-neutral-primary-lighter rounded-base shadow-sm">
-    <div class="relative w-full overflow-x-auto">
-        <p-table [value]="servicios" [lazy]="true" (onLazyLoad)="lazyLoad.emit($event)" [paginator]="true" [rows]="rows"
-            [totalRecords]="totalRecords" [loading]="!cargado" dataKey="servicioId" [showCurrentPageReport]="true"
-            currentPageReportTemplate="Viendo {first} a {last} de {totalRecords}"[tableStyle]="{ 'min-width': '900px' }">
+<div class="flex flex-col gap-2">
+    <div class="table-base p-4 md:p-6 lg:p-8">
+        <div class="relative w-full overflow-x-auto">
+            <p-table [value]="servicios" [loading]="!cargado" dataKey="servicioId" expandableRows
+                [tableStyle]="{ 'min-width': '1000px' }" class="rounded-xl">
 
-            <ng-template pTemplate="header">
-                <tr>
-                    <th class="text-center">Imagen</th>
-                    <th class="text-center">Nombre</th>
-                    <th class="text-center">Categoría</th>
-                    <th class="text-center">Precio</th>
-                    <th class="text-center">Duración</th>
-                    <th class="text-center">Publicado</th>
-                    <th class="text-center">Estado</th>
-                    <th class="text-center">Acciones</th>
-                </tr>
-            </ng-template>
+                <ng-template #header>
+                    <tr class="table-header">
+                        <th class="text-center">Imagen</th>
+                        <th class="text-center">Nombre</th>
+                        <th class="text-center">Categoría</th>
+                        <th class="text-center">Precio</th>
+                        <th class="text-center">Duración</th>
+                        <th class="text-center">Publicado</th>
+                        <th class="text-center">Estado</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </ng-template>
 
-            <ng-template #body let-servicio let-expanded="expanded" pTemplate="body">
-                <tr>
-                    <td class="px-4 py-2 whitespace-nowrap">
-                        <div class="inline-flex items-center gap-2">
-                            <p-button type="button" [pRowToggler]="servicio" [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'" class="boton-expandir-tabla"></p-button>
-                            @if(servicio.urlsMultimedia?.length > 0){
-                                <span class="relative inline-block cursor-pointer" (click)="abrirGaleria(servicio)" title="Ver galería">
-                                    <p-image [src]="servicio.urlsMultimedia[0] | safeImageUrl" width="40" height="40" [preview]="false" class="rounded-lg object-cover"></p-image>
-                                    <span class="absolute -top-1 -right-1 bg-black text-white text-xs px-1 rounded">{{ servicio.urlsMultimedia.length }}</span>
-                                </span>
-                            }
-                            @else {
-                                <div class="w-10 h-10 rounded-lg bg-gray-200 inline-flex items-center justify-center">
-                                    <i class="pi pi-image text-gray-500"></i>
-                                </div>
-                            }
-                        </div>
-                    </td>
-                    <td class="text-center">{{ servicio.nombre }}</td>
-                    <td class="text-center"><app-status-badge type="text" [value]="servicio.categoriaNombre" customClass="badge-text estado-servicio"/></td>
-                    <td class="text-center">S/ {{ servicio.precio | soles }}</td>
-                    <td class="text-center">{{ servicio.duracion }} min</td>
-                    <td class="whitespace-nowrap text-center">
-                        <div class="flex items-center justify-center gap-2">
-                            <app-status-badge type="boolean" [value]="servicio.publicado" trueLabel="Si" falseLabel="No" />
-                            <p-toggleSwitch [ngModel]="servicio.publicado" (onChange)="cambiarPublicadoServicio(servicio, $event)" class="scale-90" />
-                        </div>
-                    </td>
-                    <td class="whitespace-nowrap text-center">
-                        <div class="flex items-center justify-center gap-2">
-                            <app-status-badge type="boolean" [value]="servicio.estado" trueLabel="Activo" falseLabel="Inactivo" />
-                            <p-toggleSwitch [ngModel]="servicio.estado" (onChange)="cambiarEstadoServicio(servicio, $event)" class="scale-90" />
-                        </div>
-                    </td>
-                    <td class="text-center">
-                        <div class="flex justify-center gap-2">
-                            <p-button icon="pi pi-pencil" class="boton-editar-tabla" (click)="editarServicio(servicio)"></p-button>
-                            <p-button icon="pi pi-trash" class="boton-eliminar-tabla"(click)="pedirConfirmacion(servicio, $event)"></p-button>
-                        </div>
-                    </td>
-                </tr>
-            </ng-template>
-
-            <ng-template #expandedrow let-servicio pTemplate="rowExpansion">
-                <tr>
-                    <td colspan="8">
-                        <div class="px-6 py-4 bg-neutral-primary-soft border-t border-default">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
-                                <div class="flex flex-col gap-2">
-                                    <span class="text-xs font-semibold text-text-tertiary uppercase tracking-wider">Descripción</span>
-                                    <p class="text-text-secondary text-sm leading-relaxed">
-                                        {{ servicio.descripcion || 'Sin descripción registrada.' }}
-                                    </p>
-                                </div>
-            
-                                <div class="flex flex-col gap-3">
-                                    <span class="text-xs font-semibold text-text-tertiary uppercase tracking-wider">Detalles</span>
-                                    <div class="grid grid-cols-2 gap-3">
-                                        <div class="flex flex-col gap-1 px-3 py-2 bg-neutral-primary-lighter rounded-lg">
-                                            <span class="text-xs text-text-tertiary">Duración</span>
-                                            <span class="text-sm font-semibold text-text-primary">{{ servicio.duracion }} min</span>
-                                        </div>
-                                        <div class="flex flex-col gap-1 px-3 py-2 bg-neutral-primary-lighter rounded-lg">
-                                            <span class="text-xs text-text-tertiary">Precio</span>
-                                            <span class="text-sm font-semibold text-text-primary">{{ servicio.precio | soles }}</span>
-                                        </div>
-                                        <div class="flex flex-col gap-1 px-3 py-2 bg-neutral-primary-lighter rounded-lg col-span-2">
-                                            <span class="text-xs text-text-tertiary">Categoría</span>
-                                            <span class="text-sm font-semibold text-text-primary">{{ servicio.categoriaNombre }}</span>
-                                        </div>
+                <ng-template #body let-servicio let-expanded="expanded">
+                    <tr class="table-row">
+                        <td class="px-4 py-2 whitespace-nowrap">
+                            <div class="inline-flex items-center gap-2">
+                                <app-button variant="expandir-tabla" [pRowToggler]="servicio"
+                                    [icon]="expanded ? 'chevron-down' : 'chevron-right'"
+                                    [tooltip]="expanded ? 'Ocultar descripción' : 'Ver descripción'" />
+                                @if ((servicio.urlsMultimedia ?? []).length > 0) {
+                                    <button type="button" class="relative inline-block cursor-pointer"
+                                        aria-label="Ver imágenes de {{ servicio.nombre }}" (click)="abrirGaleria(servicio)">
+                                        <p-image [src]="servicio.urlsMultimedia[0] | safeImageUrl"
+                                            [alt]="'Imagen de ' + servicio.nombre" width="50" height="50"
+                                            [preview]="false" imageClass="size-10 rounded-lg object-cover" />
+                                        <span class="absolute -right-1 -top-1 rounded bg-brand-black px-1 text-xs text-brand-gold">
+                                            {{ servicio.urlsMultimedia.length }}
+                                        </span>
+                                    </button>
+                                } @else {
+                                    <div class="inline-flex size-10 items-center justify-center rounded-lg border border-ui-border bg-ui-card">
+                                        <i class="pi pi-image text-text-muted" aria-hidden="true"></i>
                                     </div>
-                                </div>
-            
+                                }
                             </div>
-                        </div>
-                    </td>
-                </tr>
-            </ng-template>
-        </p-table>
+                        </td>
+                        <td class="whitespace-nowrap text-center font-medium">{{ servicio.nombre }}</td>
+                        <td class="whitespace-nowrap text-center">
+                            <app-status-badge type="text" tone="purple" [value]="servicio.categoriaNombre" />
+                        </td>
+                        <td class="whitespace-nowrap text-center">
+                            {{ servicio.precio != null ? (servicio.precio | soles) : 'No asignado' }}
+                        </td>
+                        <td class="whitespace-nowrap text-center">{{ servicio.duracion }} min</td>
+                        <td class="whitespace-nowrap text-center">
+                            <div class="flex items-center justify-center gap-2">
+                                <app-status-badge type="boolean" [value]="servicio.publicado" trueLabel="Sí" falseLabel="No" />
+                                <p-toggleSwitch [ngModel]="servicio.publicado" (onChange)="cambiarPublicado(servicio, $event)" class="scale-90" />
+                            </div>
+                        </td>
+                        <td class="whitespace-nowrap text-center">
+                            <div class="flex items-center justify-center gap-2">
+                                <app-status-badge type="boolean" [value]="servicio.estado" trueLabel="Activo" falseLabel="Inactivo" />
+                                <p-toggleSwitch [ngModel]="servicio.estado" (onChange)="cambiarEstado(servicio, $event)" class="scale-90" />
+                            </div>
+                        </td>
+                        <td class="whitespace-nowrap text-center">
+                            <div class="table-actions">
+                                <app-button variant="editar-tabla" icon="pencil" tooltip="Editar servicio"
+                                    (clicked)="editarServicio(servicio)" />
+                                <app-button variant="eliminar-tabla" icon="trash" tooltip="Eliminar servicio"
+                                    (clicked)="pedirConfirmacion(servicio, $event)" />
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+
+                <ng-template #expandedrow let-servicio>
+                    <tr>
+                        <td colspan="8" class="p-0">
+                            <div class="rounded-xl bg-ui-surface p-4 shadow-sm">
+                                <h3 class="mb-4 text-md font-semibold text-text-primary">Descripción de {{ servicio.nombre }}</h3>
+                                <div class="ml-4 md:ml-6 mt-1 border-l border-ui-border pl-4">
+                                    @if (servicio.descripcion) {
+                                        <p class="m-0 text-sm leading-relaxed text-text-secondary">{{ servicio.descripcion }}</p>
+                                    } @else {
+                                        <p class="m-0 text-sm italic text-text-subtle">Sin descripción registrada.</p>
+                                    }
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+
+                <ng-template #emptymessage>
+                    <tr>
+                        <td colspan="8">
+                            <app-empty-state icono="sparkles"
+                                [mensaje]="hayFiltros ? 'No se encontraron servicios con los filtros aplicados' : 'Aún no hay servicios registrados'"
+                                [detalle]="hayFiltros ? undefined : 'Crea el primero con el botón «Crear servicio».'">
+                                @if (hayFiltros) {
+                                    <app-button variant="limpiar" size="sm" label="Limpiar filtros" (clicked)="limpiar.emit()" />
+                                }
+                            </app-empty-state>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
     </div>
+
+    <app-paginator [first]="first" [rows]="rows" [totalRecords]="totalRecords" etiqueta="servicio(s)"
+        [rowsPerPageOptions]="[10, 25, 50, 100]" (pageChange)="pageChange.emit($event)" />
 </div>
 
-<app-confirm-popover [visible]="mostrarConfirmacion" [mensaje]="mensajeConfirmacion" [titulo]="'Eliminar Servicio'" [icono]="icono" (confirm)="confirmarEliminar()" (cancel)="cancelarEliminar()"/>
+<app-confirm-popover [visible]="mostrarConfirmacion" mode="eliminar" titulo="Eliminar servicio"
+    [mensaje]="mensajeConfirmacion" (confirm)="confirmarEliminar()" (cancel)="cancelarEliminar()" />
 
-<p-dialog header="Imágenes del servicio" [(visible)]="mostrarGaleria" [modal]="true" [style]="{ width: '700px' }" [dismissableMask]="true">
-    <p-galleria [value]="imagenesGaleria" [activeIndex]="activeIndex" [circular]="true" [showItemNavigators]="true" [showThumbnails]="true" [numVisible]="numVisible" [responsiveOptions]="responsiveOptions">
+<app-modal [(visible)]="mostrarGaleria" [titulo]="tituloGaleria" mode="ver" icono="pi-images" maxWidth="44rem">
+    <p-galleria [value]="imagenesGaleria" [activeIndex]="activeIndex" [circular]="true" [showItemNavigators]="true"
+        [showThumbnails]="true" [numVisible]="numVisible" [responsiveOptions]="responsiveOptions">
         <ng-template #item let-item>
-            <img [src]="item.itemImageSrc" style="width:100%; max-height:400px; object-fit:contain" />
+            <img [src]="item.src | safeImageUrl" [alt]="item.alt" class="max-h-[400px] w-full object-contain" />
         </ng-template>
         <ng-template #thumbnail let-item>
-            @if(item) {
-                <img [src]="item.thumbnailImageSrc" style="width:70px; height:50px; object-fit:cover" />
-            }
+            <img [src]="item.src | safeImageUrl" [alt]="item.alt" class="h-[50px] w-[70px] object-cover" />
         </ng-template>
     </p-galleria>
-</p-dialog>
+</app-modal>

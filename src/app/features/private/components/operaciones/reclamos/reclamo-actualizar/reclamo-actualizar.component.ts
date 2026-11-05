@@ -1,36 +1,39 @@
 import { Component, EventEmitter, inject, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
 import { MessageModule } from 'primeng/message';
-import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { TextareaModule } from 'primeng/textarea';
-import { ReclamoResponse, ReclamoSolucionRequest } from '@/app/core/models/operaciones/reclamos-model/reclamo.model';
-import { campoInvalido, marcarFormulario } from '@/app/shared/utils/form-utils.component';
-import { ESTADO_RECLAMO_OPTIONS,SOLUCION_RECLAMO_OPTIONS,} from '@/app/core/models/common/select.option.model';
+import { ButtonComponent } from '@/app/shared/components/button/button.component';
+import { StatusBadgeComponent } from '@/app/shared/components/status-badge/status-badge.component';
 import { SolesPipe } from '@/app/shared/pipes/moneda.pipe';
+import { campoInvalido, marcarFormulario } from '@/app/shared/utils/form-utils.component';
+import { formatearTexto } from '@/app/shared/utils/formatear-text.utils.component';
+import { ReclamoResponse, ReclamoSolucionRequest } from '@/app/core/models/operaciones/reclamos-model/reclamo.model';
+import { ESTADO_RECLAMO_OPTIONS, SOLUCION_RECLAMO_OPTIONS } from '@/app/core/models/common/select.option.model';
 
 @Component({
   selector: 'app-reclamo-actualizar',
+  standalone: true,
   imports: [
-    ReactiveFormsModule, InputTextModule, SelectModule, TextareaModule,
-    ButtonModule, MessageModule, InputNumberModule,SolesPipe
+    ReactiveFormsModule, SelectModule, TextareaModule, MessageModule, InputNumberModule,
+    ButtonComponent, StatusBadgeComponent, SolesPipe,
   ],
   templateUrl: './reclamo-actualizar.html',
-  styleUrl: './reclamo-actualizar.scss',
 })
 export class ReclamoActualizarComponent implements OnInit, OnChanges {
-  @Output() guardar        = new EventEmitter<ReclamoSolucionRequest>();
+  @Output() guardar = new EventEmitter<ReclamoSolucionRequest>();
   @Output() cancelarEvento = new EventEmitter<void>();
   @Input() reclamo: ReclamoResponse | null = null;
+  @Input() guardando = false;
 
   private fb = inject(FormBuilder);
 
   formSubmitted = false;
   actualizarForm!: FormGroup;
+  formatearTexto = formatearTexto;
 
-  readonly estadoOpts   = ESTADO_RECLAMO_OPTIONS;
+  readonly estadoOpts = ESTADO_RECLAMO_OPTIONS;
   readonly solucionOpts = SOLUCION_RECLAMO_OPTIONS;
 
   campoInvalido = (campo: string) => campoInvalido(this.actualizarForm, campo, this.formSubmitted);
@@ -48,9 +51,9 @@ export class ReclamoActualizarComponent implements OnInit, OnChanges {
 
   private initForm(): void {
     this.actualizarForm = this.fb.group({
-      estadoReclamo:   [null, Validators.required],
+      estadoReclamo: [null, Validators.required],
       solucionReclamo: [null],
-      notasInternas:   [''],
+      notasInternas: [''],
       montoCompensado: [null, Validators.min(0)],
       detalleSolucion: [''],
     });
@@ -59,9 +62,9 @@ export class ReclamoActualizarComponent implements OnInit, OnChanges {
   private cargarDatos(): void {
     if (!this.reclamo) return;
     this.actualizarForm.patchValue({
-      estadoReclamo:   this.reclamo.estadoReclamo   ?? null,
+      estadoReclamo: this.reclamo.estadoReclamo ?? null,
       solucionReclamo: this.reclamo.solucionReclamo ?? null,
-      notasInternas:   this.reclamo.notasInternas   ?? '',
+      notasInternas: this.reclamo.notasInternas ?? '',
       montoCompensado: this.reclamo.montoCompensado ?? null,
       detalleSolucion: this.reclamo.detalleSolucion ?? '',
     });
@@ -75,18 +78,16 @@ export class ReclamoActualizarComponent implements OnInit, OnChanges {
     if (this.actualizarForm.invalid) { marcarFormulario(this.actualizarForm); return; }
 
     const v = this.actualizarForm.value;
-    const request: ReclamoSolucionRequest = {
-      estadoReclamo:   v.estadoReclamo,
+    this.guardar.emit({
+      estadoReclamo: v.estadoReclamo,
       solucionReclamo: v.solucionReclamo ?? undefined,
-      notasInternas:   v.notasInternas   || undefined,
+      notasInternas: v.notasInternas || undefined,
       montoCompensado: v.montoCompensado ?? undefined,
       detalleSolucion: v.detalleSolucion || undefined,
-    };
-    this.guardar.emit(request);
+    });
   }
 
   onCancelar(): void {
-    this.formSubmitted = false;
     this.cargarDatos();
     this.cancelarEvento.emit();
   }

@@ -126,9 +126,7 @@
     </ng-template>
   </p-table>
 
-  <div class="producto-page-paginator">
-    <app-paginator [first]="firstReservas()" [rows]="rowsReservas()" [totalRecords]="totalReservas()" etiqueta="reserva(s)" (pageChange)="onPaginatorReservas($event)" />
-  </div>
+  <app-paginator [first]="firstReservas()" [rows]="rowsReservas()" [totalRecords]="totalReservas()" etiqueta="reserva(s)" (pageChange)="onPaginatorReservas($event)" />
   }
 
   @if (tab() === 'historial') {
@@ -241,9 +239,7 @@
     </ng-template>
   </p-table>
 
-  <div class="producto-page-paginator">
-    <app-paginator [first]="firstHistorial()" [rows]="rowsHistorial()" [totalRecords]="totalHistorial()" etiqueta="atención(es)" (pageChange)="onPaginatorHistorial($event)" />
-  </div>
+  <app-paginator [first]="firstHistorial()" [rows]="rowsHistorial()" [totalRecords]="totalHistorial()" etiqueta="atención(es)" (pageChange)="onPaginatorHistorial($event)" />
   }
 </div>
 

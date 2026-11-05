@@ -1,174 +1,167 @@
-<div class="p-6 space-y-6">
-
-    <!-- Header -->
-    <div class="p-5 bg-brand-black rounded-xl border border-brand-gold flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div class="flex items-center gap-4">
-            <button pButton (click)="volver()" class="boton-primary" icon="pi pi-arrow-left">Volver</button>
-            @if (detalleReclamo) {
-                <h1 class="text-xl font-bold text-brand-gold">N° {{ detalleReclamo.numeroReclamo }}</h1>
-            } @else {
-                <h1 class="text-xl font-bold text-gray-400">Cargando...</h1>
-            }
-        </div>
-        @if (detalleReclamo) {
-            <app-status-badge type="text" [value]="detalleReclamo.estadoReclamo" />
-        }
-    </div>
-
+<div class="flex flex-col gap-6 mt-5">
+  <app-page-header [titulo]="detalleReclamo ? 'Reclamo N° ' + detalleReclamo.numeroReclamo : 'Detalle del reclamo'"
+    icono="pi-exclamation-triangle" subtitulo="Información completa, resolución y archivos adjuntos">
     @if (detalleReclamo) {
-    <div class="flex flex-col gap-6">
-
-        <!-- Datos del cliente -->
-        <section class="bg-ui-card rounded-xl border border-ui-border p-5 flex flex-col gap-4">
-            <h2 class="text-brand-gold font-semibold text-sm uppercase tracking-widest border-b border-ui-border pb-2">
-                <i class="pi pi-user mr-2"></i>Datos del cliente
-            </h2>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
-                <div class="flex flex-col gap-1">
-                    <span class="text-text-secondary">Nombre</span>
-                    <span class="font-medium">{{ detalleReclamo.nombreCliente }}</span>
-                </div>
-                <div class="flex flex-col gap-1">
-                    <span class="text-text-secondary">Correo</span>
-                    <span class="font-medium">{{ detalleReclamo.correoCliente || '—' }}</span>
-                </div>
-                <div class="flex flex-col gap-1">
-                    <span class="text-text-secondary">Teléfono</span>
-                    <span class="font-medium">{{ detalleReclamo.telefonoCliente || '—' }}</span>
-                </div>
-            </div>
-        </section>
-
-        <!-- Detalle del reclamo -->
-        <section class="bg-ui-card rounded-xl border border-ui-border p-5 flex flex-col gap-4">
-            <h2 class="text-brand-gold font-semibold text-sm uppercase tracking-widest border-b border-ui-border pb-2">
-                <i class="pi pi-exclamation-circle mr-2"></i>Detalle del reclamo
-            </h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
-
-                <div class="flex flex-col gap-1">
-                    <span class="text-text-secondary mb-3">Tipo de reclamación</span>
-                    <app-status-badge type="text" [value]="detalleReclamo.tipoReclamacion" />
-                </div>
-                <div class="flex flex-col gap-1">
-                    <span class="text-text-secondary mb-3">Tipo de problema</span>
-                    <app-status-badge type="text" [value]="formatearTexto(detalleReclamo.tipoProblema)" />
-                </div>
-                <div class="flex flex-col gap-1">
-                    <span class="text-text-secondary mb-3">Causa</span>
-                    @if (detalleReclamo.causaReclamo) {
-                        <app-status-badge type="text" [value]="formatearTexto(detalleReclamo.causaReclamo)" />
-                    } @else {
-                        <span class="text-text-subtle italic">Sin causa registrada</span>
-                    }
-                </div>
-                <div class="flex flex-col gap-1">
-                    <span class="text-text-secondary mb-3">Solución aplicada</span>
-                    @if (detalleReclamo.solucionReclamo) {
-                        <app-status-badge type="text" [value]="formatearTexto(detalleReclamo.solucionReclamo)" />
-                    } @else {
-                        <span class="text-text-subtle italic">Sin solución registrada</span>
-                    }
-                </div>
-                <div class="flex flex-col gap-1">
-                    <span class="text-text-secondary mb-3">Monto reclamado</span>
-                    <span class="font-bold text-brand-gold text-base">
-                        {{ detalleReclamo.montoReclamado != null ? ('S/ ' + (detalleReclamo.montoReclamado | number:'1.2-2')) : '—' }}
-                    </span>
-                </div>
-                <div class="flex flex-col gap-1">
-                    <span class="text-text-secondary mb-3">Monto compensado</span>
-                    <span class="font-bold text-brand-gold text-base">
-                        {{ detalleReclamo.montoCompensado != null ? ('S/ ' + (detalleReclamo.montoCompensado | number:'1.2-2')) : '—' }}
-                    </span>
-                </div>
-                <div class="flex flex-col gap-1">
-                    <span class="text-text-secondary mb-3">Fecha ocurrencia</span>
-                    <span>{{ detalleReclamo.fechaOcurrencia | date:'dd/MM/yyyy HH:mm' }}</span>
-                </div>
-                <div class="flex flex-col gap-1">
-                    <span class="text-text-secondary mb-3">Fecha reclamo</span>
-                    <span>{{ detalleReclamo.fechaReclamo | date:'dd/MM/yyyy HH:mm' }}</span>
-                </div>
-                <div class="flex flex-col gap-1">
-                    <span class="text-text-secondary mb-3">Fecha resolución</span>
-                    <span>{{ detalleReclamo.fechaResolucion ? (detalleReclamo.fechaResolucion | date:'dd/MM/yyyy HH:mm') : '—' }}</span>
-                </div>
-                <div class="flex flex-col gap-1">
-                    <span class="text-text-secondary mb-3">¿Es público?</span>
-                    <app-status-badge type="boolean" [value]="detalleReclamo.esPublico" trueLabel="Sí" falseLabel="No" />
-                </div>
-
-            </div>
-        </section>
-
-        <!-- Descripción y Notas internas -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <section class="bg-ui-card rounded-xl border border-ui-border p-5 flex flex-col gap-3">
-                <h2 class="text-brand-gold font-semibold text-sm uppercase tracking-widest border-b border-ui-border pb-2">
-                    <i class="pi pi-align-left mr-2"></i>Descripción
-                </h2>
-                @if (!detalleReclamo.descripcion) {
-                    <p class="italic text-text-subtle text-sm">No hay descripción para este reclamo.</p>
-                } @else {
-                    <p class="leading-relaxed text-sm">{{ detalleReclamo.descripcion }}</p>
-                }
-            </section>
-
-            <section class="bg-ui-card rounded-xl border border-ui-border p-5 flex flex-col gap-3">
-                <h2 class="text-brand-gold font-semibold text-sm uppercase tracking-widest border-b border-ui-border pb-2">
-                    <i class="pi pi-lock mr-2"></i>Notas internas
-                </h2>
-                @if (!detalleReclamo.notasInternas) {
-                    <p class="italic text-text-subtle text-sm">Sin notas internas.</p>
-                } @else {
-                    <p class="leading-relaxed text-sm">{{ detalleReclamo.notasInternas }}</p>
-                }
-            </section>
-            
-            <section class="bg-ui-card rounded-xl border border-ui-border p-5 flex flex-col gap-3">
-                <h2 class="text-brand-gold font-semibold text-sm uppercase tracking-widest border-b border-ui-border pb-2">
-                    <i class="pi pi-lock mr-2"></i>Detalle de Solucion
-                </h2>
-                @if (!detalleReclamo.detalleSolucion) {
-                    <p class="italic text-text-subtle text-sm">No se agrego detalle de solucion .</p>
-                } @else {
-                    <p class="leading-relaxed text-sm">{{ detalleReclamo.detalleSolucion }}</p>
-                }
-            </section>
-
-        </div>
-        
-        <section class="bg-ui-card rounded-xl border border-ui-border p-5 flex flex-col gap-4">
-            <h2 class="text-brand-gold font-semibold text-sm uppercase tracking-widest border-b border-ui-border pb-2">
-                <i class="pi pi-paperclip mr-2"></i>Adjuntos
-            </h2>
-            @if (!detalleReclamo.adjuntos || detalleReclamo.adjuntos.length === 0) {
-                <p class="italic text-text-subtle text-sm">No hay archivos adjuntos.</p>
-            } @else {
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                    @for (adjunto of detalleReclamo.adjuntos; track adjunto.idAdjunto) {
-                        @if (adjunto.mimeType?.startsWith('image/')) {
-                            <div class="aspect-square rounded-lg overflow-hidden border border-ui-border shadow flex items-center justify-center">
-                                <p-image [src]="adjunto.urlArchivo | safeImageUrl" imageClass="w-full h-full object-cover" class="w-full h-full object-cover cursor-pointer" [preview]="true"/>
-                            </div>
-                        }
-                        @else if (adjunto.mimeType === 'application/pdf') {
-                            <a [href]="adjunto.urlArchivo | safeImageUrl" target="_blank" class="flex flex-col items-center justify-center gap-2 p-4 border border-ui-border rounded-lg bg-ui-surface hover:border-brand-gold hover:bg-brand-gold/5 transition text-sm text-center">
-                                <i class="pi pi-file-pdf text-3xl text-red-500"></i>
-                                <span class="truncate w-full text-text-secondary">{{ adjunto.nombreOriginal }}</span>
-                            </a>
-                        }
-                        @else {
-                            <a [href]="adjunto.urlArchivo | safeImageUrl" target="_blank" class="flex flex-col items-center justify-center gap-2 p-4 border border-ui-border rounded-lg bg-ui-surface hover:border-brand-gold hover:bg-brand-gold/5 transition text-sm text-center">
-                                <i class="pi pi-file text-3xl text-brand-gold"></i>
-                                <span class="truncate w-full text-text-secondary">{{ adjunto.nombreOriginal }}</span>
-                            </a>
-                        }
-                    }
-                </div>
-            }
-        </section>
-    </div>
+      <app-status-badge type="text" [value]="formatearTexto(detalleReclamo.estadoReclamo)" />
     }
+    <app-button variant="secondary" size="sm" icon="arrow-left" label="Volver" (clicked)="volver()" />
+  </app-page-header>
+
+  @if (cargando) {
+    <app-empty-state tipo="cargando" mensaje="Cargando reclamo..." [boxed]="true" />
+  } @else if (!detalleReclamo) {
+    <app-empty-state tipo="error" mensaje="No se pudo cargar el reclamo" [boxed]="true">
+      <app-button variant="secondary" size="sm" icon="arrow-left" label="Volver a reclamos" (clicked)="volver()" />
+    </app-empty-state>
+  } @else {
+
+    <!-- Cliente -->
+    <section class="flex flex-col gap-5 rounded-xl border border-ui-border bg-ui-card p-6">
+      <h2 class="m-0 border-b border-ui-border pb-3 text-base font-semibold uppercase tracking-widest text-brand-gold">
+        <i class="pi pi-user mr-2" aria-hidden="true"></i>Datos del cliente
+      </h2>
+      <dl class="m-0 grid grid-cols-1 gap-6 sm:grid-cols-3">
+        <div class="flex flex-col gap-1.5">
+          <dt class="text-sm text-text-muted">Nombre</dt>
+          <dd class="m-0 text-base font-medium text-text-primary">{{ detalleReclamo.nombreCliente }}</dd>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <dt class="text-sm text-text-muted">Correo</dt>
+          <dd class="m-0 break-all text-base font-medium text-text-primary">{{ detalleReclamo.correoCliente || '—' }}</dd>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <dt class="text-sm text-text-muted">Teléfono</dt>
+          <dd class="m-0 text-base font-medium text-text-primary">{{ detalleReclamo.telefonoCliente || '—' }}</dd>
+        </div>
+      </dl>
+    </section>
+
+    <!-- Detalle -->
+    <section class="flex flex-col gap-5 rounded-xl border border-ui-border bg-ui-card p-6">
+      <h2 class="m-0 border-b border-ui-border pb-3 text-base font-semibold uppercase tracking-widest text-brand-gold">
+        <i class="pi pi-exclamation-circle mr-2" aria-hidden="true"></i>Detalle del reclamo
+      </h2>
+      <dl class="m-0 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="flex flex-col items-start gap-1.5">
+          <dt class="text-sm text-text-muted">Tipo de reclamación</dt>
+          <dd class="m-0"><app-status-badge type="text" [value]="formatearTexto(detalleReclamo.tipoReclamacion)" /></dd>
+        </div>
+        <div class="flex flex-col items-start gap-1.5">
+          <dt class="text-sm text-text-muted">Tipo de problema</dt>
+          <dd class="m-0"><app-status-badge type="text" [value]="formatearTexto(detalleReclamo.tipoProblema)" /></dd>
+        </div>
+        <div class="flex flex-col items-start gap-1.5">
+          <dt class="text-sm text-text-muted">Causa</dt>
+          <dd class="m-0">
+            @if (detalleReclamo.causaReclamo) {
+              <app-status-badge type="text" [value]="formatearTexto(detalleReclamo.causaReclamo)" />
+            } @else {
+              <span class="text-base italic text-text-subtle">Sin causa registrada</span>
+            }
+          </dd>
+        </div>
+        <div class="flex flex-col items-start gap-1.5">
+          <dt class="text-sm text-text-muted">Solución aplicada</dt>
+          <dd class="m-0">
+            @if (detalleReclamo.solucionReclamo) {
+              <app-status-badge type="text" [value]="formatearTexto(detalleReclamo.solucionReclamo)" />
+            } @else {
+              <span class="text-base italic text-text-subtle">Sin solución registrada</span>
+            }
+          </dd>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <dt class="text-sm text-text-muted">Monto reclamado</dt>
+          <dd class="m-0 text-xl font-bold text-brand-gold">
+            {{ detalleReclamo.montoReclamado != null ? (detalleReclamo.montoReclamado | soles) : '—' }}
+          </dd>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <dt class="text-sm text-text-muted">Monto compensado</dt>
+          <dd class="m-0 text-xl font-bold text-brand-gold">
+            {{ detalleReclamo.montoCompensado != null ? (detalleReclamo.montoCompensado | soles) : '—' }}
+          </dd>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <dt class="text-sm text-text-muted">Fecha de ocurrencia</dt>
+          <dd class="m-0 text-base font-medium text-text-primary">{{ (detalleReclamo.fechaOcurrencia | dateHelper) || '—' }}</dd>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <dt class="text-sm text-text-muted">Fecha del reclamo</dt>
+          <dd class="m-0 text-base font-medium text-text-primary">{{ (detalleReclamo.fechaReclamo | dateHelper) || '—' }}</dd>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <dt class="text-sm text-text-muted">Fecha de resolución</dt>
+          <dd class="m-0 text-base font-medium text-text-primary">{{ (detalleReclamo.fechaResolucion | dateHelper) || '—' }}</dd>
+        </div>
+        <div class="flex flex-col items-start gap-1.5">
+          <dt class="text-sm text-text-muted">Origen</dt>
+          <dd class="m-0"><app-status-badge type="boolean" [value]="detalleReclamo.esPublico" trueLabel="Público" falseLabel="Interno" /></dd>
+        </div>
+      </dl>
+    </section>
+
+    <!-- Textos -->
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <section class="flex flex-col gap-4 rounded-xl border border-ui-border bg-ui-card p-6">
+        <h2 class="m-0 border-b border-ui-border pb-3 text-base font-semibold uppercase tracking-widest text-brand-gold">
+          <i class="pi pi-align-left mr-2" aria-hidden="true"></i>Descripción
+        </h2>
+        @if (detalleReclamo.descripcion) {
+          <p class="m-0 text-base leading-relaxed text-text-primary">{{ detalleReclamo.descripcion }}</p>
+        } @else {
+          <p class="m-0 text-base italic text-text-subtle">No hay descripción para este reclamo.</p>
+        }
+      </section>
+
+      <section class="flex flex-col gap-4 rounded-xl border border-ui-border bg-ui-card p-6">
+        <h2 class="m-0 border-b border-ui-border pb-3 text-base font-semibold uppercase tracking-widest text-brand-gold">
+          <i class="pi pi-lock mr-2" aria-hidden="true"></i>Notas internas
+        </h2>
+        @if (detalleReclamo.notasInternas) {
+          <p class="m-0 text-base leading-relaxed text-text-primary">{{ detalleReclamo.notasInternas }}</p>
+        } @else {
+          <p class="m-0 text-base italic text-text-subtle">Sin notas internas.</p>
+        }
+      </section>
+
+      <section class="flex flex-col gap-4 rounded-xl border border-ui-border bg-ui-card p-6">
+        <h2 class="m-0 border-b border-ui-border pb-3 text-base font-semibold uppercase tracking-widest text-brand-gold">
+          <i class="pi pi-check-circle mr-2" aria-hidden="true"></i>Detalle de la solución
+        </h2>
+        @if (detalleReclamo.detalleSolucion) {
+          <p class="m-0 text-base leading-relaxed text-text-primary">{{ detalleReclamo.detalleSolucion }}</p>
+        } @else {
+          <p class="m-0 text-base italic text-text-subtle">No se agregó detalle de solución.</p>
+        }
+      </section>
+    </div>
+
+    <!-- Adjuntos -->
+    <section class="flex flex-col gap-5 rounded-xl border border-ui-border bg-ui-card p-6">
+      <h2 class="m-0 border-b border-ui-border pb-3 text-base font-semibold uppercase tracking-widest text-brand-gold">
+        <i class="pi pi-paperclip mr-2" aria-hidden="true"></i>Adjuntos
+      </h2>
+      @if (!detalleReclamo.adjuntos || detalleReclamo.adjuntos.length === 0) {
+        <p class="m-0 text-base italic text-text-subtle">No hay archivos adjuntos.</p>
+      } @else {
+        <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          @for (adjunto of detalleReclamo.adjuntos; track adjunto.idAdjunto) {
+            @if (adjunto.mimeType?.startsWith('image/')) {
+              <div class="aspect-square overflow-hidden rounded-xl border border-ui-border bg-ui-black">
+                <p-image [src]="adjunto.urlArchivo | safeImageUrl" [alt]="adjunto.nombreOriginal" [preview]="true"
+                  class="block size-full cursor-zoom-in" imageClass="size-full object-cover" />
+              </div>
+            } @else {
+              <a [href]="adjunto.urlArchivo | safeImageUrl" target="_blank" rel="noopener"
+                class="flex flex-col items-center justify-center gap-2 rounded-xl border border-ui-border bg-ui-surface p-4 text-center text-base no-underline transition hover:border-brand-gold hover:bg-brand-gold/5">
+                <i class="pi text-3xl" [class]="adjunto.mimeType === 'application/pdf' ? 'pi-file-pdf text-danger' : 'pi-file text-brand-gold'" aria-hidden="true"></i>
+                <span class="w-full truncate text-text-secondary">{{ adjunto.nombreOriginal }}</span>
+              </a>
+            }
+          }
+        </div>
+      }
+    </section>
+  }
 </div>

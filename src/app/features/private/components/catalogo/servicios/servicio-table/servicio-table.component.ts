@@ -1,70 +1,77 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TableModule } from 'primeng/table';
-import { ButtonModule } from 'primeng/button';
-import { DialogModule } from 'primeng/dialog';
-import { GalleriaModule } from 'primeng/galleria';
 import { ImageModule } from 'primeng/image';
+import { GalleriaModule } from 'primeng/galleria';
+import { PaginatorState } from 'primeng/paginator';
+import { TableModule } from 'primeng/table';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
-import { InputIconModule } from 'primeng/inputicon';
-import { IconFieldModule } from 'primeng/iconfield';
-import { TableLazyLoadEvent } from 'primeng/table';
-import { Servicio } from '@/app/core/models/catalogos/servicios.model';
-import { environment } from '@/environments/environment';
+import { ButtonComponent } from '@/app/shared/components/button/button.component';
 import { ConfirmPopoverComponent } from '@/app/shared/components/confirm-popover/confirm-popover.component';
+import { EmptyStateComponent } from '@/app/shared/components/empty-state/empty-state.component';
+import { ModalComponent } from '@/app/shared/components/modal/modal.component';
+import { PaginatorComponent } from '@/app/shared/components/paginator/paginator.component';
 import { StatusBadgeComponent } from '@/app/shared/components/status-badge/status-badge.component';
 import { SafeImageUrlPipe } from '@/app/shared/pipes/safe-image-url.pipe';
 import { SolesPipe } from '@/app/shared/pipes/moneda.pipe';
+import { Servicio } from '@/app/core/models/catalogos/servicios.model';
+
+interface ImagenGaleria { src: string; alt: string; }
 
 @Component({
   selector: 'app-servicio-table',
-  imports: [CommonModule, FormsModule, TableModule, ButtonModule, DialogModule, GalleriaModule, ImageModule, ToggleSwitchModule,
-    InputIconModule, IconFieldModule, ConfirmPopoverComponent, StatusBadgeComponent, SafeImageUrlPipe, SolesPipe
+  standalone: true,
+  imports: [
+    TableModule, ToggleSwitchModule, ImageModule, GalleriaModule, FormsModule,
+    ButtonComponent, ConfirmPopoverComponent, EmptyStateComponent, ModalComponent,
+    PaginatorComponent, StatusBadgeComponent, SafeImageUrlPipe, SolesPipe,
   ],
-  templateUrl: './servicio-table.html',
+  templateUrl: './servicio-table.html'
 })
 export class ServicioTableComponent {
-  @Output() lazyLoad = new EventEmitter<TableLazyLoadEvent>();
-  @Output() publicado = new EventEmitter<{ id: number, publicado: boolean }>();
-  @Output() estado = new EventEmitter<{ id: number, activo: boolean }>();
-  @Output() ver = new EventEmitter<number>();
   @Output() editar = new EventEmitter<Servicio>();
   @Output() eliminar = new EventEmitter<Servicio>();
+  @Output() estado = new EventEmitter<{ id: number, activo: boolean }>();
+  @Output() publicado = new EventEmitter<{ id: number, publicado: boolean }>();
+  /** Se emite desde el estado vacío cuando hay filtros activos */
+  @Output() limpiar = new EventEmitter<void>();
+  /** Cambio de página o de filas por página en el paginador */
+  @Output() pageChange = new EventEmitter<PaginatorState>();
   @Input({ required: true }) servicios: Servicio[] = [];
-  @Input() icono: string = 'pi-briefcase';
   @Input() cargado = false;
-  @Input() totalRecords = 0;
+  /** Cambia el mensaje del estado vacío y muestra el botón "Limpiar filtros" */
+  @Input() hayFiltros = false;
+  @Input() first = 0;
   @Input() rows = 25;
-
-  environment = environment.apiBaseUrl;
+  @Input() totalRecords = 0;
 
   mostrarConfirmacion = false;
   servicioAEliminar: Servicio | null = null;
 
   mostrarGaleria = false;
-  imagenesGaleria: any[] = [];
+  tituloGaleria = 'Imágenes del servicio';
+  imagenesGaleria: ImagenGaleria[] = [];
   activeIndex = 0;
   numVisible = 5;
-
-  verServicio(servicio: Servicio) {
-    this.ver.emit(servicio.servicioId);
-  }
+  responsiveOptions = [
+    { breakpoint: '1024px', numVisible: 5 },
+    { breakpoint: '768px', numVisible: 3 },
+    { breakpoint: '560px', numVisible: 1 },
+  ];
 
   editarServicio(servicio: Servicio) {
     this.editar.emit(servicio);
   }
 
-  cambiarEstadoServicio(servicio: Servicio, event: { checked: boolean }) {
+  cambiarEstado(servicio: Servicio, event: { checked: boolean }) {
     this.estado.emit({ id: servicio.servicioId, activo: event.checked });
   }
 
-  cambiarPublicadoServicio(servicio: Servicio, event: { checked: boolean }) {
+  cambiarPublicado(servicio: Servicio, event: { checked: boolean }) {
     this.publicado.emit({ id: servicio.servicioId, publicado: event.checked });
   }
 
-  pedirConfirmacion(servicio: Servicio, event: MouseEvent) {
-    event.stopPropagation();
+  pedirConfirmacion(servicio: Servicio, event?: MouseEvent) {
+    event?.stopPropagation();
     this.servicioAEliminar = servicio;
     this.mostrarConfirmacion = true;
   }
@@ -84,23 +91,15 @@ export class ServicioTableComponent {
     return this.servicioAEliminar ? `¿Seguro que deseas eliminar el servicio "${this.servicioAEliminar.nombre}"?` : '';
   }
 
-  abrirGaleria(servicio: Servicio, index: number = 0) {
+  abrirGaleria(servicio: Servicio, index = 0) {
     if (!servicio.urlsMultimedia?.length) return;
-
     this.imagenesGaleria = servicio.urlsMultimedia.map((url, i) => ({
-      itemImageSrc: `${this.environment}uploads/${url}`,
-      thumbnailImageSrc: `${this.environment}uploads/${url}`,
-      alt: servicio.nombre + ' ' + i
+      src: url,
+      alt: `${servicio.nombre} ${i + 1}`,
     }));
-
-    this.activeIndex = index;
+    this.tituloGaleria = `Imágenes de ${servicio.nombre}`;
+    this.activeIndex = Math.min(index, this.imagenesGaleria.length - 1);
     this.numVisible = Math.min(this.imagenesGaleria.length, 5);
     this.mostrarGaleria = true;
   }
-
-  responsiveOptions = [
-    { breakpoint: '1024px', numVisible: 5 },
-    { breakpoint: '768px', numVisible: 3 },
-    { breakpoint: '560px', numVisible: 1 }
-  ];
 }

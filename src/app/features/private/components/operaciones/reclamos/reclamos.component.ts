@@ -1,39 +1,37 @@
-import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ButtonModule } from 'primeng/button';
-import { DialogModule } from 'primeng/dialog';
-import { TableLazyLoadEvent } from 'primeng/table';
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { PaginatorState } from 'primeng/paginator';
+import { finalize } from 'rxjs';
 import { ReclamoTableComponent } from './reclamo-table/reclamo-table.component';
 import { ReclamoFormComponent } from './reclamo-form/reclamo-form.component';
 import { ReclamoActualizarComponent } from './reclamo-actualizar/reclamo-actualizar.component';
 import { SearchBarComponent } from '@/app/shared/components/search-bar/search-bar.component';
-import { DialogHeaderComponent } from '@/app/shared/components/dialog-header/dialog-header.component';
+import { FiltrosComponent } from '@/app/shared/components/filtros/filtros.component';
+import { StatsComponent } from '@/app/shared/components/stats/stats.component';
+import { ButtonComponent } from '@/app/shared/components/button/button.component';
+import { PageHeaderComponent } from '@/app/shared/components/page-header/page-header.component';
+import { ModalComponent } from '@/app/shared/components/modal/modal.component';
 import { ReclamoService } from '@/app/core/services/operaciones/reclamo.service';
 import { NotificationService } from '@/app/core/services/common/notification.service';
 import { ReclamoFiltro } from '@/app/core/models/operaciones/reclamos-model/reclamo.filtro.model';
 import { ReclamoRequest, ReclamoResponse, ReclamoSolucionRequest } from '@/app/core/models/operaciones/reclamos-model/reclamo.model';
-import { FILTROS_RECLAMO } from '@/app/core/config/filtros.config';
-import { FiltrosComponent } from '@/app/shared/components/filtros/filtros.component';
-import { StatsComponent } from '@/app/shared/components/stats/stats.component';
 import { RECLAMOS_STATS_CONFIG, StatsCard } from '@/app/core/models/common/card.model';
-import { Router } from '@angular/router';
+import { FILTROS_RECLAMO } from '@/app/core/config/filtros.config';
 
 @Component({
   selector: 'app-reclamos',
-  imports: [CommonModule, ButtonModule, DialogModule,
-    StatsComponent, FiltrosComponent,
-    SearchBarComponent, DialogHeaderComponent,
+  standalone: true,
+  imports: [
     ReclamoTableComponent, ReclamoFormComponent, ReclamoActualizarComponent,
+    SearchBarComponent, FiltrosComponent, StatsComponent, ButtonComponent, PageHeaderComponent, ModalComponent,
   ],
   templateUrl: './reclamos.html',
-  styleUrl: './reclamos.scss',
 })
-
 export class ReclamosComponent implements OnInit {
-  private cdr = inject(ChangeDetectorRef);
+  private cd = inject(ChangeDetectorRef);
   private router = inject(Router);
-  private reclamoService = inject(ReclamoService);
   private notify = inject(NotificationService);
+  private reclamoService = inject(ReclamoService);
 
   filtrosReclamo = FILTROS_RECLAMO;
   reclamos: ReclamoResponse[] = [];
@@ -42,12 +40,19 @@ export class ReclamosComponent implements OnInit {
   filtro: Partial<ReclamoFiltro> = {};
   mostrarFormulario = false;
   mostrarFormularioActualizar = false;
+  guardando = false;
+  resetFormTrigger = 0;
   cargado = false;
   totalRecords = 0;
   rows = 25;
+  first = 0;
   texto = 'Reclamos';
   icono = 'pi-exclamation-triangle';
   private pageActual = 0;
+
+  get hayFiltros(): boolean {
+    return Object.values(this.filtro).some(v => v !== null && v !== undefined && v !== '');
+  }
 
   ngOnInit(): void {
     this.cargarResumen();
@@ -56,15 +61,20 @@ export class ReclamosComponent implements OnInit {
 
   cargarReclamos(page: number, size: number): void {
     this.pageActual = page;
+    this.first = page * size;
     this.cargado = false;
     this.reclamoService.listarReclamos({ ...this.filtro, page, size }).subscribe({
       next: (resp) => {
         this.reclamos = resp.data?.content ?? [];
         this.totalRecords = resp.data?.totalElements ?? 0;
         this.cargado = true;
-        this.cdr.detectChanges();
+        this.cd.detectChanges();
       },
-      error: (err) => { this.notify.showHttpError(err); this.cargado = true; }
+      error: (err) => {
+        this.notify.showHttpError(err);
+        this.cargado = true;
+        this.cd.detectChanges();
+      },
     });
   }
 
@@ -80,30 +90,43 @@ export class ReclamosComponent implements OnInit {
           accentTextClass: item.accentTextClass,
           iconBgClass: item.iconBgClass,
         }));
+        this.cd.detectChanges();
       },
-      error: (err) => this.notify.showHttpError(err)
+      error: (err) => this.notify.showHttpError(err),
     });
   }
 
-  cargarDetalle(id: number): void {
-    this.router.navigate(['/dashboard/admin/operaciones/reclamos', id]);
-  }
+  // ---------- Búsqueda, filtros y paginación ----------
 
   buscarReclamos(valor: string): void {
-    this.filtro = valor ? { numeroReclamo: valor } : {};
+    this.filtro = { ...this.filtro, numeroReclamo: valor || undefined };
     this.cargarReclamos(0, this.rows);
   }
+
+  onBuscar(filtros: ReclamoFiltro): void {
+    this.filtro = { ...this.filtro, ...filtros };
+    this.cargarReclamos(0, this.rows);
+  }
+
+  onLimpiar(): void {
+    this.filtro = {};
+    this.cargarReclamos(0, this.rows);
+  }
+
+  onPageChange(event: PaginatorState): void {
+    this.rows = event.rows ?? this.rows;
+    this.first = event.first ?? 0;
+    this.cargarReclamos(Math.floor(this.first / this.rows), this.rows);
+  }
+
+  // ---------- Modales ----------
 
   abrirCrear(): void { this.mostrarFormulario = true; }
   cerrarFormulario(): void { this.mostrarFormulario = false; }
 
   abrirActualizar(reclamo: ReclamoResponse): void {
-    this.reclamoSeleccionado = reclamo;
+    this.reclamoSeleccionado = { ...reclamo };
     this.mostrarFormularioActualizar = true;
-  }
-
-  abrirVer(id: number) {
-    this.cargarDetalle(id);
   }
 
   cerrarActualizar(): void {
@@ -111,29 +134,43 @@ export class ReclamosComponent implements OnInit {
     this.reclamoSeleccionado = null;
   }
 
+  abrirVer(id: number): void {
+    this.router.navigate(['/dashboard/admin/operaciones/reclamos', id]);
+  }
+
+  // ---------- CRUD ----------
+
   guardarReclamo(data: { request: ReclamoRequest; archivos?: File[] }): void {
-    this.reclamoService.crearReclamo(data.request, data.archivos).subscribe({
-      next: () => {
-        this.notify.showSuccess('Reclamo creado correctamente');
-        this.cerrarFormulario();
-        this.cargarReclamos(0, this.rows);
-        this.cargarResumen();
-      },
-      error: (err) => this.notify.showHttpError(err)
-    });
+    if (this.guardando) return;
+    this.guardando = true;
+    this.reclamoService.crearReclamo(data.request, data.archivos)
+      .pipe(finalize(() => { this.guardando = false; this.cd.detectChanges(); }))
+      .subscribe({
+        next: () => {
+          this.notify.showSuccess('Reclamo creado correctamente');
+          this.resetFormTrigger++;
+          this.cerrarFormulario();
+          this.cargarReclamos(0, this.rows);
+          this.cargarResumen();
+        },
+        error: (err) => this.notify.showHttpError(err),
+      });
   }
 
   guardarActualizacion(data: ReclamoSolucionRequest): void {
-    if (!this.reclamoSeleccionado) return;
-    this.reclamoService.actualizarSolucionReclamo(this.reclamoSeleccionado.idReclamo, data).subscribe({
-      next: () => {
-        this.notify.showSuccess('Reclamo actualizado correctamente');
-        this.cerrarActualizar();
-        this.cargarReclamos(this.pageActual, this.rows);
-        this.cargarResumen();
-      },
-      error: (err) => this.notify.showHttpError(err)
-    });
+    if (!this.reclamoSeleccionado || this.guardando) return;
+    this.guardando = true;
+    this.reclamoService.actualizarSolucionReclamo(this.reclamoSeleccionado.idReclamo, data)
+      .pipe(finalize(() => { this.guardando = false; this.cd.detectChanges(); }))
+      .subscribe({
+        next: () => {
+          this.notify.showSuccess('Reclamo actualizado correctamente');
+          this.cerrarActualizar();
+          this.cargarReclamos(this.pageActual, this.rows);
+          this.cargarResumen();
+        },
+        error: (err) => this.notify.showHttpError(err),
+      });
   }
 
   eliminarReclamo(reclamo: ReclamoResponse): void {
@@ -141,24 +178,9 @@ export class ReclamosComponent implements OnInit {
       next: () => {
         this.notify.showSuccess('Reclamo eliminado correctamente');
         this.cargarReclamos(this.pageActual, this.rows);
+        this.cargarResumen();
       },
-      error: (err) => this.notify.showHttpError(err)
+      error: (err) => this.notify.showHttpError(err),
     });
-  }
-
-  onLazyLoad(event: TableLazyLoadEvent): void {
-    const first = event.first ?? 0;
-    const rows = event.rows ?? this.rows;
-    this.cargarReclamos(first / rows, rows);
-  }
-
-  onBuscar(filtros: ReclamoFiltro): void {
-    this.filtro = filtros;
-    this.cargarReclamos(0, this.rows);
-  }
-
-  onLimpiar(): void {
-    this.filtro = {};
-    this.cargarReclamos(0, this.rows);
   }
 }

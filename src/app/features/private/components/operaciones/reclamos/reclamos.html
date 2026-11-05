@@ -1,26 +1,31 @@
-
 <div class="flex flex-col gap-6 mt-5">
+  <app-page-header titulo="Reclamos" [icono]="icono" subtitulo="Registra, da seguimiento y resuelve los reclamos de clientes">
+    <app-search-bar placeholder="Buscar por N° reclamo" ancho="w-full md:w-[24rem] lg:w-[32rem] xl:w-[40rem]"
+      (search)="buscarReclamos($event)" />
+    <app-button variant="primary" size="sm" icon="plus" label="Crear reclamo" (clicked)="abrirCrear()" />
+  </app-page-header>
+
+  @if (statsCards.length) {
     <app-stats [items]="statsCards" />
-    <aside class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between px-6 py-4 border-b border-brand-gold-soft bg-brand-black rounded-xl">
-        <h1 class="text-lg font-semibold text-brand-gold  text-center md:text-start"> <i class="pi" [class]="icono"></i> Reclamos </h1>
-        <app-search-bar placeholder="Buscar por N° reclamo" (search)="buscarReclamos($event)" />
-        <button pButton label="Crear Reclamo" icon="pi pi-plus" class="p-button-sm boton-primary" (click)="abrirCrear()"></button>
-    </aside>
-    <app-filtros [fields]="filtrosReclamo" [titulo]="texto" [text]="texto" [acordeon]="true"   (buscar)="onBuscar($event)" (limpiar)="onLimpiar()" />
-    <app-reclamo-table [reclamos]="reclamos" [cargado]="cargado" [totalRecords]="totalRecords" [rows]="rows" [icono]="icono" (lazyLoad)="onLazyLoad($event)" (actualizar)="abrirActualizar($event)" (eliminar)="eliminarReclamo($event)" (ver)="abrirVer($event)"/>
+  }
+
+  <app-filtros [fields]="filtrosReclamo" [titulo]="texto" [text]="texto" [acordeon]="true" [abierto]="false"
+    (buscar)="onBuscar($event)" (limpiar)="onLimpiar()" />
+
+  <app-reclamo-table [reclamos]="reclamos" [cargado]="cargado" [hayFiltros]="hayFiltros"
+    [first]="first" [rows]="rows" [totalRecords]="totalRecords" (pageChange)="onPageChange($event)"
+    (actualizar)="abrirActualizar($event)" (eliminar)="eliminarReclamo($event)" (ver)="abrirVer($event)"
+    (limpiar)="onLimpiar()" />
 </div>
 
-<p-dialog [(visible)]="mostrarFormulario" [modal]="true" [dismissableMask]="true" [style]="{ width: '90vw', maxWidth: '80rem' }" (onHide)="cerrarFormulario()">
-    <ng-template pTemplate="header">
-        <app-dialog-header icono="pi-exclamation-circle" title="Crear Reclamo" mode="crear" />
-    </ng-template>
-    <app-reclamo-form (guardar)="guardarReclamo($event)" (cancelarEvento)="cerrarFormulario()" />
-</p-dialog>
+<app-modal [(visible)]="mostrarFormulario" titulo="Crear reclamo" mode="crear" icono="pi-exclamation-circle"
+  maxWidth="80rem" (cerrado)="cerrarFormulario()">
+  <app-reclamo-form [guardando]="guardando" [resetTrigger]="resetFormTrigger"
+    (guardar)="guardarReclamo($event)" (cancelarEvento)="cerrarFormulario()" />
+</app-modal>
 
-<p-dialog [(visible)]="mostrarFormularioActualizar" [modal]="true" [dismissableMask]="true"
-    [style]="{ width: '90vw', maxWidth: '50rem' }" (onHide)="cerrarActualizar()">
-    <ng-template pTemplate="header">
-        <app-dialog-header icono="pi-exclamation-circle" title="Actualizar Reclamo" mode="editar" />
-    </ng-template>
-    <app-reclamo-actualizar [reclamo]="reclamoSeleccionado" (guardar)="guardarActualizacion($event)" (cancelarEvento)="cerrarActualizar()" />
-</p-dialog>
+<app-modal [(visible)]="mostrarFormularioActualizar" titulo="Actualizar reclamo" mode="editar"
+  icono="pi-exclamation-circle" maxWidth="50rem" (cerrado)="cerrarActualizar()">
+  <app-reclamo-actualizar [reclamo]="reclamoSeleccionado" [guardando]="guardando"
+    (guardar)="guardarActualizacion($event)" (cancelarEvento)="cerrarActualizar()" />
+</app-modal>

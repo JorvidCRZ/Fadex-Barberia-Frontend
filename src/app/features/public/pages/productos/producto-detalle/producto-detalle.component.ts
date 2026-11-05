@@ -12,13 +12,12 @@ import { INVENTARIO_CONFIG } from '../../../../../core/config/valores.config';
 import { Producto } from '../../../../../core/models/catalogos/productos.model';
 import { StatusBadgeComponent } from '../../../../../shared/components/status-badge/status-badge.component';
 import { ButtonComponent } from '@/app/shared/components/button/button.component';
-import { EmptyStateComponent } from '@/app/shared/components/empty-state/empty-state.component';
 
 @Component({
   standalone: true,
   selector: 'app-producto-detalle',
   imports: [ CommonModule, FormsModule, ButtonComponent, InputNumberModule, SafeImageUrlPipe,
-     StatusBadgeComponent, ImageModule, SolesPipe,EmptyStateComponent,
+     StatusBadgeComponent, ImageModule, SolesPipe,
   ],
   templateUrl: './producto-detalle.html',
 })

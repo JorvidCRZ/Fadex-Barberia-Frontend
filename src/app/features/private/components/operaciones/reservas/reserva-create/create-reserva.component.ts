@@ -1,119 +1,81 @@
 import { Component, EventEmitter, inject, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormBuilder, FormsModule, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import { Subject, finalize, debounceTime, distinctUntilChanged, switchMap, takeUntil, of, catchError } from 'rxjs';
-import { AutoCompleteModule, AutoCompleteCompleteEvent, AutoCompleteSelectEvent } from 'primeng/autocomplete';
-import { SelectModule } from 'primeng/select';
+import { AbstractControl, FormBuilder, FormsModule, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import { Subject, catchError, debounceTime, distinctUntilChanged, finalize, of, switchMap, takeUntil } from 'rxjs';
+import { AutoCompleteCompleteEvent, AutoCompleteModule, AutoCompleteSelectEvent } from 'primeng/autocomplete';
 import { DatePickerModule } from 'primeng/datepicker';
-import { ButtonModule } from 'primeng/button';
-import { ToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
-import { DialogModule } from 'primeng/dialog';
+import { MessageModule } from 'primeng/message';
+import { SelectModule } from 'primeng/select';
+import { TextareaModule } from 'primeng/textarea';
+import { ButtonComponent } from '@/app/shared/components/button/button.component';
+import { ModalComponent } from '@/app/shared/components/modal/modal.component';
+import { campoInvalido, marcarFormulario } from '@/app/shared/utils/form-utils.component';
+import { NotificationService } from '@/app/core/services/common/notification.service';
 import { Cliente } from '@/app/core/models/gestion/cliente/cliente.model';
-import { ClienteService } from '@/app/core/services/gestion/cliente.service';
 import { Barbero } from '@/app/core/models/gestion/barbero/barbero.model';
-import { BarberoService } from '@/app/core/services/gestion/barbero.service';
 import { Servicio, ServicioFiltro } from '@/app/core/models/catalogos/servicios.model';
+import { ReservaRequest } from '@/app/core/models/reserva/reservaRequest';
+import { ClienteService } from '@/app/core/services/gestion/cliente.service';
+import { BarberoService } from '@/app/core/services/gestion/barbero.service';
 import { ServicioService } from '@/app/core/services/catalogos/servicio.service';
 import { ReservaService } from '@/app/core/services/operaciones/reserva.service';
-import { ReservaRequest } from '@/app/core/models/reserva/reservaRequest';
-import { ModalComponent } from '@/app/shared/components/modal/modal.component';
-import { ButtonComponent } from '@/app/shared/components/button/button.component';
+
+interface Horario { label: string; value: string; }
+interface ReservaPreview { cliente: string; barbero: string; servicio: string; fecha: string; hora: string; }
+
+const HORARIOS: Horario[] = [
+  { label: '09:00 AM', value: '09:00' }, { label: '09:30 AM', value: '09:30' },
+  { label: '10:00 AM', value: '10:00' }, { label: '10:30 AM', value: '10:30' },
+  { label: '11:00 AM', value: '11:00' }, { label: '11:30 AM', value: '11:30' },
+  { label: '12:00 PM', value: '12:00' }, { label: '12:30 PM', value: '12:30' },
+  { label: '02:00 PM', value: '14:00' }, { label: '02:30 PM', value: '14:30' },
+  { label: '03:00 PM', value: '15:00' }, { label: '03:30 PM', value: '15:30' },
+  { label: '04:00 PM', value: '16:00' }, { label: '04:30 PM', value: '16:30' },
+  { label: '05:00 PM', value: '17:00' }, { label: '05:30 PM', value: '17:30' },
+  { label: '06:00 PM', value: '18:00' }, { label: '06:30 PM', value: '18:30' },
+];
 
 @Component({
   selector: 'app-create-reserva',
   standalone: true,
   imports: [
-    CommonModule, FormsModule, ReactiveFormsModule, AutoCompleteModule, SelectModule, DatePickerModule,
-    ButtonModule, ToastModule, DialogModule,ModalComponent, ButtonComponent
+    FormsModule, ReactiveFormsModule, AutoCompleteModule, SelectModule, DatePickerModule,
+    TextareaModule, MessageModule, ModalComponent, ButtonComponent,
   ],
-  providers: [MessageService],
   templateUrl: './create-reserva.html',
 })
 export class CreateReserva implements OnInit, OnDestroy, OnChanges {
+  @Input() resetTrigger = 0;
+  @Output() guardar = new EventEmitter<any>();
+  @Output() cancelarEvento = new EventEmitter<void>();
 
   private fb = inject(FormBuilder);
+  private notify = inject(NotificationService);
   private clienteService = inject(ClienteService);
   private barberoService = inject(BarberoService);
   private servicioService = inject(ServicioService);
   private reservaService = inject(ReservaService);
-  private messageService = inject(MessageService);
 
   private destroy$ = new Subject<void>();
   private buscarClienteSubject = new Subject<string>();
   private buscarBarberoSubject = new Subject<string>();
   private buscarServicioSubject = new Subject<string>();
 
-  @Input() resetTrigger = 0;
-  @Output() guardar = new EventEmitter<any>();
-  @Output() cancelarEvento = new EventEmitter<void>();
-
   isLoading = false;
+  formSubmitted = false;
   showConfirmDialog = false;
-  reservaPreview: any = null;
+  reservaPreview: ReservaPreview | null = null;
   today = new Date();
+  horarios: Horario[] = HORARIOS;
 
   clientesSugeridos: Cliente[] = [];
   barberosSugeridos: Barbero[] = [];
   serviciosSugeridos: Servicio[] = [];
-
   clienteSeleccionado: Cliente | null = null;
   barberoSeleccionado: Barbero | null = null;
   servicioSeleccionado: Servicio | null = null;
-
   buscandoCliente = false;
   buscandoBarbero = false;
   buscandoServicio = false;
-
-  get horarios() {
-    const todosLosHorarios = [
-      { label: '09:00 AM', value: '09:00' },
-      { label: '09:30 AM', value: '09:30' },
-      { label: '10:00 AM', value: '10:00' },
-      { label: '10:30 AM', value: '10:30' },
-      { label: '11:00 AM', value: '11:00' },
-      { label: '11:30 AM', value: '11:30' },
-      { label: '12:00 PM', value: '12:00' },
-      { label: '12:30 PM', value: '12:30' },
-      { label: '02:00 PM', value: '14:00' },
-      { label: '02:30 PM', value: '14:30' },
-      { label: '03:00 PM', value: '15:00' },
-      { label: '03:30 PM', value: '15:30' },
-      { label: '04:00 PM', value: '16:00' },
-      { label: '04:30 PM', value: '16:30' },
-      { label: '05:00 PM', value: '17:00' },
-      { label: '05:30 PM', value: '17:30' },
-      { label: '06:00 PM', value: '18:00' },
-      { label: '06:30 PM', value: '18:30' },
-    ];
-
-    const fechaSeleccionada = this.reservaForm?.get('fecha')?.value;
-    if (!fechaSeleccionada) return todosLosHorarios;
-
-    const hoy = new Date();
-    const fechaForm = new Date(fechaSeleccionada as Date);
-
-    const esHoy =
-      fechaForm.getFullYear() === hoy.getFullYear() &&
-      fechaForm.getMonth() === hoy.getMonth() &&
-      fechaForm.getDate() === hoy.getDate();
-
-    if (!esHoy) return todosLosHorarios;
-
-    const horaActual = hoy.getHours();
-    const minActual = hoy.getMinutes();
-
-    return todosLosHorarios.filter(h => {
-      const [hh, mm] = h.value.split(':').map(Number);
-      if (hh < horaActual) return false;
-      if (hh === horaActual && mm <= minActual) return false;
-      return true;
-    });
-  }
-
-  onFechaChange(): void {
-    this.reservaForm.get('hora')?.reset();
-  }
 
   reservaForm = this.fb.group({
     clienteId: this.fb.control<number | null>(null, [Validators.required]),
@@ -121,8 +83,10 @@ export class CreateReserva implements OnInit, OnDestroy, OnChanges {
     servicioId: this.fb.control<number | null>(null, [Validators.required]),
     fecha: this.fb.control<Date | null>(null, [Validators.required, this.fechaValida.bind(this)]),
     hora: this.fb.control<string | null>(null, [Validators.required]),
-    observacion: this.fb.control<string>('', [Validators.maxLength(500)])
+    observacion: this.fb.control<string>('', [Validators.maxLength(500)]),
   });
+
+  campoInvalido = (campo: string) => campoInvalido(this.reservaForm, campo, this.formSubmitted);
 
   ngOnInit(): void {
     this.configurarBusquedas();
@@ -130,23 +94,7 @@ export class CreateReserva implements OnInit, OnDestroy, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['resetTrigger'] && !changes['resetTrigger'].firstChange) {
-      this.reservaForm.reset({
-        clienteId: null,
-        barberoId: null,
-        servicioId: null,
-        fecha: null,
-        hora: null,
-        observacion: ''
-      });
-      this.clienteSeleccionado = null;
-      this.barberoSeleccionado = null;
-      this.servicioSeleccionado = null;
-      this.clientesSugeridos = [];
-      this.barberosSugeridos = [];
-      this.serviciosSugeridos = [];
-      this.reservaPreview = null;
-      this.showConfirmDialog = false;
-      this.isLoading = false;
+      this.limpiarFormulario();
     }
   }
 
@@ -155,244 +103,187 @@ export class CreateReserva implements OnInit, OnDestroy, OnChanges {
     this.destroy$.complete();
   }
 
+  // =====================================================
+  // HORARIOS
+  // =====================================================
+
+  /** Si la fecha es hoy, oculta las horas que ya pasaron */
+  onFechaChange(): void {
+    this.reservaForm.get('hora')?.reset();
+    const fecha = this.reservaForm.get('fecha')?.value;
+    if (!fecha) { this.horarios = HORARIOS; return; }
+
+    const ahora = new Date();
+    const f = new Date(fecha);
+    const esHoy = f.getFullYear() === ahora.getFullYear()
+      && f.getMonth() === ahora.getMonth()
+      && f.getDate() === ahora.getDate();
+    if (!esHoy) { this.horarios = HORARIOS; return; }
+
+    this.horarios = HORARIOS.filter(h => {
+      const [hh, mm] = h.value.split(':').map(Number);
+      return hh > ahora.getHours() || (hh === ahora.getHours() && mm > ahora.getMinutes());
+    });
+  }
+
+  fechaValida(control: AbstractControl): ValidationErrors | null {
+    const fecha = control.value;
+    if (!fecha) return null;
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    return fecha < hoy ? { fechaInvalida: true } : null;
+  }
+
+  // =====================================================
+  // AUTOCOMPLETE
+  // =====================================================
+
+  private nombreCompleto(p?: { persona?: { nombre?: string; apellido?: string } }): string {
+    return `${p?.persona?.nombre ?? ''} ${p?.persona?.apellido ?? ''}`.trim();
+  }
+
   private configurarBusquedas(): void {
     this.buscarClienteSubject.pipe(
-      debounceTime(150),
-      distinctUntilChanged(),
+      debounceTime(150), distinctUntilChanged(),
       switchMap(texto => {
         this.buscandoCliente = true;
         const request$ = texto.trim()
           ? this.clienteService.buscarPorNombre(texto, 0, 10)
           : this.clienteService.listar(0, 10);
-        return request$.pipe(
-          finalize(() => this.buscandoCliente = false),
-          catchError(() => of(null))
-        );
+        return request$.pipe(finalize(() => this.buscandoCliente = false), catchError(() => of(null)));
       }),
       takeUntil(this.destroy$)
-    ).subscribe(response => {
-      this.clientesSugeridos = (response?.data?.content ?? []).map((cliente: Cliente) => ({
-        ...cliente,
-        nombreCompleto: `${cliente.persona?.nombre ?? ''} ${cliente.persona?.apellido ?? ''}`.trim()
+    ).subscribe(resp => {
+      this.clientesSugeridos = (resp?.data?.content ?? []).map((c: Cliente) => ({
+        ...c, nombreCompleto: this.nombreCompleto(c),
       }));
     });
 
     this.buscarBarberoSubject.pipe(
-      debounceTime(150),
-      distinctUntilChanged(),
+      debounceTime(150), distinctUntilChanged(),
       switchMap(texto => {
         this.buscandoBarbero = true;
         const request$ = texto.trim()
           ? this.barberoService.buscarPorNombre(texto, 0, 10)
           : this.barberoService.listar(0, 10);
-        return request$.pipe(
-          finalize(() => this.buscandoBarbero = false),
-          catchError(() => of(null))
-        );
+        return request$.pipe(finalize(() => this.buscandoBarbero = false), catchError(() => of(null)));
       }),
       takeUntil(this.destroy$)
-    ).subscribe(response => {
-      this.barberosSugeridos = (response?.data?.content ?? []).map((barbero: Barbero) => ({
-        ...barbero,
-        nombreCompleto: `${barbero.persona?.nombre ?? ''} ${barbero.persona?.apellido ?? ''}`.trim()
+    ).subscribe(resp => {
+      this.barberosSugeridos = (resp?.data?.content ?? []).map((b: Barbero) => ({
+        ...b, nombreCompleto: this.nombreCompleto(b),
       }));
     });
 
     this.buscarServicioSubject.pipe(
-      debounceTime(150),
-      distinctUntilChanged(),
+      debounceTime(150), distinctUntilChanged(),
       switchMap(texto => {
         this.buscandoServicio = true;
         const filtro: Partial<ServicioFiltro> = texto.trim()
           ? { page: 0, size: 10, nombre: texto }
           : { page: 0, size: 10 };
         return this.servicioService.obtenerServiciosConFiltro(filtro).pipe(
-          finalize(() => this.buscandoServicio = false),
-          catchError(() => of(null))
-        );
+          finalize(() => this.buscandoServicio = false), catchError(() => of(null)));
       }),
       takeUntil(this.destroy$)
-    ).subscribe(response => {
-      this.serviciosSugeridos = response?.data?.content ?? [];
-    });
+    ).subscribe(resp => { this.serviciosSugeridos = resp?.data?.content ?? []; });
   }
 
-  buscarCliente(event: AutoCompleteCompleteEvent): void {
-    this.buscarClienteSubject.next(event.query);
+  buscarCliente(e: AutoCompleteCompleteEvent): void { this.buscarClienteSubject.next(e.query); }
+  buscarBarbero(e: AutoCompleteCompleteEvent): void { this.buscarBarberoSubject.next(e.query); }
+  buscarServicio(e: AutoCompleteCompleteEvent): void { this.buscarServicioSubject.next(e.query); }
+
+  onSeleccionarCliente(e: AutoCompleteSelectEvent): void {
+    this.reservaForm.get('clienteId')?.setValue((e.value as Cliente)?.clienteId ?? null);
   }
-
-  buscarBarbero(event: AutoCompleteCompleteEvent): void {
-    this.buscarBarberoSubject.next(event.query);
+  onSeleccionarBarbero(e: AutoCompleteSelectEvent): void {
+    this.reservaForm.get('barberoId')?.setValue((e.value as Barbero)?.barberoId ?? null);
   }
-
-  buscarServicio(event: AutoCompleteCompleteEvent): void {
-    this.buscarServicioSubject.next(event.query);
+  onSeleccionarServicio(e: AutoCompleteSelectEvent): void {
+    this.reservaForm.get('servicioId')?.setValue((e.value as Servicio)?.servicioId ?? null);
   }
+  onLimpiarCliente(): void { this.reservaForm.get('clienteId')?.setValue(null); }
+  onLimpiarBarbero(): void { this.reservaForm.get('barberoId')?.setValue(null); }
+  onLimpiarServicio(): void { this.reservaForm.get('servicioId')?.setValue(null); }
 
-  // ---- Handlers al seleccionar un item del autocomplete ----
-  onSeleccionarCliente(event: AutoCompleteSelectEvent): void {
-    const cliente = event.value as Cliente;
-    this.reservaForm.get('clienteId')?.setValue(cliente?.clienteId ?? null);
-  }
+  // =====================================================
+  // ACCIONES
+  // =====================================================
 
-  onSeleccionarBarbero(event: AutoCompleteSelectEvent): void {
-    const barbero = event.value as Barbero;
-    this.reservaForm.get('barberoId')?.setValue(barbero?.barberoId ?? null);
-  }
-
-  onSeleccionarServicio(event: AutoCompleteSelectEvent): void {
-    const servicio = event.value as Servicio;
-    this.reservaForm.get('servicioId')?.setValue(servicio?.servicioId ?? null);
-  }
-
-  onLimpiarCliente(): void {
-    this.reservaForm.get('clienteId')?.setValue(null);
-  }
-
-  onLimpiarBarbero(): void {
-    this.reservaForm.get('barberoId')?.setValue(null);
-  }
-
-  onLimpiarServicio(): void {
-    this.reservaForm.get('servicioId')?.setValue(null);
-  }
-
-  fechaValida(control: AbstractControl): ValidationErrors | null {
-    const fecha = control.value;
-    if (!fecha) return null;
-
-    const hoy = new Date();
-    hoy.setHours(0, 0, 0, 0);
-
-    if (fecha < hoy) {
-      return { fechaInvalida: true };
-    }
-
-    return null;
+  /** yyyy-MM-dd en hora local (toISOString usa UTC y puede cambiar el día) */
+  private aISO(fecha: Date): string {
+    const p = (n: number) => String(n).padStart(2, '0');
+    return `${fecha.getFullYear()}-${p(fecha.getMonth() + 1)}-${p(fecha.getDate())}`;
   }
 
   guardarReserva(): void {
+    this.formSubmitted = true;
     if (this.reservaForm.invalid) {
-      this.reservaForm.markAllAsTouched();
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Formulario inválido',
-        detail: 'Por favor completa todos los campos requeridos'
-      });
+      marcarFormulario(this.reservaForm);
       return;
     }
-
-    const reserva = this.reservaForm.getRawValue();
-
+    const v = this.reservaForm.getRawValue();
     this.reservaPreview = {
-      ...reserva,
-      fechaFormateada: reserva.fecha ? new Date(reserva.fecha).toLocaleDateString('es-ES', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      }) : ''
+      cliente: this.nombreCompleto(this.clienteSeleccionado ?? undefined) || '—',
+      barbero: this.nombreCompleto(this.barberoSeleccionado ?? undefined) || '—',
+      servicio: this.servicioSeleccionado?.nombre || '—',
+      fecha: new Date(v.fecha as Date).toLocaleDateString('es-PE', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+      }),
+      hora: HORARIOS.find(h => h.value === v.hora)?.label ?? v.hora ?? '',
     };
-
     this.showConfirmDialog = true;
   }
 
   confirmarGuardar(): void {
-    this.showConfirmDialog = false;
+    if (this.isLoading) return;
+    const v = this.reservaForm.getRawValue();
+    if (!v.fecha) return;
+
     this.isLoading = true;
-
-    const form = this.reservaForm.getRawValue();
-
-    if (!form.fecha) {
-      this.isLoading = false;
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Fecha inválida',
-        detail: 'La fecha es requerida'
-      });
-      return;
-    }
-
-    const fecha = new Date(form.fecha as string | Date);
-
-    const reservaRequest: ReservaRequest = {
-      clienteId: form.clienteId!,
-      barberoId: form.barberoId!,
-      servicioId: form.servicioId!,
-      fecha: fecha.toISOString().split('T')[0],
-      horaInicio: form.hora!,
-      observacion: form.observacion ?? ''
+    const request: ReservaRequest = {
+      clienteId: v.clienteId!,
+      barberoId: v.barberoId!,
+      servicioId: v.servicioId!,
+      fecha: this.aISO(new Date(v.fecha)),
+      horaInicio: v.hora!,
+      observacion: v.observacion ?? '',
     };
 
-    this.reservaService.guardarReserva(reservaRequest)
-      .pipe(
-        finalize(() => {
-          this.isLoading = false;
-        })
-      )
+    this.reservaService.guardarReserva(request)
+      .pipe(finalize(() => { this.isLoading = false; }))
       .subscribe({
-        next: (response: any) => {
-          this.messageService.add({
-            severity: 'success',
-            summary: '¡Reserva creada!',
-            detail: 'La reserva se creó correctamente.',
-            life: 3000
-          });
-
-          this.guardar.emit(response);
+        next: (resp: any) => {
+          this.showConfirmDialog = false;
+          this.notify.showSuccess(resp?.message ?? 'La reserva se creó correctamente');
+          this.guardar.emit(resp);
         },
-
-        error: (error) => {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error del servidor',
-            detail:
-              error?.error?.message ??
-              'Ocurrió un error al crear la reserva.',
-            life: 4000
-          });
-        }
+        error: (err) => {
+          this.showConfirmDialog = false;
+          this.notify.showHttpError(err?.error?.message ?? err?.message ?? 'Ocurrió un error al crear la reserva');
+        },
       });
-  }
-
-  getClienteNombre(): string {
-    return this.clienteSeleccionado?.persona?.nombre + ' ' + this.clienteSeleccionado?.persona?.apellido || 'Cargando...';
-  }
-
-  getBarberoNombre(): string {
-    return this.barberoSeleccionado?.persona?.nombre + ' ' + this.barberoSeleccionado?.persona?.apellido || 'Cargando...';
-  }
-
-  getServicioNombre(): string {
-    return this.servicioSeleccionado?.nombre || 'Cargando...';
   }
 
   cancelar(): void {
+    this.limpiarFormulario();
     this.cancelarEvento.emit();
   }
 
-  get clienteInvalido(): boolean {
-    const control = this.reservaForm.get('clienteId');
-    return !!control?.invalid && control.touched;
-  }
-
-  get barberoInvalido(): boolean {
-    const control = this.reservaForm.get('barberoId');
-    return !!control?.invalid && control.touched;
-  }
-
-  get servicioInvalido(): boolean {
-    const control = this.reservaForm.get('servicioId');
-    return !!control?.invalid && control.touched;
-  }
-
-  get fechaInvalida(): boolean {
-    const control = this.reservaForm.get('fecha');
-    return !!control?.invalid && control.touched;
-  }
-
-  get horaInvalida(): boolean {
-    const control = this.reservaForm.get('hora');
-    return !!control?.invalid && control.touched;
+  private limpiarFormulario(): void {
+    this.formSubmitted = false;
+    this.reservaForm.reset({
+      clienteId: null, barberoId: null, servicioId: null, fecha: null, hora: null, observacion: '',
+    });
+    this.horarios = HORARIOS;
+    this.clienteSeleccionado = null;
+    this.barberoSeleccionado = null;
+    this.servicioSeleccionado = null;
+    this.clientesSugeridos = [];
+    this.barberosSugeridos = [];
+    this.serviciosSugeridos = [];
+    this.reservaPreview = null;
+    this.showConfirmDialog = false;
+    this.isLoading = false;
   }
 }

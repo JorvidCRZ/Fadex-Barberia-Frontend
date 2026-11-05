@@ -1,107 +1,128 @@
 import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ButtonModule } from 'primeng/button';
-import { DialogModule } from 'primeng/dialog';
-import { TableLazyLoadEvent, TableModule } from 'primeng/table';
-import { TooltipModule } from 'primeng/tooltip';
-import { StatusBadgeComponent } from '@/app/shared/components/status-badge/status-badge.component';
+import { TableModule } from 'primeng/table';
+import { PaginatorState } from 'primeng/paginator';
+import { ButtonComponent } from '@/app/shared/components/button/button.component';
+import { EmptyStateComponent } from '@/app/shared/components/empty-state/empty-state.component';
 import { FiltrosComponent } from '@/app/shared/components/filtros/filtros.component';
+import { ModalComponent } from '@/app/shared/components/modal/modal.component';
+import { PageHeaderComponent } from '@/app/shared/components/page-header/page-header.component';
+import { PaginatorComponent } from '@/app/shared/components/paginator/paginator.component';
 import { SearchBarComponent } from '@/app/shared/components/search-bar/search-bar.component';
+import { StatsComponent } from '@/app/shared/components/stats/stats.component';
+import { StatusBadgeComponent } from '@/app/shared/components/status-badge/status-badge.component';
+import { DateFormatPipe } from '@/app/shared/pipes/dat.pipe';
 import { FILTROS_RESERVA } from '@/app/core/config/filtros.config';
 import { ReservaService } from '@/app/core/services/operaciones/reserva.service';
-import { Reserva, ReservaFiltro } from '@/app/core/models/operaciones/Reserva.model';
 import { NotificationService } from '@/app/core/services/common/notification.service';
-import { DialogHeaderComponent } from '@/app/shared/components/dialog-header/dialog-header.component';
-import { DateFormatPipe } from '@/app/shared/pipes/dat.pipe';
-import { CreateReserva } from '../reserva-create/create-reserva.component';
+import { Reserva, ReservaFiltro } from '@/app/core/models/operaciones/Reserva.model';
+import { StatsCard } from '@/app/core/models/common/card.model';
 import { CalendarReservas } from '../reserva-calendar/reserva-calendar.component';
-import { ButtonComponent } from '@/app/shared/components/button/button.component';
-import { MonedaPipe } from '@/app/shared/pipes/moneda.pipe';
-import { ModalComponent } from '@/app/shared/components/modal/modal.component';
+import { ReservaDetalleComponent } from '../reservas-detalle/reserva-detalle.component';
+import { ReservarComponent } from '@/app/features/private/pages/reservar/reservar.component';
 
 @Component({
   selector: 'app-reserva-list',
   standalone: true,
   imports: [
-    CommonModule,
-    FormsModule,
-    ButtonModule,
-    DialogModule,
-    TableModule,
-    CreateReserva,
-    TooltipModule,
-    StatusBadgeComponent,
-    FiltrosComponent,
-    SearchBarComponent,
-    DateFormatPipe,
-    CalendarReservas,
-    ButtonComponent, 
-    MonedaPipe,
-    ModalComponent
+    TableModule, CalendarReservas, ReservaDetalleComponent, ReservarComponent,
+    ButtonComponent, EmptyStateComponent, FiltrosComponent, ModalComponent, PageHeaderComponent,
+    PaginatorComponent, SearchBarComponent, StatsComponent, StatusBadgeComponent, DateFormatPipe,
   ],
   templateUrl: './reserva-list.html',
 })
 export class ReservaList implements OnInit {
   private router = inject(Router);
-  private reservaService = inject(ReservaService);
-  private notify = inject(NotificationService);
+  private route = inject(ActivatedRoute);
   private cd = inject(ChangeDetectorRef);
+  private notify = inject(NotificationService);
+  private reservaService = inject(ReservaService);
 
   reservas: Reserva[] = [];
+  stats: StatsCard[] = [];
+  filtro: Partial<ReservaFiltro> = {};
+  filtrosFields = [...FILTROS_RESERVA];
+  reservaSeleccionada: Reserva | null = null;
   cargado = false;
   totalRecords = 0;
   rows = 10;
-
-  filtro: Partial<ReservaFiltro> = {};
-  filtrosFields = [...FILTROS_RESERVA];
+  first = 0;
+  showDetalle = false;
+  mostrarCalendario = false;
+  mostrarFormulario = false;
+  resetFormTrigger = 0;
+  icono = 'pi-calendar';
   texto = 'Reservas';
 
-  showDetalle = false;
-  reservaSeleccionada: Reserva | null = null;
-  mostrarCalendario = false;
-  private route = inject(ActivatedRoute); // import desde '@angular/router'
-
-  abrirCalendario(): void {
-    this.mostrarCalendario = true;
+  get hayFiltros(): boolean {
+    return Object.values(this.filtro).some(v => v !== null && v !== undefined && v !== '');
   }
 
-  cerrarCalendario(): void {
-    this.mostrarCalendario = false;
-  }
   ngOnInit(): void {
     this.cargarReservas(0, this.rows);
-    if (this.route.snapshot.queryParamMap.has('nueva')) {
-    this.abrirCrear();
-  }
+    if (this.route.snapshot.queryParamMap.has('nueva')) { this.abrirCrear(); }
   }
 
   cargarReservas(page: number, size: number): void {
+    this.first = page * size;
     this.cargado = false;
-    this.reservaService
-      .obtenerReservas({ ...this.filtro, page, size, sort: 'fecha,desc' })
-      .subscribe({
-        next: (resp) => {
-          this.reservas = resp.data.content;
-          this.totalRecords = resp.data.totalElements;
-          this.cargado = true;
-          this.cd.detectChanges();
-        },
-        error: (err) => {
-          this.notify.showHttpError(err.message);
-          this.cargado = true;
-          this.cd.detectChanges();
-        },
-      });
+    this.reservaService.obtenerReservas({ ...this.filtro, page, size, sort: 'fecha,desc' }).subscribe({
+      next: (resp) => {
+        this.reservas = resp.data.content;
+        this.totalRecords = resp.data.totalElements;
+        this.actualizarStats();
+        this.cargado = true;
+        this.cd.detectChanges();
+      },
+      error: (err) => {
+        this.notify.showHttpError(err.message);
+        this.cargado = true;
+        this.cd.detectChanges();
+      },
+    });
   }
 
-  onLazyLoad(event: TableLazyLoadEvent): void {
-    const first = event.first ?? 0;
-    const rows = event.rows ?? this.rows;
-    this.rows = rows;
-    this.cargarReservas(Math.floor(first / rows), rows);
+  private actualizarStats(): void {
+    const cuenta = (...estados: string[]) =>
+      this.reservas.filter(r => estados.includes(r.estadoReserva ?? '')).length;
+    this.stats = [
+      {
+        title: 'Total reservas',
+        value: this.totalRecords,
+        icon: 'pi pi-calendar',
+        description: this.hayFiltros ? 'Según los filtros aplicados' : 'Registradas en el sistema',
+      },
+      {
+        title: 'Confirmadas',
+        value: cuenta('CONFIRMADA'),
+        icon: 'pi pi-check-circle',
+        description: 'En esta página',
+        accentClass: 'bg-success',
+        iconBgClass: 'bg-success/10',
+        accentTextClass: 'text-success',
+      },
+      {
+        title: 'Pendientes de pago',
+        value: cuenta('PENDIENTE_PAGO', 'PENDIENTE'),
+        icon: 'pi pi-clock',
+        description: 'En esta página',
+        accentClass: 'bg-warning',
+        iconBgClass: 'bg-warning/10',
+        accentTextClass: 'text-warning',
+      },
+      {
+        title: 'Finalizadas',
+        value: cuenta('FINALIZADA'),
+        icon: 'pi pi-verified',
+        description: 'En esta página',
+        accentClass: 'bg-info',
+        iconBgClass: 'bg-info/10',
+        accentTextClass: 'text-info',
+      },
+    ];
   }
+
+  // ---------- Búsqueda, filtros y paginación ----------
 
   buscarCliente(nombre: string): void {
     this.filtro.clienteNombre = nombre;
@@ -118,9 +139,38 @@ export class ReservaList implements OnInit {
     this.cargarReservas(0, this.rows);
   }
 
+  onPageChange(event: PaginatorState): void {
+    this.rows = event.rows ?? this.rows;
+    this.first = event.first ?? 0;
+    this.cargarReservas(Math.floor(this.first / this.rows), this.rows);
+  }
+
+  // ---------- Modales ----------
+
   verDetalle(reserva: Reserva): void {
     this.reservaSeleccionada = reserva;
     this.showDetalle = true;
+  }
+
+  cerrarDetalle(): void {
+    this.showDetalle = false;
+    this.reservaSeleccionada = null;
+  }
+
+  abrirCalendario(): void { this.mostrarCalendario = true; }
+  abrirCrear(): void { this.mostrarFormulario = true; }
+  cerrarFormulario(): void { this.mostrarFormulario = false; }
+
+  onReservaGuardada(): void {
+    this.resetFormTrigger++;
+    this.mostrarFormulario = false;
+    this.cargarReservas(0, this.rows);
+  }
+
+  // ---------- Cobro ----------
+
+  puedeCobrar(reserva: Reserva): boolean {
+    return reserva.estadoReserva !== 'FINALIZADA' && reserva.estadoReserva !== 'CANCELADA';
   }
 
   cobrarReserva(reserva: Reserva): void {
@@ -133,45 +183,5 @@ export class ReservaList implements OnInit {
         },
       },
     });
-  }
-
-  editarReserva(reserva: Reserva): void {
-    this.router.navigate([`/dashboard/admin/operaciones/reservas/editar/${reserva.id}`]);
-  }
-
-  mostrarFormulario = false;
-  resetFormTrigger = 0;
-  icono = 'pi-calendar-plus';
-
-  abrirCrear(): void {
-    this.mostrarFormulario = true;
-  }
-
-  cerrarFormulario(): void {
-    this.mostrarFormulario = false;
-  }
-
-  onReservaGuardada(): void {
-    this.resetFormTrigger++;
-    this.mostrarFormulario = false;
-    this.cargarReservas(0, this.rows);
-  }
-
-  // AJUSTA los case si EstadoReserva.ts trae otros nombres
-  getEstadoClass(estado: string | null): string {
-    switch (estado) {
-      case 'CONFIRMADA':
-        return 'estado-confirmada';
-      case 'PENDIENTE_PAGO':
-        return 'estado-pendiente';
-      case 'EN_PROCESO':
-        return 'estado-en-proceso';
-      case 'FINALIZADA':
-        return 'estado-completada';
-      case 'CANCELADA':
-        return 'estado-cancelada';
-      default:
-        return 'estado-default';
-    }
   }
 }

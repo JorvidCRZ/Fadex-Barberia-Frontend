@@ -6,10 +6,6 @@ import { SolesPipe } from '@/app/shared/pipes/moneda.pipe';
 import { Producto } from '@/app/core/models/catalogos/productos.model';
 import { INVENTARIO_CONFIG } from '@/app/core/config/valores.config';
 
-/**
- * Ficha de producto (solo presentación). Se usa dentro de <app-modal>:
- *   <app-producto-detalle [producto]="productoDetalle" />
- */
 @Component({
   selector: 'app-producto-detalle',
   standalone: true,
