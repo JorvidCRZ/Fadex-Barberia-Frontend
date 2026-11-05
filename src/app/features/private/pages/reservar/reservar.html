@@ -131,7 +131,7 @@
                   <td>
                     @if (imagenServicio(servicio); as img) {
                       <img [src]="img | safeImageUrl" [alt]="servicio.nombre"
-                        class="size-11 rounded-lg object-cover" (error)="ocultarImagen($event)" />
+                        class="size-11 rounded-lg object-contain" (error)="ocultarImagen($event)" />
                     } @else {
                       <div class="flex size-11 items-center justify-center rounded-lg bg-brand-gold/10 text-brand-gold">
                         <i class="pi pi-image"></i>

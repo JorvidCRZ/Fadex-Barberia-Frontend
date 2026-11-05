@@ -216,7 +216,6 @@ export class MisReservasComponent implements OnInit {
 
           this.cargarMisReservas();
 
-          // La reserva cancelada pasa al historial: forzar recarga la próxima vez
           this.historialCargado = false;
         },
         error: (err) => {
@@ -226,9 +225,6 @@ export class MisReservasComponent implements OnInit {
       });
   }
 
-  // =====================================================
-  // RESERVAS: PAGAR
-  // =====================================================
 
   irAPagar(reserva: Reserva): void {
     this.router.navigate(['/mi-cuenta/pago', reserva.reservaId]);

@@ -41,7 +41,6 @@
           </span>
         </td>
 
-        <!-- Productos -->
         <td>
           <div class="flex items-center justify-center gap-2">
             <div
@@ -55,17 +54,14 @@
           </div>
         </td>
 
-        <!-- Método de pago -->
         <td>
           <span class="text-sm text-text-primary">{{ compra.metodoPago || '—' }}</span>
         </td>
 
-        <!-- Total -->
         <td>
           <span class="font-bold text-brand-gold">{{ compra.total | moneda }}</span>
         </td>
 
-        <!-- Acciones -->
         <td>
           <div class="flex items-center justify-center gap-2">
             <app-button variant="ver-tabla" icon="eye" tooltip="Ver detalle" tooltipPosition="top" (clicked)="verDetalle(compra)" />

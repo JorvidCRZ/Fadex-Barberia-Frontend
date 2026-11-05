@@ -23,15 +23,15 @@ export const BUTTON_VARIANTS = [
   'close-preparando', 'close-enviado', 'close-entregado',
   // Confirmación
   'confirm-pagado', 'confirm-preparando', 'confirm-enviado', 'confirm-entregado',
-  'primary', 'secondary', /* ...el resto igual... */ 'excel', 'pdf',
-  'sidebar-toggle',      
+  // Layout
+  'sidebar-toggle',
 ] as const;
 
 export type ButtonVariant = (typeof BUTTON_VARIANTS)[number];
 
 /** Variantes que usan el mixin boton-tabla (size-10): solo muestran el icono */
 const SOLO_ICONO = new Set<ButtonVariant>([
-  'sidebar-toggle',            // ← nueva
+  'sidebar-toggle',
   'tabla', 'editar-tabla', 'eliminar-tabla', 'ver-tabla', 'devolver-tabla', 'agregar',
   'accion-cita', 'accion-rojo', 'cierre',
   'cerrar-tabla', 'close-tabla', 'close-aprobar', 'close-devolver', 'close-pagado',
@@ -46,19 +46,32 @@ const SOLO_ICONO = new Set<ButtonVariant>([
     '[class.inline-flex]': '!fullWidth',
     '[class.flex]': 'fullWidth',
   },
+  // El tooltip va en un <span> nativo que envuelve al p-button (no sobre <p-button>):
+  // así el hover siempre lo recibe un elemento real, también cuando el botón está deshabilitado.
   template: `
-    <p-button [unstyled]="true" [type]="type" [styleClass]="clases" [disabled]="disabled || loading"
-     [ariaLabel]="tooltip || label || undefined" [pTooltip]="tooltip" [tooltipPosition]="tooltipPosition" 
-     [class]="fullWidth ? 'flex w-full' : 'inline-flex'" (onClick)="alHacerClick($event)">
-      @if (loading) {
-        <i class="pi pi-spin pi-spinner"></i>
-      } @else if (icon) {
-        <i [class]="claseIcono"></i>
-      }
-      @if (!soloIcono && textoVisible) {
-        <span>  {{ textoVisible }}</span>
-      }
-    </p-button>
+    <span
+      [class]="fullWidth ? 'flex w-full' : 'inline-flex'"
+      [pTooltip]="tooltip"
+      [tooltipPosition]="tooltipPosition"
+      appendTo="body">
+      <p-button
+        [unstyled]="true"
+        [type]="type"
+        [styleClass]="clases"
+        [disabled]="disabled || loading"
+        [ariaLabel]="ariaLabel || tooltip || label || undefined"
+        [class]="fullWidth ? 'flex w-full' : 'inline-flex'"
+        (onClick)="alHacerClick($event)">
+        @if (loading) {
+          <i class="pi pi-spin pi-spinner"></i>
+        } @else if (icon) {
+          <i [class]="claseIcono"></i>
+        }
+        @if (!soloIcono && textoVisible) {
+          <span>{{ textoVisible }}</span>
+        }
+      </p-button>
+    </span>
   `,
 })
 export class ButtonComponent {

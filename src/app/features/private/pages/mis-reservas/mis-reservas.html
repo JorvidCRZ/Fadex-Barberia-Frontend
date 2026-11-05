@@ -1,5 +1,6 @@
 <div class="flex flex-col gap-6 mt-5">
-  <app-page-header titulo="Mis Reservas" icono="calendar" subtitulo="Consulta, paga o cancela tus citas y revisa tu historial">
+  <app-page-header titulo="Mis Reservas" icono="calendar"
+    subtitulo="Consulta, paga o cancela tus citas y revisa tu historial">
     <app-button variant="secondary" size="sm" icon="refresh" label="Recargar" (clicked)="recargar()" />
     <app-button variant="primary" size="sm" icon="plus" label="Nueva reserva" (clicked)="abrirNuevaReserva()" />
   </app-page-header>
@@ -65,9 +66,12 @@
           <span class="text-sm font-medium text-text-primary">
             {{ reserva.fecha | dateHelper }}
             @if (horaCorta(reserva.horaInicio)) {
-              <span class="text-text-muted">
-                {{ ' ' + horaCorta(reserva.horaInicio) }}@if (horaCorta(reserva.horaFin)) { - {{ horaCorta(reserva.horaFin) }} }
-              </span>
+            <span class="text-text-muted">
+              {{ ' ' + horaCorta(reserva.horaInicio) }}
+              @if (horaCorta(reserva.horaFin)) {
+              - {{ horaCorta(reserva.horaFin) }}
+              }
+            </span>
             }
           </span>
         </td>
@@ -152,9 +156,12 @@
           <span class="text-sm font-medium text-text-primary">
             {{ reserva.fecha | dateHelper }}
             @if (horaCorta(reserva.horaInicio)) {
-              <span class="text-text-muted">
-                {{ ' ' + horaCorta(reserva.horaInicio) }}@if (horaCorta(reserva.horaFin)) { - {{ horaCorta(reserva.horaFin) }} }
-              </span>
+            <span class="text-text-muted">
+              {{ ' ' + horaCorta(reserva.horaInicio) }}
+              @if (horaCorta(reserva.horaFin)) {
+              - {{ horaCorta(reserva.horaFin) }}
+              }
+            </span>
             }
           </span>
         </td>
@@ -190,7 +197,14 @@
         </td>
         <td>
           <div class="flex items-center justify-center gap-2">
-            <app-button variant="ver-tabla" icon="eye" tooltip="Ver detalle" tooltipPosition="top" (clicked)="verDetalle(reserva)" />
+            <app-button variant="ver-tabla" icon="eye" tooltip="Ver detalle" tooltipPosition="top"
+              (clicked)="verDetalle(reserva)" />
+
+            @if (puedeDescargarBoleta(reserva)) {
+            <app-button variant="secondary" size="sm" icon="download" tooltip="Descargar boleta"
+              tooltipPosition="top" [loading]="descargandoBoleta() === reserva.ventaId"
+              (clicked)="descargarBoleta(reserva)" />
+            }
           </div>
         </td>
       </tr>
@@ -241,7 +255,10 @@
 
 <app-reservar [(visible)]="dialogNuevaReserva" [servicioIdInicial]="servicioIdInicial()" (creada)="onReservaCreada()" />
 
-<app-confirm-popover [visible]="mostrarConfirmacion()" mode="anular" titulo="Confirmar cancelación" [mensaje]="mensajeConfirmacion" confirmText="Sí, cancelar" cancelText="No" (confirm)="confirmarCancelacion()" (cancel)="cerrarConfirmacion()" />
+<app-confirm-popover [visible]="mostrarConfirmacion()" mode="anular" titulo="Confirmar cancelación"
+  [mensaje]="mensajeConfirmacion" confirmText="Sí, cancelar" cancelText="No" (confirm)="confirmarCancelacion()"
+  (cancel)="cerrarConfirmacion()" />
+
 <app-modal [(visible)]="displayModal" titulo="Detalle de Atención" mode="crear" icono="pi-history" maxWidth="40rem">
   @if (reservaSeleccionada(); as reserva) {
   <div class="space-y-5">
@@ -265,7 +282,7 @@
     </div>
 
     <div>
-      <p class="mb-2 text-sm text-gray-400">Servicio realizado</p>
+      <p class="mb-2 text-sm text-gray-400">Servicio</p>
       <div class="flex items-center rounded-xl border border-white/10 bg-black/30 p-3">
         <i class="pi pi-check-circle mr-3 text-brand-gold"></i>
         <span class="font-semibold text-white">{{ reserva.nombreServicio }}</span>
@@ -280,30 +297,10 @@
         </p>
       </div>
       <div class="text-right">
-        <p class="mb-1 text-sm text-gray-400">Total pagado</p>
+        <p class="mb-1 text-sm text-gray-400">{{ reserva.ventaId != null ? 'Total pagado' : 'Total' }}</p>
         <p class="m-0 text-2xl font-bold text-brand-gold">{{ reserva.total | moneda }}</p>
       </div>
     </div>
-
-    <div class="flex items-center justify-between rounded-xl border border-brand-gold/20 bg-black/30 p-4">
-      <div>
-        <p class="mb-1 text-sm text-gray-400">Total pagado</p>
-        <p class="m-0 text-2xl font-bold text-brand-gold">{{ reserva.total | moneda }}</p>
-      </div>
-    </div>
-
-    @if (puedeDescargarBoleta(reserva)) {
-      <div class="pt-2">
-        <app-button
-          variant="secondary"
-          size="sm"
-          icon="download"
-          label="Descargar boleta"
-          [fullWidth]="true"
-          [loading]="descargandoBoleta() === reserva.ventaId"
-          (clicked)="descargarBoleta(reserva)" />
-      </div>
-    }
 
     @if (reserva.observacion) {
     <div>
