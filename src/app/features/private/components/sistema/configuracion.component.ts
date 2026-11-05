@@ -1,11 +1,14 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
+import { MessageModule } from 'primeng/message';
+import { TextareaModule } from 'primeng/textarea';
 import { ToastModule } from 'primeng/toast';
-import { ConfiguracionEmpresaLocal } from '../../../../core/models/common/empresa.model';
-import { AuthService } from '../../../../core/services/auth/auth.service';
-import { ConfiguracionService, LOCAL_CONFIGURACION_EMPRESA_KEY } from '../../../../core/services/common/configuracion.service';
+import { InputTextModule } from 'primeng/inputtext';
+import { ButtonComponent } from '@/app/shared/components/button/button.component';
+import { PageHeaderComponent } from '@/app/shared/components/page-header/page-header.component';
+import { ConfiguracionEmpresaLocal } from '@/app/core/models/common/empresa.model';
+import { ConfiguracionService, LOCAL_CONFIGURACION_EMPRESA_KEY } from '@/app/core/services/common/configuracion.service';
 
 const DEFAULT_SETTINGS: ConfiguracionEmpresaLocal = {
   businessName: 'FadeX Barbería',
@@ -40,19 +43,21 @@ function isConfiguracionEmpresaLocal(value: unknown): value is ConfiguracionEmpr
 
 @Component({
   selector: 'app-configuracion',
-  imports: [ReactiveFormsModule, ToastModule],
+  standalone: true,
+  imports: [
+    ReactiveFormsModule, ToastModule, InputTextModule, TextareaModule, MessageModule,
+    ButtonComponent, PageHeaderComponent,
+  ],
   templateUrl: './configuracion.html',
-  styleUrl: './configuracion.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [MessageService],
 })
 export class ConfiguracionComponent {
   private readonly formBuilder = inject(FormBuilder).nonNullable;
-  private readonly authService = inject(AuthService);
-  private readonly router = inject(Router);
   private readonly messageService = inject(MessageService);
   private readonly configuracionService = inject(ConfiguracionService);
 
+  readonly icono = 'pi-cog';
   readonly settingsForm = this.formBuilder.group({
     businessName: [DEFAULT_SETTINGS.businessName, [Validators.required, Validators.maxLength(100)]],
     email: [DEFAULT_SETTINGS.email, [Validators.required, Validators.email, Validators.maxLength(150)]],
@@ -67,6 +72,16 @@ export class ConfiguracionComponent {
 
   constructor() {
     this.loadSettings();
+  }
+
+  /** true si el campo es inválido y el usuario ya lo tocó (o intentó guardar) */
+  invalido(campo: keyof typeof this.settingsForm.controls): boolean {
+    const control = this.settingsForm.controls[campo];
+    return control.invalid && control.touched;
+  }
+
+  quitarLogo(): void {
+    this.logoDataUrl.set(null);
   }
 
   onLogoSelected(event: Event): void {
