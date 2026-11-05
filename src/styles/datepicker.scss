@@ -47,7 +47,7 @@
 
 .p-datepicker-weekday {
     color: rgb(var(--color-brand-gold)) !important;
-    font-size: 0.75rem !important;
+    font-size: 0.875rem !important;
     font-weight: 600 !important;
     text-transform: uppercase !important;
     letter-spacing: 0.05em !important;
@@ -96,7 +96,7 @@
 }
 
 .p-datepicker-weekday-cell {
-    font-size: 0.75rem !important;
+    font-size: 0.875rem !important;
 }
 
 .p-datepicker-day-cell {
@@ -107,6 +107,9 @@
 .p-datepicker-minute-picker,
 .p-datepicker-time-picker,
 .p-datepicker-day {
-    font-size: 0.75rem !important;
+    font-size: 0.875rem !important;
+}
+
+.p-datepicker-day-cell {
     padding: 0.25rem !important;
 }

@@ -387,6 +387,43 @@ button.boton-submit.p-button {
     }
 }
 
+.gestion-tabla-acciones {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.gestion-tabla-acciones > p-button {
+    display: inline-flex;
+    flex: 0 0 2.25rem;
+    width: 2.25rem;
+    height: 2.25rem;
+    min-width: 2.25rem;
+}
+
+.gestion-tabla-acciones > p-button .p-button {
+    display: inline-flex !important;
+    flex: 0 0 2.25rem;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 2.25rem !important;
+    min-width: 2.25rem !important;
+    max-width: 2.25rem;
+    height: 2.25rem !important;
+    min-height: 2.25rem !important;
+    max-height: 2.25rem;
+    padding: 0 !important;
+    line-height: 1;
+}
+
+.gestion-tabla-acciones > p-button .p-button-icon {
+    margin: 0 !important;
+    font-size: 1rem;
+    line-height: 1;
+}
+
 .boton-agregar {
     @include boton-tabla;
 

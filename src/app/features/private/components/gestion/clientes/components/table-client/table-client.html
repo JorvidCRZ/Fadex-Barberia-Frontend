@@ -28,7 +28,7 @@
 					<td class="whitespace-nowrap">{{ c.persona.telefono || 'N/A' }}</td>
 					<td class="whitespace-nowrap">{{ c.persona.email || 'N/A' }}</td>
 					<td class="whitespace-nowrap">
-						<div class="flex items-center justify-center gap-2">
+						<div class="gestion-tabla-acciones">
 							@if (isSearchMode) {
 								<p-button icon="pi pi-eye" class="boton-editar-tabla" pTooltip="Ver detalle" tooltipPosition="top" [routerLink]="[c.clienteId ?? c.idCliente ?? c.id]" />
 								<p-button icon="pi pi-user-minus" class="boton-eliminar-tabla" pTooltip="Deshabilitar" tooltipPosition="top" (onClick)="onDelete(c.clienteId ?? c.idCliente ?? c.id)" />

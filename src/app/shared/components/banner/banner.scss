@@ -52,7 +52,7 @@
   display: block;
   margin-bottom: 1.25rem;
   color: rgb(var(--color-brand-gold));
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-weight: 700;
   letter-spacing: 0.28em;
 }
@@ -156,16 +156,31 @@
 
 @media (width <= 640px) {
   .banner-slide {
-    min-height: 38rem;
+    min-height: clamp(24rem, 74svh, 34rem);
   }
 
   .banner-content {
     width: min(100% - 2rem, 76rem);
     padding: 6rem 0 5rem;
+    text-align: center;
   }
 
   .banner-content h1 {
     font-size: clamp(2.5rem, 14vw, 4.5rem);
+    margin-inline: auto;
+  }
+
+  .banner-content p {
+    margin-inline: auto;
+  }
+
+  .banner-content .boton-primary {
+    display: inline-flex;
+    width: 100%;
+    max-width: 20rem;
+    min-height: 2.75rem;
+    align-items: center;
+    justify-content: center;
   }
 
   :host ::ng-deep .p-carousel-prev-button {

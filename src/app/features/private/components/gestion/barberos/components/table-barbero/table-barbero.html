@@ -36,7 +36,7 @@
 					<td class="whitespace-nowrap text-center text-neutral-primary-dark">{{ b.sueldo || '—' }}</td>
 
 					<td class="whitespace-nowrap text-center">
-						<div class="flex flex-row justify-center gap-1">
+						<div class="gestion-tabla-acciones">
 							@if (isSearchMode) {
 								<p-button icon="pi pi-eye" class="boton-editar-tabla" pTooltip="Ver detalle" tooltipPosition="top" [routerLink]="['/dashboard/admin/gestion/barberos', b.barberoId ?? b.idBarbero ?? b.id]" />
 								<p-button icon="pi pi-user-minus" class="boton-eliminar-tabla" pTooltip="Deshabilitar" tooltipPosition="top" (onClick)="onDelete(b.barberoId ?? b.idBarbero ?? b.id)" />

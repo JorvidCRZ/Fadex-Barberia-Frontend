@@ -38,7 +38,7 @@
             </div>
 
             <div class="overflow-x-auto">
-                <table class="w-full min-w-[860px] text-sm">
+                <table class="cart-product-table w-full min-w-[860px] text-sm">
 
                     <thead class="bg-ui-black text-text-secondary">
                         <tr class="border-b border-ui-border">
@@ -75,17 +75,17 @@
                                     </div>
                                 </td>
 
-                                <td class="px-5 py-4 text-center font-medium text-text-primary">{{ precioItem(item) | soles }}</td>
+                                <td data-label="Precio" class="px-5 py-4 text-center font-medium text-text-primary">{{ precioItem(item) | soles }}</td>
 
-                                <td class="px-5 py-4 text-center">
+                                <td data-label="Cantidad" class="px-5 py-4 text-center">
                                     <div class="flex items-center justify-center gap-2">
                                         <app-button variant="tabla" icon="pi-minus" tooltip="Disminuir cantidad" styleClass="border border-ui-border bg-ui-elevated text-text-primary hover:bg-brand-gold hover:text-black" (clicked)="actualizarCantidad(i, item.cantidad - 1)" />
                                         <span class="w-10 text-center font-semibold text-text-primary">{{ item.cantidad }}</span>
                                         <app-button variant="tabla" icon="pi-plus" tooltip="Aumentar cantidad" styleClass="border border-ui-border bg-ui-elevated text-text-primary hover:bg-brand-gold hover:text-black" [disabled]="item.cantidad >= item.producto.stock" (clicked)="actualizarCantidad(i, item.cantidad + 1)" />
                                     </div>
                                 </td>
-                                <td class="px-5 py-4 text-right font-bold text-brand-gold">{{ subtotalItem(item) | soles }}</td>
-                                <td class="px-5 py-4 text-center">
+                                <td data-label="Subtotal" class="px-5 py-4 text-right font-bold text-brand-gold">{{ subtotalItem(item) | soles }}</td>
+                                <td data-label="Acciones" class="px-5 py-4 text-center">
                                     <app-button variant="eliminar-tabla" icon="pi-trash" tooltip="Eliminar producto" (clicked)="eliminarProducto(i)" />
                                 </td>
                             </tr>

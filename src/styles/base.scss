@@ -3,6 +3,7 @@ body,
 app-root {
     width: 100%;
     min-height: 100%;
+    min-width: 0;
     font-size: 1rem;
 }
 
@@ -17,6 +18,9 @@ body {
     background: #070707ee;
     color: rgb(var(--color-text-primary));
     font-family: Arial, Helvetica, sans-serif;
+    font-size: clamp(1rem, 0.95rem + 0.25vw, 1.0625rem);
+    line-height: 1.6;
+    -webkit-text-size-adjust: 100%;
 }
 
 *,
@@ -32,9 +36,54 @@ select {
     font: inherit;
 }
 
-img {
+img,
+video,
+svg {
     max-width: 100%;
+    height: auto;
+}
+
+img,
+video {
     display: block;
+}
+
+h1 {
+    font-size: clamp(1.75rem, 1.4rem + 1.8vw, 2.5rem) !important;
+}
+
+h2 {
+    font-size: clamp(1.5rem, 1.25rem + 1.2vw, 2rem) !important;
+}
+
+h3 {
+    font-size: clamp(1.25rem, 1.1rem + 0.7vw, 1.5rem) !important;
+}
+
+p {
+    max-width: 65ch;
+    font-size: clamp(1rem, 0.95rem + 0.25vw, 1.0625rem) !important;
+    line-height: 1.6;
+}
+
+small {
+    font-size: 0.875rem;
+}
+
+input,
+select,
+textarea {
+    min-width: 0;
+    font-size: 1rem !important;
+}
+
+button {
+    min-height: 2.75rem;
+}
+
+app-header .public-menu a,
+app-footer a {
+    min-height: 2.75rem;
 }
 
 a {
@@ -44,6 +93,266 @@ a {
 
 a:hover {
     color: rgb(var(--color-brand-gold));
+}
+
+app-login .text-xs:not(i),
+app-register .text-xs:not(i),
+app-forgot-password .text-xs:not(i),
+app-reset-password .text-xs:not(i),
+app-checkout .text-xs:not(i),
+app-pago .text-xs:not(i),
+app-reservas .text-xs:not(i),
+app-reclamos .text-xs:not(i),
+app-footer .text-xs:not(i),
+app-servicios .text-xs:not(i),
+app-producto .text-xs:not(i),
+app-carrito .text-xs:not(i) {
+    font-size: 0.875rem !important;
+}
+
+app-nosotros .text-xs:not(i),
+app-preguntas-frecuentes .text-xs:not(i),
+app-politica-privacidad .text-xs:not(i),
+app-terminos-condiciones .text-xs:not(i),
+app-servicio-card .text-xs:not(i),
+app-producto-card .text-xs:not(i),
+app-servicio-detalle .text-xs:not(i),
+app-producto-detalle .text-xs:not(i),
+app-producto-lista .text-xs:not(i),
+app-servicio-lista .text-xs:not(i) {
+    font-size: 0.875rem !important;
+}
+
+app-footer .text-gray-500,
+app-login .text-text-muted,
+app-register .text-text-muted,
+app-forgot-password .text-text-muted,
+app-reset-password .text-text-muted,
+app-checkout .text-text-muted,
+app-pago .text-text-muted,
+app-reservas .text-text-muted,
+app-reclamos .text-text-muted,
+app-servicios .text-text-muted,
+app-producto .text-text-muted,
+app-carrito .text-text-muted,
+app-nosotros .text-text-muted,
+app-preguntas-frecuentes .text-text-muted,
+app-politica-privacidad .text-text-muted,
+app-terminos-condiciones .text-text-muted,
+app-servicio-card .text-text-muted,
+app-producto-card .text-text-muted,
+app-servicio-detalle .text-text-muted,
+app-producto-detalle .text-text-muted,
+app-login .text-text-subtle,
+app-register .text-text-subtle,
+app-forgot-password .text-text-subtle,
+app-reset-password .text-text-subtle,
+app-checkout .text-text-subtle,
+app-pago .text-text-subtle,
+app-reservas .text-text-subtle,
+app-nosotros .text-text-subtle,
+app-reclamos .text-text-subtle,
+app-servicios .text-text-subtle,
+app-producto .text-text-subtle,
+app-carrito .text-text-subtle,
+app-preguntas-frecuentes .text-text-subtle,
+app-politica-privacidad .text-text-subtle,
+app-terminos-condiciones .text-text-subtle,
+app-servicio-card .text-text-subtle,
+app-producto-card .text-text-subtle,
+app-servicio-detalle .text-text-subtle,
+app-producto-detalle .text-text-subtle,
+app-reservas .text-gray-600,
+app-reservas .placeholder-gray-600::placeholder {
+    color: #a3a3a3;
+}
+
+app-producto-detalle .producto-detail-modal-code,
+app-producto-detalle .producto-detail-rating,
+app-producto-detalle .producto-detail-buy-label,
+app-producto-card .producto-card-description,
+app-servicio-detalle .servicio-detail-rating,
+app-servicio-detalle .servicio-detail-buy-label,
+app-servicio-detalle .servicio-detail-buy-caption {
+    color: #a3a3a3;
+}
+
+app-reclamos .text-\[11px\] {
+    font-size: 0.875rem !important;
+}
+
+app-header .public-menu-button {
+    display: flex;
+    min-height: 2.75rem;
+    width: 2.75rem;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    border: 1px solid rgb(var(--color-ui-border));
+    border-radius: 0.75rem;
+    background: rgb(var(--color-ui-surface));
+    color: rgb(var(--color-text-primary));
+    cursor: pointer;
+}
+
+app-header .public-menu-button span {
+    display: block;
+    width: 1.25rem;
+    height: 2px;
+    border-radius: 999px;
+    background: currentColor;
+    transition: transform 150ms ease, opacity 150ms ease;
+}
+
+app-header .public-menu-checkbox {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    clip-path: inset(50%);
+}
+
+app-header .public-menu-checkbox:focus-visible ~ .container-main .public-menu-button {
+    outline: 2px solid rgb(var(--color-brand-gold));
+    outline-offset: 2px;
+}
+
+app-header .public-menu-checkbox:checked ~ .container-main .public-menu-button span:first-child {
+    transform: translateY(0.4rem) rotate(45deg);
+}
+
+app-header .public-menu-checkbox:checked ~ .container-main .public-menu-button span:nth-child(2) {
+    opacity: 0;
+}
+
+app-header .public-menu-checkbox:checked ~ .container-main .public-menu-button span:last-child {
+    transform: translateY(-0.4rem) rotate(-45deg);
+}
+
+app-header .public-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    display: none;
+    width: 100%;
+    max-height: calc(100dvh - 5rem);
+    overflow-y: auto;
+    border-top: 1px solid rgb(var(--color-ui-border));
+    background: rgb(var(--color-ui-black));
+    padding: 1rem;
+    box-shadow: 0 1rem 2rem rgb(0 0 0 / 0.35);
+}
+
+app-header .public-menu-checkbox:checked ~ .public-menu {
+    display: grid;
+    gap: 0.5rem;
+}
+
+app-header .public-menu nav {
+    display: grid;
+    gap: 0.25rem;
+}
+
+app-header .public-menu nav a {
+    display: flex;
+    align-items: center;
+    border-radius: 0.75rem;
+    padding: 0.625rem 0.75rem;
+}
+
+app-header .public-menu-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    border-top: 1px solid rgb(var(--color-ui-border));
+    padding-top: 0.75rem;
+}
+
+app-header .public-menu-actions > a,
+app-header .public-menu-actions > button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.75rem;
+    padding: 0.5rem 0.75rem;
+}
+
+app-footer li > a {
+    display: inline-flex;
+    align-items: center;
+}
+
+app-carrito .cart-product-table {
+    min-width: 860px;
+}
+
+@media (min-width: 1024px) {
+    app-header .public-menu-checkbox,
+    app-header .public-menu-button,
+    app-header .public-menu {
+        display: none !important;
+    }
+}
+
+@media (max-width: 640px) {
+    app-carrito .cart-product-table {
+        display: block;
+        min-width: 0;
+    }
+
+    app-carrito .cart-product-table thead {
+        display: none;
+    }
+
+    app-carrito .cart-product-table tbody {
+        display: grid;
+        gap: 1rem;
+        padding: 1rem;
+    }
+
+    app-carrito .cart-product-table tr {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        overflow: hidden;
+        border: 1px solid rgb(var(--color-ui-border));
+        border-radius: 1rem;
+    }
+
+    app-carrito .cart-product-table td {
+        display: flex;
+        min-width: 0;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        border-bottom: 1px solid rgb(var(--color-ui-border-soft));
+        padding: 0.75rem 1rem !important;
+        text-align: left;
+    }
+
+    app-carrito .cart-product-table td:last-child {
+        border-bottom: 0;
+    }
+
+    app-carrito .cart-product-table td::before {
+        content: attr(data-label);
+        color: rgb(var(--color-text-secondary));
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    app-carrito .cart-product-table td:first-child::before {
+        content: none;
+    }
+
+    app-carrito .cart-product-table td:nth-child(3) > div {
+        margin-left: auto;
+    }
 }
 
 

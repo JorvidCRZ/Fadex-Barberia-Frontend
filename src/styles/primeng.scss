@@ -41,8 +41,32 @@ p-button .p-button {
 }
 
 .p-dialog {
-    overflow: overlay;
+    min-width: 0;
+    max-width: 95vw;
+    overflow: auto;
     border: 1px solid rgb(var(--color-brand-gold-hover)) !important;
+}
+
+.p-dialog-content,
+.p-datepicker-panel,
+.p-select-overlay,
+.p-multiselect-overlay,
+.p-toast {
+    min-width: 0;
+    max-width: 95vw;
+}
+
+.p-toast {
+    width: min(25rem, 95vw);
+}
+
+.p-inputtext,
+.p-password-input,
+.p-inputnumber-input,
+.p-datepicker-input,
+.p-select-label,
+.p-multiselect-label {
+    font-size: 1rem;
 }
 
 .p-dialog-header {

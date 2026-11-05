@@ -34,7 +34,7 @@
             </form>
         </section>
 
-        <aside class="rounded-3xl border border-brand-gold/20 bg-ui-card p-6 shadow-card h-fit sticky top-4">
+        <aside class="rounded-3xl border border-brand-gold/20 bg-ui-card p-6 shadow-card h-fit lg:sticky lg:top-4">
             <div class="flex items-center gap-3 border-b border-ui-border-soft pb-4">
                 <i class="pi pi-receipt text-xl text-brand-gold" aria-hidden="true"></i>
                 <h2 class="text-xl font-semibold text-text-primary">Resumen del pedido</h2>
@@ -107,8 +107,8 @@
                     </div>
                     }
 
-                    <div>
-                        <p class="font-semibold text-text-primary hover:underline hover:text-brand-gold">{{ item.producto.nombre }}</p>
+                    <div class="min-w-0 flex-1">
+                        <p class="break-words font-semibold text-text-primary hover:underline hover:text-brand-gold">{{ item.producto.nombre }}</p>
                         <p class="text-sm text-text-secondary  hover:underline hover:text-brand-gold">{{ item.producto.nombreCategoria }}</p>
                     </div>
 

@@ -122,7 +122,9 @@
 }
 
 .producto-detail-main-image {
-    @apply relative flex min-h-72 items-center justify-center overflow-hidden rounded-2xl border border-ui-border-soft bg-ui-black;
+    @apply relative flex items-center justify-center overflow-hidden rounded-2xl border border-ui-border-soft bg-ui-black;
+
+    aspect-ratio: 1;
 }
 
 .producto-detail-image-label {
@@ -130,9 +132,9 @@
 }
 
 .producto-detail-main-image img {
-    @apply h-full w-full object-cover;
+    @apply h-full w-full object-contain;
 
-    height: 28rem;
+    max-height: 100%;
 }
 
 .producto-detail-thumbs {
@@ -609,7 +611,8 @@
     }
 
     .producto-detail-main-image img {
-        height: 32rem;
+        height: 100%;
+        max-height: 32rem;
     }
 
     .producto-detail-thumbs {
@@ -642,7 +645,7 @@
     }
 
     .producto-detail-main-image img {
-        height: auto;
+        height: 100%;
         max-height: 55vh;
         width: 100%;
         object-fit: contain;
