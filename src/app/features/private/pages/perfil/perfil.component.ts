@@ -63,6 +63,9 @@ const PERFIL_VACIO: PerfilCuenta = {
 const passwordsCoinciden = (g: AbstractControl): ValidationErrors | null =>
   g.get('passwordNueva')?.value === g.get('confirmarPassword')?.value ? null : { noCoinciden: true };
 
+const textoValido = (control: AbstractControl): ValidationErrors | null =>
+  String(control.value ?? '').trim() ? null : { whitespace: true };
+
 const desdePersona = (p: Persona): PerfilCuenta => ({
   personaId: p.personaId,
   usuarioId: p.usuario?.idUsuario,
@@ -104,23 +107,39 @@ export class PerfilComponent implements OnInit {
 
   readonly camposPassword = [
     { control: 'passwordActual', key: 'actual', label: 'Contraseña actual', placeholder: '••••••••', error: 'La contraseña actual es requerida.' },
-    { control: 'passwordNueva', key: 'nueva', label: 'Nueva contraseña', placeholder: 'Mín. 8 caracteres', error: 'Mínimo 8 caracteres.' },
-    { control: 'confirmarPassword', key: 'confirmar', label: 'Confirmar contraseña', placeholder: 'Repite la nueva contraseña', error: 'Confirma tu nueva contraseña.' },
+    { control: 'passwordNueva', key: 'nueva', label: 'Nueva contraseña', placeholder: 'Mín. 8 caracteres', error: 'Mínimo 8 caracteres, con mayúscula, minúscula, número y símbolo.' },
+    { control: 'confirmarPassword', key: 'confirmar', label: 'Confirmar contraseña', placeholder: 'Repite la nueva contraseña', error: 'Confirma una contraseña válida.' },
   ] as const;
 
   // ── Formularios ──
   formPerfil = this.fb.group({
-    nombre: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
-    apellido: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
-    email: [{ value: '', disabled: true }],
-    telefono: ['', [Validators.pattern(/^\d{9,15}$/)]],
+    nombre: ['', [
+      Validators.required,
+      textoValido,
+      Validators.minLength(2),
+      Validators.maxLength(100),
+      Validators.pattern(/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+(?:[ '-][A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)*$/),
+    ]],
+    apellido: ['', [
+      Validators.required,
+      textoValido,
+      Validators.minLength(2),
+      Validators.maxLength(100),
+      Validators.pattern(/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+(?:[ '-][A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)*$/),
+    ]],
+    email: [{ value: '', disabled: true }, Validators.email],
+    telefono: ['', [Validators.required, Validators.pattern(/^9\d{8}$/)]],
   });
 
   formPassword = this.fb.group(
     {
       passwordActual: ['', [Validators.required, Validators.minLength(6)]],
-      passwordNueva: ['', [Validators.required, Validators.minLength(8)]],
-      confirmarPassword: ['', [Validators.required]],
+      passwordNueva: ['', [
+        Validators.required,
+        Validators.minLength(8),
+        Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$/),
+      ]],
+      confirmarPassword: ['', [Validators.required, Validators.minLength(8)]],
     },
     { validators: passwordsCoinciden },
   );

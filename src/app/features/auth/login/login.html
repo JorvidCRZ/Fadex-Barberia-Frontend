@@ -28,7 +28,6 @@
         <div class="part-form">
           <div class="flex items-center justify-between">
             <label for="password" class="label-form">Contraseña</label>
-            <a routerLink="/forgot-password"class="text-xs font-medium text-brand-gold transition-colors hover:text-brand-gold-hover">¿La olvidaste?</a>
           </div>
           <p-password inputId="password" formControlName="password" [toggleMask]="true" [feedback]="false" autocomplete="current-password" placeholder="••••••••" class="w-full" />
           @if (campoInvalido('password')) {
@@ -49,10 +48,14 @@
           <div class="flex-grow border-t border-ui-border-soft"></div>
         </div>
 
-        <div id="google-button" class="flex justify-center w-full min-h-[40px]"></div>
-        <p class="mt-2 text-center text-sm text-text-muted">¿No tienes cuenta?
-          <a routerLink="/register" class="font-semibold text-brand-gold transition-colors hover:text-brand-gold-hover">Regístrate gratis</a>
+        <div id="google-button" class="flex justify-center w-full min-h-[40px]"></div> 
+        <p class="mt-2 text-center text-sm text-text-muted">¿Olvidaste tu contraseña?
+          <a routerLink="/forgot-password" class="font-semibold text-brand-gold transition-colors hover:text-brand-gold-hover">Recuperar</a>
         </p>
+        <p class="mt-2 text-center text-sm text-text-muted">¿No tienes cuenta? 
+          <a routerLink="/register" class="font-semibold text-brand-gold transition-colors hover:text-brand-gold-hover"> Regístrate</a>
+        </p>
+        
       </form>
     </div>
 

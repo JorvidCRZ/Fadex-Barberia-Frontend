@@ -53,6 +53,12 @@ export const ADMIN_MENU = [
         routerLink: ['gestion/usuarios'],
         permission: 'USUARIO_READ_ALL',
       }
+      ,
+      {
+        label: 'Sueldos',
+        icon: 'pi pi-money-bill',
+        routerLink: ['gestion/sueldos'],
+      },
     ],
   },
 

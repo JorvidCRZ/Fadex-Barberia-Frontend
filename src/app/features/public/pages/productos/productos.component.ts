@@ -44,7 +44,7 @@ export class ProductComponent implements OnInit {
   productos = signal<Producto[]>([]);
   cargando = signal(true);
   page = signal(0);
-  size = signal(12);
+  size = signal(8);
   totalRecords = signal(0);
   texto = 'Productos';
   categoriasMap = new Map<number, Categoria>();

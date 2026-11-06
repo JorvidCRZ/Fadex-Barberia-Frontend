@@ -111,7 +111,7 @@
     </div>
 
     <app-paginator [first]="first" [rows]="rows" [totalRecords]="totalRecords" etiqueta="producto(s)"
-        [rowsPerPageOptions]="[10, 25, 50, 100]" (pageChange)="pageChange.emit($event)" />
+        [rowsPerPageOptions]="[8,10, 25, 50, 100]" (pageChange)="pageChange.emit($event)" />
 </div>
 
 <app-confirm-popover [visible]="mostrarConfirmacion" mode="eliminar" titulo="Eliminar producto"

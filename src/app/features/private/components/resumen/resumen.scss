@@ -162,70 +162,112 @@
 .kpi-card__delta--negative { color: #f87171; }
 
 .citas-section {
-  background: rgb(var(--color-ui-card));
-  border: 1px solid rgb(var(--color-ui-border-soft));
-  border-radius: 0.6rem;
-  padding: 1rem 0 0;
+  background: #111111;
+  border: 1px solid #302b1c;
+  border-radius: 9px;
+  padding: 0;
   margin-bottom: 1.25rem;
+  overflow: hidden;
 }
 
 .citas-section__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-direction: row;
   gap: 0.45rem;
-  padding: 0 0.8rem;
-  margin-bottom: 1rem;
+  padding: 11px 10px 12px;
+  margin-bottom: 0;
+  border-bottom: 1px solid #2a271e;
 }
 
 .citas-section__title {
-  font-size: 1rem;
+  font-size: 16px;
   font-weight: 600;
-  color: rgb(var(--color-brand-white));
+  color: #f2f2f2;
 }
 
-.citas-table-wrapper {
-  border-radius: 0.75rem;
-  overflow: hidden;
-  background: rgb(var(--color-ui-card));
-  border: 1px solid rgb(var(--color-ui-border-soft));
+.citas-section__header app-button {
+  display: block;
 }
 
-.citas-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.8rem;
-}
-
-.citas-table thead tr {
-  background: rgb(var(--color-brand-dark));
-  border-bottom: 1px solid rgb(var(--color-ui-border-soft));
-}
-
-.citas-table th {
-  padding: 0.75rem 1rem;
-  text-align: left;
+.citas-section ::ng-deep app-button button {
+  min-height: 23px;
+  padding: 4px 8px;
+  border: 1px solid #514112;
+  border-radius: 4px;
+  background: #17140b;
+  color: #d7af32;
+  font-size: 13px;
   font-weight: 600;
-  font-size: 0.7rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--color-text-muted);
+  box-shadow: none;
 }
 
-.citas-table td {
-  padding: 0.75rem 1rem;
+.citas-section ::ng-deep app-button button:hover {
+  background: #28200a;
+  border-color: #d7af32;
+}
+
+.citas-section ::ng-deep table {
+  min-width: 760px !important;
+  color: #f2f2f2;
+  font-size: 14px;
+}
+
+.citas-section ::ng-deep .table-header {
+  background: #111111;
+  border-bottom: 1px solid #2a271e;
+}
+
+.citas-section ::ng-deep .table-header th {
+  padding: 12px 10px;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: #d7af32;
+}
+
+.citas-section ::ng-deep .table-row {
+  background: #111111;
+  border-color: #211f1a;
+}
+
+.citas-section ::ng-deep .table-row:hover {
+  background: #171611;
+}
+
+.citas-section ::ng-deep .table-row td {
+  padding: 13px 10px;
   vertical-align: middle;
-  border-bottom: 1px solid rgb(var(--color-ui-border-soft));
-  color: rgb(var(--color-brand-white));
+  border-color: #211f1a;
+  color: #f2f2f2;
+  font-size: 14px;
 }
 
-.citas-table tbody tr:last-child td {
-  border-bottom: none;
+.citas-section ::ng-deep .table-row .text-base {
+  font-size: 14px;
 }
 
-.citas-table tbody tr:hover td {
-  background: var(--color-ui-elevated);
+.citas-section ::ng-deep .table-row .text-sm,
+.citas-section ::ng-deep .table-row .text-xs {
+  font-size: 12px;
+}
+
+.citas-section ::ng-deep app-empty-state {
+  display: block;
+  min-height: 76px;
+}
+
+.citas-section ::ng-deep app-empty-state > div {
+  min-height: 76px;
+  padding: 20px 12px !important;
+  color: #817c72;
+  font-size: 13px;
+}
+
+.citas-section ::ng-deep app-empty-state i {
+  color: #d7af32;
+  font-size: 12px;
 }
 
 .citas-table__empty {
@@ -357,6 +399,9 @@
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
   .citas-table th:nth-child(4),
   .citas-table td:nth-child(4) { display: none; }
+  .citas-section__header {
+    align-items: flex-start;
+  }
   .prediccion-stats { gap: 1rem; }
   .prediccion-chart-wrap { height: 160px; }
 }

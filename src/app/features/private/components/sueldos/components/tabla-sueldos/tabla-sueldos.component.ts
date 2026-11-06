@@ -7,12 +7,14 @@ import { TooltipModule } from 'primeng/tooltip';
 import { StatusBadgeComponent } from '@/app/shared/components/status-badge/status-badge.component';
 import { PlanillaBarbero } from '@/app/core/models/planilla/planilla.model';
 import { Router } from '@angular/router';
+import { ButtonComponent } from '@/app/shared/components/button/button.component';
+
 
 @Component({
   selector: 'app-tabla-sueldos',
   standalone: true,
   imports: [
-    CommonModule, FormsModule, ButtonModule, TableModule, TooltipModule, StatusBadgeComponent
+    CommonModule, FormsModule, ButtonModule, TableModule, TooltipModule, StatusBadgeComponent,ButtonComponent
   ],
   templateUrl: './tabla-sueldos.html',
   styleUrl: './tabla-sueldos.scss',
@@ -131,7 +133,7 @@ export class TablaSueldosComponent implements OnInit {
   }
 
   verDetalle(barbero: PlanillaBarbero): void {
-    this.router.navigate(['/dashboard/admin/sueldos', barbero.barberoId]);
+    this.router.navigate(['/dashboard/admin/gestion/sueldos', barbero.barberoId]);
   }
 
   getIniciales(nombre: string | null | undefined): string {

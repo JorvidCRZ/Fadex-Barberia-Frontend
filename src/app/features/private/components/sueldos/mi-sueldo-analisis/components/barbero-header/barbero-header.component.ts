@@ -15,6 +15,6 @@ export class BarberoHeaderComponent {
   private readonly router = inject(Router);
 
   volver(): void {
-    this.router.navigate(['/dashboard/admin/sueldos']);
+    this.router.navigate(['/dashboard/admin/gestion/sueldos']);
   }
 }

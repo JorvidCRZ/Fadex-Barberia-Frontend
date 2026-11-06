@@ -1,8 +1,9 @@
 /* ─── contenedor principal ─── */
 .fx-wrap {
   background: #111111;
-  border-radius: 12px;
-  padding: 24px 28px;
+  border: 1px solid #302b1c;
+  border-radius: 9px;
+  padding: 14px 10px 18px;
   color: #e8e0d0;
   font-family: inherit;
 }
@@ -12,15 +13,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 28px;
+  margin: 14px 0 22px;
   gap: 12px;
   flex-wrap: wrap;
 }
 
 .fx-title {
-  font-size: 15px;
-  font-weight: 500;
-  color: #e8e0d0;
+  font-weight: 600;
+  color: #f2f2f2;
   margin: 0;
   letter-spacing: 0.01em;
   flex-shrink: 0;
@@ -40,7 +40,6 @@
   color: #e8e0d0;
   padding: 7px 12px;
   border-radius: 8px;
-  font-size: 13px;
   cursor: pointer;
   transition: border-color 0.2s ease;
   appearance: auto;
@@ -67,7 +66,6 @@
   border: none;
   padding: 7px 16px;
   border-radius: 8px;
-  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   height: 36px;
@@ -82,7 +80,7 @@
 .chart-container {
   display: flex;
   gap: 12px;
-  height: 340px;
+  height: 190px;
   width: 100%;
 }
 
@@ -92,8 +90,7 @@
   flex-direction: column;
   justify-content: space-between;
   align-items: flex-end;
-  font-size: 11px;
-  color: #6a6055;
+  color: #817c72;
   min-width: 52px;
   flex-shrink: 0;
   padding-bottom: 80px;
@@ -129,7 +126,7 @@
 .grid-line {
   width: 100%;
   height: 0.5px;
-  background: #222222;
+  background: #2a271e;
 }
 
 /* ─── fila de barras ─── */
@@ -168,7 +165,7 @@
 
 /* ─── barra azul (sueldo base) ─── */
 .bar-base {
-  background: #2563a8;
+  background: #d7af32;
   width: 100%;
   border-radius: 4px 4px 0 0;
   transition: height 0.4s ease;
@@ -177,7 +174,7 @@
 
 /* ─── barra dorada (comisión) ─── */
 .bar-comision {
-  background: #C8A455;
+  background: #d7af32;
   width: 100%;
   flex-shrink: 0;
   transition: height 0.4s ease;
@@ -199,9 +196,8 @@
 }
 
 .nombre-barbero {
-  font-size: 12px;
   font-weight: 600;
-  color: #e8e0d0;
+  color: #a7a29a;
   max-width: 96px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -209,14 +205,12 @@
 }
 
 .dato-secundario {
-  font-size: 10px;
   color: #8a8070;
   margin-top: 2px;
   white-space: nowrap;
 }
 
 .dato-total {
-  font-size: 10px;
   font-weight: 700;
   color: #C8A455;
   margin-top: 2px;
@@ -235,7 +229,6 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
   color: #8a8070;
 }
 
@@ -263,7 +256,7 @@
   .header-chart    { flex-direction: column; align-items: flex-start; }
   .filtros         { width: 100%; }
   .chart-filter    { flex: 1; min-width: 0; }
-  .chart-container { height: 260px; }
+  .chart-container { height: 220px; }
   .y-axis          { min-width: 38px; font-size: 9px; padding-bottom: 70px; }
   .bar-group       { width: 80px; }
   .bar-stack       { width: 42px; }

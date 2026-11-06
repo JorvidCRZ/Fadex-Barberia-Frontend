@@ -3,7 +3,7 @@ import { ButtonModule } from 'primeng/button';
 import { CommonModule } from '@angular/common';
 import { MessageModule } from 'primeng/message';
 import { InputTextModule } from 'primeng/inputtext';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, isDevMode, OnInit } from '@angular/core';
 import { AuthService } from '../../../core/services/auth/auth.service';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { LogoComponent } from '../../../shared/components/logo/logo.component';
@@ -42,6 +42,7 @@ mostrarConfirmar = false;
   successMessage = '';
   errorMessage = '';
   token: string | null = null;
+  private readonly previewToken = '__reset_password_preview__';
 
   campoInvalido = (campo: string) => campoInvalido(this.formulario, campo, this.submitted);
 
@@ -52,7 +53,12 @@ ngOnInit() {
 }
 
   readToken() {
-    this.route.queryParams.subscribe((params) => {
+    this.route.queryParams.subscribe((params) => {0
+      if (params['preview'] === 'true' && isDevMode()) {
+        this.token = this.previewToken;
+        return;
+      }
+
       this.token = params['token'] || null;
       
       if (!this.token) {
@@ -92,6 +98,11 @@ ngOnInit() {
       return;
     }
 
+    if (this.token === this.previewToken) {
+      this.errorMessage = 'La vista previa está activa. Usa un enlace real para actualizar la contraseña.';
+      return;
+    }
+
     if (this.formulario.invalid) {
       if (this.getPasswordMismatchError()) {
         this.errorMessage = 'Las contraseñas no coinciden.';
@@ -128,7 +139,7 @@ ngOnInit() {
   tokenInvalido = false;
 
 verificarToken() {
-  if (!this.token) return;
+if (!this.token || this.token === this.previewToken) return;
   this.authService.verificarTokenReset(this.token).subscribe({
     error: () => {
       this.tokenInvalido = true;
@@ -137,5 +148,4 @@ verificarToken() {
   });
 }
 }
-
 

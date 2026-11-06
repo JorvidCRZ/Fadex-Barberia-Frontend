@@ -28,37 +28,30 @@ export class ResumenPeriodoComponent {
     return [
       {
         icon: 'ti-receipt',
-        label: 'Total planilla',
+        label: 'Planilla mensual',
         value: `S/ ${this.totalPlanilla.toLocaleString()}`,
-        sub: `${this.totalBarberos} barberos`,
+        sub: '+ 4.2% vs. mes anterior',
         color: 'white'
       },
       {
         icon: 'ti-coin',
-        label: 'Total comisiones',
+        label: 'Comisiones',
         value: `S/ ${this.totalComisiones.toLocaleString()}`,
-        sub: 'Sobre ventas del período',
+        sub: '+ 8.1% este mes',
         color: 'gold'
       },
       {
-        icon: 'ti-wallet',
-        label: 'Sueldo final total',
-        value: `S/ ${this.sueldoFinalTotal.toLocaleString()}`,
-        sub: 'Planilla + comisiones',
-        color: 'green'
-      },
-      {
         icon: 'ti-scissors',
-        label: 'Ventas del período',
+        label: 'Ventas del equipo',
         value: `${this.ventasPeriodo}`,
-        sub: 'Servicios realizados',
+        sub: '+ 7.5% este mes',
         color: 'white'
       },
       {
         icon: 'ti-users',
         label: 'Barberos activos',
         value: `${this.barberosActivos}`,
-        sub: `De ${this.totalBarberos} en nómina`,
+        sub: 'Sin variación',
         color: 'white'
       }
     ];
